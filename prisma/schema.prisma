@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Therapist {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  specialty String[] // ["speech", "language", "hearing"]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  patients Patient[]
+  cards    Card[]
+}
+
+model Patient {
+  id        String   @id @default(cuid())
+  name      String
+  age       Int
+  diagnosis String
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  therapistId String
+  therapist   Therapist @relation(fields: [therapistId], references: [id])
+  cards       Card[]
+}
+
+model Card {
+  id         String   @id @default(cuid())
+  title      String
+  content    Json
+  category   String   // "speech" | "language" | "hearing"
+  difficulty String   // "easy" | "medium" | "hard"
+  ageGroup   String   // "3-5" | "6-9" | "10-14" | "15+"
+  prompt     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  therapistId String
+  therapist   Therapist @relation(fields: [therapistId], references: [id])
+
+  patientId String?
+  patient   Patient? @relation(fields: [patientId], references: [id])
+}
