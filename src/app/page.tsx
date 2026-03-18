@@ -22,7 +22,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-base font-bold text-zinc-900">TerapiMat</h1>
-              <p className="text-xs text-zinc-400">AI Destekli Egzersiz Kartı Üreticisi</p>
+              <p className="text-xs text-zinc-400">AI Destekli Öğrenme Kartı Üreticisi</p>
             </div>
           </div>
 
@@ -50,8 +50,8 @@ export default function Home() {
           {/* Sol: Form */}
           <div>
             <div className="mb-4">
-              <h2 className="text-lg font-semibold text-zinc-900">Egzersiz Kartı Oluştur</h2>
-              <p className="text-sm text-zinc-500">Parametreleri seç, AI egzersiz kartını üretsin.</p>
+              <h2 className="text-lg font-semibold text-zinc-900">Öğrenme Kartı Oluştur</h2>
+              <p className="text-sm text-zinc-500">Parametreleri seç, AI öğrenme kartını üretsin.</p>
             </div>
             <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
               <CardGeneratorForm
@@ -66,7 +66,7 @@ export default function Home() {
             <div className="mb-4">
               <h2 className="text-lg font-semibold text-zinc-900">Kart Önizleme</h2>
               <p className="text-sm text-zinc-500">
-                {card ? "Üretilen egzersiz kartı aşağıda görüntüleniyor." : "Kart üretildiğinde burada görünecek."}
+                {card ? "Üretilen öğrenme kartı aşağıda görüntüleniyor." : "Kart üretildiğinde burada görünecek."}
               </p>
             </div>
 
@@ -74,7 +74,7 @@ export default function Home() {
               <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-sm">
                 <div className="text-center space-y-3">
                   <div className="mx-auto h-10 w-10 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
-                  <p className="text-sm text-zinc-500">Claude egzersiz kartı hazırlıyor…</p>
+                  <p className="text-sm text-zinc-500">Claude öğrenme kartı hazırlıyor…</p>
                 </div>
               </div>
             ) : card ? (

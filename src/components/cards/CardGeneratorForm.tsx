@@ -83,7 +83,7 @@ export function CardGeneratorForm({ onCardGenerated, onLoading }: CardGeneratorF
 
       {/* Kategori */}
       <div className="space-y-2">
-        <Label className="text-sm font-semibold text-zinc-700">Terapi Kategorisi</Label>
+        <Label className="text-sm font-semibold text-zinc-700">Eğitim Kategorisi</Label>
         <div className="grid grid-cols-3 gap-2">
           {CATEGORIES.map((cat) => (
             <button

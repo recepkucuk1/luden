@@ -6,8 +6,8 @@ import "./globals.css";
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "TerapiMat — AI Destekli Egzersiz Kartı Üreticisi",
-  description: "Dil, konuşma ve işitme terapistleri için AI destekli egzersiz kartı üreticisi.",
+  title: "TerapiMat — AI Destekli Öğrenme Kartı Üreticisi",
+  description: "Dil, konuşma ve işitme uzmanları için AI destekli öğrenme kartı üreticisi.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

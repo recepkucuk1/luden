@@ -1,13 +1,22 @@
 "use client";
 
+import { useState } from "react";
+import dynamic from "next/dynamic";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import type { GeneratedCard } from "@/lib/prompts";
 
+// @react-pdf/renderer SSR uyumlu değil — client-side only
+const CardPDFDocument = dynamic(
+  () => import("./CardPDFDocument").then((m) => m.CardPDFDocument),
+  { ssr: false }
+);
+
 const CATEGORY_LABEL: Record<string, string> = {
-  speech: "Konuşma Terapisi",
-  language: "Dil Terapisi",
-  hearing: "İşitme Terapisi",
+  speech: "Konuşma Eğitimi",
+  language: "Dil Eğitimi",
+  hearing: "İşitme Eğitimi",
 };
 
 const CATEGORY_COLOR: Record<string, string> = {
@@ -39,18 +48,69 @@ interface CardPreviewProps {
   card: GeneratedCard;
 }
 
+async function downloadPDF(card: GeneratedCard) {
+  const { pdf } = await import("@react-pdf/renderer");
+  const { CardPDFDocument } = await import("./CardPDFDocument");
+  const blob = await pdf(<CardPDFDocument card={card} />).toBlob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${card.title.replace(/\s+/g, "_")}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function CardPreview({ card }: CardPreviewProps) {
+  const [downloading, setDownloading] = useState(false);
+
+  async function handleDownload() {
+    setDownloading(true);
+    try {
+      await downloadPDF(card);
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Başlık ve Rozetler */}
       <div className="space-y-3">
-        <div className="flex flex-wrap gap-2">
-          <Badge className={CATEGORY_COLOR[card.category]}>{CATEGORY_LABEL[card.category]}</Badge>
-          <Badge className={DIFFICULTY_COLOR[card.difficulty]}>{DIFFICULTY_LABEL[card.difficulty]}</Badge>
-          <Badge className="bg-zinc-100 text-zinc-600">{AGE_LABEL[card.ageGroup]}</Badge>
-          {card.duration && (
-            <Badge className="bg-zinc-100 text-zinc-600">⏱ {card.duration}</Badge>
-          )}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-wrap gap-2">
+            <Badge className={CATEGORY_COLOR[card.category]}>{CATEGORY_LABEL[card.category]}</Badge>
+            <Badge className={DIFFICULTY_COLOR[card.difficulty]}>{DIFFICULTY_LABEL[card.difficulty]}</Badge>
+            <Badge className="bg-zinc-100 text-zinc-600">{AGE_LABEL[card.ageGroup]}</Badge>
+            {card.duration && (
+              <Badge className="bg-zinc-100 text-zinc-600">⏱ {card.duration}</Badge>
+            )}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownload}
+            disabled={downloading}
+            className="shrink-0 gap-1.5 text-xs"
+          >
+            {downloading ? (
+              <>
+                <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                Hazırlanıyor…
+              </>
+            ) : (
+              <>
+                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                PDF İndir
+              </>
+            )}
+          </Button>
         </div>
         <h2 className="text-2xl font-bold text-zinc-900">{card.title}</h2>
         <p className="text-zinc-600 text-sm leading-relaxed">{card.objective}</p>
@@ -123,12 +183,12 @@ export function CardPreview({ card }: CardPreviewProps) {
         </Card>
       )}
 
-      {/* Terapist Notları */}
+      {/* Uzman Notları */}
       {card.therapistNotes && (
         <Card className="border-amber-100 bg-amber-50">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-sm font-semibold text-amber-700 uppercase tracking-wide">
-              📝 Terapist Notları
+              📝 Uzman Notları
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">

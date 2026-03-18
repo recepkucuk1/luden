@@ -38,27 +38,35 @@ const AGE_MAP: Record<AgeGroup, string> = {
 };
 
 const CATEGORY_CONTEXT: Record<CardCategory, string> = {
-  speech: "Konuşma terapisi (artikülasyon, ses üretimi, akıcılık bozuklukları, kekemelik)",
-  language: "Dil terapisi (dil anlama ve üretme, kelime hazinesi, dilbilgisi, pragmatik beceriler)",
-  hearing: "İşitme terapisi (işitme kaybı olan bireylerde sözlü iletişim, işitsel hafıza, dudak okuma)",
+  speech: "Konuşma eğitimi (artikülasyon, ses üretimi, akıcılık bozuklukları, kekemelik)",
+  language: "Dil eğitimi (dil anlama ve üretme, kelime hazinesi, dilbilgisi, pragmatik beceriler)",
+  hearing: "İşitme eğitimi (işitme kaybı olan bireylerde sözlü iletişim, işitsel hafıza, dudak okuma)",
 };
 
 export function buildCardPrompt(params: CardGenerationParams): string {
   const { category, difficulty, ageGroup, focusArea } = params;
   const categoryLabel = category === "speech" ? "konuşma" : category === "language" ? "dil" : "işitme";
 
-  return `Sen deneyimli bir ${categoryLabel} terapistisin. Terapist için profesyonel bir egzersiz kartı oluştur.
+  return `Sen deneyimli bir ${categoryLabel} uzmanısın. Uzman için profesyonel bir öğrenme kartı oluştur.
 
-**TERAPİ ALANI:** ${CATEGORY_CONTEXT[category]}
+**EĞİTİM ALANI:** ${CATEGORY_CONTEXT[category]}
 **ZORLUK SEVİYESİ:** ${DIFFICULTY_MAP[difficulty]}
 **YAŞ GRUBU:** ${AGE_MAP[ageGroup]}
 ${focusArea ? `**HEDEF BECERİ / ODAK ALAN:** ${focusArea}` : ""}
 
-Aşağıdaki JSON formatında bir egzersiz kartı oluştur. Sadece JSON döndür, başka metin ekleme:
+**MOTİVASYON YAKLAŞIMI — KESİNLİKLE UYULMASI GEREKEN KURAL:**
+Ödül çıkartması, puan tablosu, rozet, ödül sistemi, maddi ödül veya herhangi bir dışsal ödüllendirme mekanizması KULLANMA.
+Bunların yerine yalnızca içsel motivasyonu destekleyen yaklaşımlar kullan:
+- Sözel övgü ve cesaretlendirme ("Harika denedin!", "Bir öncekinden daha net çıktı!")
+- Öğrencinin kendi gelişimini fark etmesini sağlama (önceki ve şimdiki performansı karşılaştırma, "Geçen haftaya göre bak nasıl ilerledi" gibi)
+- Oyun temelli katılım (rol yapma, hikâye kurma, keşif oyunları)
+- Merak ve keşif odaklı etkinlikler ("Sence neden böyle oluyor?", "Bakalım ne keşfedeceğiz" gibi)
+
+Aşağıdaki JSON formatında bir öğrenme kartı oluştur. Sadece JSON döndür, başka metin ekleme:
 
 {
-  "title": "Egzersizin kısa ve açıklayıcı başlığı",
-  "objective": "Bu egzersizin terapötik hedefi (1-2 cümle)",
+  "title": "Etkinliğin kısa ve açıklayıcı başlığı",
+  "objective": "Bu etkinliğin eğitimsel hedefi (1-2 cümle)",
   "duration": "Önerilen süre (örn: '10-15 dakika')",
   "materials": ["Gerekli materyal 1", "Gerekli materyal 2"],
   "instructions": [
@@ -68,13 +76,13 @@ Aşağıdaki JSON formatında bir egzersiz kartı oluştur. Sadece JSON döndür
   ],
   "exercises": [
     {
-      "name": "Egzersiz adı",
-      "description": "Egzersiz açıklaması",
+      "name": "Etkinlik adı",
+      "description": "Etkinlik açıklaması — içsel motivasyona dayalı, merak/keşif/oyun odaklı",
       "repetitions": "Tekrar sayısı veya süre"
     }
   ],
-  "therapistNotes": "Terapiste özel notlar ve dikkat edilmesi gereken noktalar",
+  "therapistNotes": "Uzmana özel notlar: sözel cesaretlendirme önerileri ve öğrencinin öz-farkındalığını destekleme ipuçları",
   "progressIndicators": ["İlerleme göstergesi 1", "İlerleme göstergesi 2"],
-  "homeExercise": "Evde yapılabilecek benzer egzersiz önerisi"
+  "homeExercise": "Evde yapılabilecek merak/keşif odaklı etkinlik önerisi"
 }`;
 }
