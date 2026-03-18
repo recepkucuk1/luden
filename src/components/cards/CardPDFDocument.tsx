@@ -8,6 +8,7 @@ import {
   Font,
 } from "@react-pdf/renderer";
 import type { GeneratedCard } from "@/lib/prompts";
+import { CATEGORY_LABEL, DIFFICULTY_LABEL, AGE_LABEL } from "@/lib/constants";
 
 // Noto Sans — tam Unicode + Türkçe desteği
 // public/fonts/ klasöründen yüklenir (client-side absolute URL)
@@ -36,25 +37,7 @@ function sanitize(text: string): string {
     .trim();
 }
 
-const CATEGORY_LABEL: Record<string, string> = {
-  speech: "Konuşma Eğitimi",
-  language: "Dil Eğitimi",
-  hearing: "İşitme Eğitimi",
-};
-
-const DIFFICULTY_LABEL: Record<string, string> = {
-  easy: "Kolay",
-  medium: "Orta",
-  hard: "Zor",
-};
-
-const AGE_LABEL: Record<string, string> = {
-  "3-6": "3-6 yaş",
-  "7-12": "7-12 yaş",
-  "13-18": "13-18 yaş",
-  adult: "Yetişkin",
-};
-
+// PDF'e özgü hex renkler (Tailwind class'ları burada çalışmaz)
 const DIFFICULTY_COLOR: Record<string, string> = {
   easy: "#059669",
   medium: "#d97706",

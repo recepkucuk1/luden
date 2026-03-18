@@ -6,7 +6,6 @@ function logError(tag: string, error: unknown) {
   if (error instanceof Error) {
     console.error(`\n[${tag}] ${error.name}: ${error.message}`);
     if (error.stack) console.error(error.stack);
-    // Prisma hataları için ek alan
     const extra = error as unknown as Record<string, unknown>;
     if (extra.code) console.error(`  Prisma code: ${extra.code}`);
     if (extra.meta) console.error(`  Prisma meta:`, extra.meta);
@@ -16,25 +15,19 @@ function logError(tag: string, error: unknown) {
 }
 
 export async function GET() {
-  console.log("[GET /api/students] istek alındı");
   try {
-    console.log("[GET /api/students] auth() çağrılıyor...");
     const session = await auth();
-    console.log("[GET /api/students] session:", session?.user?.id ?? "YOK");
-
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
 
-    console.log("[GET /api/students] prisma.patient.findMany çağrılıyor...");
-    const students = await prisma.patient.findMany({
+    const students = await prisma.student.findMany({
       where: { therapistId: session.user.id },
       orderBy: { createdAt: "desc" },
       include: {
         cards: { select: { id: true, createdAt: true } },
       },
     });
-    console.log(`[GET /api/students] ${students.length} öğrenci döndü`);
 
     return NextResponse.json({
       students: students.map((s) => {
@@ -56,18 +49,14 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  console.log("[POST /api/students] istek alındı");
   try {
     const session = await auth();
-    console.log("[POST /api/students] session:", session?.user?.id ?? "YOK");
-
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
 
     const body = await request.json();
     const { name, birthDate, workArea, diagnosis, notes } = body;
-    console.log("[POST /api/students] body:", { name, birthDate, workArea, diagnosis });
 
     if (!name || !workArea) {
       return NextResponse.json(
@@ -76,8 +65,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("[POST /api/students] prisma.patient.create çağrılıyor...");
-    const student = await prisma.patient.create({
+    const student = await prisma.student.create({
       data: {
         name,
         birthDate: birthDate ? new Date(birthDate) : null,
@@ -87,7 +75,6 @@ export async function POST(request: NextRequest) {
         therapistId: session.user.id,
       },
     });
-    console.log("[POST /api/students] öğrenci oluşturuldu:", student.id);
 
     return NextResponse.json({ student }, { status: 201 });
   } catch (error) {

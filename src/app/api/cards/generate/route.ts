@@ -6,6 +6,12 @@ import { prisma } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
+    // Auth kontrolü Claude API çağrısından önce yapılıyor
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
+    }
+
     const body: CardGenerationParams & { studentId?: string } = await request.json();
     const { category, difficulty, ageGroup, studentId } = body;
 
@@ -30,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (message.stop_reason === "max_tokens") {
-      console.error("Claude yanıtı token limitinde kesildi. Ham yanıt:\n", rawContent.text);
+      console.error("Claude yanıtı token limitinde kesildi.");
       throw new Error("Yanıt çok uzun, token limiti aşıldı. Lütfen tekrar deneyin.");
     }
 
@@ -52,21 +58,17 @@ export async function POST(request: NextRequest) {
 
     const card = { ...cardContent, category, difficulty, ageGroup };
 
-    // Oturum açıksa kartı veritabanına kaydet
-    const session = await auth();
-    if (session?.user?.id) {
-      await prisma.card.create({
-        data: {
-          title: (cardContent.title as string) ?? "Öğrenme Kartı",
-          content: cardContent as Parameters<typeof prisma.card.create>[0]["data"]["content"],
-          category,
-          difficulty,
-          ageGroup,
-          therapistId: session.user.id,
-          patientId: studentId ?? null,
-        },
-      });
-    }
+    await prisma.card.create({
+      data: {
+        title: (cardContent.title as string) ?? "Öğrenme Kartı",
+        content: cardContent as Parameters<typeof prisma.card.create>[0]["data"]["content"],
+        category,
+        difficulty,
+        ageGroup,
+        therapistId: session.user.id,
+        studentId: studentId ?? null,
+      },
+    });
 
     return NextResponse.json({ success: true, card });
   } catch (error) {

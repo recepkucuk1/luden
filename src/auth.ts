@@ -13,26 +13,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Şifre", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        try {
+          if (!credentials?.email || !credentials?.password) return null;
 
-        const therapist = await prisma.therapist.findUnique({
-          where: { email: credentials.email as string },
-        });
+          const therapist = await prisma.therapist.findUnique({
+            where: { email: credentials.email as string },
+          });
 
-        if (!therapist) return null;
+          if (!therapist) return null;
 
-        const isValid = await bcrypt.compare(
-          credentials.password as string,
-          therapist.password
-        );
+          const isValid = await bcrypt.compare(
+            credentials.password as string,
+            therapist.password
+          );
 
-        if (!isValid) return null;
+          if (!isValid) return null;
 
-        return {
-          id: therapist.id,
-          email: therapist.email,
-          name: therapist.name,
-        };
+          return {
+            id: therapist.id,
+            email: therapist.email,
+            name: therapist.name,
+          };
+        } catch (error) {
+          console.error("[auth] authorize hatası:", error);
+          return null;
+        }
       },
     }),
   ],

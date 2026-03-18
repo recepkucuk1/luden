@@ -18,30 +18,23 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  console.log("[GET /api/students/[id]] istek alındı");
   try {
     const session = await auth();
-    console.log("[GET /api/students/[id]] session:", session?.user?.id ?? "YOK");
-
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
 
     const { id } = await params;
-    console.log("[GET /api/students/[id]] id:", id);
 
-    const student = await prisma.patient.findFirst({
+    const student = await prisma.student.findFirst({
       where: { id, therapistId: session.user.id },
-      include: {
-        cards: { orderBy: { createdAt: "desc" } },
-      },
+      include: { cards: { orderBy: { createdAt: "desc" } } },
     });
 
     if (!student) {
       return NextResponse.json({ error: "Öğrenci bulunamadı" }, { status: 404 });
     }
 
-    console.log("[GET /api/students/[id]] öğrenci bulundu:", student.name);
     return NextResponse.json({ student });
   } catch (error) {
     logError("GET /api/students/[id]", error);
@@ -54,7 +47,6 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  console.log("[DELETE /api/students/[id]] istek alındı");
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -63,7 +55,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    const student = await prisma.patient.findFirst({
+    const student = await prisma.student.findFirst({
       where: { id, therapistId: session.user.id },
     });
 
@@ -71,8 +63,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Öğrenci bulunamadı" }, { status: 404 });
     }
 
-    await prisma.patient.delete({ where: { id } });
-    console.log("[DELETE /api/students/[id]] silindi:", id);
+    await prisma.student.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

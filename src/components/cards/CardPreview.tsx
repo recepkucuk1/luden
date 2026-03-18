@@ -6,43 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { GeneratedCard } from "@/lib/prompts";
+import {
+  CATEGORY_LABEL,
+  WORK_AREA_COLOR as CATEGORY_COLOR,
+  DIFFICULTY_LABEL,
+  DIFFICULTY_COLOR,
+  AGE_LABEL,
+} from "@/lib/constants";
 
 // @react-pdf/renderer SSR uyumlu değil — client-side only
 const CardPDFDocument = dynamic(
   () => import("./CardPDFDocument").then((m) => m.CardPDFDocument),
   { ssr: false }
 );
-
-const CATEGORY_LABEL: Record<string, string> = {
-  speech: "Konuşma Eğitimi",
-  language: "Dil Eğitimi",
-  hearing: "İşitme Eğitimi",
-};
-
-const CATEGORY_COLOR: Record<string, string> = {
-  speech: "bg-blue-100 text-blue-700",
-  language: "bg-purple-100 text-purple-700",
-  hearing: "bg-teal-100 text-teal-700",
-};
-
-const DIFFICULTY_LABEL: Record<string, string> = {
-  easy: "Kolay",
-  medium: "Orta",
-  hard: "Zor",
-};
-
-const DIFFICULTY_COLOR: Record<string, string> = {
-  easy: "bg-emerald-100 text-emerald-700",
-  medium: "bg-amber-100 text-amber-700",
-  hard: "bg-red-100 text-red-700",
-};
-
-const AGE_LABEL: Record<string, string> = {
-  "3-6": "3–6 yaş",
-  "7-12": "7–12 yaş",
-  "13-18": "13–18 yaş",
-  adult: "Yetişkin",
-};
 
 interface CardPreviewProps {
   card: GeneratedCard;

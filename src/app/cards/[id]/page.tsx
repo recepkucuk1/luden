@@ -14,7 +14,7 @@ interface CardRecord {
   ageGroup: string;
   content: GeneratedCard;
   createdAt: string;
-  patient: { id: string; name: string } | null;
+  student: { id: string; name: string } | null;
 }
 
 export default function CardDetailPage({
@@ -87,17 +87,17 @@ export default function CardDetailPage({
             <span className="text-base font-bold text-zinc-900">TerapiMat</span>
           </Link>
           <span className="text-zinc-300">/</span>
-          {card.patient ? (
+          {card.student ? (
             <>
               <Link href="/students" className="text-sm text-zinc-500 hover:text-zinc-700">
                 Öğrenciler
               </Link>
               <span className="text-zinc-300">/</span>
               <Link
-                href={`/students/${card.patient.id}`}
+                href={`/students/${card.student.id}`}
                 className="text-sm text-zinc-500 hover:text-zinc-700"
               >
-                {card.patient.name}
+                {card.student.name}
               </Link>
               <span className="text-zinc-300">/</span>
             </>
@@ -123,7 +123,7 @@ export default function CardDetailPage({
           {new Date(card.createdAt).toLocaleDateString("tr-TR", {
             day: "numeric", month: "long", year: "numeric",
           })}
-          {card.patient && ` · ${card.patient.name}`}
+          {card.student && ` · ${card.student.name}`}
         </p>
       </main>
     </div>

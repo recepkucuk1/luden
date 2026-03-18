@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,11 +15,11 @@ model Therapist {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  patients Patient[]
+  students Student[]
   cards    Card[]
 }
 
-model Patient {
+model Student {
   id        String    @id @default(cuid())
   name      String
   birthDate DateTime?
@@ -43,7 +40,7 @@ model Card {
   content    Json
   category   String   // "speech" | "language" | "hearing"
   difficulty String   // "easy" | "medium" | "hard"
-  ageGroup   String   // "3-5" | "6-9" | "10-14" | "15+"
+  ageGroup   String   // "3-6" | "7-12" | "13-18" | "adult"
   prompt     String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -51,6 +48,6 @@ model Card {
   therapistId String
   therapist   Therapist @relation(fields: [therapistId], references: [id])
 
-  patientId String?
-  patient   Patient? @relation(fields: [patientId], references: [id])
+  studentId String?
+  student   Student? @relation(fields: [studentId], references: [id])
 }

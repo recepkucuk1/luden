@@ -9,18 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-
-const WORK_AREA_LABEL: Record<string, string> = {
-  speech: "Konuşma",
-  language: "Dil",
-  hearing: "İşitme",
-};
-
-const WORK_AREA_COLOR: Record<string, string> = {
-  speech: "bg-blue-100 text-blue-700",
-  language: "bg-purple-100 text-purple-700",
-  hearing: "bg-teal-100 text-teal-700",
-};
+import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
 
 type FilterArea = "all" | "speech" | "language" | "hearing";
 type SortBy = "name" | "birthDate-asc" | "birthDate-desc" | "lastCard" | "mostCards";
@@ -37,13 +26,6 @@ interface Student {
   _count: { cards: number };
 }
 
-function calcAge(birthDate: string | null): string {
-  if (!birthDate) return "";
-  const age = Math.floor(
-    (Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25)
-  );
-  return `${age} yaş`;
-}
 
 const FILTER_OPTIONS: { value: FilterArea; label: string }[] = [
   { value: "all", label: "Tümü" },

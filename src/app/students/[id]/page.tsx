@@ -6,30 +6,13 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { GeneratedCard } from "@/lib/prompts";
-
-const WORK_AREA_LABEL: Record<string, string> = {
-  speech: "Konuşma Eğitimi",
-  language: "Dil Eğitimi",
-  hearing: "İşitme Eğitimi",
-};
-
-const WORK_AREA_COLOR: Record<string, string> = {
-  speech: "bg-blue-100 text-blue-700",
-  language: "bg-purple-100 text-purple-700",
-  hearing: "bg-teal-100 text-teal-700",
-};
-
-const DIFFICULTY_LABEL: Record<string, string> = {
-  easy: "Kolay",
-  medium: "Orta",
-  hard: "Zor",
-};
-
-const DIFFICULTY_COLOR: Record<string, string> = {
-  easy: "bg-emerald-100 text-emerald-700",
-  medium: "bg-amber-100 text-amber-700",
-  hard: "bg-red-100 text-red-700",
-};
+import {
+  CATEGORY_LABEL as WORK_AREA_LABEL,
+  WORK_AREA_COLOR,
+  DIFFICULTY_LABEL,
+  DIFFICULTY_COLOR,
+  calcAge,
+} from "@/lib/constants";
 
 interface StudentCard {
   id: string;
@@ -52,12 +35,6 @@ interface Student {
   cards: StudentCard[];
 }
 
-function calcAge(birthDate: string | null): string {
-  if (!birthDate) return "";
-  const diff = Date.now() - new Date(birthDate).getTime();
-  const age = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
-  return `${age} yaş`;
-}
 
 export default function StudentDetailPage({
   params,
