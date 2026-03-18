@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       throw new Error("Claude yanıtından JSON çıkarılamadı");
     }
 
-    let cardContent: unknown;
+    let cardContent: Record<string, unknown>;
     try {
       cardContent = JSON.parse(jsonMatch[1] ?? jsonMatch[0]);
     } catch (parseErr) {
