@@ -48,7 +48,7 @@ export default function CardDetailPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+      <div className="flex items-center justify-center py-32">
         <div className="h-8 w-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
       </div>
     );
@@ -56,7 +56,7 @@ export default function CardDetailPage({
 
   if (notFound || !card) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center gap-3">
+      <div className="flex flex-col items-center justify-center py-32 gap-3">
         <p className="text-zinc-500">Kart bulunamadı.</p>
         <button
           onClick={() => router.back()}
@@ -76,52 +76,32 @@ export default function CardDetailPage({
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      {/* Header */}
-      <header className="border-b border-zinc-200 bg-white px-6 py-4">
-        <div className="mx-auto max-w-3xl flex items-center justify-between">
-          <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm">
-              TM
-            </div>
-            <span className="text-base font-bold text-zinc-900">TerapiMat</span>
-          </Link>
-          <span className="text-zinc-300">/</span>
+    <>
+      {/* Breadcrumb */}
+      <div className="border-b border-zinc-100 bg-white px-6 py-2.5">
+        <div className="mx-auto max-w-3xl flex items-center gap-2 text-sm">
           {card.student ? (
             <>
-              <Link href="/students" className="text-sm text-zinc-500 hover:text-zinc-700">
+              <Link href="/students" className="text-zinc-400 hover:text-zinc-600 transition-colors">
                 Öğrenciler
               </Link>
               <span className="text-zinc-300">/</span>
               <Link
                 href={`/students/${card.student.id}`}
-                className="text-sm text-zinc-500 hover:text-zinc-700"
+                className="text-zinc-400 hover:text-zinc-600 transition-colors"
               >
                 {card.student.name}
               </Link>
-              <span className="text-zinc-300">/</span>
             </>
           ) : (
-            <>
-              <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-700">
-                Ana Sayfa
-              </Link>
-              <span className="text-zinc-300">/</span>
-            </>
+            <Link href="/" className="text-zinc-400 hover:text-zinc-600 transition-colors">
+              Kart Üret
+            </Link>
           )}
-          <span className="text-sm font-medium text-zinc-700 truncate max-w-[160px]">
-            {card.title}
-          </span>
-          </div>
-          <Link
-            href="/profile"
-            className="rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 transition-colors shrink-0"
-          >
-            Profil
-          </Link>
+          <span className="text-zinc-300">/</span>
+          <span className="text-zinc-700 font-medium truncate max-w-[200px]">{card.title}</span>
         </div>
-      </header>
+      </div>
 
       <main className="mx-auto max-w-3xl px-6 py-8">
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
@@ -134,6 +114,6 @@ export default function CardDetailPage({
           {card.student && ` · ${card.student.name}`}
         </p>
       </main>
-    </div>
+    </>
   );
 }
