@@ -46,6 +46,24 @@ export default function StudentDetailPage({
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [confirmCardId, setConfirmCardId] = useState<string | null>(null);
+  const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
+
+  async function deleteCard(cardId: string) {
+    setDeletingCardId(cardId);
+    try {
+      const res = await fetch(`/api/cards/${cardId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Silme başarısız");
+      setStudent((prev) =>
+        prev ? { ...prev, cards: prev.cards.filter((c) => c.id !== cardId) } : prev
+      );
+    } catch (err) {
+      console.error("Kart silinemedi:", err);
+    } finally {
+      setDeletingCardId(null);
+      setConfirmCardId(null);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -165,37 +183,70 @@ export default function StudentDetailPage({
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {student.cards.map((card) => (
-                <Link
+                <div
                   key={card.id}
-                  href={`/cards/${card.id}`}
-                  className="group rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
+                  className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all overflow-hidden"
                 >
-                  <div className="flex flex-wrap gap-1.5 mb-2">
-                    <Badge className={WORK_AREA_COLOR[card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
-                      {WORK_AREA_LABEL[card.category] ?? card.category}
-                    </Badge>
-                    <Badge className={DIFFICULTY_COLOR[card.difficulty] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
-                      {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
-                    </Badge>
-                    <Badge className="bg-zinc-100 text-zinc-600" style={{ fontSize: "10px" }}>
-                      {card.ageGroup}
-                    </Badge>
-                  </div>
-                  <h3 className="font-semibold text-zinc-900 text-sm mb-1">{card.title}</h3>
-                  {(card.content as GeneratedCard).objective && (
-                    <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
-                      {(card.content as GeneratedCard).objective}
-                    </p>
+                  <Link href={`/cards/${card.id}`} className="block p-4">
+                    <div className="flex flex-wrap gap-1.5 mb-2 pr-8">
+                      <Badge className={WORK_AREA_COLOR[card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                        {WORK_AREA_LABEL[card.category] ?? card.category}
+                      </Badge>
+                      <Badge className={DIFFICULTY_COLOR[card.difficulty] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                        {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
+                      </Badge>
+                      <Badge className="bg-zinc-100 text-zinc-600" style={{ fontSize: "10px" }}>
+                        {card.ageGroup}
+                      </Badge>
+                    </div>
+                    <h3 className="font-semibold text-zinc-900 text-sm mb-1">{card.title}</h3>
+                    {(card.content as GeneratedCard).objective && (
+                      <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
+                        {(card.content as GeneratedCard).objective}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-xs text-zinc-400">
+                        {new Date(card.createdAt).toLocaleDateString("tr-TR")}
+                      </p>
+                      <span className="text-xs text-blue-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                        Detay →
+                      </span>
+                    </div>
+                  </Link>
+
+                  {/* Sil butonu */}
+                  <button
+                    onClick={() => setConfirmCardId(card.id)}
+                    className="absolute top-3 right-3 rounded-lg px-2 py-1 text-xs text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    Sil
+                  </button>
+
+                  {/* Onay dialogu */}
+                  {confirmCardId === card.id && (
+                    <div className="absolute inset-0 rounded-2xl bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center gap-3 p-4">
+                      <p className="text-sm font-medium text-zinc-700 text-center">
+                        Bu kartı silmek istediğinize emin misiniz?
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setConfirmCardId(null)}
+                          className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs text-zinc-600 hover:bg-zinc-50 transition-colors"
+                        >
+                          İptal
+                        </button>
+                        <button
+                          onClick={() => deleteCard(card.id)}
+                          disabled={deletingCardId === card.id}
+                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-white hover:bg-red-700 disabled:opacity-60 transition-colors"
+                        >
+                          {deletingCardId === card.id ? "Siliniyor…" : "Evet, Sil"}
+                        </button>
+                      </div>
+                    </div>
                   )}
-                  <div className="flex items-center justify-between mt-2">
-                    <p className="text-xs text-zinc-400">
-                      {new Date(card.createdAt).toLocaleDateString("tr-TR")}
-                    </p>
-                    <span className="text-xs text-blue-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                      Detay →
-                    </span>
-                  </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}
