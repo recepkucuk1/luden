@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
@@ -37,11 +38,8 @@ export function AppHeader() {
     <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white px-6 py-3">
       <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
         {/* Sol: Logo */}
-        <Link href="/dashboard" className="flex items-center gap-2.5 shrink-0">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm">
-            TM
-          </div>
-          <span className="text-base font-bold text-zinc-900">TerapiMat</span>
+        <Link href="/dashboard" className="shrink-0">
+          <Image src="/logo.png" alt="TerapiMat" width={120} height={36} className="h-9 w-auto" priority />
         </Link>
 
         {/* Orta: Nav */}
