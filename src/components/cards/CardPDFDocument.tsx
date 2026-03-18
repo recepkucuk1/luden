@@ -3,6 +3,7 @@ import {
   Page,
   Text,
   View,
+  Image,
   StyleSheet,
   Font,
 } from "@react-pdf/renderer";
@@ -10,10 +11,11 @@ import type { GeneratedCard } from "@/lib/prompts";
 
 // Noto Sans — tam Unicode + Türkçe desteği
 // public/fonts/ klasöründen yüklenir (client-side absolute URL)
-const FONT_BASE =
-  typeof window !== "undefined"
-    ? `${window.location.origin}/fonts`
-    : "/fonts";
+const ORIGIN =
+  typeof window !== "undefined" ? window.location.origin : "";
+
+const FONT_BASE = `${ORIGIN}/fonts`;
+const LOGO_SRC  = `${ORIGIN}/luden-logo-5.png`;
 
 Font.register({
   family: "NotoSans",
@@ -77,27 +79,16 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: 20,
     paddingBottom: 16,
     borderBottomWidth: 2,
     borderBottomColor: "#2563eb",
   },
-  logoBox: {
-    width: 80,
-    height: 48,
-    borderWidth: 1,
-    borderColor: "#d4d4d8",
-    borderStyle: "dashed",
-    borderRadius: 4,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  logoText: {
-    fontFamily: F,
-    fontSize: 7,
-    color: "#a1a1aa",
-    textAlign: "center",
+  logo: {
+    width: 100,         // 600px orijinal genişlik → 100pt PDF
+    height: 37,         // 221/600 * 100 ≈ 37pt (oran korunuyor)
+    objectFit: "contain",
   },
   headerRight: { alignItems: "flex-end" },
   appName: {
@@ -332,9 +323,7 @@ export function CardPDFDocument({ card }: CardPDFDocumentProps) {
 
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.logoBox}>
-            <Text style={styles.logoText}>KURUM{"\n"}LOGOSU</Text>
-          </View>
+          <Image src={LOGO_SRC} style={styles.logo} />
           <View style={styles.headerRight}>
             <Text style={styles.appName}>TERAPİMAT</Text>
             <Text style={styles.dateText}>{today}</Text>

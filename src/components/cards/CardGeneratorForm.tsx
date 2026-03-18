@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,9 +19,24 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+type AgeGroup = "3-6" | "7-12" | "13-18" | "adult";
+
+function calcAgeGroup(birthDate: string): AgeGroup {
+  const age = Math.floor(
+    (Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25)
+  );
+  if (age < 7)  return "3-6";
+  if (age < 13) return "7-12";
+  if (age < 19) return "13-18";
+  return "adult";
+}
+
 interface CardGeneratorFormProps {
   onCardGenerated: (card: GeneratedCard) => void;
   onLoading: (loading: boolean) => void;
+  studentId?: string;
+  studentName?: string;
+  studentBirthDate?: string;
 }
 
 const CATEGORIES = [
@@ -43,17 +58,24 @@ const DIFFICULTIES = [
   { value: "hard", label: "Zor", color: "text-red-600 border-red-200 bg-red-50 data-[selected=true]:bg-red-100 data-[selected=true]:border-red-500" },
 ] as const;
 
-export function CardGeneratorForm({ onCardGenerated, onLoading }: CardGeneratorFormProps) {
+export function CardGeneratorForm({ onCardGenerated, onLoading, studentId, studentName, studentBirthDate }: CardGeneratorFormProps) {
   const [error, setError] = useState<string | null>(null);
+
+  const autoAgeGroup = studentBirthDate ? calcAgeGroup(studentBirthDate) : undefined;
 
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       category: "speech",
-      ageGroup: "7-12",
+      ageGroup: autoAgeGroup ?? "7-12",
       difficulty: "easy",
     },
   });
+
+  // Öğrenci değişince yaş grubunu güncelle
+  useEffect(() => {
+    if (autoAgeGroup) setValue("ageGroup", autoAgeGroup);
+  }, [autoAgeGroup, setValue]);
 
   const watchedCategory = watch("category");
   const watchedAgeGroup = watch("ageGroup");
@@ -66,7 +88,7 @@ export function CardGeneratorForm({ onCardGenerated, onLoading }: CardGeneratorF
       const res = await fetch("/api/cards/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, studentId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Bilinmeyen hata");
@@ -80,6 +102,15 @@ export function CardGeneratorForm({ onCardGenerated, onLoading }: CardGeneratorF
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+      {/* Seçili Öğrenci */}
+      {studentId && studentName && (
+        <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
+          <span className="text-blue-600 text-sm">👤</span>
+          <span className="text-sm text-blue-700 font-medium">{studentName}</span>
+          <span className="text-xs text-blue-500 ml-auto">için kart üretiliyor</span>
+        </div>
+      )}
 
       {/* Kategori */}
       <div className="space-y-2">
@@ -109,23 +140,32 @@ export function CardGeneratorForm({ onCardGenerated, onLoading }: CardGeneratorF
       {/* Yaş Grubu */}
       <div className="space-y-2">
         <Label className="text-sm font-semibold text-zinc-700">Yaş Grubu</Label>
-        <div className="grid grid-cols-4 gap-2">
-          {AGE_GROUPS.map((age) => (
-            <button
-              key={age.value}
-              type="button"
-              onClick={() => setValue("ageGroup", age.value)}
-              className={cn(
-                "rounded-lg border-2 py-2 text-sm font-medium transition-all",
-                watchedAgeGroup === age.value
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                  : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
-              )}
-            >
-              {age.label}
-            </button>
-          ))}
-        </div>
+        {autoAgeGroup ? (
+          <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
+            <span className="text-sm text-zinc-700 font-medium">
+              {AGE_GROUPS.find((a) => a.value === autoAgeGroup)?.label}
+            </span>
+            <span className="text-xs text-zinc-400 ml-auto">öğrenciden otomatik</span>
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 gap-2">
+            {AGE_GROUPS.map((age) => (
+              <button
+                key={age.value}
+                type="button"
+                onClick={() => setValue("ageGroup", age.value)}
+                className={cn(
+                  "rounded-lg border-2 py-2 text-sm font-medium transition-all",
+                  watchedAgeGroup === age.value
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
+                )}
+              >
+                {age.label}
+              </button>
+            ))}
+          </div>
+        )}
         {errors.ageGroup && <p className="text-xs text-red-500">{errors.ageGroup.message}</p>}
       </div>
 

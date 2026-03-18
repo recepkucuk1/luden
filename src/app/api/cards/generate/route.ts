@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { anthropic, MODEL } from "@/lib/anthropic";
 import { buildCardPrompt, CardGenerationParams } from "@/lib/prompts";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
-    const body: CardGenerationParams = await request.json();
-    const { category, difficulty, ageGroup } = body;
+    const body: CardGenerationParams & { studentId?: string } = await request.json();
+    const { category, difficulty, ageGroup, studentId } = body;
 
     if (!category || !difficulty || !ageGroup) {
       return NextResponse.json(
@@ -32,7 +34,6 @@ export async function POST(request: NextRequest) {
       throw new Error("Yanıt çok uzun, token limiti aşıldı. Lütfen tekrar deneyin.");
     }
 
-    // Claude bazen ```json ... ``` bloğu içinde döndürür, her iki durumu da yakala
     const jsonMatch = rawContent.text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/)
       ?? rawContent.text.match(/(\{[\s\S]*\})/);
 
@@ -49,10 +50,25 @@ export async function POST(request: NextRequest) {
       throw parseErr;
     }
 
-    return NextResponse.json({
-      success: true,
-      card: { ...cardContent, category, difficulty, ageGroup },
-    });
+    const card = { ...cardContent, category, difficulty, ageGroup };
+
+    // Oturum açıksa kartı veritabanına kaydet
+    const session = await auth();
+    if (session?.user?.id) {
+      await prisma.card.create({
+        data: {
+          title: (cardContent.title as string) ?? "Öğrenme Kartı",
+          content: cardContent as Parameters<typeof prisma.card.create>[0]["data"]["content"],
+          category,
+          difficulty,
+          ageGroup,
+          therapistId: session.user.id,
+          patientId: studentId ?? null,
+        },
+      });
+    }
+
+    return NextResponse.json({ success: true, card });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : undefined;
