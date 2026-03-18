@@ -15,7 +15,7 @@ export const authConfig: NextAuthConfig = {
 
       if (isApiAuth) return true;
       if (isAuthPage) {
-        if (isLoggedIn) return Response.redirect(new URL("/", nextUrl));
+        if (isLoggedIn) return Response.redirect(new URL("/dashboard", nextUrl));
         return true;
       }
       if (!isLoggedIn) return Response.redirect(new URL("/login", nextUrl));

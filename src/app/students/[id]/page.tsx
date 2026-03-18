@@ -106,19 +106,27 @@ export default function StudentDetailPage({
     <div className="min-h-screen bg-zinc-50">
       {/* Header */}
       <header className="border-b border-zinc-200 bg-white px-6 py-4">
-        <div className="mx-auto max-w-5xl flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm">
-              TM
-            </div>
-            <span className="text-base font-bold text-zinc-900">TerapiMat</span>
+        <div className="mx-auto max-w-5xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm">
+                TM
+              </div>
+              <span className="text-base font-bold text-zinc-900">TerapiMat</span>
+            </Link>
+            <span className="text-zinc-300">/</span>
+            <Link href="/students" className="text-sm text-zinc-500 hover:text-zinc-700">
+              Öğrenciler
+            </Link>
+            <span className="text-zinc-300">/</span>
+            <span className="text-sm font-medium text-zinc-700">{student.name}</span>
+          </div>
+          <Link
+            href="/profile"
+            className="rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 transition-colors"
+          >
+            Profil
           </Link>
-          <span className="text-zinc-300">/</span>
-          <Link href="/students" className="text-sm text-zinc-500 hover:text-zinc-700">
-            Öğrenciler
-          </Link>
-          <span className="text-zinc-300">/</span>
-          <span className="text-sm font-medium text-zinc-700">{student.name}</span>
         </div>
       </header>
 

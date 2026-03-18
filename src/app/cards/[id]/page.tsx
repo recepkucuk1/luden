@@ -79,8 +79,9 @@ export default function CardDetailPage({
     <div className="min-h-screen bg-zinc-50">
       {/* Header */}
       <header className="border-b border-zinc-200 bg-white px-6 py-4">
-        <div className="mx-auto max-w-3xl flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2">
+        <div className="mx-auto max-w-3xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+          <Link href="/dashboard" className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm">
               TM
             </div>
@@ -112,6 +113,13 @@ export default function CardDetailPage({
           <span className="text-sm font-medium text-zinc-700 truncate max-w-[160px]">
             {card.title}
           </span>
+          </div>
+          <Link
+            href="/profile"
+            className="rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 transition-colors shrink-0"
+          >
+            Profil
+          </Link>
         </div>
       </header>
 

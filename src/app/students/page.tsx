@@ -153,7 +153,15 @@ export default function StudentsPage() {
             <span className="text-sm font-medium text-zinc-600">Öğrenciler</span>
           </div>
           {session?.user && (
-            <p className="text-sm text-zinc-500 hidden sm:block">{session.user.name}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-zinc-500 hidden sm:block">{session.user.name}</p>
+              <Link
+                href="/profile"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 transition-colors"
+              >
+                Profil
+              </Link>
+            </div>
           )}
         </div>
       </header>

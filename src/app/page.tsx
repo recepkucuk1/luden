@@ -40,20 +40,32 @@ function HomeContent() {
             </div>
             <nav className="hidden sm:flex items-center gap-1 ml-2">
               <Link
+                href="/dashboard"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 transition-colors"
+              >
+                Dashboard
+              </Link>
+              <Link
                 href="/students"
                 className="rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 transition-colors"
               >
-                👤 Öğrenciler
+                Öğrenciler
               </Link>
             </nav>
           </div>
 
           {session?.user && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-zinc-800">{session.user.name}</p>
                 <p className="text-xs text-zinc-400">{session.user.email}</p>
               </div>
+              <Link
+                href="/profile"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-100 transition-colors"
+              >
+                Profil
+              </Link>
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
                 className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
