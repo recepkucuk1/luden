@@ -5,6 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import type { GeneratedCard } from "@/lib/prompts";
 import {
   CATEGORY_LABEL as WORK_AREA_LABEL,
@@ -13,6 +17,17 @@ import {
   DIFFICULTY_COLOR,
   calcAge,
 } from "@/lib/constants";
+
+const WORK_AREAS = [
+  { value: "speech", label: "Konuşma", icon: "🗣️" },
+  { value: "language", label: "Dil", icon: "📚" },
+  { value: "hearing", label: "İşitme", icon: "👂" },
+];
+
+function toInputDate(dateStr: string | null): string {
+  if (!dateStr) return "";
+  return dateStr.slice(0, 10);
+}
 
 interface StudentCard {
   id: string;
@@ -47,6 +62,54 @@ export default function StudentDetailPage({
   const [notFound, setNotFound] = useState(false);
   const [confirmCardId, setConfirmCardId] = useState<string | null>(null);
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
+
+  // Düzenleme
+  const [showEdit, setShowEdit] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editBirthDate, setEditBirthDate] = useState("");
+  const [editWorkArea, setEditWorkArea] = useState("speech");
+  const [editDiagnosis, setEditDiagnosis] = useState("");
+  const [editNotes, setEditNotes] = useState("");
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  function openEdit() {
+    if (!student) return;
+    setEditName(student.name);
+    setEditBirthDate(toInputDate(student.birthDate));
+    setEditWorkArea(student.workArea);
+    setEditDiagnosis(student.diagnosis ?? "");
+    setEditNotes(student.notes ?? "");
+    setEditError(null);
+    setShowEdit(true);
+  }
+
+  async function handleEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!student || !editName.trim()) { setEditError("Ad Soyad zorunludur."); return; }
+    setEditSubmitting(true);
+    setEditError(null);
+    try {
+      const res = await fetch(`/api/students/${student.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editName, birthDate: editBirthDate || null,
+          workArea: editWorkArea, diagnosis: editDiagnosis, notes: editNotes,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Hata oluştu");
+      setStudent((prev) =>
+        prev ? { ...prev, name: editName, birthDate: editBirthDate || null, workArea: editWorkArea, diagnosis: editDiagnosis || null, notes: editNotes || null } : prev
+      );
+      setShowEdit(false);
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "Hata oluştu");
+    } finally {
+      setEditSubmitting(false);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -137,13 +200,16 @@ export default function StudentDetailPage({
                 </div>
               </div>
             </div>
-            <Link
-              href={`/?studentId=${student.id}&studentName=${encodeURIComponent(student.name)}&workArea=${student.workArea}${student.birthDate ? `&birthDate=${encodeURIComponent(student.birthDate)}` : ""}`}
-            >
-              <Button size="sm" className="shrink-0">
-                ✨ Kart Üret
+            <div className="flex items-center gap-2 shrink-0">
+              <Button size="sm" variant="outline" onClick={openEdit}>
+                Düzenle
               </Button>
-            </Link>
+              <Link
+                href={`/?studentId=${student.id}&studentName=${encodeURIComponent(student.name)}&workArea=${student.workArea}${student.birthDate ? `&birthDate=${encodeURIComponent(student.birthDate)}` : ""}`}
+              >
+                <Button size="sm">✨ Kart Üret</Button>
+              </Link>
+            </div>
           </div>
 
           {student.notes && (
@@ -153,6 +219,66 @@ export default function StudentDetailPage({
             </div>
           )}
         </div>
+
+        {/* Düzenleme Modalı */}
+        {showEdit && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-base font-bold text-zinc-900">Öğrenci Düzenle</h2>
+                <button onClick={() => setShowEdit(false)} className="text-zinc-400 hover:text-zinc-600 text-lg leading-none">✕</button>
+              </div>
+              <form onSubmit={handleEdit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-name" className="text-sm font-medium">Ad Soyad *</Label>
+                  <Input id="edit-name" value={editName} onChange={(e) => setEditName(e.target.value)} autoFocus />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-birthDate" className="text-sm font-medium">Doğum Tarihi</Label>
+                  <Input id="edit-birthDate" type="date" value={editBirthDate} onChange={(e) => setEditBirthDate(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium">Çalışma Alanı *</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {WORK_AREAS.map((w) => (
+                      <button
+                        key={w.value}
+                        type="button"
+                        onClick={() => setEditWorkArea(w.value)}
+                        className={cn(
+                          "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all text-xs font-medium",
+                          editWorkArea === w.value
+                            ? "border-blue-500 bg-blue-50 text-blue-700"
+                            : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
+                        )}
+                      >
+                        <span className="text-lg">{w.icon}</span>
+                        {w.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-diagnosis" className="text-sm font-medium">Tanı</Label>
+                  <Input id="edit-diagnosis" value={editDiagnosis} onChange={(e) => setEditDiagnosis(e.target.value)} placeholder="Örn: Dil gelişim gecikmesi" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-notes" className="text-sm font-medium">Notlar</Label>
+                  <Textarea id="edit-notes" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={2} className="resize-none text-sm" />
+                </div>
+                {editError && <p className="text-xs text-red-500">{editError}</p>}
+                <div className="flex gap-2 pt-1">
+                  <Button type="submit" disabled={editSubmitting} className="flex-1">
+                    {editSubmitting ? "Kaydediliyor…" : "Kaydet"}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setShowEdit(false)} className="flex-1">
+                    İptal
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Öğrenme Kartları */}
         <div>

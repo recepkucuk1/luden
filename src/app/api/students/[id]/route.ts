@@ -43,6 +43,55 @@ export async function GET(
   }
 }
 
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    const existing = await prisma.student.findFirst({
+      where: { id, therapistId: session.user.id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Öğrenci bulunamadı" }, { status: 404 });
+    }
+
+    const body = await request.json();
+    const { name, birthDate, workArea, diagnosis, notes } = body;
+
+    if (!name?.trim() || !workArea) {
+      return NextResponse.json(
+        { error: "Ad Soyad ve çalışma alanı zorunludur." },
+        { status: 400 }
+      );
+    }
+
+    const student = await prisma.student.update({
+      where: { id },
+      data: {
+        name: name.trim(),
+        birthDate: birthDate ? new Date(birthDate) : null,
+        workArea,
+        diagnosis: diagnosis || null,
+        notes: notes || null,
+      },
+    });
+
+    return NextResponse.json({ student });
+  } catch (error) {
+    logError("PUT /api/students/[id]", error);
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
