@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/students", label: "Öğrenciler" },
   { href: "/cards", label: "Kartlar" },
-  { href: "/", label: "Kart Üret", exact: true },
+  { href: "/generate", label: "Kart Üret" },
 ];
 
 export function AppHeader() {
@@ -51,7 +51,7 @@ export function AppHeader() {
               href={item.href}
               className={cn(
                 "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-                isActive(item.href, item.exact)
+                isActive(item.href)
                   ? "bg-zinc-100 text-zinc-900"
                   : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
               )}

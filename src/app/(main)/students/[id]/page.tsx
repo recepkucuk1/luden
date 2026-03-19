@@ -245,7 +245,7 @@ export default function StudentDetailPage({
                 Düzenle
               </Button>
               <Link
-                href={`/?studentId=${student.id}&studentName=${encodeURIComponent(student.name)}&workArea=${student.workArea}${student.birthDate ? `&birthDate=${encodeURIComponent(student.birthDate)}` : ""}`}
+                href={`/generate?studentId=${student.id}&studentName=${encodeURIComponent(student.name)}&workArea=${student.workArea}${student.birthDate ? `&birthDate=${encodeURIComponent(student.birthDate)}` : ""}`}
               >
                 <Button size="sm">✨ Kart Üret</Button>
               </Link>
@@ -358,7 +358,7 @@ export default function StudentDetailPage({
                 Bu öğrenci için öğrenme kartı oluşturmak için &quot;Kart Üret&quot; butonuna tıkla.
               </p>
               <Link
-                href={`/?studentId=${student.id}&studentName=${encodeURIComponent(student.name)}&workArea=${student.workArea}${student.birthDate ? `&birthDate=${encodeURIComponent(student.birthDate)}` : ""}`}
+                href={`/generate?studentId=${student.id}&studentName=${encodeURIComponent(student.name)}&workArea=${student.workArea}${student.birthDate ? `&birthDate=${encodeURIComponent(student.birthDate)}` : ""}`}
               >
                 <Button size="sm">✨ Kart Üret</Button>
               </Link>
