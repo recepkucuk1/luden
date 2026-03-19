@@ -91,7 +91,30 @@ export function CardGeneratorForm({
   const [curricula, setCurricula] = useState<Curriculum[]>([]);
   const [selectedCurriculumId, setSelectedCurriculumId] = useState("");
   const [selectedMainGoalId, setSelectedMainGoalId] = useState("");
-  const [selectedSubGoalId, setSelectedSubGoalId] = useState("");
+  const [selectedSubGoalIds, setSelectedSubGoalIds] = useState<string[]>([]); // çoklu seçim
+
+  const AREA_LABELS: Record<string, string> = {
+    speech: "Akıcılık Bozukluğu",
+    language: "Dil",
+    acquired_language: "Edinilmiş Dil",
+    speech_sound: "Konuşma Sesi",
+    motor_speech: "Motor Konuşma",
+    resonance: "Rezonans",
+    voice: "Ses",
+    hearing: "İşitme Eğitimi",
+    hearing_language: "Dil Eğitimi (İşitme)",
+    hearing_social: "Sosyal İletişim",
+    hearing_learning: "Öğrenmeye Destek",
+    hearing_literacy: "Okuma ve Yazma",
+    hearing_early_math: "Erken Matematik",
+    hearing_math: "Matematik",
+  };
+
+  const curriculaByArea = curricula.reduce<Record<string, Curriculum[]>>((acc, c) => {
+    if (!acc[c.area]) acc[c.area] = [];
+    acc[c.area].push(c);
+    return acc;
+  }, {});
 
   useEffect(() => {
     fetch("/api/curriculum")
@@ -102,29 +125,25 @@ export function CardGeneratorForm({
 
   const selectedCurriculum = curricula.find((c) => c.id === selectedCurriculumId);
   const mainGoals = selectedCurriculum?.goals.filter((g) => g.isMainGoal) ?? [];
-  const subGoals = selectedCurriculum?.goals.filter(
-    (g) => !g.isMainGoal && selectedMainGoalId
-      ? g.code.startsWith(selectedMainGoalId.replace(/\.0$/, "."))
-      : false
-  ) ?? [];
-
-  // Seçili ana hedef objesi (alt hedef filtrelemek için kodu lazım)
   const selectedMainGoal = mainGoals.find((g) => g.id === selectedMainGoalId);
 
-  // Gerçek sub-goals: aynı prefix (2.0 → 2.x)
+  // Alt hedefler: seçili ana hedefin altındakiler
   const filteredSubGoals = selectedMainGoal
     ? (selectedCurriculum?.goals.filter(
         (g) => !g.isMainGoal && g.code.startsWith(selectedMainGoal.code.replace(".0", "."))
       ) ?? [])
     : [];
 
-  // curriculumGoalId: alt hedef seçildiyse alt hedef, yoksa ana hedef, yoksa undefined
-  const curriculumGoalId = selectedSubGoalId || selectedMainGoalId || undefined;
+  function toggleSubGoal(id: string) {
+    setSelectedSubGoalIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
 
   function resetCurriculum() {
     setSelectedCurriculumId("");
     setSelectedMainGoalId("");
-    setSelectedSubGoalId("");
+    setSelectedSubGoalIds([]);
   }
 
   // ─── React Hook Form ───────────────────────────────────────────────────────
@@ -153,6 +172,24 @@ export function CardGeneratorForm({
   const watchedAgeGroup = watch("ageGroup");
   const watchedDifficulty = watch("difficulty");
 
+  // Hangi kategori hangi curriculum area'larını görebilir
+  const CATEGORY_AREA_FILTER: Record<string, string[] | null> = {
+    speech:   ["speech", "speech_sound", "motor_speech", "resonance", "voice"],
+    language: ["language", "acquired_language"],
+    hearing:  ["hearing", "hearing_language", "hearing_social", "hearing_learning", "hearing_literacy", "hearing_early_math", "hearing_math"],
+  };
+  const allowedAreas = CATEGORY_AREA_FILTER[watchedCategory] ?? null;
+  const filteredCurriculaByArea = Object.fromEntries(
+    Object.entries(curriculaByArea).filter(([area]) =>
+      !allowedAreas || allowedAreas.includes(area)
+    )
+  );
+
+  // Kategori değişince müfredat seçimini sıfırla
+  useEffect(() => {
+    resetCurriculum();
+  }, [watchedCategory]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function onSubmit(values: FormValues) {
     setError(null);
     onLoading(true);
@@ -161,7 +198,16 @@ export function CardGeneratorForm({
       const res = await fetch("/api/cards/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, studentId, curriculumGoalId }),
+        body: JSON.stringify({
+          ...values,
+          studentId,
+          // Alt hedef seçildiyse array, yoksa ana hedef tek eleman, yoksa boş
+          curriculumGoalIds: selectedSubGoalIds.length > 0
+            ? selectedSubGoalIds
+            : selectedMainGoalId
+            ? [selectedMainGoalId]
+            : [],
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Bilinmeyen hata");
@@ -290,15 +336,19 @@ export function CardGeneratorForm({
           onChange={(e) => {
             setSelectedCurriculumId(e.target.value);
             setSelectedMainGoalId("");
-            setSelectedSubGoalId("");
+            setSelectedSubGoalIds([]);
           }}
           className={SELECT_CLS}
         >
-          <option value="">— Alan seç —</option>
-          {curricula.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.code} {c.title}
-            </option>
+          <option value="">— Modül seç —</option>
+          {Object.entries(filteredCurriculaByArea).map(([area, list]) => (
+            <optgroup key={area} label={AREA_LABELS[area] ?? area}>
+              {list.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.title}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
 
@@ -308,7 +358,7 @@ export function CardGeneratorForm({
             value={selectedMainGoalId}
             onChange={(e) => {
               setSelectedMainGoalId(e.target.value);
-              setSelectedSubGoalId("");
+              setSelectedSubGoalIds([]);
             }}
             className={SELECT_CLS}
           >
@@ -321,29 +371,42 @@ export function CardGeneratorForm({
           </select>
         )}
 
-        {/* Alt hedef */}
+        {/* Alt hedef — checkbox listesi */}
         {selectedMainGoalId && filteredSubGoals.length > 0 && (
-          <select
-            value={selectedSubGoalId}
-            onChange={(e) => setSelectedSubGoalId(e.target.value)}
-            className={SELECT_CLS}
-          >
-            <option value="">— Alt hedef seç —</option>
-            {filteredSubGoals.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.code} {g.title}
-              </option>
-            ))}
-          </select>
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 divide-y divide-zinc-100">
+            {filteredSubGoals.map((g) => {
+              const checked = selectedSubGoalIds.includes(g.id);
+              return (
+                <label
+                  key={g.id}
+                  className={cn(
+                    "flex items-start gap-3 px-3 py-2.5 cursor-pointer transition-colors",
+                    checked ? "bg-blue-50" : "hover:bg-white"
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleSubGoal(g.id)}
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 accent-blue-600"
+                  />
+                  <span className="text-xs text-zinc-400 shrink-0 w-10 tabular-nums pt-px">
+                    {g.code}
+                  </span>
+                  <span className="text-xs text-zinc-700 leading-relaxed">{g.title}</span>
+                </label>
+              );
+            })}
+          </div>
         )}
 
         {/* Seçim özeti */}
-        {curriculumGoalId && (
+        {(selectedSubGoalIds.length > 0 || selectedMainGoalId) && (
           <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
             <span className="text-blue-500 text-xs mt-0.5">🎯</span>
             <p className="text-xs text-blue-700 leading-relaxed">
-              {selectedSubGoalId
-                ? filteredSubGoals.find((g) => g.id === selectedSubGoalId)?.title
+              {selectedSubGoalIds.length > 0
+                ? `${selectedSubGoalIds.length} alt hedef seçildi`
                 : mainGoals.find((g) => g.id === selectedMainGoalId)?.title}
             </p>
           </div>
