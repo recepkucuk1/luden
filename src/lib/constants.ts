@@ -43,8 +43,11 @@ export const AGE_LABEL: Record<string, string> = {
 
 export function calcAge(birthDate: string | null): string {
   if (!birthDate) return "";
-  const age = Math.floor(
-    (Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25)
-  );
-  return `${age} yaş`;
+  const birth = new Date(birthDate);
+  const now = new Date();
+  let years = now.getFullYear() - birth.getFullYear();
+  let months = now.getMonth() - birth.getMonth();
+  if (now.getDate() < birth.getDate()) months--;
+  if (months < 0) { years--; months += 12; }
+  return months > 0 ? `${years} yaş ${months} ay` : `${years} yaş`;
 }
