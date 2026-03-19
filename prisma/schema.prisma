@@ -32,6 +32,7 @@ model Student {
   therapistId String
   therapist   Therapist @relation(fields: [therapistId], references: [id])
   cards       Card[]
+  assignments CardAssignment[]
 }
 
 model Card {
@@ -50,4 +51,18 @@ model Card {
 
   studentId String?
   student   Student? @relation(fields: [studentId], references: [id])
+
+  assignments CardAssignment[]
+}
+
+model CardAssignment {
+  id         String   @id @default(cuid())
+  cardId     String
+  studentId  String
+  assignedAt DateTime @default(now())
+
+  card    Card    @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([cardId, studentId])
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CardPreview } from "@/components/cards/CardPreview";
+import { AssignStudentsModal } from "@/components/cards/AssignStudentsModal";
 import type { GeneratedCard } from "@/lib/prompts";
 
 interface CardRecord {
@@ -15,6 +16,7 @@ interface CardRecord {
   content: GeneratedCard;
   createdAt: string;
   student: { id: string; name: string } | null;
+  _count: { assignments: number };
 }
 
 export default function CardDetailPage({
@@ -27,6 +29,8 @@ export default function CardDetailPage({
   const [card, setCard] = useState<CardRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [assignedCount, setAssignedCount] = useState(0);
+  const [showAssign, setShowAssign] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -36,6 +40,7 @@ export default function CardDetailPage({
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
         setCard(data.card);
+        setAssignedCount(data.card._count?.assignments ?? 0);
       } catch (err) {
         console.error("Kart yüklenemedi:", err);
         setNotFound(true);
@@ -107,13 +112,35 @@ export default function CardDetailPage({
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <CardPreview card={generatedCard} />
         </div>
-        <p className="text-xs text-zinc-400 text-center mt-4">
-          {new Date(card.createdAt).toLocaleDateString("tr-TR", {
-            day: "numeric", month: "long", year: "numeric",
-          })}
-          {card.student && ` · ${card.student.name}`}
-        </p>
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-xs text-zinc-400">
+            {new Date(card.createdAt).toLocaleDateString("tr-TR", {
+              day: "numeric", month: "long", year: "numeric",
+            })}
+            {card.student && ` · ${card.student.name}`}
+          </p>
+          <button
+            onClick={() => setShowAssign(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 transition-colors"
+          >
+            Öğrenciye Ata
+            {assignedCount > 0 && (
+              <span className="rounded-full bg-blue-100 text-blue-700 px-1.5 py-0.5 text-[10px] font-semibold">
+                {assignedCount}
+              </span>
+            )}
+          </button>
+        </div>
       </main>
+
+      {showAssign && (
+        <AssignStudentsModal
+          cardId={card.id}
+          cardTitle={card.title}
+          onClose={() => setShowAssign(false)}
+          onSaved={(count) => setAssignedCount(count)}
+        />
+      )}
     </>
   );
 }

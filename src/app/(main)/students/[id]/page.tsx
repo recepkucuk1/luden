@@ -40,6 +40,19 @@ interface StudentCard {
   createdAt: string;
 }
 
+interface AssignedCard {
+  id: string;
+  assignedAt: string;
+  card: {
+    id: string;
+    title: string;
+    category: string;
+    difficulty: string;
+    ageGroup: string;
+    createdAt: string;
+  };
+}
+
 interface Student {
   id: string;
   name: string;
@@ -49,6 +62,7 @@ interface Student {
   notes: string | null;
   createdAt: string;
   cards: StudentCard[];
+  assignments: AssignedCard[];
 }
 
 export default function StudentDetailPage({
@@ -327,11 +341,11 @@ export default function StudentDetailPage({
           </div>
         )}
 
-        {/* Öğrenme Kartları */}
+        {/* Bu öğrenci için üretilen kartlar */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-semibold text-zinc-900">
-              Öğrenme Kartları
+              Bu öğrenci için üretilen kartlar
               <span className="ml-2 text-sm font-normal text-zinc-400">({student.cards.length})</span>
             </h2>
           </div>
@@ -414,6 +428,57 @@ export default function StudentDetailPage({
                     </div>
                   )}
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Atanan kartlar */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-semibold text-zinc-900">
+              Atanan kartlar
+              <span className="ml-2 text-sm font-normal text-zinc-400">({student.assignments.length})</span>
+            </h2>
+          </div>
+
+          {student.assignments.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-12 text-center">
+              <div className="text-3xl mb-2">📋</div>
+              <p className="text-sm font-medium text-zinc-500 mb-1">Henüz kart atanmadı</p>
+              <p className="text-xs text-zinc-400">
+                Kart kütüphanesinden bu öğrenciye kart atayabilirsiniz.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {student.assignments.map((assignment) => (
+                <Link
+                  key={assignment.id}
+                  href={`/cards/${assignment.card.id}`}
+                  className="group rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all overflow-hidden block p-4"
+                >
+                  <div className="flex flex-wrap gap-1.5 mb-2 pr-8">
+                    <Badge className={WORK_AREA_COLOR[assignment.card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                      {WORK_AREA_LABEL[assignment.card.category] ?? assignment.card.category}
+                    </Badge>
+                    <Badge className={DIFFICULTY_COLOR[assignment.card.difficulty] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                      {DIFFICULTY_LABEL[assignment.card.difficulty] ?? assignment.card.difficulty}
+                    </Badge>
+                    <Badge className="bg-zinc-100 text-zinc-600" style={{ fontSize: "10px" }}>
+                      {assignment.card.ageGroup}
+                    </Badge>
+                  </div>
+                  <h3 className="font-semibold text-zinc-900 text-sm mb-1">{assignment.card.title}</h3>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-xs text-zinc-400">
+                      {new Date(assignment.assignedAt).toLocaleDateString("tr-TR")}
+                    </p>
+                    <span className="text-xs text-blue-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      Detay →
+                    </span>
+                  </div>
+                </Link>
               ))}
             </div>
           )}

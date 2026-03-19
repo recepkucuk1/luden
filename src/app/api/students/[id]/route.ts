@@ -28,7 +28,15 @@ export async function GET(
 
     const student = await prisma.student.findFirst({
       where: { id, therapistId: session.user.id },
-      include: { cards: { orderBy: { createdAt: "desc" } } },
+      include: {
+        cards: { orderBy: { createdAt: "desc" } },
+        assignments: {
+          orderBy: { assignedAt: "desc" },
+          include: {
+            card: { select: { id: true, title: true, category: true, difficulty: true, ageGroup: true, createdAt: true } },
+          },
+        },
+      },
     });
 
     if (!student) {

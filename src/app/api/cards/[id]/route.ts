@@ -16,7 +16,10 @@ export async function GET(
 
     const card = await prisma.card.findFirst({
       where: { id, therapistId: session.user.id },
-      include: { student: { select: { id: true, name: true } } },
+      include: {
+        student: { select: { id: true, name: true } },
+        _count: { select: { assignments: true } },
+      },
     });
 
     if (!card) {
