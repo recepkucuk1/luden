@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,8 +42,12 @@ export function CardPreview({ card }: CardPreviewProps) {
 
   async function handleDownload() {
     setDownloading(true);
+    const loadingToast = toast.loading("PDF hazırlanıyor…");
     try {
       await downloadPDF(card);
+      toast.success("PDF indirildi", { id: loadingToast });
+    } catch {
+      toast.error("PDF oluşturulamadı, tekrar deneyin", { id: loadingToast });
     } finally {
       setDownloading(false);
     }

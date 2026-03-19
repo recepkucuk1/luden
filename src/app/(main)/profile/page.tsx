@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
 const PREDEFINED_SPECIALTIES = ["speech-therapist", "audiologist", "speech-audiology"];
 
@@ -24,13 +24,11 @@ export default function ProfilePage() {
   const [otherText, setOtherText] = useState("");
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileSaving, setProfileSaving] = useState(false);
-  const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
-  const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -59,7 +57,6 @@ export default function ProfilePage() {
   async function handleProfileSave(e: React.FormEvent) {
     e.preventDefault();
     setProfileSaving(true);
-    setProfileMsg(null);
     try {
       const specialtyToSave =
         selectedSpecialty === "other" && otherText.trim()
@@ -74,9 +71,9 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setProfileMsg({ type: "success", text: "Profil güncellendi." });
+      toast.success("Profil güncellendi");
     } catch (err) {
-      setProfileMsg({ type: "error", text: err instanceof Error ? err.message : "Hata oluştu" });
+      toast.error(err instanceof Error ? err.message : "Bir hata oluştu, tekrar deneyin");
     } finally {
       setProfileSaving(false);
     }
@@ -85,11 +82,10 @@ export default function ProfilePage() {
   async function handlePasswordChange(e: React.FormEvent) {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setPasswordMsg({ type: "error", text: "Yeni şifreler eşleşmiyor." });
+      toast.error("Yeni şifreler eşleşmiyor");
       return;
     }
     setPasswordSaving(true);
-    setPasswordMsg(null);
     try {
       const res = await fetch("/api/profile/password", {
         method: "PUT",
@@ -98,12 +94,12 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setPasswordMsg({ type: "success", text: "Şifre başarıyla değiştirildi." });
+      toast.success("Şifre güncellendi");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-      setPasswordMsg({ type: "error", text: err instanceof Error ? err.message : "Hata oluştu" });
+      toast.error(err instanceof Error ? err.message : "Bir hata oluştu, tekrar deneyin");
     } finally {
       setPasswordSaving(false);
     }
@@ -173,19 +169,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {profileMsg && (
-                <div
-                  className={cn(
-                    "rounded-lg border px-3 py-2 text-sm",
-                    profileMsg.type === "success"
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                      : "border-red-200 bg-red-50 text-red-600"
-                  )}
-                >
-                  {profileMsg.text}
-                </div>
-              )}
-
               <Button type="submit" disabled={profileSaving}>
                 {profileSaving ? "Kaydediliyor…" : "Kaydet"}
               </Button>
@@ -229,19 +212,6 @@ export default function ProfilePage() {
                   autoComplete="new-password"
                 />
               </div>
-
-              {passwordMsg && (
-                <div
-                  className={cn(
-                    "rounded-lg border px-3 py-2 text-sm",
-                    passwordMsg.type === "success"
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                      : "border-red-200 bg-red-50 text-red-600"
-                  )}
-                >
-                  {passwordMsg.text}
-                </div>
-              )}
 
               <Button type="submit" disabled={passwordSaving} variant="outline">
                 {passwordSaving ? "Değiştiriliyor…" : "Şifreyi Değiştir"}

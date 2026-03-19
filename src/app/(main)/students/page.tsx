@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,8 +91,9 @@ export default function StudentsPage() {
       const res = await fetch(`/api/students/${studentId}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Silme başarısız");
       setStudents((prev) => prev.filter((s) => s.id !== studentId));
-    } catch (err) {
-      console.error("Öğrenci silinemedi:", err);
+      toast.success("Öğrenci silindi");
+    } catch {
+      toast.error("Bir hata oluştu, tekrar deneyin");
     } finally {
       setDeletingId(null);
       setConfirmDeleteId(null);
@@ -131,8 +133,10 @@ export default function StudentsPage() {
             : s
         )
       );
+      toast.success("Değişiklikler kaydedildi");
       setEditingStudent(null);
     } catch (err) {
+      toast.error("Bir hata oluştu, tekrar deneyin");
       setEditError(err instanceof Error ? err.message : "Hata oluştu");
     } finally {
       setEditSubmitting(false);
@@ -175,10 +179,12 @@ export default function StudentsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Hata oluştu");
+      toast.success("Öğrenci başarıyla eklendi");
       setShowForm(false);
       resetForm();
       fetchStudents();
     } catch (err) {
+      toast.error("Bir hata oluştu, tekrar deneyin");
       setFormError(err instanceof Error ? err.message : "Hata oluştu");
     } finally {
       setSubmitting(false);

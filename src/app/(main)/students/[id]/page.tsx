@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,9 +74,10 @@ export default function StudentDetailPage({
     try {
       const res = await fetch(`/api/students/${student.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Silme başarısız");
+      toast.success("Öğrenci silindi");
       router.push("/students");
-    } catch (err) {
-      console.error("Öğrenci silinemedi:", err);
+    } catch {
+      toast.error("Bir hata oluştu, tekrar deneyin");
       setDeletingStudent(false);
       setShowDeleteConfirm(false);
     }
@@ -121,8 +123,10 @@ export default function StudentDetailPage({
       setStudent((prev) =>
         prev ? { ...prev, name: editName, birthDate: editBirthDate || null, workArea: editWorkArea, diagnosis: editDiagnosis || null, notes: editNotes || null } : prev
       );
+      toast.success("Değişiklikler kaydedildi");
       setShowEdit(false);
     } catch (err) {
+      toast.error("Bir hata oluştu, tekrar deneyin");
       setEditError(err instanceof Error ? err.message : "Hata oluştu");
     } finally {
       setEditSubmitting(false);
@@ -155,8 +159,9 @@ export default function StudentDetailPage({
       setStudent((prev) =>
         prev ? { ...prev, cards: prev.cards.filter((c) => c.id !== cardId) } : prev
       );
-    } catch (err) {
-      console.error("Kart silinemedi:", err);
+      toast.success("Kart silindi");
+    } catch {
+      toast.error("Bir hata oluştu, tekrar deneyin");
     } finally {
       setDeletingCardId(null);
       setConfirmCardId(null);

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { Toaster } from "sonner";
 import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import "./globals.css";
 
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="tr">
       <body className={`${geist.variable} antialiased`}>
         <AuthSessionProvider>{children}</AuthSessionProvider>
+        <Toaster position="bottom-right" duration={3000} richColors />
       </body>
     </html>
   );

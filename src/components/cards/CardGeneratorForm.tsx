@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -84,6 +85,7 @@ export function CardGeneratorForm({ onCardGenerated, onLoading, studentId, stude
   async function onSubmit(values: FormValues) {
     setError(null);
     onLoading(true);
+    const loadingToast = toast.loading("Kart üretiliyor…");
     try {
       const res = await fetch("/api/cards/generate", {
         method: "POST",
@@ -92,8 +94,10 @@ export function CardGeneratorForm({ onCardGenerated, onLoading, studentId, stude
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Bilinmeyen hata");
+      toast.success("Öğrenme kartı oluşturuldu", { id: loadingToast });
       onCardGenerated(data.card);
     } catch (err) {
+      toast.error("Bir hata oluştu, tekrar deneyin", { id: loadingToast });
       setError(err instanceof Error ? err.message : "Kart üretilirken hata oluştu.");
     } finally {
       onLoading(false);
