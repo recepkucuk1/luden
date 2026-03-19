@@ -461,22 +461,19 @@ export default function StudentsPage() {
               className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
             >
               <Link href={`/students/${student.id}`} className="block p-5">
-                <div className="flex items-start justify-between mb-3">
+                <div className="mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 font-bold text-sm">
                     {student.name.charAt(0).toUpperCase()}
                   </div>
-                  <Badge className={cn(WORK_AREA_COLOR[student.workArea] ?? "bg-zinc-100 text-zinc-600", "mr-7")}>
+                </div>
+                <h3 className="font-semibold text-zinc-900 mb-1">{student.name}</h3>
+                <div className="flex flex-wrap items-center gap-1.5 text-xs text-zinc-400">
+                  <Badge className={WORK_AREA_COLOR[student.workArea] ?? "bg-zinc-100 text-zinc-600"}>
                     {WORK_AREA_LABEL[student.workArea] ?? student.workArea}
                   </Badge>
-                </div>
-                <h3 className="font-semibold text-zinc-900 mb-0.5">{student.name}</h3>
-                <div className="flex items-center gap-2 text-xs text-zinc-400">
                   {student.birthDate && <span>{calcAge(student.birthDate)}</span>}
                   {student.diagnosis && (
-                    <>
-                      {student.birthDate && <span>·</span>}
-                      <span className="truncate">{student.diagnosis}</span>
-                    </>
+                    <span className="truncate">{student.diagnosis}</span>
                   )}
                 </div>
                 <div className="mt-3 pt-3 border-t border-zinc-100 flex items-center justify-between">
