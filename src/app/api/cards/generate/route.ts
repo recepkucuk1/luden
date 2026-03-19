@@ -6,14 +6,14 @@ import { prisma } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
-    // Auth kontrolü Claude API çağrısından önce yapılıyor
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
 
-    const body: CardGenerationParams & { studentId?: string } = await request.json();
-    const { category, difficulty, ageGroup, studentId } = body;
+    const body: CardGenerationParams & { studentId?: string; curriculumGoalId?: string } =
+      await request.json();
+    const { category, difficulty, ageGroup, studentId, curriculumGoalId } = body;
 
     if (!category || !difficulty || !ageGroup) {
       return NextResponse.json(
@@ -22,7 +22,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt = buildCardPrompt(body);
+    // Müfredat hedefi varsa DB'den al ve prompt metnini oluştur
+    let curriculumGoalText: string | undefined;
+    if (curriculumGoalId) {
+      const goal = await prisma.curriculumGoal.findFirst({
+        where: { id: curriculumGoalId },
+        include: { curriculum: { select: { code: true, title: true } } },
+      });
+      if (goal) {
+        curriculumGoalText = `${goal.curriculum.code}.${goal.code} - ${goal.title} (${goal.curriculum.title})`;
+      }
+    }
+
+    const prompt = buildCardPrompt({ ...body, curriculumGoalText });
 
     const message = await anthropic.messages.create({
       model: MODEL,
@@ -40,8 +52,9 @@ export async function POST(request: NextRequest) {
       throw new Error("Yanıt çok uzun, token limiti aşıldı. Lütfen tekrar deneyin.");
     }
 
-    const jsonMatch = rawContent.text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/)
-      ?? rawContent.text.match(/(\{[\s\S]*\})/);
+    const jsonMatch =
+      rawContent.text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/) ??
+      rawContent.text.match(/(\{[\s\S]*\})/);
 
     if (!jsonMatch) {
       console.error("Claude yanıtı (JSON bulunamadı):\n", rawContent.text);
@@ -67,6 +80,7 @@ export async function POST(request: NextRequest) {
         ageGroup,
         therapistId: session.user.id,
         studentId: studentId ?? null,
+        curriculumGoalId: curriculumGoalId ?? null,
       },
     });
 

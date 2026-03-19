@@ -15,8 +15,9 @@ model Therapist {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  students Student[]
-  cards    Card[]
+  students  Student[]
+  cards     Card[]
+  progress  StudentProgress[]
 }
 
 model Student {
@@ -33,6 +34,7 @@ model Student {
   therapist   Therapist @relation(fields: [therapistId], references: [id])
   cards       Card[]
   assignments CardAssignment[]
+  progress    StudentProgress[]
 }
 
 model Card {
@@ -52,6 +54,9 @@ model Card {
   studentId String?
   student   Student? @relation(fields: [studentId], references: [id])
 
+  curriculumGoalId String?
+  curriculumGoal   CurriculumGoal? @relation(fields: [curriculumGoalId], references: [id])
+
   assignments CardAssignment[]
 }
 
@@ -65,4 +70,44 @@ model CardAssignment {
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([cardId, studentId])
+}
+
+model Curriculum {
+  id    String @id @default(cuid())
+  code  String // "1.1", "1.2"
+  area  String // "speech" | "language" | "hearing"
+  title String // "Kekemelik"
+
+  goals CurriculumGoal[]
+}
+
+model CurriculumGoal {
+  id         String  @id @default(cuid())
+  code       String  // "1.0", "1.1", "2.0"
+  title      String  // "Konuşma sırasında nefes kontrolünü sağlar"
+  isMainGoal Boolean // true = ana hedef (1.0), false = alt hedef (1.1)
+
+  curriculumId String
+  curriculum   Curriculum @relation(fields: [curriculumId], references: [id])
+
+  cards    Card[]
+  progress StudentProgress[]
+}
+
+model StudentProgress {
+  id        String   @id @default(cuid())
+  status    String   // "not_started" | "in_progress" | "completed"
+  notes     String?
+  updatedAt DateTime @updatedAt
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  goalId String
+  goal   CurriculumGoal @relation(fields: [goalId], references: [id])
+
+  therapistId String
+  therapist   Therapist @relation(fields: [therapistId], references: [id])
+
+  @@unique([studentId, goalId])
 }

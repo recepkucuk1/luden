@@ -19,7 +19,6 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
-
 type AgeGroup = "3-6" | "7-12" | "13-18" | "adult";
 
 function calcAgeGroup(birthDate: string): AgeGroup {
@@ -32,6 +31,23 @@ function calcAgeGroup(birthDate: string): AgeGroup {
   return "adult";
 }
 
+// ─── Curriculum types ─────────────────────────────────────────────────────────
+interface CurriculumGoal {
+  id: string;
+  code: string;
+  title: string;
+  isMainGoal: boolean;
+}
+
+interface Curriculum {
+  id: string;
+  code: string;
+  area: string;
+  title: string;
+  goals: CurriculumGoal[];
+}
+
+// ─── Form props ───────────────────────────────────────────────────────────────
 interface CardGeneratorFormProps {
   onCardGenerated: (card: GeneratedCard) => void;
   onLoading: (loading: boolean) => void;
@@ -59,12 +75,68 @@ const DIFFICULTIES = [
   { value: "hard", label: "Zor", color: "text-red-600 border-red-200 bg-red-50 data-[selected=true]:bg-red-100 data-[selected=true]:border-red-500" },
 ] as const;
 
-export function CardGeneratorForm({ onCardGenerated, onLoading, studentId, studentName, studentBirthDate }: CardGeneratorFormProps) {
+const SELECT_CLS =
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed";
+
+export function CardGeneratorForm({
+  onCardGenerated,
+  onLoading,
+  studentId,
+  studentName,
+  studentBirthDate,
+}: CardGeneratorFormProps) {
   const [error, setError] = useState<string | null>(null);
 
+  // ─── Curriculum state ──────────────────────────────────────────────────────
+  const [curricula, setCurricula] = useState<Curriculum[]>([]);
+  const [selectedCurriculumId, setSelectedCurriculumId] = useState("");
+  const [selectedMainGoalId, setSelectedMainGoalId] = useState("");
+  const [selectedSubGoalId, setSelectedSubGoalId] = useState("");
+
+  useEffect(() => {
+    fetch("/api/curriculum")
+      .then((r) => r.json())
+      .then((d) => setCurricula(d.curricula ?? []))
+      .catch(() => {/* sessiz */});
+  }, []);
+
+  const selectedCurriculum = curricula.find((c) => c.id === selectedCurriculumId);
+  const mainGoals = selectedCurriculum?.goals.filter((g) => g.isMainGoal) ?? [];
+  const subGoals = selectedCurriculum?.goals.filter(
+    (g) => !g.isMainGoal && selectedMainGoalId
+      ? g.code.startsWith(selectedMainGoalId.replace(/\.0$/, "."))
+      : false
+  ) ?? [];
+
+  // Seçili ana hedef objesi (alt hedef filtrelemek için kodu lazım)
+  const selectedMainGoal = mainGoals.find((g) => g.id === selectedMainGoalId);
+
+  // Gerçek sub-goals: aynı prefix (2.0 → 2.x)
+  const filteredSubGoals = selectedMainGoal
+    ? (selectedCurriculum?.goals.filter(
+        (g) => !g.isMainGoal && g.code.startsWith(selectedMainGoal.code.replace(".0", "."))
+      ) ?? [])
+    : [];
+
+  // curriculumGoalId: alt hedef seçildiyse alt hedef, yoksa ana hedef, yoksa undefined
+  const curriculumGoalId = selectedSubGoalId || selectedMainGoalId || undefined;
+
+  function resetCurriculum() {
+    setSelectedCurriculumId("");
+    setSelectedMainGoalId("");
+    setSelectedSubGoalId("");
+  }
+
+  // ─── React Hook Form ───────────────────────────────────────────────────────
   const autoAgeGroup = studentBirthDate ? calcAgeGroup(studentBirthDate) : undefined;
 
-  const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormValues>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       category: "speech",
@@ -73,7 +145,6 @@ export function CardGeneratorForm({ onCardGenerated, onLoading, studentId, stude
     },
   });
 
-  // Öğrenci değişince yaş grubunu güncelle
   useEffect(() => {
     if (autoAgeGroup) setValue("ageGroup", autoAgeGroup);
   }, [autoAgeGroup, setValue]);
@@ -90,7 +161,7 @@ export function CardGeneratorForm({ onCardGenerated, onLoading, studentId, stude
       const res = await fetch("/api/cards/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, studentId }),
+        body: JSON.stringify({ ...values, studentId, curriculumGoalId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Bilinmeyen hata");
@@ -193,6 +264,90 @@ export function CardGeneratorForm({ onCardGenerated, onLoading, studentId, stude
           ))}
         </div>
         {errors.difficulty && <p className="text-xs text-red-500">{errors.difficulty.message}</p>}
+      </div>
+
+      {/* Müfredat Hedefi */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-semibold text-zinc-700">
+            Müfredat Hedefi{" "}
+            <span className="text-zinc-400 font-normal">(isteğe bağlı)</span>
+          </Label>
+          {selectedCurriculumId && (
+            <button
+              type="button"
+              onClick={resetCurriculum}
+              className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              Temizle
+            </button>
+          )}
+        </div>
+
+        {/* Alan seçimi */}
+        <select
+          value={selectedCurriculumId}
+          onChange={(e) => {
+            setSelectedCurriculumId(e.target.value);
+            setSelectedMainGoalId("");
+            setSelectedSubGoalId("");
+          }}
+          className={SELECT_CLS}
+        >
+          <option value="">— Alan seç —</option>
+          {curricula.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.code} {c.title}
+            </option>
+          ))}
+        </select>
+
+        {/* Ana hedef */}
+        {selectedCurriculumId && (
+          <select
+            value={selectedMainGoalId}
+            onChange={(e) => {
+              setSelectedMainGoalId(e.target.value);
+              setSelectedSubGoalId("");
+            }}
+            className={SELECT_CLS}
+          >
+            <option value="">— Ana hedef seç —</option>
+            {mainGoals.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.code} {g.title}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {/* Alt hedef */}
+        {selectedMainGoalId && filteredSubGoals.length > 0 && (
+          <select
+            value={selectedSubGoalId}
+            onChange={(e) => setSelectedSubGoalId(e.target.value)}
+            className={SELECT_CLS}
+          >
+            <option value="">— Alt hedef seç —</option>
+            {filteredSubGoals.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.code} {g.title}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {/* Seçim özeti */}
+        {curriculumGoalId && (
+          <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
+            <span className="text-blue-500 text-xs mt-0.5">🎯</span>
+            <p className="text-xs text-blue-700 leading-relaxed">
+              {selectedSubGoalId
+                ? filteredSubGoals.find((g) => g.id === selectedSubGoalId)?.title
+                : mainGoals.find((g) => g.id === selectedMainGoalId)?.title}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Hedef Beceri */}

@@ -7,6 +7,7 @@ export interface CardGenerationParams {
   difficulty: Difficulty;
   ageGroup: AgeGroup;
   focusArea?: string;
+  curriculumGoalText?: string; // "[kod] - [başlık]" formatında, generate route tarafından doldurulur
 }
 
 export interface GeneratedCard {
@@ -44,7 +45,7 @@ const CATEGORY_CONTEXT: Record<CardCategory, string> = {
 };
 
 export function buildCardPrompt(params: CardGenerationParams): string {
-  const { category, difficulty, ageGroup, focusArea } = params;
+  const { category, difficulty, ageGroup, focusArea, curriculumGoalText } = params;
   const categoryLabel = category === "speech" ? "konuşma" : category === "language" ? "dil" : "işitme";
 
   return `Sen deneyimli bir ${categoryLabel} uzmanısın. Uzman için profesyonel bir öğrenme kartı oluştur.
@@ -52,6 +53,7 @@ export function buildCardPrompt(params: CardGenerationParams): string {
 **EĞİTİM ALANI:** ${CATEGORY_CONTEXT[category]}
 **ZORLUK SEVİYESİ:** ${DIFFICULTY_MAP[difficulty]}
 **YAŞ GRUBU:** ${AGE_MAP[ageGroup]}
+${curriculumGoalText ? `**MÜFREDAT HEDEFİ:** ${curriculumGoalText}\nBu kart şu müfredat hedefi için üretiliyor: ${curriculumGoalText}\nKart içeriği bu hedefe doğrudan hizmet etmeli.` : ""}
 ${focusArea ? `**HEDEF BECERİ / ODAK ALAN:** ${focusArea}` : ""}
 
 **MOTİVASYON YAKLAŞIMI — KESİNLİKLE UYULMASI GEREKEN KURAL:**

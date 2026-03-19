@@ -19,6 +19,15 @@ export async function GET(
       include: {
         student: { select: { id: true, name: true } },
         _count: { select: { assignments: true } },
+        curriculumGoal: {
+          select: {
+            id: true,
+            code: true,
+            title: true,
+            isMainGoal: true,
+            curriculum: { select: { code: true, title: true } },
+          },
+        },
       },
     });
 

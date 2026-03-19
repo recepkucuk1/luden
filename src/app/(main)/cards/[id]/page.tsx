@@ -17,6 +17,13 @@ interface CardRecord {
   createdAt: string;
   student: { id: string; name: string } | null;
   _count: { assignments: number };
+  curriculumGoal: {
+    id: string;
+    code: string;
+    title: string;
+    isMainGoal: boolean;
+    curriculum: { code: string; title: string };
+  } | null;
 }
 
 export default function CardDetailPage({
@@ -109,6 +116,21 @@ export default function CardDetailPage({
       </div>
 
       <main className="mx-auto max-w-3xl px-6 py-8">
+        {/* Müfredat Hedefi */}
+        {card.curriculumGoal && (
+          <div className="mb-4 flex items-start gap-2 rounded-xl border border-purple-200 bg-purple-50 px-4 py-3">
+            <span className="text-purple-500 text-sm mt-0.5">🎯</span>
+            <div>
+              <p className="text-xs font-semibold text-purple-700 mb-0.5">
+                {card.curriculumGoal.curriculum.code} {card.curriculumGoal.curriculum.title}
+              </p>
+              <p className="text-xs text-purple-600">
+                {card.curriculumGoal.code} — {card.curriculumGoal.title}
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <CardPreview card={generatedCard} />
         </div>
