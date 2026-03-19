@@ -39,7 +39,7 @@ export function AppHeader() {
       <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
         {/* Sol: Logo */}
         <Link href="/dashboard" className="shrink-0">
-          <Image src="/logo.png" alt="TerapiMat" width={120} height={36} className="h-9 w-auto" priority />
+          <Image src="/logo.png" alt="Luden" width={600} height={221} className="h-8 w-auto" priority />
         </Link>
 
         {/* Orta: Nav */}
