@@ -30,6 +30,7 @@ interface Student {
   createdAt: string;
   latestCardAt: string | null;
   _count: { cards: number };
+  progressSummary: { completed: number; total: number };
 }
 
 const FILTER_OPTIONS: { value: FilterArea; label: string }[] = [
@@ -482,18 +483,38 @@ export default function StudentsPage() {
                     <span className="truncate">{student.diagnosis}</span>
                   )}
                 </div>
-                <div className="mt-3 pt-3 border-t border-zinc-100 flex items-center justify-between">
-                  <span className="text-xs text-zinc-400">
-                    {student._count.cards} kart
-                    {student.latestCardAt && (
-                      <span className="ml-1">
-                        · {new Date(student.latestCardAt).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })}
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-xs text-blue-600 font-medium group-hover:underline">
-                    Detay →
-                  </span>
+                <div className="mt-3 pt-3 border-t border-zinc-100 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-zinc-400">
+                      {student._count.cards} kart
+                      {student.latestCardAt && (
+                        <span className="ml-1">
+                          · {new Date(student.latestCardAt).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })}
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-xs text-blue-600 font-medium group-hover:underline">
+                      Detay →
+                    </span>
+                  </div>
+                  {student.progressSummary.total > 0 && (
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] text-zinc-400">
+                          {student.progressSummary.completed}/{student.progressSummary.total} hedef tamamlandı
+                        </span>
+                        <span className="text-[10px] font-semibold text-zinc-500">
+                          {Math.round((student.progressSummary.completed / student.progressSummary.total) * 100)}%
+                        </span>
+                      </div>
+                      <div className="h-1 w-full rounded-full bg-zinc-100 overflow-hidden">
+                        <div
+                          className="h-full bg-emerald-500 transition-all duration-500 rounded-full"
+                          style={{ width: `${(student.progressSummary.completed / student.progressSummary.total) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Link>
               <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

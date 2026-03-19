@@ -26,6 +26,7 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       include: {
         cards: { select: { id: true, createdAt: true } },
+        progress: { select: { status: true } },
       },
     });
 
@@ -38,6 +39,10 @@ export async function GET() {
           ...s,
           _count: { cards: s.cards.length },
           latestCardAt: sorted[0]?.createdAt ?? null,
+          progressSummary: {
+            completed: s.progress.filter((p) => p.status === "completed").length,
+            total: s.progress.length,
+          },
         };
       }),
     });

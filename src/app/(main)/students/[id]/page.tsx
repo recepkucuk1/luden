@@ -18,6 +18,7 @@ import {
   DIFFICULTY_COLOR,
   calcAge,
 } from "@/lib/constants";
+import { ProgressTab } from "@/components/students/ProgressTab";
 
 const WORK_AREAS = [
   { value: "speech", label: "Konuşma", icon: "🗣️" },
@@ -75,6 +76,7 @@ export default function StudentDetailPage({
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [activeTab, setActiveTab] = useState<"cards" | "progress">("cards");
   const [confirmCardId, setConfirmCardId] = useState<string | null>(null);
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
 
@@ -341,6 +343,36 @@ export default function StudentDetailPage({
           </div>
         )}
 
+        {/* Sekme Bar */}
+        <div className="flex items-center gap-1 rounded-xl bg-zinc-100 p-1 w-fit">
+          {([
+            { key: "cards", label: "Kartlar", count: student.cards.length + student.assignments.length },
+            { key: "progress", label: "İlerleme", count: null },
+          ] as const).map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={cn(
+                "rounded-lg px-4 py-1.5 text-xs font-medium transition-all",
+                activeTab === tab.key
+                  ? "bg-white text-zinc-900 shadow-sm"
+                  : "text-zinc-500 hover:text-zinc-700"
+              )}
+            >
+              {tab.label}
+              {tab.count !== null && (
+                <span className="ml-1.5 text-zinc-400">{tab.count}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* İlerleme Sekmesi */}
+        {activeTab === "progress" && <ProgressTab studentId={student.id} />}
+
+        {/* Kartlar Sekmesi */}
+        {activeTab === "cards" && <>
+
         {/* Bu öğrenci için üretilen kartlar */}
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -483,6 +515,8 @@ export default function StudentDetailPage({
             </div>
           )}
         </div>
+
+        </>}
       </main>
     </>
   );
