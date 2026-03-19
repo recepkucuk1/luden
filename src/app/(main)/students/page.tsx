@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -79,6 +79,24 @@ export default function StudentsPage() {
   const [editNotes, setEditNotes] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+
+  // Silme
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  async function handleDelete(studentId: string) {
+    setDeletingId(studentId);
+    try {
+      const res = await fetch(`/api/students/${studentId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Silme başarısız");
+      setStudents((prev) => prev.filter((s) => s.id !== studentId));
+    } catch (err) {
+      console.error("Öğrenci silinemedi:", err);
+    } finally {
+      setDeletingId(null);
+      setConfirmDeleteId(null);
+    }
+  }
 
   function openEdit(student: Student) {
     setEditingStudent(student);
@@ -475,13 +493,47 @@ export default function StudentsPage() {
                   </span>
                 </div>
               </Link>
-              <button
-                onClick={() => openEdit(student)}
-                className="absolute top-3 right-3 rounded-lg p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-0 group-hover:opacity-100"
-                title="Düzenle"
-              >
-                <Pencil size={14} />
-              </button>
+              <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => openEdit(student)}
+                  className="rounded-lg p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                  title="Düzenle"
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  onClick={() => setConfirmDeleteId(student.id)}
+                  className="rounded-lg p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  title="Sil"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+
+              {/* Silme onayı */}
+              {confirmDeleteId === student.id && (
+                <div className="absolute inset-0 rounded-2xl bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center gap-3 p-4 z-10">
+                  <p className="text-sm font-medium text-zinc-700 text-center">
+                    Bu öğrenciyi silmek istediğinize emin misiniz?
+                  </p>
+                  <p className="text-xs text-zinc-400 text-center">Tüm kartları da silinecek.</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs text-zinc-600 hover:bg-zinc-50 transition-colors"
+                    >
+                      İptal
+                    </button>
+                    <button
+                      onClick={() => handleDelete(student.id)}
+                      disabled={deletingId === student.id}
+                      className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-white hover:bg-red-700 disabled:opacity-60 transition-colors"
+                    >
+                      {deletingId === student.id ? "Siliniyor…" : "Evet, Sil"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

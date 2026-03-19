@@ -63,6 +63,24 @@ export default function StudentDetailPage({
   const [confirmCardId, setConfirmCardId] = useState<string | null>(null);
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
 
+  // Öğrenci silme
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingStudent, setDeletingStudent] = useState(false);
+
+  async function handleDeleteStudent() {
+    if (!student) return;
+    setDeletingStudent(true);
+    try {
+      const res = await fetch(`/api/students/${student.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Silme başarısız");
+      router.push("/students");
+    } catch (err) {
+      console.error("Öğrenci silinemedi:", err);
+      setDeletingStudent(false);
+      setShowDeleteConfirm(false);
+    }
+  }
+
   // Düzenleme
   const [showEdit, setShowEdit] = useState(false);
   const [editName, setEditName] = useState("");
@@ -201,6 +219,9 @@ export default function StudentDetailPage({
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              <Button size="sm" variant="outline" onClick={() => setShowDeleteConfirm(true)} className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700">
+                Sil
+              </Button>
               <Button size="sm" variant="outline" onClick={openEdit}>
                 Düzenle
               </Button>
@@ -219,6 +240,27 @@ export default function StudentDetailPage({
             </div>
           )}
         </div>
+
+        {/* Silme Onayı */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-6 text-center">
+              <p className="text-base font-semibold text-zinc-900 mb-1">Öğrenciyi sil</p>
+              <p className="text-sm text-zinc-500 mb-1">
+                <strong>{student.name}</strong> silinecek.
+              </p>
+              <p className="text-xs text-zinc-400 mb-5">Bu işlem geri alınamaz. Tüm kartlar da silinecek.</p>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDeleteConfirm(false)} disabled={deletingStudent}>
+                  İptal
+                </Button>
+                <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={handleDeleteStudent} disabled={deletingStudent}>
+                  {deletingStudent ? "Siliniyor…" : "Evet, Sil"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Düzenleme Modalı */}
         {showEdit && (
