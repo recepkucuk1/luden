@@ -95,7 +95,7 @@ export function CurriculumPicker({ curricula, selectedIds, onChange, defaultOpen
                   <span>{group.icon}</span>
                   <span>{group.label}</span>
                   {selectedCount > 0 && (
-                    <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[11px] font-semibold text-blue-600 leading-none">
+                    <span className="rounded-full bg-[#FE703A]/10 px-1.5 py-0.5 text-[11px] font-semibold text-[#FE703A] leading-none">
                       {selectedCount} seçili
                     </span>
                   )}
@@ -123,7 +123,7 @@ export function CurriculumPicker({ curricula, selectedIds, onChange, defaultOpen
                             type="checkbox"
                             checked={selectedIds.includes(c.id)}
                             onChange={() => toggleId(c.id)}
-                            className="h-4 w-4 rounded border-zinc-300 accent-blue-600"
+                            className="h-4 w-4 rounded border-zinc-300 accent-[#023435]"
                           />
                           <span className="text-sm text-zinc-700 group-hover:text-zinc-900">
                             {c.title}

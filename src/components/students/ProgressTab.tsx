@@ -37,8 +37,8 @@ const STATUS_OPTIONS = [
     value: "in_progress",
     label: "Devam Ediyor",
     icon: "🔵",
-    activeCls: "bg-blue-100 border-blue-500 text-blue-800",
-    inactiveCls: "border-blue-100 text-blue-200 hover:border-blue-300 hover:text-blue-400",
+    activeCls: "bg-[#FE703A]/10 border-[#FE703A] text-[#FE703A]",
+    inactiveCls: "border-[#FE703A]/20 text-[#FE703A]/30 hover:border-[#FE703A]/40 hover:text-[#FE703A]/50",
   },
   {
     value: "completed",
@@ -232,7 +232,7 @@ export function ProgressTab({
         {onEditClick && (
           <button
             onClick={onEditClick}
-            className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+            className="rounded-lg bg-[#FE703A] px-4 py-2 text-sm font-medium text-white hover:bg-[#FE703A]/90 transition-colors"
           >
             Öğrenciyi Düzenle → Modül Ekle
           </button>
@@ -296,7 +296,7 @@ export function ProgressTab({
             <span className="text-xs text-zinc-500">
               <span className="font-semibold text-emerald-600">{completedCount}</span>
               {" "}tamamlandı ·{" "}
-              <span className="font-semibold text-blue-600">{inProgressCount}</span>
+              <span className="font-semibold text-[#FE703A]">{inProgressCount}</span>
               {" "}devam ediyor ·{" "}
               <span className="text-zinc-400">
                 {totalCount - completedCount - inProgressCount} başlanmadı
@@ -313,7 +313,7 @@ export function ProgressTab({
                 style={{ width: `${(completedCount / totalCount) * 100}%` }}
               />
               <div
-                className="bg-blue-400 transition-all duration-500"
+                className="bg-[#FE703A] transition-all duration-500"
                 style={{ width: `${(inProgressCount / totalCount) * 100}%` }}
               />
             </div>
@@ -392,7 +392,7 @@ export function ProgressTab({
                                 className={cn(
                                   "rounded p-1 transition-colors",
                                   noteOpen || hasNote
-                                    ? "text-blue-500"
+                                    ? "text-[#023435]"
                                     : "text-zinc-200 hover:text-zinc-400"
                                 )}
                               >
@@ -412,7 +412,7 @@ export function ProgressTab({
                               onChange={(e) => setGoalNotes(sub.id, e.target.value)}
                               placeholder="Not ekle…"
                               rows={2}
-                              className="mt-2 w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-xs text-zinc-700 placeholder-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                              className="mt-2 w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-xs text-zinc-700 placeholder-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#023435]/50 resize-none"
                             />
                           )}
                         </div>

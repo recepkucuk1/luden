@@ -35,9 +35,9 @@ export const WORK_AREA_FILTER: Record<string, string[]> = {
 };
 
 export const WORK_AREA_COLOR: Record<string, string> = {
-  speech: "bg-blue-100 text-blue-700",
-  language: "bg-purple-100 text-purple-700",
-  hearing: "bg-teal-100 text-teal-700",
+  speech: "bg-[#107996]/10 text-[#107996]",
+  language: "bg-[#F4B2A6]/40 text-[#692137]",
+  hearing: "bg-[#F4AE10]/15 text-amber-900",
 };
 
 export const DIFFICULTY_LABEL: Record<string, string> = {

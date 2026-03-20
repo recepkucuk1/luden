@@ -102,7 +102,7 @@ export function AssignStudentsModal({ cardId, cardTitle, onClose, onSaved }: Pro
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="h-6 w-6 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+              <div className="h-6 w-6 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
             </div>
           ) : students.length === 0 ? (
             <p className="text-sm text-zinc-400 text-center py-12">Henüz öğrenci eklenmedi.</p>
@@ -110,12 +110,12 @@ export function AssignStudentsModal({ cardId, cardTitle, onClose, onSaved }: Pro
             <ul className="space-y-2">
               {students.map((s) => (
                 <li key={s.id}>
-                  <label className="flex items-center gap-3 cursor-pointer rounded-xl border border-zinc-200 px-4 py-3 hover:bg-zinc-50 transition-colors has-[:checked]:border-blue-300 has-[:checked]:bg-blue-50">
+                  <label className="flex items-center gap-3 cursor-pointer rounded-xl border border-zinc-200 px-4 py-3 hover:bg-zinc-50 transition-colors has-[:checked]:border-[#023435]/30 has-[:checked]:bg-[#023435]/5">
                     <input
                       type="checkbox"
                       checked={selected.has(s.id)}
                       onChange={() => toggle(s.id)}
-                      className="h-4 w-4 rounded border-zinc-300 text-blue-600 accent-blue-600"
+                      className="h-4 w-4 rounded border-zinc-300 accent-[#023435]"
                     />
                     <span className="flex-1 text-sm font-medium text-zinc-800">{s.name}</span>
                     <Badge className={WORK_AREA_COLOR[s.workArea] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>

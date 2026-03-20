@@ -78,7 +78,7 @@ const DIFFICULTIES = [
 ] as const;
 
 const SELECT_CLS =
-  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#023435]/30 disabled:opacity-50 disabled:cursor-not-allowed";
 
 export function CardGeneratorForm({
   onCardGenerated,
@@ -222,10 +222,10 @@ export function CardGeneratorForm({
 
       {/* Seçili Öğrenci */}
       {studentId && studentName && (
-        <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
-          <span className="text-blue-600 text-sm">👤</span>
-          <span className="text-sm text-blue-700 font-medium">{studentName}</span>
-          <span className="text-xs text-blue-500 ml-auto">için kart üretiliyor</span>
+        <div className="flex items-center gap-2 rounded-xl border border-[#023435]/20 bg-[#023435]/5 px-3 py-2">
+          <span className="text-[#023435] text-sm">👤</span>
+          <span className="text-sm text-[#023435] font-medium">{studentName}</span>
+          <span className="text-xs text-[#023435]/60 ml-auto">için kart üretiliyor</span>
         </div>
       )}
 
@@ -241,7 +241,7 @@ export function CardGeneratorForm({
               className={cn(
                 "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all",
                 watchedCategory === cat.value
-                  ? "border-blue-500 bg-blue-50"
+                  ? "border-[#023435] bg-[#023435]/5"
                   : "border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50"
               )}
             >
@@ -274,7 +274,7 @@ export function CardGeneratorForm({
                 className={cn(
                   "rounded-lg border-2 py-2 text-sm font-medium transition-all",
                   watchedAgeGroup === age.value
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
                     : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
                 )}
               >
@@ -377,14 +377,14 @@ export function CardGeneratorForm({
                   key={g.id}
                   className={cn(
                     "flex items-start gap-3 px-3 py-2.5 cursor-pointer transition-colors",
-                    checked ? "bg-blue-50" : "hover:bg-white"
+                    checked ? "bg-[#023435]/5" : "hover:bg-white"
                   )}
                 >
                   <input
                     type="checkbox"
                     checked={checked}
                     onChange={() => toggleSubGoal(g.id)}
-                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 accent-blue-600"
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 accent-[#023435]"
                   />
                   <span className="text-xs text-zinc-400 shrink-0 w-10 tabular-nums pt-px">
                     {g.code}
@@ -398,9 +398,9 @@ export function CardGeneratorForm({
 
         {/* Seçim özeti */}
         {(selectedSubGoalIds.length > 0 || selectedMainGoalId) && (
-          <div className="flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
-            <span className="text-blue-500 text-xs mt-0.5">🎯</span>
-            <p className="text-xs text-blue-700 leading-relaxed">
+          <div className="flex items-start gap-2 rounded-xl border border-[#023435]/20 bg-[#023435]/5 px-3 py-2">
+            <span className="text-[#023435] text-xs mt-0.5">🎯</span>
+            <p className="text-xs text-[#023435] leading-relaxed">
               {selectedSubGoalIds.length > 0
                 ? `${selectedSubGoalIds.length} alt hedef seçildi`
                 : mainGoals.find((g) => g.id === selectedMainGoalId)?.title}

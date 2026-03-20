@@ -252,7 +252,7 @@ export default function StudentDetailPage({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="h-8 w-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+        <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
       </div>
     );
   }
@@ -286,7 +286,7 @@ export default function StudentDetailPage({
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-blue-700 font-bold text-xl">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#023435]/10 text-[#023435] font-bold text-xl">
                 {student.name.charAt(0).toUpperCase()}
               </div>
               <div>
@@ -334,7 +334,7 @@ export default function StudentDetailPage({
                     {student.curriculumIds?.map(cid => {
                       const c = curricula.find(x => x.id === cid);
                       return c ? (
-                        <span key={cid} className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs text-blue-700">
+                        <span key={cid} className="rounded-full bg-[#FE703A]/10 border border-[#FE703A]/20 px-2.5 py-0.5 text-xs text-[#FE703A]">
                           {c.title}
                         </span>
                       ) : null;
@@ -395,7 +395,7 @@ export default function StudentDetailPage({
                         className={cn(
                           "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all text-xs font-medium",
                           editWorkArea === w.value
-                            ? "border-blue-500 bg-blue-50 text-blue-700"
+                            ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
                             : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
                         )}
                       >
@@ -435,7 +435,7 @@ export default function StudentDetailPage({
         )}
 
         {/* Sekme Bar */}
-        <div className="flex items-center gap-1 rounded-xl bg-zinc-100 p-1 w-fit">
+        <div className="flex gap-1 border-b border-zinc-200">
           {([
             { key: "cards", label: "Kartlar", count: student.cards.length + student.assignments.length },
             { key: "progress", label: "İlerleme", count: null },
@@ -445,9 +445,9 @@ export default function StudentDetailPage({
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                "rounded-lg px-4 py-1.5 text-xs font-medium transition-all",
+                "px-4 pb-3 text-xs font-medium transition-all",
                 activeTab === tab.key
-                  ? "bg-white text-zinc-900 shadow-sm"
+                  ? "font-semibold text-[#023435] border-b-2 border-[#FE703A]"
                   : "text-zinc-500 hover:text-zinc-700"
               )}
             >
@@ -482,7 +482,7 @@ export default function StudentDetailPage({
 
             {!student.aiProfile && !generatingProfile && !profileTimedOut && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="h-6 w-6 rounded-full border-2 border-blue-200 border-t-blue-500 animate-spin mx-auto mb-4" />
+                <div className="h-6 w-6 rounded-full border-2 border-[#FE703A]/20 border-t-[#FE703A] animate-spin mx-auto mb-4" />
                 <p className="text-sm font-medium text-zinc-500">Profil hazırlanıyor…</p>
                 <p className="text-xs text-zinc-400 mt-1">Bu birkaç saniye sürebilir.</p>
               </div>
@@ -504,7 +504,7 @@ export default function StudentDetailPage({
 
             {generatingProfile && !student.aiProfile && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="h-6 w-6 rounded-full border-2 border-blue-200 border-t-blue-500 animate-spin mx-auto mb-4" />
+                <div className="h-6 w-6 rounded-full border-2 border-[#FE703A]/20 border-t-[#FE703A] animate-spin mx-auto mb-4" />
                 <p className="text-sm font-medium text-zinc-500">Profil oluşturuluyor…</p>
               </div>
             )}
@@ -580,7 +580,7 @@ export default function StudentDetailPage({
               {student.cards.map((card) => (
                 <div
                   key={card.id}
-                  className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all overflow-hidden"
+                  className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden"
                 >
                   <Link href={`/cards/${card.id}`} className="block p-4">
                     <div className="flex flex-wrap gap-1.5 mb-2 pr-8">
@@ -604,7 +604,7 @@ export default function StudentDetailPage({
                       <p className="text-xs text-zinc-400">
                         {new Date(card.createdAt).toLocaleDateString("tr-TR")}
                       </p>
-                      <span className="text-xs text-blue-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-xs text-[#FE703A] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                         Detay →
                       </span>
                     </div>
@@ -668,7 +668,7 @@ export default function StudentDetailPage({
                 <Link
                   key={assignment.id}
                   href={`/cards/${assignment.card.id}`}
-                  className="group rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all overflow-hidden block p-4"
+                  className="group rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden block p-4"
                 >
                   <div className="flex flex-wrap gap-1.5 mb-2 pr-8">
                     <Badge className={WORK_AREA_COLOR[assignment.card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>

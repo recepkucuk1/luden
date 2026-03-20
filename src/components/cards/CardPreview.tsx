@@ -129,7 +129,7 @@ export function CardPreview({ card }: CardPreviewProps) {
             <ol className="space-y-2">
               {card.instructions.map((step, i) => (
                 <li key={i} className="flex gap-3 text-sm text-zinc-700">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FE703A]/10 text-xs font-bold text-[#FE703A]">
                     {i + 1}
                   </span>
                   <span className="leading-relaxed">{step.replace(/^Adım \d+:\s*/, "")}</span>
@@ -201,14 +201,14 @@ export function CardPreview({ card }: CardPreviewProps) {
 
       {/* Ev Egzersizi */}
       {card.homeExercise && (
-        <Card className="border-blue-100 bg-blue-50">
+        <Card className="border-[#023435]/15 bg-[#023435]/5">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-blue-700 uppercase tracking-wide">
+            <CardTitle className="text-sm font-semibold text-[#023435] uppercase tracking-wide">
               🏠 Ev Egzersizi
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <p className="text-sm text-blue-800 leading-relaxed">{card.homeExercise}</p>
+            <p className="text-sm text-[#023435] leading-relaxed">{card.homeExercise}</p>
           </CardContent>
         </Card>
       )}

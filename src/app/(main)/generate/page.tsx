@@ -79,7 +79,7 @@ function HomeContent() {
           {loading ? (
             <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-sm">
               <div className="text-center space-y-3">
-                <div className="mx-auto h-10 w-10 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+                <div className="mx-auto h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
                 <p className="text-sm text-zinc-500">Claude öğrenme kartı hazırlıyor…</p>
               </div>
             </div>
@@ -101,7 +101,7 @@ function HomeContent() {
                   {generatedCardId && (
                     <button
                       onClick={() => setShowAssign(true)}
-                      className="flex-1 min-w-[140px] rounded-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+                      className="flex-1 min-w-[140px] rounded-lg bg-[#FE703A] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#FE703A]/90 transition-colors"
                     >
                       Öğrenciye Ata
                     </button>

@@ -61,7 +61,7 @@ const SORT_OPTIONS: { value: SortBy; label: string }[] = [
 ];
 
 const SELECT_CLS =
-  "rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer";
+  "rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#023435]/30 cursor-pointer";
 
 function PillGroup({
   options,
@@ -161,7 +161,7 @@ export default function CardsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="h-8 w-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+        <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
       </div>
     );
   }
@@ -194,7 +194,7 @@ export default function CardsPage() {
                   options={CATEGORY_OPTIONS}
                   value={filterCategory}
                   onChange={setFilterCategory}
-                  activeClass="border-blue-400 bg-blue-50 text-blue-700"
+                  activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]"
                 />
               </div>
 
@@ -255,7 +255,7 @@ export default function CardsPage() {
                     onChange={(e) => setSortBy(e.target.value as SortBy)}
                     className={cn(
                       SELECT_CLS,
-                      sortBy !== "newest" && "border-blue-400 bg-blue-50 text-blue-700"
+                      sortBy !== "newest" && "border-[#023435] bg-[#023435]/5 text-[#023435]"
                     )}
                   >
                     {SORT_OPTIONS.map((o) => (
@@ -277,7 +277,7 @@ export default function CardsPage() {
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white py-16 text-center">
                 <p className="text-sm text-zinc-500 mb-2">Bu filtrelere uyan kart bulunamadı.</p>
-                <button onClick={clearFilters} className="text-xs text-blue-600 hover:underline">
+                <button onClick={clearFilters} className="text-xs text-[#FE703A] hover:underline">
                   Filtreleri temizle
                 </button>
               </div>
@@ -286,7 +286,7 @@ export default function CardsPage() {
                 {filtered.map((card) => (
                   <div
                     key={card.id}
-                    className="group rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all overflow-hidden flex flex-col"
+                    className="group rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden flex flex-col"
                   >
                     <Link href={`/cards/${card.id}`} className="block p-4 flex-1">
                       <div className="flex flex-wrap gap-1.5 mb-2">

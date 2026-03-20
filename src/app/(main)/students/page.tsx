@@ -274,9 +274,9 @@ export default function StudentsPage() {
               onChange={(e) => setSortBy(e.target.value as SortBy)}
               className={cn(
                 "rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer",
-                "bg-white text-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                "bg-white text-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#023435]/30",
                 sortBy !== "name"
-                  ? "border-blue-400 text-blue-700 bg-blue-50"
+                  ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
                   : "border-zinc-200"
               )}
             >
@@ -332,7 +332,7 @@ export default function StudentsPage() {
                       className={cn(
                         "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all text-xs font-medium",
                         workArea === w.value
-                          ? "border-blue-500 bg-blue-50 text-blue-700"
+                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
                           : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
                       )}
                     >
@@ -416,7 +416,7 @@ export default function StudentsPage() {
                       className={cn(
                         "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all text-xs font-medium",
                         editWorkArea === w.value
-                          ? "border-blue-500 bg-blue-50 text-blue-700"
+                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
                           : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
                       )}
                     >
@@ -458,7 +458,7 @@ export default function StudentsPage() {
       {/* Liste */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <div className="h-8 w-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+          <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
         </div>
       ) : students.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-20 text-center">
@@ -469,7 +469,7 @@ export default function StudentsPage() {
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white py-16 text-center">
           <p className="text-sm text-zinc-500">Bu kategoride öğrenci bulunamadı.</p>
-          <button onClick={() => setFilterArea("all")} className="mt-2 text-xs text-blue-600 hover:underline">
+          <button onClick={() => setFilterArea("all")} className="mt-2 text-xs text-[#FE703A] hover:underline">
             Filtreyi temizle
           </button>
         </div>
@@ -478,11 +478,11 @@ export default function StudentsPage() {
           {filtered.map((student) => (
             <div
               key={student.id}
-              className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
+              className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all"
             >
               <Link href={`/students/${student.id}`} className="block p-5">
                 <div className="mb-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 font-bold text-sm">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#023435]/10 text-[#023435] font-bold text-sm">
                     {student.name.charAt(0).toUpperCase()}
                   </div>
                 </div>
@@ -506,7 +506,7 @@ export default function StudentsPage() {
                         </span>
                       )}
                     </span>
-                    <span className="text-xs text-blue-600 font-medium group-hover:underline">
+                    <span className="text-xs text-[#FE703A] font-medium group-hover:underline">
                       Detay →
                     </span>
                   </div>
@@ -533,7 +533,7 @@ export default function StudentsPage() {
               <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => openEdit(student)}
-                  className="rounded-lg p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                  className="rounded-lg p-1.5 text-zinc-400 hover:text-[#023435] hover:bg-[#023435]/5 transition-colors"
                   title="Düzenle"
                 >
                   <Pencil size={14} />

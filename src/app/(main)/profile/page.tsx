@@ -111,7 +111,7 @@ export default function ProfilePage() {
 
       {profileLoading ? (
         <div className="flex justify-center py-20">
-          <div className="h-8 w-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+          <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
         </div>
       ) : (
         <>
@@ -148,7 +148,7 @@ export default function ProfilePage() {
                           value={opt.value}
                           checked={selectedSpecialty === opt.value}
                           onChange={() => setSelectedSpecialty(opt.value)}
-                          className="h-4 w-4 border-zinc-300 accent-blue-600"
+                          className="h-4 w-4 border-zinc-300 accent-[#023435]"
                         />
                         <span className="text-sm text-zinc-700 group-hover:text-zinc-900 transition-colors">
                           {opt.label}

@@ -30,12 +30,12 @@ const FAQ_ITEMS = [
 function FaqAccordion() {
   const [open, setOpen] = useState<number | null>(null);
   return (
-    <div className="divide-y divide-zinc-200 rounded-2xl border border-zinc-200 bg-white overflow-hidden">
+    <div className="divide-y divide-[#F4B2A6]/30 rounded-2xl border border-[#F4B2A6]/30 bg-white overflow-hidden">
       {FAQ_ITEMS.map((item, i) => (
         <div key={i}>
           <button
             onClick={() => setOpen(open === i ? null : i)}
-            className="flex w-full items-center justify-between px-6 py-5 text-left text-sm font-medium text-zinc-900 hover:bg-zinc-50 transition-colors"
+            className="flex w-full items-center justify-between px-6 py-5 text-left text-sm font-medium text-zinc-900 hover:bg-[#F4B2A6]/10 transition-colors"
           >
             <span>{item.q}</span>
             <svg
@@ -153,6 +153,7 @@ const PLANS = [
 export default function LandingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
@@ -160,10 +161,16 @@ export default function LandingPage() {
     }
   }, [status, session, router]);
 
+  useEffect(() => {
+    function onScroll() { setScrolled(window.scrollY > 40); }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   if (status === "loading" || (status === "authenticated")) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+        <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
       </div>
     );
   }
@@ -171,7 +178,10 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white text-zinc-900">
       {/* ── Header ── */}
-      <header className="sticky top-0 z-40 border-b border-zinc-100 bg-white/90 backdrop-blur-sm px-6 py-3">
+      <header className={cn(
+        "sticky top-0 z-40 px-6 py-3 transition-colors duration-300",
+        scrolled ? "bg-[#023435]" : "bg-[#023435]"
+      )}>
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
           <Link href="/" className="shrink-0">
             <Image
@@ -179,20 +189,20 @@ export default function LandingPage() {
               alt="Luden Vox"
               width={600}
               height={221}
-              className="h-9 w-auto"
+              className="h-9 w-auto brightness-0 invert"
               priority
             />
           </Link>
           <div className="flex items-center gap-2">
             <Link
               href="/login"
-              className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 transition-colors"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-colors"
             >
               Giriş Yap
             </Link>
             <Link
               href="/register"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              className="rounded-lg bg-[#FE703A] px-4 py-2 text-sm font-medium text-white hover:bg-[#FE703A]/90 transition-colors"
             >
               Ücretsiz Başla
             </Link>
@@ -201,32 +211,32 @@ export default function LandingPage() {
       </header>
 
       {/* ── Hero ── */}
-      <section className="px-6 pt-24 pb-20 text-center">
+      <section className="px-6 pt-24 pb-20 text-center bg-[#023435]">
         <div className="mx-auto max-w-3xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-1.5 text-xs font-medium text-blue-700 mb-8">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#FE703A]/30 bg-[#FE703A]/20 px-4 py-1.5 text-xs font-medium text-[#FE703A] mb-8">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#FE703A] animate-pulse" />
             AI Destekli · Dil ve Konuşma Terapisi
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900 leading-tight tracking-tight mb-6">
+          <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight tracking-tight mb-6">
             Dil, Konuşma ve İşitme{" "}
-            <span className="text-blue-600">Uzmanları</span> için
+            <span className="text-[#FE703A]">Uzmanları</span> için
             <br />
             AI Destekli Öğrenme Kartları
           </h1>
-          <p className="text-lg text-zinc-500 leading-relaxed mb-10 max-w-xl mx-auto">
+          <p className="text-lg text-white/70 leading-relaxed mb-10 max-w-xl mx-auto">
             Saniyeler içinde kişiselleştirilmiş öğrenme materyalleri üretin,
             öğrencilerinizi takip edin.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/register"
-              className="w-full sm:w-auto rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200"
+              className="w-full sm:w-auto rounded-xl bg-[#FE703A] px-8 py-3 text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors shadow-sm"
             >
               Ücretsiz Başla
             </Link>
             <a
               href="#features"
-              className="w-full sm:w-auto rounded-xl border border-zinc-200 px-8 py-3 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors"
+              className="w-full sm:w-auto rounded-xl border border-white/30 px-8 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
             >
               Nasıl Çalışır?
             </a>
@@ -235,7 +245,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features ── */}
-      <section id="features" className="px-6 py-20 bg-zinc-50">
+      <section id="features" className="px-6 py-20 bg-white">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold text-zinc-900 mb-3">Her şey tek platformda</h2>
@@ -246,11 +256,11 @@ export default function LandingPage() {
               <div
                 key={f.title}
                 className={cn(
-                  "rounded-2xl border bg-white p-6",
-                  f.soon ? "opacity-60" : "border-zinc-200"
+                  "rounded-2xl border border-zinc-200 bg-white p-6",
+                  f.soon && "opacity-60"
                 )}
               >
-                <div className="text-3xl mb-4">{f.icon}</div>
+                <div className="rounded-2xl bg-[#FE703A]/10 p-3 text-2xl w-fit mb-4">{f.icon}</div>
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-sm font-semibold text-zinc-900">{f.title}</h3>
                   {f.soon && (
@@ -267,7 +277,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Pricing ── */}
-      <section id="pricing" className="px-6 py-20">
+      <section id="pricing" className="px-6 py-20 bg-zinc-50">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold text-zinc-900 mb-3">Şeffaf fiyatlandırma</h2>
@@ -280,14 +290,14 @@ export default function LandingPage() {
                 className={cn(
                   "rounded-2xl border p-6 flex flex-col",
                   plan.highlight
-                    ? "border-blue-200 bg-blue-50 ring-1 ring-blue-200"
+                    ? "border-[#FE703A] bg-[#FE703A]/5 ring-1 ring-[#FE703A]/20"
                     : "border-zinc-200 bg-white"
                 )}
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-semibold text-zinc-900">{plan.name}</span>
                   {plan.badge && (
-                    <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-semibold text-blue-700">
+                    <span className="rounded-full bg-[#FE703A] px-2.5 py-0.5 text-[10px] font-semibold text-white">
                       {plan.badge}
                     </span>
                   )}
@@ -300,7 +310,7 @@ export default function LandingPage() {
                 <ul className="space-y-2 mb-6 flex-1">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-zinc-600">
-                      <svg className="h-4 w-4 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <svg className="h-4 w-4 text-[#FE703A] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                       {f}
@@ -313,7 +323,7 @@ export default function LandingPage() {
                     className={cn(
                       "block w-full rounded-xl py-2.5 text-center text-sm font-semibold transition-colors",
                       plan.highlight
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        ? "bg-[#FE703A] text-white hover:bg-[#FE703A]/90"
                         : "border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
                     )}
                   >
@@ -334,7 +344,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section id="faq" className="px-6 py-20 bg-zinc-50">
+      <section id="faq" className="px-6 py-20 bg-[#F4B2A6]/10">
         <div className="mx-auto max-w-2xl">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold text-zinc-900 mb-3">Sık sorulan sorular</h2>
@@ -345,7 +355,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-zinc-100 px-6 py-12">
+      <footer className="bg-[#023435] px-6 py-12">
         <div className="mx-auto max-w-5xl">
           <div className="grid gap-8 sm:grid-cols-3">
             {/* Sol: Logo + açıklama */}
@@ -355,16 +365,16 @@ export default function LandingPage() {
                 alt="Luden Vox"
                 width={600}
                 height={221}
-                className="h-8 w-auto mb-3"
+                className="h-8 w-auto mb-3 brightness-0 invert"
               />
-              <p className="text-xs text-zinc-400 leading-relaxed max-w-[200px]">
+              <p className="text-xs text-white/60 leading-relaxed max-w-[200px]">
                 Dil, konuşma ve işitme uzmanları için AI destekli öğrenme kartı platformu.
               </p>
             </div>
 
             {/* Orta: Linkler */}
             <div>
-              <p className="text-xs font-semibold text-zinc-700 uppercase tracking-wide mb-4">Platform</p>
+              <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">Platform</p>
               <ul className="space-y-2">
                 {[
                   { href: "#features", label: "Özellikler" },
@@ -376,7 +386,7 @@ export default function LandingPage() {
                   <li key={l.label}>
                     <a
                       href={l.href}
-                      className="text-sm text-zinc-500 hover:text-zinc-800 transition-colors"
+                      className="text-sm text-white/60 hover:text-white transition-colors"
                     >
                       {l.label}
                     </a>
@@ -387,10 +397,10 @@ export default function LandingPage() {
 
             {/* Sağ: İletişim */}
             <div>
-              <p className="text-xs font-semibold text-zinc-700 uppercase tracking-wide mb-4">İletişim</p>
+              <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">İletişim</p>
               <a
                 href="mailto:merhaba@ludenvox.com"
-                className="text-sm text-zinc-500 hover:text-zinc-800 transition-colors block mb-4"
+                className="text-sm text-white/60 hover:text-white transition-colors block mb-4"
               >
                 merhaba@ludenvox.com
               </a>
@@ -400,7 +410,7 @@ export default function LandingPage() {
                   href="https://instagram.com/ludenvox"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:text-zinc-700 hover:border-zinc-300 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors"
                   aria-label="Instagram"
                 >
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -412,7 +422,7 @@ export default function LandingPage() {
                   href="https://linkedin.com/company/ludenvox"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-400 hover:text-zinc-700 hover:border-zinc-300 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors"
                   aria-label="LinkedIn"
                 >
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -423,7 +433,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-10 border-t border-zinc-100 pt-6 text-center text-xs text-zinc-400">
+          <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-white/40">
             © {new Date().getFullYear()} Luden Vox. Tüm hakları saklıdır.
           </div>
         </div>

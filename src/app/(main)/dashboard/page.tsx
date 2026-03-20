@@ -71,22 +71,22 @@ export default function DashboardPage() {
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <div className="h-8 w-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+          <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
         </div>
       ) : (
         <>
           {/* İstatistikler */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-            <div className="col-span-1 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <div className="col-span-1 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm border-l-4 border-l-[#FE703A]">
               <p className="text-xs text-zinc-400 mb-1">Toplam Öğrenci</p>
               <p className="text-3xl font-bold text-zinc-900">{stats?.students ?? 0}</p>
             </div>
-            <div className="col-span-1 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <div className="col-span-1 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm border-l-4 border-l-[#FE703A]">
               <p className="text-xs text-zinc-400 mb-1">Toplam Kart</p>
               <p className="text-3xl font-bold text-zinc-900">{stats?.cards ?? 0}</p>
             </div>
             {CATEGORY_ITEMS.map((cat) => (
-              <div key={cat.key} className="col-span-1 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+              <div key={cat.key} className="col-span-1 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm border-l-4 border-l-[#FE703A]">
                 <p className="text-xs text-zinc-400 mb-1">{cat.label}</p>
                 <p className="text-3xl font-bold text-zinc-900">{stats?.byCategory[cat.key] ?? 0}</p>
               </div>
@@ -103,7 +103,7 @@ export default function DashboardPage() {
                   <Link href="/cards" className="text-xs text-zinc-400 hover:text-zinc-600 hover:underline transition-colors">
                     Kart Kütüphanesi →
                   </Link>
-                  <Link href="/generate" className="text-xs text-blue-600 hover:underline">
+                  <Link href="/generate" className="text-xs text-[#FE703A] hover:underline">
                     Yeni Kart Üret
                   </Link>
                 </div>
@@ -157,7 +157,7 @@ export default function DashboardPage() {
             <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
               <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
                 <h2 className="text-sm font-semibold text-zinc-900">Son Eklenen Öğrenciler</h2>
-                <Link href="/students" className="text-xs text-blue-600 hover:underline">
+                <Link href="/students" className="text-xs text-[#FE703A] hover:underline">
                   Tümünü Gör
                 </Link>
               </div>
@@ -173,7 +173,7 @@ export default function DashboardPage() {
                         href={`/students/${student.id}`}
                         className="flex items-center gap-3 px-5 py-3 hover:bg-zinc-50 transition-colors"
                       >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 font-bold text-xs shrink-0">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#023435]/10 text-[#023435] font-bold text-xs shrink-0">
                           {student.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">

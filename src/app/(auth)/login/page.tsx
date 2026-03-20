@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,19 +36,37 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50">
-      <div className="w-full max-w-sm space-y-8 px-4">
-        {/* Logo */}
-        <div className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white font-bold text-lg">
-            TM
+    <div className="flex min-h-screen">
+      {/* Sol panel — masaüstü */}
+      <div className="hidden lg:flex lg:w-5/12 flex-col justify-between bg-[#023435] p-12">
+        <Image src="/logo.png" alt="Luden" width={600} height={221} className="h-9 w-auto brightness-0 invert" />
+        <div>
+          <h2 className="text-3xl font-bold text-white mb-4">Dil ve Konuşma Uzmanları için AI</h2>
+          <p className="text-white/60 text-sm leading-relaxed mb-8">
+            Öğrenci takibi, müfredat planlama ve kişiselleştirilmiş öğrenme kartları — hepsi tek platformda.
+          </p>
+          <div className="flex gap-2">
+            <div className="h-2 w-12 rounded-full bg-[#F4B2A6]" />
+            <div className="h-2 w-6 rounded-full bg-[#FE703A]" />
+            <div className="h-2 w-3 rounded-full bg-white/30" />
           </div>
-          <h1 className="text-2xl font-bold text-zinc-900">TerapiMat'a giriş yap</h1>
-          <p className="mt-1 text-sm text-zinc-500">Hesabınla devam et</p>
         </div>
+        <p className="text-xs text-white/40">© 2025 Luden Vox</p>
+      </div>
 
-        {/* Form */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm space-y-5">
+      {/* Sağ panel */}
+      <div className="flex-1 flex items-center justify-center bg-white p-8">
+        <div className="w-full max-w-sm">
+          {/* Mobil logo */}
+          <div className="lg:hidden text-center mb-8">
+            <Image src="/logo.png" alt="Luden" width={600} height={221} className="h-8 w-auto mx-auto" />
+          </div>
+
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-zinc-900">Giriş Yap</h1>
+            <p className="mt-1 text-sm text-zinc-500">Hesabınla devam et</p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-sm font-medium">Email</Label>
@@ -84,9 +103,9 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="text-center text-sm text-zinc-500">
+          <p className="mt-6 text-center text-sm text-zinc-500">
             Hesabın yok mu?{" "}
-            <Link href="/register" className="font-medium text-blue-600 hover:underline">
+            <Link href="/register" className="font-medium text-[#FE703A] hover:underline">
               Kayıt ol
             </Link>
           </p>

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import "./globals.css";
 
-const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "TerapiMat — AI Destekli Öğrenme Kartı Üreticisi",
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr">
-      <body className={`${geist.variable} antialiased`}>
+      <body className={`${jakarta.variable} antialiased`}>
         <AuthSessionProvider>{children}</AuthSessionProvider>
         <Toaster position="bottom-right" duration={3000} richColors />
       </body>

@@ -43,13 +43,13 @@ export function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white">
+    <header className="sticky top-0 z-40 bg-[#023435]">
       {/* Ana bar */}
       <div className="px-6 py-3">
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
           {/* Sol: Logo */}
           <Link href="/dashboard" className="shrink-0">
-            <Image src="/logo.png" alt="Luden" width={600} height={221} className="h-9 w-auto" priority />
+            <Image src="/logo.png" alt="Luden" width={600} height={221} className="h-9 w-auto brightness-0 invert" priority />
           </Link>
 
           {/* Orta: Nav — masaüstü */}
@@ -61,8 +61,8 @@ export function AppHeader() {
                 className={cn(
                   "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
                   isActive(item.href)
-                    ? "bg-zinc-100 text-zinc-900"
-                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                    ? "text-[#FE703A] font-semibold hover:bg-white/10"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 )}
               >
                 {item.label}
@@ -76,7 +76,7 @@ export function AppHeader() {
               <div className="relative hidden sm:block" ref={dropdownRef}>
                 <button
                   onClick={() => setOpen((v) => !v)}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-white/80 hover:bg-white/10 transition-colors"
                 >
                   <span className="max-w-[120px] truncate">{session.user.name}</span>
                   <svg
@@ -142,7 +142,7 @@ export function AppHeader() {
             <div className="sm:hidden" ref={mobileRef}>
               <button
                 onClick={() => setMobileOpen((v) => !v)}
-                className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 transition-colors"
+                className="rounded-lg p-2 text-white/70 hover:bg-white/10 transition-colors"
                 aria-label="Menüyü aç"
               >
                 {mobileOpen ? (
@@ -164,7 +164,7 @@ export function AppHeader() {
 
       {/* Mobil menü */}
       {mobileOpen && (
-        <div className="sm:hidden border-t border-zinc-100 bg-white px-4 pb-3 pt-2 space-y-0.5">
+        <div className="sm:hidden border-t border-white/10 bg-[#023435] px-4 pb-3 pt-2 space-y-0.5">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
@@ -173,8 +173,8 @@ export function AppHeader() {
               className={cn(
                 "block rounded-lg px-4 py-2.5 text-sm font-medium transition-colors",
                 isActive(item.href)
-                  ? "bg-zinc-100 text-zinc-900"
-                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                  ? "text-[#FE703A] bg-white/5"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
               )}
             >
               {item.label}
@@ -182,17 +182,17 @@ export function AppHeader() {
           ))}
           {session?.user && (
             <>
-              <div className="h-px bg-zinc-100 my-1" />
+              <div className="h-px bg-white/10 my-1" />
               <Link
                 href="/profile"
                 onClick={() => setMobileOpen(false)}
-                className="block rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+                className="block rounded-lg px-4 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
               >
                 Profil
               </Link>
               <button
                 onClick={() => { setMobileOpen(false); signOut({ callbackUrl: "/login" }); }}
-                className="block w-full text-left rounded-lg px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                className="block w-full text-left rounded-lg px-4 py-2.5 text-sm font-medium text-red-400 hover:bg-white/5 transition-colors"
               >
                 Çıkış Yap
               </button>

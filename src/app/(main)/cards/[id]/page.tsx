@@ -61,7 +61,7 @@ export default function CardDetailPage({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <div className="h-8 w-8 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+        <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
       </div>
     );
   }
@@ -72,7 +72,7 @@ export default function CardDetailPage({
         <p className="text-zinc-500">Kart bulunamadı.</p>
         <button
           onClick={() => router.back()}
-          className="text-sm text-blue-600 hover:underline"
+          className="text-sm text-[#FE703A] hover:underline"
         >
           Geri dön
         </button>
@@ -147,7 +147,7 @@ export default function CardDetailPage({
           >
             Öğrenciye Ata
             {assignedCount > 0 && (
-              <span className="rounded-full bg-blue-100 text-blue-700 px-1.5 py-0.5 text-[10px] font-semibold">
+              <span className="rounded-full bg-[#023435]/10 text-[#023435] px-1.5 py-0.5 text-[10px] font-semibold">
                 {assignedCount}
               </span>
             )}
