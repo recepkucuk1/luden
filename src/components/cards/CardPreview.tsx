@@ -46,7 +46,8 @@ export function CardPreview({ card }: CardPreviewProps) {
     try {
       await downloadPDF(card);
       toast.success("PDF indirildi", { id: loadingToast });
-    } catch {
+    } catch (err) {
+      console.error("[PDF] oluşturma hatası:", err);
       toast.error("PDF oluşturulamadı, tekrar deneyin", { id: loadingToast });
     } finally {
       setDownloading(false);
