@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
       });
       if (goals.length > 0) {
         const lines = goals.map(
-          (g) => `- ${g.code}: ${g.title} (${g.curriculum.title})`
+          (g: { code: string; title: string; curriculum: { title: string } }) =>
+            `- ${g.code}: ${g.title} (${g.curriculum.title})`
         );
         curriculumGoalText = lines.join("\n");
       }
