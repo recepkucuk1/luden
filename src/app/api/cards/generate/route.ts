@@ -3,6 +3,7 @@ import { anthropic, MODEL } from "@/lib/anthropic";
 import { buildCardPrompt, CardGenerationParams } from "@/lib/prompts";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +11,12 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
+
+    const { allowed, retryAfter } = rateLimit(
+      `cards:generate:${session.user.id}`,
+      2
+    );
+    if (!allowed) return rateLimitResponse(retryAfter);
 
     const body: CardGenerationParams & { studentId?: string; curriculumGoalIds?: string[] } =
       await request.json();

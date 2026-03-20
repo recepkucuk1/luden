@@ -117,8 +117,8 @@ export default function StudentDetailPage({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Hata oluştu");
       setStudent((prev) => prev ? { ...prev, aiProfile: data.aiProfile } : prev);
-    } catch {
-      toast.error("Profil oluşturulamadı, tekrar deneyin");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Profil oluşturulamadı, tekrar deneyin");
     } finally {
       setGeneratingProfile(false);
     }

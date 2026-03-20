@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { generateStudentProfile } from "@/lib/generateProfile";
+import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function POST(
   _request: NextRequest,
@@ -12,6 +13,12 @@ export async function POST(
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
+
+    const { allowed, retryAfter } = rateLimit(
+      `ai-profile:${session.user.id}`,
+      3
+    );
+    if (!allowed) return rateLimitResponse(retryAfter);
 
     const { id } = await params;
 

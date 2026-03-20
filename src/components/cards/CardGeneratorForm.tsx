@@ -206,8 +206,9 @@ export function CardGeneratorForm({
       toast.success("Öğrenme kartı oluşturuldu", { id: loadingToast });
       onCardGenerated(data.card);
     } catch (err) {
-      toast.error("Bir hata oluştu, tekrar deneyin", { id: loadingToast });
-      setError(err instanceof Error ? err.message : "Kart üretilirken hata oluştu.");
+      const msg = err instanceof Error ? err.message : "Bir hata oluştu, tekrar deneyin";
+      toast.error(msg, { id: loadingToast });
+      setError(msg);
     } finally {
       onLoading(false);
     }
