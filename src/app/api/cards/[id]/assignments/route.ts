@@ -27,7 +27,7 @@ export async function GET(
     });
 
     return NextResponse.json({
-      assignedStudentIds: assignments.map((a) => a.studentId),
+      assignedStudentIds: assignments.map((a: { studentId: string }) => a.studentId),
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
