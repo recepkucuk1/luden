@@ -343,9 +343,11 @@ export default function StudentsPage() {
                 </div>
               </div>
               <CurriculumPicker
+                key={workArea}
                 curricula={curricula}
                 selectedIds={newCurriculumIds}
                 onChange={setNewCurriculumIds}
+                defaultOpenKey={workArea}
               />
               <div className="space-y-1.5">
                 <Label htmlFor="diagnosis" className="text-sm font-medium">Tanı</Label>

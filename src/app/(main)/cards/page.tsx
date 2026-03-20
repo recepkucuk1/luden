@@ -171,7 +171,7 @@ export default function CardsPage() {
       <div className="border-b border-zinc-100 bg-white px-6 py-2.5">
         <div className="mx-auto max-w-5xl flex items-center justify-between">
           <h1 className="text-sm font-semibold text-zinc-700">Kart Kütüphanesi</h1>
-          <Link href="/"><Button size="sm">✨ Kart Üret</Button></Link>
+          <Link href="/generate"><Button size="sm">✨ Kart Üret</Button></Link>
         </div>
       </div>
 
@@ -181,7 +181,7 @@ export default function CardsPage() {
             <div className="text-4xl mb-3">🗂️</div>
             <p className="text-sm font-medium text-zinc-500 mb-1">Henüz kart oluşturulmadı</p>
             <p className="text-xs text-zinc-400 mb-4">Öğrencileriniz için kart üretmeye başlayın.</p>
-            <Link href="/"><Button size="sm">✨ Kart Üret</Button></Link>
+            <Link href="/generate"><Button size="sm">✨ Kart Üret</Button></Link>
           </div>
         ) : (
           <>
@@ -303,7 +303,7 @@ export default function CardsPage() {
                       <h3 className="font-semibold text-zinc-900 text-sm mb-1 line-clamp-2">{card.title}</h3>
                       <div className="mt-2 space-y-0.5">
                         {card.student && (
-                          <p className="text-xs text-zinc-400">Üretildi: {card.student.name}</p>
+                          <p className="text-xs text-zinc-400">Kim için: {card.student.name}</p>
                         )}
                         <p className="text-xs text-zinc-400">
                           {card._count.assignments > 0

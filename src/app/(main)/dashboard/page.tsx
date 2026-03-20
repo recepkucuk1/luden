@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import {
   WORK_AREA_LABEL,
@@ -56,6 +57,7 @@ export default function DashboardPage() {
         setRecentStudents(data.recentStudents);
       } catch (err) {
         console.error("Dashboard yüklenemedi:", err);
+        toast.error("Veriler yüklenemedi, sayfayı yenileyin");
       } finally {
         setLoading(false);
       }
@@ -97,9 +99,14 @@ export default function DashboardPage() {
             <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
               <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
                 <h2 className="text-sm font-semibold text-zinc-900">Son Üretilen Kartlar</h2>
-                <Link href="/" className="text-xs text-blue-600 hover:underline">
-                  Yeni Kart Üret
-                </Link>
+                <div className="flex items-center gap-3">
+                  <Link href="/cards" className="text-xs text-zinc-400 hover:text-zinc-600 hover:underline transition-colors">
+                    Kart Kütüphanesi →
+                  </Link>
+                  <Link href="/generate" className="text-xs text-blue-600 hover:underline">
+                    Yeni Kart Üret
+                  </Link>
+                </div>
               </div>
               {recentCards.length === 0 ? (
                 <div className="flex items-center justify-center py-12">

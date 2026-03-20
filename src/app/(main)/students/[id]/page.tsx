@@ -79,6 +79,7 @@ export default function StudentDetailPage({
   const [notFound, setNotFound] = useState(false);
   const [activeTab, setActiveTab] = useState<"cards" | "progress" | "aiProfile">("cards");
   const [generatingProfile, setGeneratingProfile] = useState(false);
+  const [profileTimedOut, setProfileTimedOut] = useState(false);
   const [confirmCardId, setConfirmCardId] = useState<string | null>(null);
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
 
@@ -92,6 +93,14 @@ export default function StudentDetailPage({
   useEffect(() => {
     // Profil henüz hazır değilse (yeni öğrenci oluşturuldu, arka planda üretiliyor)
     if (student && !student.aiProfile && !generatingProfile) {
+      setProfileTimedOut(false);
+
+      // 30 saniye sonra timeout
+      const timeoutId = setTimeout(() => {
+        stopPolling();
+        setProfileTimedOut(true);
+      }, 30_000);
+
       pollRef.current = setInterval(async () => {
         try {
           const res = await fetch(`/api/students/${id}`);
@@ -100,9 +109,15 @@ export default function StudentDetailPage({
           if (data.student?.aiProfile) {
             setStudent((prev) => prev ? { ...prev, aiProfile: data.student.aiProfile } : prev);
             stopPolling();
+            clearTimeout(timeoutId);
           }
         } catch { /* sessiz */ }
       }, 3000);
+
+      return () => {
+        stopPolling();
+        clearTimeout(timeoutId);
+      };
     } else {
       stopPolling();
     }
@@ -355,7 +370,7 @@ export default function StudentDetailPage({
         {/* Düzenleme Modalı */}
         {showEdit && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-            <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-base font-bold text-zinc-900">Öğrenci Düzenle</h2>
                 <button onClick={() => setShowEdit(false)} className="text-zinc-400 hover:text-zinc-600 text-lg leading-none">✕</button>
@@ -391,9 +406,11 @@ export default function StudentDetailPage({
                   </div>
                 </div>
                 <CurriculumPicker
+                  key={editWorkArea}
                   curricula={curricula}
                   selectedIds={editCurriculumIds}
                   onChange={setEditCurriculumIds}
+                  defaultOpenKey={editWorkArea}
                 />
                 <div className="space-y-1.5">
                   <Label htmlFor="edit-diagnosis" className="text-sm font-medium">Tanı</Label>
@@ -457,11 +474,25 @@ export default function StudentDetailPage({
               </div>
             </div>
 
-            {!student.aiProfile && !generatingProfile && (
+            {!student.aiProfile && !generatingProfile && !profileTimedOut && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="h-6 w-6 rounded-full border-2 border-blue-200 border-t-blue-500 animate-spin mx-auto mb-4" />
                 <p className="text-sm font-medium text-zinc-500">Profil hazırlanıyor…</p>
                 <p className="text-xs text-zinc-400 mt-1">Bu birkaç saniye sürebilir.</p>
+              </div>
+            )}
+
+            {!student.aiProfile && !generatingProfile && profileTimedOut && (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="text-3xl mb-3">⚠️</div>
+                <p className="text-sm font-medium text-zinc-600">Profil oluşturulamadı.</p>
+                <p className="text-xs text-zinc-400 mt-1">Lütfen daha sonra tekrar deneyin.</p>
+                <button
+                  onClick={handleGenerateProfile}
+                  className="mt-4 rounded-lg border border-zinc-200 px-4 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+                >
+                  Tekrar Dene
+                </button>
               </div>
             )}
 

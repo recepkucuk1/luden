@@ -15,6 +15,7 @@ interface CurriculumPickerProps {
   curricula: Curriculum[];
   selectedIds: string[];
   onChange: (ids: string[]) => void;
+  defaultOpenKey?: string; // Varsayılan açık accordion grubu (workArea değeri)
 }
 
 const TOP_GROUPS = [
@@ -41,8 +42,8 @@ const TOP_GROUPS = [
   },
 ];
 
-export function CurriculumPicker({ curricula, selectedIds, onChange }: CurriculumPickerProps) {
-  const [openKeys, setOpenKeys] = useState<string[]>([]);
+export function CurriculumPicker({ curricula, selectedIds, onChange, defaultOpenKey }: CurriculumPickerProps) {
+  const [openKeys, setOpenKeys] = useState<string[]>(defaultOpenKey ? [defaultOpenKey] : []);
 
   function toggleGroup(key: string) {
     setOpenKeys((prev) =>

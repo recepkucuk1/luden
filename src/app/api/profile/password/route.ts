@@ -20,9 +20,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       return NextResponse.json(
-        { error: "Yeni şifre en az 6 karakter olmalıdır." },
+        { error: "Yeni şifre en az 8 karakter olmalıdır." },
         { status: 400 }
       );
     }

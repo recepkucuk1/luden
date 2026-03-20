@@ -52,6 +52,7 @@ interface Curriculum {
 interface CardGeneratorFormProps {
   onCardGenerated: (card: GeneratedCard) => void;
   onLoading: (loading: boolean) => void;
+  onCardIdGenerated?: (id: string) => void;
   studentId?: string;
   studentName?: string;
   studentBirthDate?: string;
@@ -82,6 +83,7 @@ const SELECT_CLS =
 export function CardGeneratorForm({
   onCardGenerated,
   onLoading,
+  onCardIdGenerated,
   studentId,
   studentName,
   studentBirthDate,
@@ -204,6 +206,7 @@ export function CardGeneratorForm({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Bilinmeyen hata");
       toast.success("Öğrenme kartı oluşturuldu", { id: loadingToast });
+      if (data.cardId) onCardIdGenerated?.(data.cardId);
       onCardGenerated(data.card);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Bir hata oluştu, tekrar deneyin";

@@ -197,7 +197,7 @@ export default function ProfilePage() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="En az 6 karakter"
+                  placeholder="En az 8 karakter"
                   autoComplete="new-password"
                 />
               </div>

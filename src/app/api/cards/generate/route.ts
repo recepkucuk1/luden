@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     const card = { ...cardContent, category, difficulty, ageGroup };
 
-    await prisma.card.create({
+    const dbCard = await prisma.card.create({
       data: {
         title: (cardContent.title as string) ?? "Öğrenme Kartı",
         content: cardContent as Parameters<typeof prisma.card.create>[0]["data"]["content"],
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, card });
+    return NextResponse.json({ success: true, card, cardId: dbCard.id });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : undefined;
