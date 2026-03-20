@@ -53,7 +53,7 @@ export function buildCardPrompt(params: CardGenerationParams): string {
 **EĞİTİM ALANI:** ${CATEGORY_CONTEXT[category]}
 **ZORLUK SEVİYESİ:** ${DIFFICULTY_MAP[difficulty]}
 **YAŞ GRUBU:** ${AGE_MAP[ageGroup]}
-${curriculumGoalText ? `**MÜFREDAT HEDEFİ:** ${curriculumGoalText}\nBu kart şu müfredat hedefi için üretiliyor: ${curriculumGoalText}\nKart içeriği bu hedefe doğrudan hizmet etmeli.` : ""}
+${curriculumGoalText ? `**MÜFREDAT HEDEFLERİ:**\n${curriculumGoalText}\nKart içeriği bu hedeflere doğrudan hizmet etmeli.` : ""}
 ${focusArea ? `**HEDEF BECERİ / ODAK ALAN:** ${focusArea}` : ""}
 
 **MOTİVASYON YAKLAŞIMI — KESİNLİKLE UYULMASI GEREKEN KURAL:**

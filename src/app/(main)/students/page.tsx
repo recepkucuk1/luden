@@ -9,13 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, toInputDate } from "@/lib/utils";
 import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
-
-function toInputDate(dateStr: string | null): string {
-  if (!dateStr) return "";
-  return dateStr.slice(0, 10);
-}
+import { CurriculumPicker } from "@/components/students/CurriculumPicker";
 
 type FilterArea = "all" | "speech" | "language" | "hearing";
 type SortBy = "name" | "birthDate-asc" | "birthDate-desc" | "lastCard" | "mostCards";
@@ -54,6 +50,7 @@ const WORK_AREAS = [
   { value: "hearing", label: "İşitme", icon: "👂" },
 ];
 
+
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +61,10 @@ export default function StudentsPage() {
 
   const [filterArea, setFilterArea] = useState<FilterArea>("all");
   const [sortBy, setSortBy] = useState<SortBy>("name");
+
+  // Curriculum
+  const [curricula, setCurricula] = useState<{id:string;area:string;title:string}[]>([]);
+  const [newCurriculumIds, setNewCurriculumIds] = useState<string[]>([]);
 
   // Yeni öğrenci formu
   const [name, setName] = useState("");
@@ -162,9 +163,14 @@ export default function StudentsPage() {
 
   useEffect(() => { fetchStudents(); }, [fetchStudents]);
 
+  useEffect(() => {
+    fetch("/api/curriculum").then(r => r.json()).then(d => setCurricula(d.curricula ?? []));
+  }, []);
+
   function resetForm() {
     setName(""); setBirthDate(""); setWorkArea("speech");
     setDiagnosis(""); setNotes(""); setFormError(null);
+    setNewCurriculumIds([]);
   }
 
   async function handleCreate(e: React.FormEvent) {
@@ -176,7 +182,7 @@ export default function StudentsPage() {
       const res = await fetch("/api/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, birthDate: birthDate || null, workArea, diagnosis, notes }),
+        body: JSON.stringify({ name, birthDate: birthDate || null, workArea, diagnosis, notes, curriculumIds: newCurriculumIds }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Hata oluştu");
@@ -284,8 +290,8 @@ export default function StudentsPage() {
 
       {/* Yeni Öğrenci Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-bold text-zinc-900">Yeni Öğrenci Ekle</h2>
               <button
@@ -336,6 +342,11 @@ export default function StudentsPage() {
                   ))}
                 </div>
               </div>
+              <CurriculumPicker
+                curricula={curricula}
+                selectedIds={newCurriculumIds}
+                onChange={setNewCurriculumIds}
+              />
               <div className="space-y-1.5">
                 <Label htmlFor="diagnosis" className="text-sm font-medium">Tanı</Label>
                 <Input

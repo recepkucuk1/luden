@@ -20,6 +20,7 @@ export async function GET() {
         ageGroup: true,
         createdAt: true,
         student: { select: { id: true, name: true } },
+        curriculumGoal: { select: { curriculumId: true } },
         _count: { select: { assignments: true } },
       },
     });

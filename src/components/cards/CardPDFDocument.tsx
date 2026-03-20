@@ -8,7 +8,7 @@ import {
   Font,
 } from "@react-pdf/renderer";
 import type { GeneratedCard } from "@/lib/prompts";
-import { CATEGORY_LABEL, DIFFICULTY_LABEL, AGE_LABEL } from "@/lib/constants";
+import { WORK_AREA_LABEL, DIFFICULTY_LABEL, AGE_LABEL } from "@/lib/constants";
 
 // Noto Sans — tam Unicode + Türkçe desteği
 // public/fonts/ klasöründen yüklenir (client-side absolute URL)
@@ -317,7 +317,7 @@ export function CardPDFDocument({ card }: CardPDFDocumentProps) {
         <View style={styles.titleSection}>
           <View style={styles.badgeRow}>
             <Text style={[styles.badge, styles.badgeCategory]}>
-              {CATEGORY_LABEL[card.category] ?? card.category}
+              {WORK_AREA_LABEL[card.category] ?? card.category}
             </Text>
             <Text style={[styles.badge, {
               backgroundColor: "#fef9c3",

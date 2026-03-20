@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AREA_LABELS, WORK_AREA_FILTER } from "@/lib/constants";
 
 interface CurriculumGoal {
   id: string;
@@ -84,12 +85,6 @@ function GoalStatusButtons({
 // -----------------------------------------------------------------------
 // ProgressTab
 // -----------------------------------------------------------------------
-// Hangi workArea hangi curriculum area'larını görebilir
-const WORK_AREA_FILTER: Record<string, string[] | null> = {
-  speech:   ["speech", "speech_sound", "motor_speech", "resonance", "voice"],
-  language: ["language", "acquired_language"],
-  hearing:  ["hearing", "hearing_language", "hearing_social", "hearing_learning", "hearing_literacy", "hearing_early_math", "hearing_math"],
-};
 
 export function ProgressTab({ studentId, workArea }: { studentId: string; workArea?: string }) {
   const [curricula, setCurricula] = useState<Curriculum[]>([]);
@@ -133,23 +128,6 @@ export function ProgressTab({ studentId, workArea }: { studentId: string; workAr
   }, [studentId]);
 
   // ── Curricula dropdown grouping ──────────────────────────────────────
-  const AREA_LABELS: Record<string, string> = {
-    speech: "Akıcılık Bozukluğu",
-    language: "Dil",
-    acquired_language: "Edinilmiş Dil",
-    speech_sound: "Konuşma Sesi",
-    motor_speech: "Motor Konuşma",
-    resonance: "Rezonans",
-    voice: "Ses",
-    hearing: "İşitme Eğitimi",
-    hearing_language: "Dil Eğitimi (İşitme)",
-    hearing_social: "Sosyal İletişim",
-    hearing_learning: "Öğrenmeye Destek",
-    hearing_literacy: "Okuma ve Yazma",
-    hearing_early_math: "Erken Matematik",
-    hearing_math: "Matematik",
-  };
-
   const allowedAreas = workArea ? (WORK_AREA_FILTER[workArea] ?? null) : null;
 
   const curriculaByArea = curricula.reduce<Record<string, Curriculum[]>>((acc, c) => {

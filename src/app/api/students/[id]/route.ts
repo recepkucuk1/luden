@@ -1,18 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-
-function logError(tag: string, error: unknown) {
-  if (error instanceof Error) {
-    console.error(`\n[${tag}] ${error.name}: ${error.message}`);
-    if (error.stack) console.error(error.stack);
-    const extra = error as unknown as Record<string, unknown>;
-    if (extra.code) console.error(`  Prisma code: ${extra.code}`);
-    if (extra.meta) console.error(`  Prisma meta:`, extra.meta);
-  } else {
-    console.error(`\n[${tag}]`, error);
-  }
-}
+import { logError } from "@/lib/utils";
 
 export async function GET(
   _request: NextRequest,
@@ -72,7 +61,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, birthDate, workArea, diagnosis, notes } = body;
+    const { name, birthDate, workArea, diagnosis, notes, curriculumIds } = body;
 
     if (!name?.trim() || !workArea) {
       return NextResponse.json(
@@ -89,6 +78,7 @@ export async function PUT(
         workArea,
         diagnosis: diagnosis || null,
         notes: notes || null,
+        curriculumIds: Array.isArray(curriculumIds) ? curriculumIds : undefined,
       },
     });
 

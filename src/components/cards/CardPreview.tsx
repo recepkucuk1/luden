@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { GeneratedCard } from "@/lib/prompts";
 import {
-  CATEGORY_LABEL,
-  WORK_AREA_COLOR as CATEGORY_COLOR,
+  WORK_AREA_LABEL,
+  WORK_AREA_COLOR,
   DIFFICULTY_LABEL,
   DIFFICULTY_COLOR,
   AGE_LABEL,
@@ -59,7 +59,7 @@ export function CardPreview({ card }: CardPreviewProps) {
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-wrap gap-2">
-            <Badge className={CATEGORY_COLOR[card.category]}>{CATEGORY_LABEL[card.category]}</Badge>
+            <Badge className={WORK_AREA_COLOR[card.category]}>{WORK_AREA_LABEL[card.category]}</Badge>
             <Badge className={DIFFICULTY_COLOR[card.difficulty]}>{DIFFICULTY_LABEL[card.difficulty]}</Badge>
             <Badge className="bg-zinc-100 text-zinc-600">{AGE_LABEL[card.ageGroup]}</Badge>
             {card.duration && (

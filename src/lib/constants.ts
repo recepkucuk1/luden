@@ -2,17 +2,36 @@
 // UI'da Tailwind class, PDF'de hex renk farklı olduğu için
 // DIFFICULTY_COLOR_PDF CardPDFDocument içinde yerel kalır.
 
-export const CATEGORY_LABEL: Record<string, string> = {
-  speech: "Konuşma Eğitimi",
-  language: "Dil Eğitimi",
-  hearing: "İşitme Eğitimi",
-};
-
 // Kısa etiket (badge, filtre butonları)
 export const WORK_AREA_LABEL: Record<string, string> = {
   speech: "Konuşma",
   language: "Dil",
   hearing: "İşitme",
+};
+
+// Müfredat alt-alan etiketleri
+export const AREA_LABELS: Record<string, string> = {
+  speech: "Akıcılık Bozukluğu",
+  language: "Dil",
+  acquired_language: "Edinilmiş Dil",
+  speech_sound: "Konuşma Sesi",
+  motor_speech: "Motor Konuşma",
+  resonance: "Rezonans",
+  voice: "Ses",
+  hearing: "İşitme Eğitimi",
+  hearing_language: "Dil Eğitimi (İşitme)",
+  hearing_social: "Sosyal İletişim",
+  hearing_learning: "Öğrenmeye Destek",
+  hearing_literacy: "Okuma ve Yazma",
+  hearing_early_math: "Erken Matematik",
+  hearing_math: "Matematik",
+};
+
+// Çalışma alanından izin verilen müfredat alanlarına mapping
+export const WORK_AREA_FILTER: Record<string, string[]> = {
+  speech:   ["speech", "speech_sound", "motor_speech", "resonance", "voice"],
+  language: ["language", "acquired_language"],
+  hearing:  ["hearing", "hearing_language", "hearing_social", "hearing_learning", "hearing_literacy", "hearing_early_math", "hearing_math"],
 };
 
 export const WORK_AREA_COLOR: Record<string, string> = {

@@ -11,9 +11,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
 
-    const body: CardGenerationParams & { studentId?: string; curriculumGoalId?: string } =
+    const body: CardGenerationParams & { studentId?: string; curriculumGoalIds?: string[] } =
       await request.json();
-    const { category, difficulty, ageGroup, studentId, curriculumGoalId } = body;
+    const { category, difficulty, ageGroup, studentId, curriculumGoalIds = [] } = body;
 
     if (!category || !difficulty || !ageGroup) {
       return NextResponse.json(
@@ -22,15 +22,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Müfredat hedefi varsa DB'den al ve prompt metnini oluştur
+    // Seçilen tüm müfredat hedeflerini DB'den al ve prompt metnini oluştur
     let curriculumGoalText: string | undefined;
-    if (curriculumGoalId) {
-      const goal = await prisma.curriculumGoal.findFirst({
-        where: { id: curriculumGoalId },
+    const firstGoalId = curriculumGoalIds[0] ?? null;
+    if (curriculumGoalIds.length > 0) {
+      const goals = await prisma.curriculumGoal.findMany({
+        where: { id: { in: curriculumGoalIds } },
         include: { curriculum: { select: { code: true, title: true } } },
       });
-      if (goal) {
-        curriculumGoalText = `${goal.curriculum.code}.${goal.code} - ${goal.title} (${goal.curriculum.title})`;
+      if (goals.length > 0) {
+        const lines = goals.map(
+          (g) => `- ${g.code}: ${g.title} (${g.curriculum.title})`
+        );
+        curriculumGoalText = lines.join("\n");
       }
     }
 
@@ -80,7 +84,7 @@ export async function POST(request: NextRequest) {
         ageGroup,
         therapistId: session.user.id,
         studentId: studentId ?? null,
-        curriculumGoalId: curriculumGoalId ?? null,
+        curriculumGoalId: firstGoalId,
       },
     });
 

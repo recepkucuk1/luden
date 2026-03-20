@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { AREA_LABELS, WORK_AREA_FILTER } from "@/lib/constants";
 import type { GeneratedCard } from "@/lib/prompts";
 
 const schema = z.object({
@@ -92,23 +93,7 @@ export function CardGeneratorForm({
   const [selectedCurriculumId, setSelectedCurriculumId] = useState("");
   const [selectedMainGoalId, setSelectedMainGoalId] = useState("");
   const [selectedSubGoalIds, setSelectedSubGoalIds] = useState<string[]>([]); // çoklu seçim
-
-  const AREA_LABELS: Record<string, string> = {
-    speech: "Akıcılık Bozukluğu",
-    language: "Dil",
-    acquired_language: "Edinilmiş Dil",
-    speech_sound: "Konuşma Sesi",
-    motor_speech: "Motor Konuşma",
-    resonance: "Rezonans",
-    voice: "Ses",
-    hearing: "İşitme Eğitimi",
-    hearing_language: "Dil Eğitimi (İşitme)",
-    hearing_social: "Sosyal İletişim",
-    hearing_learning: "Öğrenmeye Destek",
-    hearing_literacy: "Okuma ve Yazma",
-    hearing_early_math: "Erken Matematik",
-    hearing_math: "Matematik",
-  };
+  const [studentCurriculumIds, setStudentCurriculumIds] = useState<string[]>([]);
 
   const curriculaByArea = curricula.reduce<Record<string, Curriculum[]>>((acc, c) => {
     if (!acc[c.area]) acc[c.area] = [];
@@ -120,8 +105,15 @@ export function CardGeneratorForm({
     fetch("/api/curriculum")
       .then((r) => r.json())
       .then((d) => setCurricula(d.curricula ?? []))
-      .catch(() => {/* sessiz */});
+      .catch(() => toast.error("Müfredat yüklenemedi"));
   }, []);
+
+  useEffect(() => {
+    if (!studentId) { setStudentCurriculumIds([]); return; }
+    fetch(`/api/students/${studentId}`)
+      .then(r => r.json())
+      .then(d => setStudentCurriculumIds(d.student?.curriculumIds ?? []));
+  }, [studentId]);
 
   const selectedCurriculum = curricula.find((c) => c.id === selectedCurriculumId);
   const mainGoals = selectedCurriculum?.goals.filter((g) => g.isMainGoal) ?? [];
@@ -172,17 +164,17 @@ export function CardGeneratorForm({
   const watchedAgeGroup = watch("ageGroup");
   const watchedDifficulty = watch("difficulty");
 
-  // Hangi kategori hangi curriculum area'larını görebilir
-  const CATEGORY_AREA_FILTER: Record<string, string[] | null> = {
-    speech:   ["speech", "speech_sound", "motor_speech", "resonance", "voice"],
-    language: ["language", "acquired_language"],
-    hearing:  ["hearing", "hearing_language", "hearing_social", "hearing_learning", "hearing_literacy", "hearing_early_math", "hearing_math"],
-  };
-  const allowedAreas = CATEGORY_AREA_FILTER[watchedCategory] ?? null;
+  const allowedAreas = WORK_AREA_FILTER[watchedCategory] ?? null;
   const filteredCurriculaByArea = Object.fromEntries(
-    Object.entries(curriculaByArea).filter(([area]) =>
-      !allowedAreas || allowedAreas.includes(area)
-    )
+    Object.entries(curriculaByArea)
+      .filter(([area]) => !allowedAreas || allowedAreas.includes(area))
+      .map(([area, list]) => {
+        const filtered = studentCurriculumIds.length > 0
+          ? list.filter(c => studentCurriculumIds.includes(c.id))
+          : list;
+        return [area, filtered] as [string, typeof list];
+      })
+      .filter(([, list]) => list.length > 0)
   );
 
   // Kategori değişince müfredat seçimini sıfırla

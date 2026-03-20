@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -9,27 +9,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import { cn, toInputDate } from "@/lib/utils";
 import type { GeneratedCard } from "@/lib/prompts";
 import {
-  CATEGORY_LABEL as WORK_AREA_LABEL,
+  WORK_AREA_LABEL,
   WORK_AREA_COLOR,
   DIFFICULTY_LABEL,
   DIFFICULTY_COLOR,
   calcAge,
 } from "@/lib/constants";
 import { ProgressTab } from "@/components/students/ProgressTab";
+import { CurriculumPicker } from "@/components/students/CurriculumPicker";
 
 const WORK_AREAS = [
   { value: "speech", label: "Konuşma", icon: "🗣️" },
   { value: "language", label: "Dil", icon: "📚" },
   { value: "hearing", label: "İşitme", icon: "👂" },
 ];
-
-function toInputDate(dateStr: string | null): string {
-  if (!dateStr) return "";
-  return dateStr.slice(0, 10);
-}
 
 interface StudentCard {
   id: string;
@@ -61,10 +57,13 @@ interface Student {
   workArea: string;
   diagnosis: string | null;
   notes: string | null;
+  curriculumIds: string[];
+  aiProfile: string | null;
   createdAt: string;
   cards: StudentCard[];
   assignments: AssignedCard[];
 }
+
 
 export default function StudentDetailPage({
   params,
@@ -74,11 +73,56 @@ export default function StudentDetailPage({
   const { id } = use(params);
   const router = useRouter();
   const [student, setStudent] = useState<Student | null>(null);
+  const [curricula, setCurricula] = useState<{id:string;area:string;title:string}[]>([]);
+  const [editCurriculumIds, setEditCurriculumIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [activeTab, setActiveTab] = useState<"cards" | "progress">("cards");
+  const [activeTab, setActiveTab] = useState<"cards" | "progress" | "aiProfile">("cards");
+  const [generatingProfile, setGeneratingProfile] = useState(false);
   const [confirmCardId, setConfirmCardId] = useState<string | null>(null);
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
+
+  // Eğitim Profili — polling
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  function stopPolling() {
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+  }
+
+  useEffect(() => {
+    // Profil henüz hazır değilse (yeni öğrenci oluşturuldu, arka planda üretiliyor)
+    if (student && !student.aiProfile && !generatingProfile) {
+      pollRef.current = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/students/${id}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data.student?.aiProfile) {
+            setStudent((prev) => prev ? { ...prev, aiProfile: data.student.aiProfile } : prev);
+            stopPolling();
+          }
+        } catch { /* sessiz */ }
+      }, 3000);
+    } else {
+      stopPolling();
+    }
+    return stopPolling;
+  }, [student?.aiProfile, generatingProfile]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleGenerateProfile() {
+    if (!student) return;
+    setGeneratingProfile(true);
+    try {
+      const res = await fetch(`/api/students/${student.id}/ai-profile`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Hata oluştu");
+      setStudent((prev) => prev ? { ...prev, aiProfile: data.aiProfile } : prev);
+    } catch {
+      toast.error("Profil oluşturulamadı, tekrar deneyin");
+    } finally {
+      setGeneratingProfile(false);
+    }
+  }
 
   // Öğrenci silme
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -116,6 +160,7 @@ export default function StudentDetailPage({
     setEditWorkArea(student.workArea);
     setEditDiagnosis(student.diagnosis ?? "");
     setEditNotes(student.notes ?? "");
+    setEditCurriculumIds(student.curriculumIds ?? []);
     setEditError(null);
     setShowEdit(true);
   }
@@ -132,12 +177,13 @@ export default function StudentDetailPage({
         body: JSON.stringify({
           name: editName, birthDate: editBirthDate || null,
           workArea: editWorkArea, diagnosis: editDiagnosis, notes: editNotes,
+          curriculumIds: editCurriculumIds,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Hata oluştu");
       setStudent((prev) =>
-        prev ? { ...prev, name: editName, birthDate: editBirthDate || null, workArea: editWorkArea, diagnosis: editDiagnosis || null, notes: editNotes || null } : prev
+        prev ? { ...prev, name: editName, birthDate: editBirthDate || null, workArea: editWorkArea, diagnosis: editDiagnosis || null, notes: editNotes || null, curriculumIds: editCurriculumIds } : prev
       );
       toast.success("Değişiklikler kaydedildi");
       setShowEdit(false);
@@ -152,11 +198,15 @@ export default function StudentDetailPage({
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/students/${id}`);
-        if (res.status === 404) { setNotFound(true); return; }
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-        setStudent(data.student);
+        const [sRes, cRes] = await Promise.all([
+          fetch(`/api/students/${id}`),
+          fetch("/api/curriculum"),
+        ]);
+        if (sRes.status === 404) { setNotFound(true); return; }
+        const [sData, cData] = await Promise.all([sRes.json(), cRes.json()]);
+        if (!sRes.ok) throw new Error(sData.error || `HTTP ${sRes.status}`);
+        setStudent(sData.student);
+        setCurricula(cData.curricula ?? []);
       } catch (err) {
         console.error("Öğrenci yüklenemedi:", err);
         setNotFound(true);
@@ -254,10 +304,29 @@ export default function StudentDetailPage({
             </div>
           </div>
 
-          {student.notes && (
-            <div className="mt-4 pt-4 border-t border-zinc-100">
-              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide mb-1">Notlar</p>
-              <p className="text-sm text-zinc-600">{student.notes}</p>
+          {(student.notes || (student.curriculumIds?.length ?? 0) > 0) && (
+            <div className="mt-4 pt-4 border-t border-zinc-100 space-y-3">
+              {student.notes && (
+                <div>
+                  <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide mb-1">Notlar</p>
+                  <p className="text-sm text-zinc-600">{student.notes}</p>
+                </div>
+              )}
+              {(student.curriculumIds?.length ?? 0) > 0 && (
+                <div>
+                  <p className="text-xs text-zinc-500 mb-1">Çalışma Modülleri</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {student.curriculumIds?.map(cid => {
+                      const c = curricula.find(x => x.id === cid);
+                      return c ? (
+                        <span key={cid} className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs text-blue-700">
+                          {c.title}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -321,6 +390,11 @@ export default function StudentDetailPage({
                     ))}
                   </div>
                 </div>
+                <CurriculumPicker
+                  curricula={curricula}
+                  selectedIds={editCurriculumIds}
+                  onChange={setEditCurriculumIds}
+                />
                 <div className="space-y-1.5">
                   <Label htmlFor="edit-diagnosis" className="text-sm font-medium">Tanı</Label>
                   <Input id="edit-diagnosis" value={editDiagnosis} onChange={(e) => setEditDiagnosis(e.target.value)} placeholder="Örn: Dil gelişim gecikmesi" />
@@ -348,6 +422,7 @@ export default function StudentDetailPage({
           {([
             { key: "cards", label: "Kartlar", count: student.cards.length + student.assignments.length },
             { key: "progress", label: "İlerleme", count: null },
+            { key: "aiProfile", label: "Eğitim Profili", count: null },
           ] as const).map((tab) => (
             <button
               key={tab.key}
@@ -368,7 +443,75 @@ export default function StudentDetailPage({
         </div>
 
         {/* İlerleme Sekmesi */}
-        {activeTab === "progress" && <ProgressTab studentId={student.id} />}
+        {activeTab === "progress" && <ProgressTab studentId={student.id} workArea={student.workArea} />}
+
+        {/* Eğitim Profili Sekmesi */}
+        {activeTab === "aiProfile" && (
+          <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-base font-semibold text-zinc-900">Eğitim Profili</h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  AI destekli klinik arka plan ve uzman önerileri
+                </p>
+              </div>
+            </div>
+
+            {!student.aiProfile && !generatingProfile && (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="h-6 w-6 rounded-full border-2 border-blue-200 border-t-blue-500 animate-spin mx-auto mb-4" />
+                <p className="text-sm font-medium text-zinc-500">Profil hazırlanıyor…</p>
+                <p className="text-xs text-zinc-400 mt-1">Bu birkaç saniye sürebilir.</p>
+              </div>
+            )}
+
+            {generatingProfile && !student.aiProfile && (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="h-6 w-6 rounded-full border-2 border-blue-200 border-t-blue-500 animate-spin mx-auto mb-4" />
+                <p className="text-sm font-medium text-zinc-500">Profil oluşturuluyor…</p>
+              </div>
+            )}
+
+            {student.aiProfile && (
+              <div className="prose prose-sm max-w-none prose-zinc
+                prose-headings:font-semibold prose-headings:text-zinc-800
+                prose-h2:text-base prose-h2:mt-6 prose-h2:mb-3 prose-h2:first:mt-0
+                prose-h3:text-sm prose-h3:mt-4 prose-h3:mb-2
+                prose-p:text-zinc-600 prose-p:leading-relaxed
+                prose-li:text-zinc-600 prose-ul:mt-1
+                prose-hr:border-zinc-200">
+                {student.aiProfile.split("\n").map((line, i) => {
+                  if (line.startsWith("## ")) {
+                    return (
+                      <h2 key={i} className="text-base font-semibold text-zinc-800 mt-6 mb-3 first:mt-0 pb-2 border-b border-zinc-100">
+                        {line.replace("## ", "")}
+                      </h2>
+                    );
+                  }
+                  if (line.startsWith("### ")) {
+                    return (
+                      <h3 key={i} className="text-sm font-semibold text-zinc-700 mt-4 mb-1.5">
+                        {line.replace("### ", "")}
+                      </h3>
+                    );
+                  }
+                  if (line.startsWith("- ")) {
+                    return (
+                      <p key={i} className="text-sm text-zinc-600 leading-relaxed pl-3 before:content-['•'] before:mr-2 before:text-zinc-400">
+                        {line.replace("- ", "")}
+                      </p>
+                    );
+                  }
+                  if (line.startsWith("---")) {
+                    return <hr key={i} className="border-zinc-100 my-4" />;
+                  }
+                  if (line.trim() === "") return <div key={i} className="h-1" />;
+                  return <p key={i} className="text-sm text-zinc-600 leading-relaxed">{line}</p>;
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Kartlar Sekmesi */}
         {activeTab === "cards" && <>

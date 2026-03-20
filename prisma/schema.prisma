@@ -21,14 +21,16 @@ model Therapist {
 }
 
 model Student {
-  id        String    @id @default(cuid())
-  name      String
-  birthDate DateTime?
-  workArea  String    @default("speech") // "speech" | "language" | "hearing"
-  diagnosis String?
-  notes     String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  name          String
+  birthDate     DateTime?
+  workArea      String    @default("speech") // "speech" | "language" | "hearing"
+  diagnosis     String?
+  notes         String?
+  curriculumIds String[]  @default([])
+  aiProfile     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   therapistId String
   therapist   Therapist @relation(fields: [therapistId], references: [id])

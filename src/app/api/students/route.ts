@@ -1,18 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-
-function logError(tag: string, error: unknown) {
-  if (error instanceof Error) {
-    console.error(`\n[${tag}] ${error.name}: ${error.message}`);
-    if (error.stack) console.error(error.stack);
-    const extra = error as unknown as Record<string, unknown>;
-    if (extra.code) console.error(`  Prisma code: ${extra.code}`);
-    if (extra.meta) console.error(`  Prisma meta:`, extra.meta);
-  } else {
-    console.error(`\n[${tag}]`, error);
-  }
-}
+import { generateStudentProfile } from "@/lib/generateProfile";
+import { logError } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -61,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, birthDate, workArea, diagnosis, notes } = body;
+    const { name, birthDate, workArea, diagnosis, notes, curriculumIds } = body;
 
     if (!name || !workArea) {
       return NextResponse.json(
@@ -78,7 +68,17 @@ export async function POST(request: NextRequest) {
         diagnosis: diagnosis || null,
         notes: notes || null,
         therapistId: session.user.id,
+        curriculumIds: Array.isArray(curriculumIds) ? curriculumIds : [],
       },
+    });
+
+    // Response gönderildikten sonra profil üret (after = Next.js post-response hook)
+    after(async () => {
+      try {
+        await generateStudentProfile(student.id);
+      } catch (err) {
+        console.error("[generateStudentProfile] after() hatası:", err);
+      }
     });
 
     return NextResponse.json({ student }, { status: 201 });
