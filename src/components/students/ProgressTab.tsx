@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AREA_LABELS, WORK_AREA_FILTER } from "@/lib/constants";
+import { AREA_LABELS } from "@/lib/constants";
 
 interface CurriculumGoal {
   id: string;
@@ -22,7 +22,6 @@ interface Curriculum {
   goals: CurriculumGoal[];
 }
 
-// Her hedefin state yapısı — tam olarak bu
 type GoalProgress = { status: string; notes: string };
 type ProgressMap = Record<string, GoalProgress>;
 
@@ -50,9 +49,6 @@ const STATUS_OPTIONS = [
   },
 ] as const;
 
-// -----------------------------------------------------------------------
-// GoalStatusButtons — her goalId için tamamen bağımsız çalışır
-// -----------------------------------------------------------------------
 function GoalStatusButtons({
   goalId,
   status,
@@ -82,17 +78,19 @@ function GoalStatusButtons({
   );
 }
 
-// -----------------------------------------------------------------------
-// ProgressTab
-// -----------------------------------------------------------------------
-
-export function ProgressTab({ studentId, workArea }: { studentId: string; workArea?: string }) {
-  const [curricula, setCurricula] = useState<Curriculum[]>([]);
+export function ProgressTab({
+  studentId,
+  curriculumIds,
+  onEditClick,
+}: {
+  studentId: string;
+  curriculumIds: string[];
+  onEditClick?: () => void;
+}) {
+  const [allCurricula, setAllCurricula] = useState<Curriculum[]>([]);
   const [selectedCurriculumId, setSelectedCurriculumId] = useState("");
 
-  // localProgress: her goalId'nin mevcut (belki kaydedilmemiş) durumu
   const [localProgress, setLocalProgress] = useState<ProgressMap>({});
-  // savedProgress: son kaydedilen durum — dirty hesabı için
   const [savedProgress, setSavedProgress] = useState<ProgressMap>({});
 
   const [openMainGoals, setOpenMainGoals] = useState<Set<string>>(new Set());
@@ -100,42 +98,41 @@ export function ProgressTab({ studentId, workArea }: { studentId: string; workAr
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Sadece öğrenciye atanmış modüller
+  const curricula = useMemo(
+    () => allCurricula.filter((c) => curriculumIds.includes(c.id)),
+    [allCurricula, curriculumIds]
+  );
+
+  // curriculumIds değişince (düzenleme sonrası) seçimi güncelle
+  useEffect(() => {
+    if (curricula.length > 0 && !curricula.find((c) => c.id === selectedCurriculumId)) {
+      setSelectedCurriculumId(curricula[0].id);
+    } else if (curricula.length === 0) {
+      setSelectedCurriculumId("");
+    }
+  }, [curricula]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     Promise.all([
       fetch("/api/curriculum").then((r) => r.json()),
       fetch(`/api/students/${studentId}/progress`).then((r) => r.json()),
     ])
       .then(([cData, pData]) => {
-        const curriculaList: Curriculum[] = cData.curricula ?? [];
+        setAllCurricula(cData.curricula ?? []);
+
         const progressList: { goalId: string; status: string; notes: string | null }[] =
           pData.progress ?? [];
-
-        setCurricula(curriculaList);
-        if (curriculaList.length > 0) {
-          setSelectedCurriculumId(curriculaList[0].id);
-        }
-
-        // Her goalId → { status, notes } — bağımsız map
         const map: ProgressMap = {};
         for (const p of progressList) {
           map[p.goalId] = { status: p.status, notes: p.notes ?? "" };
         }
         setLocalProgress(map);
-        setSavedProgress(map); // başlangıçta ikisi aynı
+        setSavedProgress(map);
       })
       .catch(() => toast.error("Veriler yüklenemedi"))
       .finally(() => setLoading(false));
   }, [studentId]);
-
-  // ── Curricula dropdown grouping ──────────────────────────────────────
-  const allowedAreas = workArea ? (WORK_AREA_FILTER[workArea] ?? null) : null;
-
-  const curriculaByArea = curricula.reduce<Record<string, Curriculum[]>>((acc, c) => {
-    if (allowedAreas && !allowedAreas.includes(c.area)) return acc;
-    if (!acc[c.area]) acc[c.area] = [];
-    acc[c.area].push(c);
-    return acc;
-  }, {});
 
   const selectedCurriculum = curricula.find((c) => c.id === selectedCurriculumId);
   const mainGoals = selectedCurriculum?.goals.filter((g) => g.isMainGoal) ?? [];
@@ -148,35 +145,24 @@ export function ProgressTab({ studentId, workArea }: { studentId: string; workAr
     );
   }
 
-  // ── State güncelleyiciler ────────────────────────────────────────────
-
-  // Sadece TEK goalId'nin status'unu değiştirir, diğerleri dokunulmaz
   function setGoalStatus(goalId: string, status: string) {
     setLocalProgress((prev) => ({
       ...prev,
-      [goalId]: {
-        status,
-        notes: prev[goalId]?.notes ?? "",
-      },
+      [goalId]: { status, notes: prev[goalId]?.notes ?? "" },
     }));
   }
 
-  // Sadece TEK goalId'nin notunu değiştirir, diğerleri dokunulmaz
   function setGoalNotes(goalId: string, notes: string) {
     setLocalProgress((prev) => ({
       ...prev,
-      [goalId]: {
-        status: prev[goalId]?.status ?? "not_started",
-        notes,
-      },
+      [goalId]: { status: prev[goalId]?.status ?? "not_started", notes },
     }));
   }
 
   function toggleMainGoal(id: string) {
     setOpenMainGoals((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   }
@@ -184,20 +170,16 @@ export function ProgressTab({ studentId, workArea }: { studentId: string; workAr
   function toggleNote(goalId: string) {
     setOpenNotes((prev) => {
       const next = new Set(prev);
-      if (next.has(goalId)) next.delete(goalId);
-      else next.add(goalId);
+      if (next.has(goalId)) next.delete(goalId); else next.add(goalId);
       return next;
     });
   }
 
-  // ── Dirty hesabı ─────────────────────────────────────────────────────
-  // localProgress ile savedProgress karşılaştırılır
   const dirtyEntries = Object.entries(localProgress).filter(([id, v]) => {
     const saved = savedProgress[id];
     return !saved || saved.status !== v.status || saved.notes !== v.notes;
   });
 
-  // ── Kaydet ───────────────────────────────────────────────────────────
   async function handleSave() {
     if (dirtyEntries.length === 0) return;
     setSaving(true);
@@ -215,13 +197,9 @@ export function ProgressTab({ studentId, workArea }: { studentId: string; workAr
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-
-      // savedProgress'i localProgress ile hizala (artık dirty değil)
       setSavedProgress((prev) => {
         const next = { ...prev };
-        for (const [id, v] of dirtyEntries) {
-          next[id] = { ...v };
-        }
+        for (const [id, v] of dirtyEntries) next[id] = { ...v };
         return next;
       });
       toast.success(`${data.saved} hedef güncellendi`);
@@ -232,7 +210,6 @@ export function ProgressTab({ studentId, workArea }: { studentId: string; workAr
     }
   }
 
-  // ── Yükleniyor ───────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="flex justify-center py-16">
@@ -241,35 +218,76 @@ export function ProgressTab({ studentId, workArea }: { studentId: string; workAr
     );
   }
 
-  // ── İlerleme özeti ───────────────────────────────────────────────────
+  // Boş state — modül atanmamış
+  if (curriculumIds.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-16 px-8 text-center">
+        <div className="text-4xl mb-3">📋</div>
+        <p className="text-sm font-medium text-zinc-600 mb-1">
+          Bu öğrenci için henüz çalışma modülü seçilmemiştir.
+        </p>
+        <p className="text-xs text-zinc-400 mb-5">
+          Öğrenci profilini düzenleyerek modül ekleyebilirsiniz.
+        </p>
+        {onEditClick && (
+          <button
+            onClick={onEditClick}
+            className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+          >
+            Öğrenciyi Düzenle → Modül Ekle
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // Curricula gruplama (area bazlı, dropdown için)
+  const curriculaByArea = curricula.reduce<Record<string, Curriculum[]>>((acc, c) => {
+    if (!acc[c.area]) acc[c.area] = [];
+    acc[c.area].push(c);
+    return acc;
+  }, {});
+
   const allGoals = selectedCurriculum?.goals ?? [];
-  const completedCount = allGoals.filter(
-    (g) => localProgress[g.id]?.status === "completed"
-  ).length;
-  const inProgressCount = allGoals.filter(
-    (g) => localProgress[g.id]?.status === "in_progress"
-  ).length;
+  const completedCount = allGoals.filter((g) => localProgress[g.id]?.status === "completed").length;
+  const inProgressCount = allGoals.filter((g) => localProgress[g.id]?.status === "in_progress").length;
   const totalCount = allGoals.length;
 
-  // ── Render ───────────────────────────────────────────────────────────
   return (
     <div className="space-y-4">
       {/* Modül Dropdown */}
-      <select
-        value={selectedCurriculumId}
-        onChange={(e) => setSelectedCurriculumId(e.target.value)}
-        className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        {Object.entries(curriculaByArea).map(([area, list]) => (
-          <optgroup key={area} label={AREA_LABELS[area] ?? area}>
-            {list.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.title}
-              </option>
-            ))}
-          </optgroup>
-        ))}
-      </select>
+      {curricula.length > 1 && (
+        <select
+          value={selectedCurriculumId}
+          onChange={(e) => setSelectedCurriculumId(e.target.value)}
+          className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {Object.entries(curriculaByArea).map(([area, list]) => (
+            <optgroup key={area} label={AREA_LABELS[area] ?? area}>
+              {list.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.title}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      )}
+
+      {/* Tek modül varsa başlık olarak göster */}
+      {curricula.length === 1 && selectedCurriculum && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-zinc-700">{selectedCurriculum.title}</p>
+          {onEditClick && (
+            <button
+              onClick={onEditClick}
+              className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              Modülü Değiştir
+            </button>
+          )}
+        </div>
+      )}
 
       {/* İlerleme Özeti */}
       {totalCount > 0 && (
@@ -321,7 +339,6 @@ export function ProgressTab({ studentId, workArea }: { studentId: string; workAr
                 key={main.id}
                 className="rounded-2xl border border-zinc-200 bg-white overflow-hidden"
               >
-                {/* Ana Hedef — tıklanınca açılır/kapanır */}
                 <button
                   type="button"
                   onClick={() => toggleMainGoal(main.id)}
@@ -350,11 +367,9 @@ export function ProgressTab({ studentId, workArea }: { studentId: string; workAr
                   )}
                 </button>
 
-                {/* Alt Hedefler — her biri bağımsız */}
                 {isOpen && subGoals.length > 0 && (
                   <div className="divide-y divide-zinc-50">
                     {subGoals.map((sub) => {
-                      // Her sub kendi state'ini okur — diğerlerinden bağımsız
                       const currentStatus = localProgress[sub.id]?.status ?? "not_started";
                       const currentNotes = localProgress[sub.id]?.notes ?? "";
                       const noteOpen = openNotes.has(sub.id);
@@ -383,7 +398,6 @@ export function ProgressTab({ studentId, workArea }: { studentId: string; workAr
                               >
                                 <FileText className="w-3.5 h-3.5" />
                               </button>
-                              {/* Her GoalStatusButtons kendi goalId + status'unu alır */}
                               <GoalStatusButtons
                                 goalId={sub.id}
                                 status={currentStatus}

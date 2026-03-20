@@ -460,7 +460,13 @@ export default function StudentDetailPage({
         </div>
 
         {/* İlerleme Sekmesi */}
-        {activeTab === "progress" && <ProgressTab studentId={student.id} workArea={student.workArea} />}
+        {activeTab === "progress" && (
+          <ProgressTab
+            studentId={student.id}
+            curriculumIds={student.curriculumIds ?? []}
+            onEditClick={openEdit}
+          />
+        )}
 
         {/* Eğitim Profili Sekmesi */}
         {activeTab === "aiProfile" && (
