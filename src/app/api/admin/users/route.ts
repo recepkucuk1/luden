@@ -1,0 +1,59 @@
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
+
+async function requireAdmin() {
+  const session = await auth();
+  if (!session?.user?.id) return null;
+  const therapist = await prisma.therapist.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+  if (therapist?.role !== "admin") return null;
+  return session;
+}
+
+export async function GET() {
+  const session = await requireAdmin();
+  if (!session) {
+    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
+  }
+
+  const users = await prisma.therapist.findMany({
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      specialty: true,
+      role: true,
+      createdAt: true,
+      _count: {
+        select: { students: true, cards: true },
+      },
+    },
+  });
+
+  return NextResponse.json({ users });
+}
+
+export async function DELETE(request: NextRequest) {
+  const session = await requireAdmin();
+  if (!session) {
+    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ error: "id gerekli" }, { status: 400 });
+  }
+
+  // Admin kendisini silemez
+  if (id === session.user.id) {
+    return NextResponse.json({ error: "Kendi hesabınızı silemezsiniz." }, { status: 400 });
+  }
+
+  await prisma.therapist.delete({ where: { id } });
+  return NextResponse.json({ success: true });
+}

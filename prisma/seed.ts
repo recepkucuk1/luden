@@ -3111,6 +3111,13 @@ async function main() {
   console.log(`  Curriculum   : ${curriculumCount}`);
   console.log(`  Hedef (Goal) : ${goalCount}`);
   console.log("─────────────────────────────────");
+
+  // En eski terapisti admin yap
+  const oldest = await prisma.therapist.findFirst({ orderBy: { createdAt: "asc" } });
+  if (oldest) {
+    await prisma.therapist.update({ where: { id: oldest.id }, data: { role: "admin" } });
+    console.log(`\n  ★  Admin: ${oldest.name} (${oldest.email})`);
+  }
 }
 
 main()
