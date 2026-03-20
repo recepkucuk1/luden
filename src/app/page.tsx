@@ -185,10 +185,10 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
           <Link href="/" className="shrink-0">
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="Luden Vox"
-              width={600}
-              height={221}
+              width={120}
+              height={44}
               className="h-9 w-auto brightness-0 invert"
               priority
             />
@@ -361,10 +361,10 @@ export default function LandingPage() {
             {/* Sol: Logo + açıklama */}
             <div>
               <Image
-                src="/logo.png"
+                src="/logo.svg"
                 alt="Luden Vox"
-                width={600}
-                height={221}
+                width={120}
+                height={44}
                 className="h-8 w-auto mb-3 brightness-0 invert"
               />
               <p className="text-xs text-white/60 leading-relaxed max-w-[200px]">

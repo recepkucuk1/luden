@@ -49,7 +49,7 @@ export function AppHeader() {
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
           {/* Sol: Logo */}
           <Link href="/dashboard" className="shrink-0">
-            <Image src="/logo.png" alt="Luden" width={600} height={221} className="h-9 w-auto brightness-0 invert" priority />
+            <Image src="/logo.svg" alt="Luden" width={120} height={44} className="h-9 w-auto brightness-0 invert" priority />
           </Link>
 
           {/* Orta: Nav — masaüstü */}

@@ -65,7 +65,7 @@ export default function RegisterPage() {
     <div className="flex min-h-screen">
       {/* Sol panel — masaüstü */}
       <div className="hidden lg:flex lg:w-5/12 flex-col justify-between bg-[#023435] p-12">
-        <Image src="/logo.png" alt="Luden" width={600} height={221} className="h-9 w-auto brightness-0 invert" />
+        <Image src="/logo.svg" alt="Luden" width={120} height={44} className="h-9 w-auto brightness-0 invert" />
         <div>
           <h2 className="text-3xl font-bold text-white mb-4">Uzmanlar için akıllı platform</h2>
           <p className="text-white/60 text-sm leading-relaxed mb-8">
@@ -85,7 +85,7 @@ export default function RegisterPage() {
         <div className="w-full max-w-sm">
           {/* Mobil logo */}
           <div className="lg:hidden text-center mb-8">
-            <Image src="/logo.png" alt="Luden" width={600} height={221} className="h-8 w-auto mx-auto" />
+            <Image src="/logo.svg" alt="Luden" width={120} height={44} className="h-8 w-auto mx-auto" />
           </div>
 
           <div className="mb-8">
