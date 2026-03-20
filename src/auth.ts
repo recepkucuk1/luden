@@ -50,19 +50,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id;
         token.role = (user as { role?: string }).role ?? "user";
       }
-      // Eski token'larda role yoksa DB'den çek
-      if (!token.role && token.id) {
+      return token;
+    },
+    async session({ session, token }) {
+      if (token?.id) session.user.id = token.id as string;
+      // token.role varsa kullan; yoksa (eski token) DB'den çek
+      if (token?.role) {
+        session.user.role = token.role as string;
+      } else if (token?.id) {
         const therapist = await prisma.therapist.findUnique({
           where: { id: token.id as string },
           select: { role: true },
         });
-        token.role = therapist?.role ?? "user";
+        session.user.role = therapist?.role ?? "user";
+      } else {
+        session.user.role = "user";
       }
-      return token;
-    },
-    session({ session, token }) {
-      if (token?.id) session.user.id = token.id as string;
-      session.user.role = (token.role as string) ?? "user";
       return session;
     },
   },
