@@ -321,10 +321,17 @@ export default function CardsPage() {
                     onDeletePress={() => { setSwipeOpenId(null); setConfirmDeleteId(card.id); }}
                   >
                   <div
-                    className="group rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden flex flex-col"
+                    className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden flex flex-col"
                   >
+                    {/* Hover delete button — desktop only (hidden on touch via opacity) */}
+                    <button
+                      onClick={(e) => { e.preventDefault(); setConfirmDeleteId(card.id); }}
+                      className="absolute top-3 right-3 z-10 rounded-lg px-2 py-1 text-xs text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      Sil
+                    </button>
                     <Link href={`/cards/${card.id}`} className="block p-4 flex-1">
-                      <div className="flex flex-wrap gap-1.5 mb-2">
+                      <div className="flex flex-wrap gap-1.5 mb-2 pr-8">
                         <Badge className={WORK_AREA_COLOR[card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
                           {WORK_AREA_LABEL[card.category] ?? card.category}
                         </Badge>
