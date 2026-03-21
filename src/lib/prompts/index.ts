@@ -13,7 +13,6 @@ export interface CardGenerationParams {
 export interface GeneratedCard {
   title: string;
   objective: string;
-  duration: string;
   materials: string[];
   instructions: string[];
   exercises: { name: string; description: string; repetitions: string }[];
@@ -69,7 +68,6 @@ Aşağıdaki JSON formatında bir öğrenme kartı oluştur. Sadece JSON döndü
 {
   "title": "Etkinliğin kısa ve açıklayıcı başlığı",
   "objective": "Bu etkinliğin eğitimsel hedefi (1-2 cümle)",
-  "duration": "Önerilen süre (örn: '10-15 dakika')",
   "materials": ["Gerekli materyal 1", "Gerekli materyal 2"],
   "instructions": [
     "Adım 1: ...",

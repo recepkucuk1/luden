@@ -64,9 +64,6 @@ export function CardPreview({ card }: CardPreviewProps) {
             <Badge className={WORK_AREA_COLOR[card.category]}>{WORK_AREA_LABEL[card.category]}</Badge>
             <Badge className={DIFFICULTY_COLOR[card.difficulty]}>{DIFFICULTY_LABEL[card.difficulty]}</Badge>
             <Badge className="bg-zinc-100 text-zinc-600">{AGE_LABEL[card.ageGroup]}</Badge>
-            {card.duration && (
-              <Badge className="bg-zinc-100 text-zinc-600">⏱ {card.duration}</Badge>
-            )}
           </div>
           <Button
             variant="outline"

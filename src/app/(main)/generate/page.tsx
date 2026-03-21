@@ -1,12 +1,60 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CardGeneratorForm } from "@/components/cards/CardGeneratorForm";
 import { CardPreview } from "@/components/cards/CardPreview";
 import { AssignStudentsModal } from "@/components/cards/AssignStudentsModal";
 import type { GeneratedCard } from "@/lib/prompts";
+
+const LOADING_MSGS = [
+  "Kelimeler uçuşuyor, kartınız şekilleniyor... 🦋",
+  "Nöronlar ateşleniyor, hedefler hizalanıyor... 🧠",
+  "Dil büyüsü yapılıyor, biraz sabır... ✨",
+  "Öğrenme kartı pişiyor, fırından çıkmak üzere... 🍞",
+  "Sesler, heceler, kelimeler bir araya geliyor... 🎵",
+  "Uzman terapist moduna geçildi... 🎯",
+  "Müfredat hedefleri karta işleniyor... 📚",
+  "Beyin fırtınası devam ediyor... ⚡",
+  "Kartınız özenle hazırlanıyor... 🌱",
+  "Dil yolculuğunuz başlamak üzere... 🚀",
+  "Kelime hazinesi kontrol ediliyor... 🔍",
+  "Artikülasyon egzersizleri tasarlanıyor... 👄",
+  "İşitsel bellekle dans ediliyor... 👂",
+  "Terapi sihri devreye giriyor... 🪄",
+  "Her hece bir adım, her adım bir zafer... 🏆",
+  "Öğrenme maceranız kurgulanıyor... 🗺️",
+];
+
+function LoadingMessages() {
+  const [index, setIndex] = useState(() => Math.floor(Math.random() * LOADING_MSGS.length));
+  const [visible, setVisible] = useState(true);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      timerRef.current = setTimeout(() => {
+        setIndex((i) => (i + 1) % LOADING_MSGS.length);
+        setVisible(true);
+      }, 300);
+    }, 2600);
+    return () => {
+      clearInterval(interval);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  return (
+    <p
+      className="text-sm text-zinc-500 transition-opacity duration-300 max-w-xs"
+      style={{ opacity: visible ? 1 : 0 }}
+    >
+      {LOADING_MSGS[index]}
+    </p>
+  );
+}
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -78,9 +126,9 @@ function HomeContent() {
 
           {loading ? (
             <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-sm">
-              <div className="text-center space-y-3">
+              <div className="text-center space-y-4 px-8">
                 <div className="mx-auto h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
-                <p className="text-sm text-zinc-500">Claude öğrenme kartı hazırlıyor…</p>
+                <LoadingMessages />
               </div>
             </div>
           ) : card ? (

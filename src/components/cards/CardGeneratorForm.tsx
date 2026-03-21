@@ -187,7 +187,7 @@ export function CardGeneratorForm({
   async function onSubmit(values: FormValues) {
     setError(null);
     onLoading(true);
-    const loadingToast = toast.loading("Kart üretiliyor…");
+    const loadingToast = toast.loading("Kart üretiliyor... ✨");
     try {
       const res = await fetch("/api/cards/generate", {
         method: "POST",

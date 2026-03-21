@@ -334,11 +334,6 @@ export function CardPDFDocument({ card }: CardPDFDocumentProps) {
             <Text style={[styles.badge, styles.badgeAge]}>
               {AGE_LABEL[card.ageGroup] ?? card.ageGroup}
             </Text>
-            {card.duration && (
-              <Text style={[styles.badge, styles.badgeDuration]}>
-                {sanitize(card.duration)}
-              </Text>
-            )}
           </View>
 
           <Text style={styles.cardTitle}>{sanitize(card.title)}</Text>
