@@ -192,22 +192,24 @@ export default function ProfilePage() {
                 {badges.map((badge) => (
                   <div
                     key={badge.id}
-                    title={`${badge.name}: ${badge.description}`}
                     className={[
-                      "relative group flex flex-col items-center gap-1.5 rounded-xl border p-3 text-center transition-all",
+                      "relative flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all",
                       badge.earned
-                        ? "border-[#FE703A]/30 bg-gradient-to-b from-[#FE703A]/5 to-white shadow-sm"
-                        : "border-zinc-100 bg-zinc-50 opacity-40 grayscale",
+                        ? "border-[#023435]/20 bg-[#023435]/[0.08] shadow-sm"
+                        : "border-zinc-100 bg-zinc-50 opacity-30 grayscale",
                     ].join(" ")}
                   >
-                    <span className="text-2xl leading-none">{badge.emoji}</span>
-                    <p className={`text-[11px] font-semibold leading-tight ${badge.earned ? "text-zinc-800" : "text-zinc-500"}`}>
-                      {badge.name}
-                    </p>
-                    {/* Tooltip */}
-                    <div className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 w-max max-w-[160px] rounded-lg bg-zinc-900 px-2.5 py-1.5 text-[11px] text-white opacity-0 group-hover:opacity-100 transition-opacity z-10 text-center">
-                      {badge.description}
-                      <div className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-zinc-900" />
+                    {badge.earned && (
+                      <div className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#023435] text-white text-[9px] font-bold leading-none">
+                        ✓
+                      </div>
+                    )}
+                    <span className="text-5xl leading-none">{badge.emoji}</span>
+                    <div>
+                      <p className={`text-[11px] font-semibold leading-tight ${badge.earned ? "text-zinc-800" : "text-zinc-500"}`}>
+                        {badge.name}
+                      </p>
+                      <p className="text-[10px] text-zinc-400 mt-0.5 leading-snug">{badge.description}</p>
                     </div>
                   </div>
                 ))}

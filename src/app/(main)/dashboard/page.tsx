@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { Users, CheckCircle2, LayoutGrid, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   WORK_AREA_LABEL,
@@ -41,11 +42,6 @@ interface RecentStudent {
   cardCount: number;
 }
 
-const CATEGORY_ITEMS = [
-  { key: "speech", label: "Konuşma" },
-  { key: "language", label: "Dil" },
-  { key: "hearing", label: "İşitme" },
-];
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -88,54 +84,73 @@ export default function DashboardPage() {
       ) : (
         <>
           {/* İstatistikler */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-            <div className="col-span-1 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm border-l-4 border-l-[#FE703A]">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm border-l-4 border-l-[#FE703A]">
               <p className="text-xs text-zinc-400 mb-1">Toplam Öğrenci</p>
               <p className="text-3xl font-bold text-zinc-900">{stats?.students ?? 0}</p>
             </div>
-            <div className="col-span-1 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm border-l-4 border-l-[#FE703A]">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm border-l-4 border-l-[#FE703A]">
               <p className="text-xs text-zinc-400 mb-1">Toplam Kart</p>
               <p className="text-3xl font-bold text-zinc-900">{stats?.cards ?? 0}</p>
             </div>
-            {CATEGORY_ITEMS.map((cat) => (
-              <div key={cat.key} className="col-span-1 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm border-l-4 border-l-[#FE703A]">
-                <p className="text-xs text-zinc-400 mb-1">{cat.label}</p>
-                <p className="text-3xl font-bold text-zinc-900">{stats?.byCategory[cat.key] ?? 0}</p>
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm border-l-4 border-l-[#FE703A]">
+              <p className="text-xs text-zinc-400 mb-3">Alanlara Göre</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-zinc-600">🗣 Konuşma</span>
+                  <span className="text-sm font-bold text-zinc-900">{stats?.byCategory.speech ?? 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-zinc-600">💬 Dil</span>
+                  <span className="text-sm font-bold text-zinc-900">{stats?.byCategory.language ?? 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-zinc-600">👂 İşitme</span>
+                  <span className="text-sm font-bold text-zinc-900">{stats?.byCategory.hearing ?? 0}</span>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
 
           {/* Bu Hafta */}
           <div>
-            <h2 className="text-sm font-semibold text-zinc-500 mb-3">Bu Hafta</h2>
+            <h2 className="text-sm font-semibold text-[#023435] mb-3">Bu Hafta</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">👤</span>
-                  <p className="text-xs text-zinc-400">Çalışılan Öğrenci</p>
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#023435]/10">
+                    <Users className="h-4 w-4 text-[#023435]" />
+                  </div>
+                  <p className="text-xs text-zinc-500">Çalışılan Öğrenci</p>
                 </div>
                 <p className="text-2xl font-bold text-[#023435]">{weekly?.studentsWorked ?? "—"}</p>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">✅</span>
-                  <p className="text-xs text-zinc-400">Tamamlanan Hedef</p>
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#023435]/10">
+                    <CheckCircle2 className="h-4 w-4 text-[#023435]" />
+                  </div>
+                  <p className="text-xs text-zinc-500">Tamamlanan Hedef</p>
                 </div>
-                <p className="text-2xl font-bold text-[#FE703A]">{weekly?.goalsCompleted ?? "—"}</p>
+                <p className="text-2xl font-bold text-[#023435]">{weekly?.goalsCompleted ?? "—"}</p>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">🃏</span>
-                  <p className="text-xs text-zinc-400">Üretilen Kart</p>
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#023435]/10">
+                    <LayoutGrid className="h-4 w-4 text-[#023435]" />
+                  </div>
+                  <p className="text-xs text-zinc-500">Üretilen Kart</p>
                 </div>
-                <p className="text-2xl font-bold text-purple-600">{weekly?.cardsCreated ?? "—"}</p>
+                <p className="text-2xl font-bold text-[#023435]">{weekly?.cardsCreated ?? "—"}</p>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">🔥</span>
-                  <p className="text-xs text-zinc-400">Günlük Seri</p>
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FE703A]/10">
+                    <Flame className="h-4 w-4 text-[#FE703A]" />
+                  </div>
+                  <p className="text-xs text-zinc-500">Günlük Seri</p>
                 </div>
-                <p className="text-2xl font-bold text-orange-500">
+                <p className="text-2xl font-bold text-[#FE703A]">
                   {weekly ? `${weekly.streak} gün` : "—"}
                 </p>
               </div>
