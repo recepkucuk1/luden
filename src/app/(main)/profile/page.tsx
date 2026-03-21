@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { type EarnedBadge } from "@/lib/badges";
 
 const PREDEFINED_SPECIALTIES = ["speech-therapist", "audiologist", "speech-audiology"];
 
@@ -22,6 +23,7 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [otherText, setOtherText] = useState("");
+  const [badges, setBadges] = useState<EarnedBadge[]>([]);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileSaving, setProfileSaving] = useState(false);
 
@@ -33,11 +35,14 @@ export default function ProfilePage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/profile");
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        setName(data.therapist.name);
-        const specialties: string[] = data.therapist.specialty ?? [];
+        const [profileRes, badgesRes] = await Promise.all([
+          fetch("/api/profile"),
+          fetch("/api/stats/badges"),
+        ]);
+        const [profileData, badgesData] = await Promise.all([profileRes.json(), badgesRes.json()]);
+        if (!profileRes.ok) throw new Error(profileData.error);
+        setName(profileData.therapist.name);
+        const specialties: string[] = profileData.therapist.specialty ?? [];
         const first = specialties[0] ?? "";
         if (PREDEFINED_SPECIALTIES.includes(first)) {
           setSelectedSpecialty(first);
@@ -45,6 +50,7 @@ export default function ProfilePage() {
           setSelectedSpecialty("other");
           setOtherText(first);
         }
+        if (badgesRes.ok) setBadges(badgesData.badges ?? []);
       } catch (err) {
         console.error("Profil yüklenemedi:", err);
       } finally {
@@ -174,6 +180,40 @@ export default function ProfilePage() {
               </Button>
             </form>
           </div>
+
+          {/* Rozetlerim */}
+          {badges.length > 0 && (
+            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <h2 className="text-base font-semibold text-zinc-900 mb-1">Rozetlerim</h2>
+              <p className="text-xs text-zinc-400 mb-5">
+                {badges.filter((b) => b.earned).length} / {badges.length} rozet kazanıldı
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                {badges.map((badge) => (
+                  <div
+                    key={badge.id}
+                    title={`${badge.name}: ${badge.description}`}
+                    className={[
+                      "relative group flex flex-col items-center gap-1.5 rounded-xl border p-3 text-center transition-all",
+                      badge.earned
+                        ? "border-[#FE703A]/30 bg-gradient-to-b from-[#FE703A]/5 to-white shadow-sm"
+                        : "border-zinc-100 bg-zinc-50 opacity-40 grayscale",
+                    ].join(" ")}
+                  >
+                    <span className="text-2xl leading-none">{badge.emoji}</span>
+                    <p className={`text-[11px] font-semibold leading-tight ${badge.earned ? "text-zinc-800" : "text-zinc-500"}`}>
+                      {badge.name}
+                    </p>
+                    {/* Tooltip */}
+                    <div className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 w-max max-w-[160px] rounded-lg bg-zinc-900 px-2.5 py-1.5 text-[11px] text-white opacity-0 group-hover:opacity-100 transition-opacity z-10 text-center">
+                      {badge.description}
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-zinc-900" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Şifre Değiştir */}
           <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">

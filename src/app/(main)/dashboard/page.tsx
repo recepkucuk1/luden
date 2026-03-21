@@ -17,6 +17,13 @@ interface DashboardStats {
   byCategory: Record<string, number>;
 }
 
+interface WeeklyStats {
+  studentsWorked: number;
+  goalsCompleted: number;
+  cardsCreated: number;
+  streak: number;
+}
+
 interface RecentCard {
   id: string;
   title: string;
@@ -42,6 +49,7 @@ const CATEGORY_ITEMS = [
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [weekly, setWeekly] = useState<WeeklyStats | null>(null);
   const [recentCards, setRecentCards] = useState<RecentCard[]>([]);
   const [recentStudents, setRecentStudents] = useState<RecentStudent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,12 +57,16 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/dashboard");
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        setStats(data.stats);
-        setRecentCards(data.recentCards);
-        setRecentStudents(data.recentStudents);
+        const [dashRes, weekRes] = await Promise.all([
+          fetch("/api/dashboard"),
+          fetch("/api/stats/weekly"),
+        ]);
+        const [dashData, weekData] = await Promise.all([dashRes.json(), weekRes.json()]);
+        if (!dashRes.ok) throw new Error(dashData.error);
+        setStats(dashData.stats);
+        setRecentCards(dashData.recentCards);
+        setRecentStudents(dashData.recentStudents);
+        if (weekRes.ok) setWeekly(weekData);
       } catch (err) {
         console.error("Dashboard yüklenemedi:", err);
         toast.error("Veriler yüklenemedi, sayfayı yenileyin");
@@ -91,6 +103,43 @@ export default function DashboardPage() {
                 <p className="text-3xl font-bold text-zinc-900">{stats?.byCategory[cat.key] ?? 0}</p>
               </div>
             ))}
+          </div>
+
+          {/* Bu Hafta */}
+          <div>
+            <h2 className="text-sm font-semibold text-zinc-500 mb-3">Bu Hafta</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">👤</span>
+                  <p className="text-xs text-zinc-400">Çalışılan Öğrenci</p>
+                </div>
+                <p className="text-2xl font-bold text-[#023435]">{weekly?.studentsWorked ?? "—"}</p>
+              </div>
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">✅</span>
+                  <p className="text-xs text-zinc-400">Tamamlanan Hedef</p>
+                </div>
+                <p className="text-2xl font-bold text-[#FE703A]">{weekly?.goalsCompleted ?? "—"}</p>
+              </div>
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">🃏</span>
+                  <p className="text-xs text-zinc-400">Üretilen Kart</p>
+                </div>
+                <p className="text-2xl font-bold text-purple-600">{weekly?.cardsCreated ?? "—"}</p>
+              </div>
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">🔥</span>
+                  <p className="text-xs text-zinc-400">Günlük Seri</p>
+                </div>
+                <p className="text-2xl font-bold text-orange-500">
+                  {weekly ? `${weekly.streak} gün` : "—"}
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Son Aktivite */}
