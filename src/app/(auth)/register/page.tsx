@@ -1,18 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const captchaRef = useRef<HCaptcha>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [successEmail, setSuccessEmail] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -31,11 +35,20 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!captchaToken) {
+      setError("Lütfen CAPTCHA doğrulamasını tamamlayın.");
+      setLoading(false);
+      return;
+    }
+
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, captchaToken }),
     });
+
+    captchaRef.current?.resetCaptcha();
+    setCaptchaToken(null);
 
     const data = await res.json();
 
@@ -45,20 +58,34 @@ export default function RegisterPage() {
       return;
     }
 
-    // Kayıt başarılı — otomatik giriş yap
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    setSuccessEmail(email);
+    setSuccess(true);
+    setLoading(false);
+  }
 
-    if (result?.error) {
-      setError("Kayıt başarılı fakat giriş yapılamadı. Lütfen giriş sayfasına gidin.");
-      setLoading(false);
-    } else {
-      router.push("/");
-      router.refresh();
-    }
+  if (success) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white p-8">
+        <div className="w-full max-w-sm text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mx-auto mb-5">
+            <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-zinc-900 mb-2">Emailinizi kontrol edin</h2>
+          <p className="text-sm text-zinc-500 mb-1">
+            Doğrulama linki şu adrese gönderildi:
+          </p>
+          <p className="text-sm font-semibold text-zinc-700 mb-6">{successEmail}</p>
+          <p className="text-xs text-zinc-400 mb-6">
+            Linke tıklayarak hesabınızı aktifleştirin. Email gelmezse spam klasörünü kontrol edin.
+          </p>
+          <Button onClick={() => router.push("/login")} className="w-full">
+            Giriş Sayfasına Git
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -90,7 +117,7 @@ export default function RegisterPage() {
 
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-zinc-900">Hesap Oluştur</h1>
-            <p className="mt-1 text-sm text-zinc-500">TerapiMat&apos;a ücretsiz kaydol</p>
+            <p className="mt-1 text-sm text-zinc-500">Luden&apos;a ücretsiz kaydol</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -142,6 +169,13 @@ export default function RegisterPage() {
                 autoComplete="new-password"
               />
             </div>
+
+            <HCaptcha
+              sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? "10000000-ffff-ffff-ffff-000000000001"}
+              onVerify={setCaptchaToken}
+              ref={captchaRef}
+              theme="light"
+            />
 
             {error && (
               <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">

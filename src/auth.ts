@@ -1,4 +1,8 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
+
+class EmailNotVerifiedError extends CredentialsSignin {
+  code = "email_not_verified";
+}
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
@@ -18,7 +22,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           const therapist = await prisma.therapist.findUnique({
             where: { email: credentials.email as string },
-            select: { id: true, email: true, name: true, password: true, specialty: true, role: true },
+            select: { id: true, email: true, name: true, password: true, specialty: true, role: true, emailVerified: true },
           });
 
           if (!therapist) return null;
@@ -29,6 +33,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           );
 
           if (!isValid) return null;
+
+          if (!therapist.emailVerified) {
+            throw new EmailNotVerifiedError();
+          }
 
           return {
             id: therapist.id,

@@ -12,7 +12,7 @@ export const authConfig: NextAuthConfig = {
 
       const isAuthPage = path.startsWith("/login") || path.startsWith("/register");
       const isApiAuth = path.startsWith("/api/auth");
-      const isPublic = path === "/";
+      const isPublic = path === "/" || path.startsWith("/verify-email");
 
       if (isApiAuth) return true;
       if (isPublic) return true;
