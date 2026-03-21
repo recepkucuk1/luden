@@ -21,6 +21,7 @@ import {
 import { ProgressTab } from "@/components/students/ProgressTab";
 import { CurriculumPicker } from "@/components/students/CurriculumPicker";
 import { Markdown } from "@/components/Md";
+import { SwipeableCard } from "@/components/SwipeableCard";
 
 function parseProfileSections(text: string): { title: string; content: string }[] {
   const result: { title: string; content: string }[] = [];
@@ -109,6 +110,7 @@ export default function StudentDetailPage({
   const [profileTimedOut, setProfileTimedOut] = useState(false);
   const [confirmCardId, setConfirmCardId] = useState<string | null>(null);
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
+  const [swipeOpenId, setSwipeOpenId] = useState<string | null>(null);
 
   // Eğitim Profili — polling
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -585,8 +587,15 @@ export default function StudentDetailPage({
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {student.cards.map((card) => (
-                <div
+                <SwipeableCard
                   key={card.id}
+                  id={card.id}
+                  openId={swipeOpenId}
+                  onOpen={setSwipeOpenId}
+                  onClose={() => setSwipeOpenId(null)}
+                  onDeletePress={() => { setSwipeOpenId(null); setConfirmCardId(card.id); }}
+                >
+                <div
                   className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden"
                 >
                   <Link href={`/cards/${card.id}`} className="block p-4">
@@ -647,6 +656,7 @@ export default function StudentDetailPage({
                     </div>
                   )}
                 </div>
+                </SwipeableCard>
               ))}
             </div>
           )}

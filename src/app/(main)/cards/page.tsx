@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AssignStudentsModal } from "@/components/cards/AssignStudentsModal";
+import { SwipeableCard } from "@/components/SwipeableCard";
 import { cn } from "@/lib/utils";
 import {
   WORK_AREA_COLOR,
@@ -100,6 +101,9 @@ export default function CardsPage() {
   const [curricula, setCurricula] = useState<Curriculum[]>([]);
   const [loading, setLoading]     = useState(true);
   const [assigningCard, setAssigningCard] = useState<CardItem | null>(null);
+  const [swipeOpenId, setSwipeOpenId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
 
   // Filtreler
   const [filterCategory,   setFilterCategory]   = useState("all");
@@ -166,6 +170,21 @@ export default function CardsPage() {
     });
     return list;
   }, [cards, filterCategory, filterDifficulty, filterAgeGroup, filterCurriculum, sortBy, goalToCurriculumId]);
+
+  async function handleDeleteCard(cardId: string) {
+    setDeletingCardId(cardId);
+    try {
+      const res = await fetch(`/api/cards/${cardId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Silme başarısız");
+      setCards((prev) => prev.filter((c) => c.id !== cardId));
+      toast.success("Kart silindi");
+    } catch {
+      toast.error("Bir hata oluştu, tekrar deneyin");
+    } finally {
+      setDeletingCardId(null);
+      setConfirmDeleteId(null);
+    }
+  }
 
   if (loading) {
     return (
@@ -293,8 +312,15 @@ export default function CardsPage() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {filtered.map((card) => (
-                  <div
+                  <SwipeableCard
                     key={card.id}
+                    id={card.id}
+                    openId={swipeOpenId}
+                    onOpen={setSwipeOpenId}
+                    onClose={() => setSwipeOpenId(null)}
+                    onDeletePress={() => { setSwipeOpenId(null); setConfirmDeleteId(card.id); }}
+                  >
+                  <div
                     className="group rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden flex flex-col"
                   >
                     <Link href={`/cards/${card.id}`} className="block p-4 flex-1">
@@ -330,12 +356,32 @@ export default function CardsPage() {
                       </button>
                     </div>
                   </div>
+                  </SwipeableCard>
                 ))}
               </div>
             )}
           </>
         )}
       </main>
+
+      {confirmDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-6 text-center">
+            <p className="text-base font-semibold text-zinc-900 mb-1">Kartı sil</p>
+            <p className="text-sm text-zinc-500 mb-5">
+              Bu kartı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setConfirmDeleteId(null)} disabled={!!deletingCardId}>
+                İptal
+              </Button>
+              <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => handleDeleteCard(confirmDeleteId)} disabled={!!deletingCardId}>
+                {deletingCardId ? "Siliniyor…" : "Evet, Sil"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {assigningCard && (
         <AssignStudentsModal
