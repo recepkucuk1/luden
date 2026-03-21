@@ -113,8 +113,9 @@ export function CardGeneratorForm({
   useEffect(() => {
     if (!studentId) { setStudentCurriculumIds([]); return; }
     fetch(`/api/students/${studentId}`)
-      .then(r => r.json())
-      .then(d => setStudentCurriculumIds(d.student?.curriculumIds ?? []));
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(d => setStudentCurriculumIds(d.student?.curriculumIds ?? []))
+      .catch(() => toast.error("Öğrenci verileri yüklenemedi"));
   }, [studentId]);
 
   const selectedCurriculum = curricula.find((c) => c.id === selectedCurriculumId);

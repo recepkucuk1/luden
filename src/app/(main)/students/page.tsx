@@ -164,7 +164,10 @@ export default function StudentsPage() {
   useEffect(() => { fetchStudents(); }, [fetchStudents]);
 
   useEffect(() => {
-    fetch("/api/curriculum").then(r => r.json()).then(d => setCurricula(d.curricula ?? []));
+    fetch("/api/curriculum")
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(d => setCurricula(d.curricula ?? []))
+      .catch(() => {/* curriculum is optional — form still works without it */});
   }, []);
 
   function resetForm() {

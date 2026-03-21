@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { logError } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -20,9 +21,8 @@ export async function GET() {
 
     return NextResponse.json({ therapist });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("[GET /api/profile] HATA:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logError("GET /api/profile", error);
+    return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
 }
 
@@ -48,8 +48,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ therapist });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("[PUT /api/profile] HATA:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logError("PUT /api/profile", error);
+    return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
 }

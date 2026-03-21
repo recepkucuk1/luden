@@ -150,8 +150,8 @@ export default function StudentDetailPage({
     } else {
       stopPolling();
     }
-    return stopPolling;
-  }, [student?.aiProfile, generatingProfile]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => stopPolling();
+  }, [id, student?.aiProfile, generatingProfile]);
 
   async function handleGenerateProfile() {
     if (!student) return;

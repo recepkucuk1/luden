@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { logError } from "@/lib/utils";
 
 export async function PUT(request: NextRequest) {
   try {
@@ -44,7 +45,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Mevcut şifre yanlış." }, { status: 400 });
     }
 
-    const hashed = await bcrypt.hash(newPassword, 10);
+    const hashed = await bcrypt.hash(newPassword, 12);
     await prisma.therapist.update({
       where: { id: session.user.id },
       data: { password: hashed },
@@ -52,8 +53,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("[PUT /api/profile/password] HATA:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logError("PUT /api/profile/password", error);
+    return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
 }

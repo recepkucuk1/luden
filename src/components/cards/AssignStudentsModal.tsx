@@ -32,6 +32,8 @@ export function AssignStudentsModal({ cardId, cardTitle, onClose, onSaved }: Pro
           fetch("/api/students"),
           fetch(`/api/cards/${cardId}/assignments`),
         ]);
+        if (!studentsRes.ok) throw new Error("Öğrenciler yüklenemedi");
+        if (!assignmentsRes.ok) throw new Error("Atamalar yüklenemedi");
         const studentsData = await studentsRes.json();
         const assignmentsData = await assignmentsRes.json();
 

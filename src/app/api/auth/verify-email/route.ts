@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { logError } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Email doğrulama hatası:", error);
+    logError("GET /api/auth/verify-email", error);
     return NextResponse.json({ error: "Doğrulama sırasında hata oluştu." }, { status: 500 });
   }
 }

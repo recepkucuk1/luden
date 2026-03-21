@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { logError } from "@/lib/utils";
 
 export async function GET(
   _request: NextRequest,
@@ -49,9 +50,8 @@ export async function GET(
 
     return NextResponse.json({ card: { ...card, curriculumGoals } });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("[GET /api/cards/[id]] HATA:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logError("GET /api/cards/[id]", error);
+    return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
 }
 
@@ -82,8 +82,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("[DELETE /api/cards/[id]] HATA:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logError("DELETE /api/cards/[id]", error);
+    return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
 }

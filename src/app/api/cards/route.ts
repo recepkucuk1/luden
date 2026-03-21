@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { logError } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -27,8 +28,7 @@ export async function GET() {
 
     return NextResponse.json({ cards });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("[GET /api/cards] HATA:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    logError("GET /api/cards", error);
+    return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
 }

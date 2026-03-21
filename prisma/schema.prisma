@@ -37,7 +37,7 @@ model Student {
   updatedAt     DateTime  @updatedAt
 
   therapistId String
-  therapist   Therapist @relation(fields: [therapistId], references: [id])
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
   cards       Card[]
   assignments CardAssignment[]
   progress    StudentProgress[]
@@ -55,10 +55,10 @@ model Card {
   updatedAt  DateTime @updatedAt
 
   therapistId String
-  therapist   Therapist @relation(fields: [therapistId], references: [id])
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
   studentId String?
-  student   Student? @relation(fields: [studentId], references: [id])
+  student   Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
 
   curriculumGoalIds String[] @default([])
 
@@ -105,13 +105,13 @@ model StudentProgress {
   updatedAt DateTime @updatedAt
 
   studentId String
-  student   Student @relation(fields: [studentId], references: [id])
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   goalId String
-  goal   CurriculumGoal @relation(fields: [goalId], references: [id])
+  goal   CurriculumGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
 
   therapistId String
-  therapist   Therapist @relation(fields: [therapistId], references: [id])
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, goalId])
 }

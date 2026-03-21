@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { toDateStr, calculateStreak } from "@/lib/badges";
+import { logError } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -37,7 +38,7 @@ export async function GET() {
 
     return NextResponse.json({ studentsWorked, goalsCompleted, cardsCreated, streak });
   } catch (error) {
-    console.error("[GET /api/stats/weekly]", error);
+    logError("GET /api/stats/weekly", error);
     return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
 }

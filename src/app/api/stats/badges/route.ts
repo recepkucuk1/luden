@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { computeBadges, toDateStr, calculateStreak, type BadgeStats } from "@/lib/badges";
+import { logError } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -38,7 +39,7 @@ export async function GET() {
 
     return NextResponse.json({ badges: computeBadges(stats), stats });
   } catch (error) {
-    console.error("[GET /api/stats/badges]", error);
+    logError("GET /api/stats/badges", error);
     return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse, getClientIp } from "@/lib/rateLimit";
 import { sendVerificationEmail } from "@/lib/email";
+import { logError } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Yeniden doğrulama hatası:", error);
+    logError("POST /api/auth/resend-verification", error);
     return NextResponse.json({ error: "Hata oluştu." }, { status: 500 });
   }
 }

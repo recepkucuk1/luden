@@ -114,8 +114,8 @@ export default function CardsPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/cards").then((r) => r.json()),
-      fetch("/api/curriculum").then((r) => r.json()),
+      fetch("/api/cards").then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch("/api/curriculum").then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
     ]).then(([cData, curData]) => {
       setCards(cData.cards ?? []);
       setCurricula(curData.curricula ?? []);

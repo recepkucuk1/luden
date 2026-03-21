@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse, getClientIp } from "@/lib/rateLimit";
 import { registerBodySchema, zodError } from "@/lib/validation";
 import { sendVerificationEmail } from "@/lib/email";
+import { logError } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Kayıt hatası:", error);
+    logError("POST /api/auth/register", error);
     return NextResponse.json({ error: "Kayıt sırasında bir hata oluştu." }, { status: 500 });
   }
 }

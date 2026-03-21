@@ -82,8 +82,16 @@ export default function CardDetailPage({
     );
   }
 
+  const raw = card.content as unknown as Record<string, unknown>;
   const generatedCard: GeneratedCard = {
-    ...(card.content as GeneratedCard),
+    title: typeof raw.title === "string" ? raw.title : card.title,
+    objective: typeof raw.objective === "string" ? raw.objective : "",
+    materials: Array.isArray(raw.materials) ? (raw.materials as string[]) : [],
+    instructions: Array.isArray(raw.instructions) ? (raw.instructions as string[]) : [],
+    exercises: Array.isArray(raw.exercises) ? (raw.exercises as GeneratedCard["exercises"]) : [],
+    therapistNotes: typeof raw.therapistNotes === "string" ? raw.therapistNotes : "",
+    progressIndicators: Array.isArray(raw.progressIndicators) ? (raw.progressIndicators as string[]) : [],
+    homeExercise: typeof raw.homeExercise === "string" ? raw.homeExercise : "",
     category: card.category as GeneratedCard["category"],
     difficulty: card.difficulty as GeneratedCard["difficulty"],
     ageGroup: card.ageGroup as GeneratedCard["ageGroup"],
