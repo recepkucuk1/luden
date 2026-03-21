@@ -20,6 +20,33 @@ import {
 } from "@/lib/constants";
 import { ProgressTab } from "@/components/students/ProgressTab";
 import { CurriculumPicker } from "@/components/students/CurriculumPicker";
+import { Markdown } from "@/components/Md";
+
+function parseProfileSections(text: string): { title: string; content: string }[] {
+  const result: { title: string; content: string }[] = [];
+  let current: { title: string; content: string } | null = null;
+  for (const line of text.split("\n")) {
+    if (line.startsWith("## ")) {
+      if (current) result.push(current);
+      current = { title: line.slice(3).trim(), content: "" };
+    } else if (current) {
+      current.content += line + "\n";
+    }
+  }
+  if (current) result.push(current);
+  return result;
+}
+
+const SECTION_STYLE: Record<string, { box: string; title: string }> = {
+  "Kavramsal Arka Plan": {
+    box: "bg-[#023435]/5 border border-[#023435]/10",
+    title: "text-[#023435]",
+  },
+  "Uzmana Öneriler": {
+    box: "bg-[#FE703A]/5 border border-[#FE703A]/10",
+    title: "text-[#FE703A]",
+  },
+};
 
 const WORK_AREAS = [
   { value: "speech", label: "Konuşma", icon: "🗣️" },
@@ -510,40 +537,20 @@ export default function StudentDetailPage({
             )}
 
             {student.aiProfile && (
-              <div className="prose prose-sm max-w-none prose-zinc min-w-0 break-words
-                prose-headings:font-semibold prose-headings:text-zinc-800
-                prose-h2:text-base prose-h2:mt-6 prose-h2:mb-3 prose-h2:first:mt-0
-                prose-h3:text-sm prose-h3:mt-4 prose-h3:mb-2
-                prose-p:text-zinc-600 prose-p:leading-relaxed
-                prose-li:text-zinc-600 prose-ul:mt-1
-                prose-hr:border-zinc-200">
-                {student.aiProfile.split("\n").map((line, i) => {
-                  if (line.startsWith("## ")) {
-                    return (
-                      <h2 key={i} className="text-base font-semibold text-zinc-800 mt-6 mb-3 first:mt-0 pb-2 border-b border-zinc-100">
-                        {line.replace("## ", "")}
+              <div className="space-y-3 min-w-0">
+                {parseProfileSections(student.aiProfile).map((section) => {
+                  const style = SECTION_STYLE[section.title] ?? {
+                    box: "bg-zinc-50 border border-zinc-100",
+                    title: "text-zinc-700",
+                  };
+                  return (
+                    <div key={section.title} className={cn("rounded-xl p-4", style.box)}>
+                      <h2 className={cn("text-sm font-bold mb-3", style.title)}>
+                        {section.title}
                       </h2>
-                    );
-                  }
-                  if (line.startsWith("### ")) {
-                    return (
-                      <h3 key={i} className="text-sm font-semibold text-zinc-700 mt-4 mb-1.5">
-                        {line.replace("### ", "")}
-                      </h3>
-                    );
-                  }
-                  if (line.startsWith("- ")) {
-                    return (
-                      <p key={i} className="text-sm text-zinc-600 leading-relaxed pl-3 before:content-['•'] before:mr-2 before:text-zinc-400">
-                        {line.replace("- ", "")}
-                      </p>
-                    );
-                  }
-                  if (line.startsWith("---")) {
-                    return <hr key={i} className="border-zinc-100 my-4" />;
-                  }
-                  if (line.trim() === "") return <div key={i} className="h-1" />;
-                  return <p key={i} className="text-sm text-zinc-600 leading-relaxed">{line}</p>;
+                      <Markdown>{section.content.trim()}</Markdown>
+                    </div>
+                  );
                 })}
               </div>
             )}

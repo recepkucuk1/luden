@@ -14,6 +14,7 @@ import {
   DIFFICULTY_COLOR,
   AGE_LABEL,
 } from "@/lib/constants";
+import { InlineMd } from "@/components/Md";
 
 // @react-pdf/renderer SSR uyumlu değil — client-side only
 const CardPDFDocument = dynamic(
@@ -95,7 +96,7 @@ export function CardPreview({ card }: CardPreviewProps) {
           </Button>
         </div>
         <h2 className="text-2xl font-bold text-zinc-900">{card.title}</h2>
-        <p className="text-zinc-600 text-sm leading-relaxed">{card.objective}</p>
+        <p className="text-zinc-600 text-sm leading-relaxed"><InlineMd text={card.objective} /></p>
       </div>
 
       {/* Materyaller */}
@@ -133,7 +134,7 @@ export function CardPreview({ card }: CardPreviewProps) {
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FE703A]/10 text-xs font-bold text-[#FE703A]">
                     {i + 1}
                   </span>
-                  <span className="leading-relaxed">{step.replace(/^Adım \d+:\s*/, "")}</span>
+                  <span className="leading-relaxed"><InlineMd text={step.replace(/^Adım \d+:\s*/, "")} /></span>
                 </li>
               ))}
             </ol>
@@ -158,7 +159,7 @@ export function CardPreview({ card }: CardPreviewProps) {
                     {ex.repetitions}
                   </span>
                 </div>
-                <p className="text-xs text-zinc-600 leading-relaxed">{ex.description}</p>
+                <p className="text-xs text-zinc-600 leading-relaxed"><InlineMd text={ex.description} /></p>
               </div>
             ))}
           </CardContent>
@@ -174,7 +175,7 @@ export function CardPreview({ card }: CardPreviewProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <p className="text-sm text-amber-800 leading-relaxed">{card.therapistNotes}</p>
+            <p className="text-sm text-amber-800 leading-relaxed"><InlineMd text={card.therapistNotes} /></p>
           </CardContent>
         </Card>
       )}
@@ -192,7 +193,7 @@ export function CardPreview({ card }: CardPreviewProps) {
               {card.progressIndicators.map((pi, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-zinc-700">
                   <span className="text-emerald-500 mt-0.5">✓</span>
-                  {pi}
+                  <InlineMd text={pi} />
                 </li>
               ))}
             </ul>
@@ -209,7 +210,7 @@ export function CardPreview({ card }: CardPreviewProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <p className="text-sm text-[#023435] leading-relaxed">{card.homeExercise}</p>
+            <p className="text-sm text-[#023435] leading-relaxed"><InlineMd text={card.homeExercise} /></p>
           </CardContent>
         </Card>
       )}
