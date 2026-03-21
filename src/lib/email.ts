@@ -61,11 +61,19 @@ function verificationEmailHtml(verifyUrl: string): string {
 
 export async function sendVerificationEmail(email: string, token: string): Promise<void> {
   const verifyUrl = `${BASE_URL}/verify-email?token=${token}`;
-  const { error } = await resend.emails.send({
+  console.log("[email] sendVerificationEmail →", { to: email, verifyUrl });
+  console.log("[email] RESEND_API_KEY set:", !!process.env.RESEND_API_KEY);
+
+  const { data, error } = await resend.emails.send({
     from: FROM,
     to: email,
     subject: "Luden - Email Adresinizi Doğrulayın",
     html: verificationEmailHtml(verifyUrl),
   });
-  if (error) throw new Error(`Email gönderilemedi: ${error.message}`);
+
+  if (error) {
+    console.error("[email] Resend error:", JSON.stringify(error));
+    throw new Error(`Email gönderilemedi: ${error.message}`);
+  }
+  console.log("[email] Resend success, id:", data?.id);
 }
