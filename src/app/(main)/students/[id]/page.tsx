@@ -281,11 +281,11 @@ export default function StudentDetailPage({
         </div>
       </div>
 
-      <main className="mx-auto max-w-5xl px-6 py-8 space-y-6">
+      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-6 overflow-x-hidden">
         {/* Öğrenci Bilgileri */}
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#023435]/10 text-[#023435] font-bold text-xl">
                 {student.name.charAt(0).toUpperCase()}
               </div>
@@ -304,7 +304,7 @@ export default function StudentDetailPage({
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 flex-wrap sm:shrink-0">
               <Button size="sm" variant="outline" onClick={() => setShowDeleteConfirm(true)} className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700">
                 Sil
               </Button>
@@ -510,7 +510,7 @@ export default function StudentDetailPage({
             )}
 
             {student.aiProfile && (
-              <div className="prose prose-sm max-w-none prose-zinc
+              <div className="prose prose-sm max-w-none prose-zinc min-w-0 break-words
                 prose-headings:font-semibold prose-headings:text-zinc-800
                 prose-h2:text-base prose-h2:mt-6 prose-h2:mb-3 prose-h2:first:mt-0
                 prose-h3:text-sm prose-h3:mt-4 prose-h3:mb-2

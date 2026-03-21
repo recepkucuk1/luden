@@ -175,7 +175,7 @@ export default function CardsPage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 overflow-x-hidden">
         {cards.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-20 text-center">
             <div className="text-4xl mb-3">🗂️</div>

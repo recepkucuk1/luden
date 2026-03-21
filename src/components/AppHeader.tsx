@@ -31,8 +31,8 @@ export function AppHeader() {
         setMobileOpen(false);
       }
     }
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
+    document.addEventListener("click", onClickOutside);
+    return () => document.removeEventListener("click", onClickOutside);
   }, []);
 
   // Sayfa değişince mobil menüyü kapat
