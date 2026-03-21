@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse, getClientIp } from "@/lib/rateLimit";
+import { registerBodySchema, zodError } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,21 +10,11 @@ export async function POST(request: NextRequest) {
     const { allowed, retryAfter } = rateLimit(`register:${ip}`, 5);
     if (!allowed) return rateLimitResponse(retryAfter);
 
-    const { name, email, password } = await request.json();
-
-    if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: "İsim, email ve şifre zorunludur." },
-        { status: 400 }
-      );
+    const parsed = registerBodySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: zodError(parsed.error) }, { status: 400 });
     }
-
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: "Şifre en az 8 karakter olmalıdır." },
-        { status: 400 }
-      );
-    }
+    const { name, email, password } = parsed.data;
 
     const existing = await prisma.therapist.findUnique({ where: { email } });
     if (existing) {

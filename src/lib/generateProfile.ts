@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { anthropic, MODEL } from "@/lib/anthropic";
+import { stripHtmlTags } from "@/lib/validation";
 
 const WORK_AREA_LABEL: Record<string, string> = {
   speech: "Konuşma",
@@ -107,6 +108,6 @@ export async function generateStudentProfile(studentId: string): Promise<void> {
 
   await prisma.student.update({
     where: { id: studentId },
-    data: { aiProfile: raw.text.trim() },
+    data: { aiProfile: stripHtmlTags(raw.text) },
   });
 }

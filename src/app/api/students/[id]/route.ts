@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logError } from "@/lib/utils";
+import { studentBodySchema, zodError } from "@/lib/validation";
+import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function GET(
   _request: NextRequest,
@@ -60,20 +62,16 @@ export async function PUT(
       return NextResponse.json({ error: "Öğrenci bulunamadı" }, { status: 404 });
     }
 
-    const body = await request.json();
-    const { name, birthDate, workArea, diagnosis, notes, curriculumIds } = body;
-
-    if (!name?.trim() || !workArea) {
-      return NextResponse.json(
-        { error: "Ad Soyad ve çalışma alanı zorunludur." },
-        { status: 400 }
-      );
+    const parsed = studentBodySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: zodError(parsed.error) }, { status: 400 });
     }
+    const { name, birthDate, workArea, diagnosis, notes, curriculumIds } = parsed.data;
 
     const student = await prisma.student.update({
       where: { id },
       data: {
-        name: name.trim(),
+        name,
         birthDate: birthDate ? new Date(birthDate) : null,
         workArea,
         diagnosis: diagnosis || null,
@@ -101,6 +99,9 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    const { allowed, retryAfter } = rateLimit(`students:delete:${session.user.id}`, 10);
+    if (!allowed) return rateLimitResponse(retryAfter);
 
     const student = await prisma.student.findFirst({
       where: { id, therapistId: session.user.id },

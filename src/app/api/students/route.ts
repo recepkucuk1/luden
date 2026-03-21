@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { generateStudentProfile } from "@/lib/generateProfile";
 import { logError } from "@/lib/utils";
+import { studentBodySchema, zodError } from "@/lib/validation";
 
 export async function GET() {
   try {
@@ -50,15 +51,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { name, birthDate, workArea, diagnosis, notes, curriculumIds } = body;
-
-    if (!name || !workArea) {
-      return NextResponse.json(
-        { error: "Ad Soyad ve çalışma alanı zorunludur." },
-        { status: 400 }
-      );
+    const parsed = studentBodySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: zodError(parsed.error) }, { status: 400 });
     }
+    const { name, birthDate, workArea, diagnosis, notes, curriculumIds } = parsed.data;
 
     const student = await prisma.student.create({
       data: {

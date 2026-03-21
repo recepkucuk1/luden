@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 async function requireAdmin() {
   const session = await auth();
@@ -42,6 +43,9 @@ export async function DELETE(request: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
   }
+
+  const { allowed, retryAfter } = rateLimit(`admin:users:delete:${session.user.id}`, 5);
+  if (!allowed) return rateLimitResponse(retryAfter);
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");

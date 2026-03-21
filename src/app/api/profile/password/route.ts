@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function PUT(request: NextRequest) {
   try {
@@ -9,6 +10,9 @@ export async function PUT(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
+
+    const { allowed, retryAfter } = rateLimit(`profile:password:${session.user.id}`, 3);
+    if (!allowed) return rateLimitResponse(retryAfter);
 
     const body = await request.json();
     const { currentPassword, newPassword } = body;

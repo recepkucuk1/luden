@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function GET(
   _request: NextRequest,
@@ -63,6 +64,9 @@ export async function DELETE(
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
+
+    const { allowed, retryAfter } = rateLimit(`cards:delete:${session.user.id}`, 10);
+    if (!allowed) return rateLimitResponse(retryAfter);
 
     const { id } = await params;
 

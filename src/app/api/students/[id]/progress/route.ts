@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logError } from "@/lib/utils";
+import { progressUpdatesSchema, zodError } from "@/lib/validation";
 
 export async function GET(
   _request: NextRequest,
@@ -55,12 +56,11 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const updates: { goalId: string; status: string; notes?: string | null }[] =
-      body.updates ?? [];
-
-    if (!Array.isArray(updates) || updates.length === 0) {
-      return NextResponse.json({ error: "updates dizisi boş" }, { status: 400 });
+    const parsedUpdates = progressUpdatesSchema.safeParse(body.updates);
+    if (!parsedUpdates.success) {
+      return NextResponse.json({ error: zodError(parsedUpdates.error) }, { status: 400 });
     }
+    const updates = parsedUpdates.data;
 
     const therapistId = session.user.id;
 

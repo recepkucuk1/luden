@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { anthropic, MODEL } from "@/lib/anthropic";
-import { buildCardPrompt, CardGenerationParams } from "@/lib/prompts";
+import { buildCardPrompt } from "@/lib/prompts";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { cardGenerateBodySchema, zodError } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,16 +19,11 @@ export async function POST(request: NextRequest) {
     );
     if (!allowed) return rateLimitResponse(retryAfter);
 
-    const body: CardGenerationParams & { studentId?: string; curriculumGoalIds?: string[] } =
-      await request.json();
-    const { category, difficulty, ageGroup, studentId, curriculumGoalIds = [] } = body;
-
-    if (!category || !difficulty || !ageGroup) {
-      return NextResponse.json(
-        { error: "category, difficulty ve ageGroup alanları zorunludur." },
-        { status: 400 }
-      );
+    const parsed = cardGenerateBodySchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: zodError(parsed.error) }, { status: 400 });
     }
+    const { category, difficulty, ageGroup, focusArea, studentId, curriculumGoalIds = [] } = parsed.data;
 
     // Seçilen tüm müfredat hedeflerini DB'den al ve prompt metnini oluştur
     let curriculumGoalText: string | undefined;
@@ -45,7 +41,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const prompt = buildCardPrompt({ ...body, curriculumGoalText });
+    const prompt = buildCardPrompt({ category, difficulty, ageGroup, focusArea, curriculumGoalText });
 
     const message = await anthropic.messages.create({
       model: MODEL,
