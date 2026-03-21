@@ -13,22 +13,24 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // hCaptcha doğrulaması
-    const captchaToken = body.captchaToken as string | undefined;
-    if (!captchaToken) {
-      return NextResponse.json({ error: "CAPTCHA doğrulaması gerekli." }, { status: 400 });
-    }
-    const hcRes = await fetch("https://hcaptcha.com/siteverify", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `response=${captchaToken}&secret=${process.env.HCAPTCHA_SECRET_KEY}`,
-    });
-    const hcData = await hcRes.json();
-    if (!hcData.success) {
-      return NextResponse.json(
-        { error: "CAPTCHA doğrulaması başarısız. Lütfen tekrar deneyin." },
-        { status: 400 }
-      );
+    // hCaptcha doğrulaması (development ortamında atlanır)
+    if (process.env.NODE_ENV !== "development") {
+      const captchaToken = body.captchaToken as string | undefined;
+      if (!captchaToken) {
+        return NextResponse.json({ error: "CAPTCHA doğrulaması gerekli." }, { status: 400 });
+      }
+      const hcRes = await fetch("https://hcaptcha.com/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `response=${captchaToken}&secret=${process.env.HCAPTCHA_SECRET_KEY}`,
+      });
+      const hcData = await hcRes.json();
+      if (!hcData.success) {
+        return NextResponse.json(
+          { error: "CAPTCHA doğrulaması başarısız. Lütfen tekrar deneyin." },
+          { status: 400 }
+        );
+      }
     }
 
     const parsed = registerBodySchema.safeParse(body);

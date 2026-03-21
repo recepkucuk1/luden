@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const isDev = process.env.NODE_ENV === "development";
+
 export default function RegisterPage() {
   const router = useRouter();
   const captchaRef = useRef<HCaptcha>(null);
@@ -170,12 +172,16 @@ export default function RegisterPage() {
               />
             </div>
 
-            <HCaptcha
-              sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? "10000000-ffff-ffff-ffff-000000000001"}
-              onVerify={setCaptchaToken}
-              ref={captchaRef}
-              theme="light"
-            />
+            {!isDev && (
+              <HCaptcha
+                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? ""}
+                onVerify={setCaptchaToken}
+                onError={(err) => console.error("[hCaptcha] error:", err)}
+                onExpire={() => { console.warn("[hCaptcha] expired"); setCaptchaToken(null); }}
+                ref={captchaRef}
+                theme="light"
+              />
+            )}
 
             {error && (
               <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
@@ -183,7 +189,7 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <Button type="submit" disabled={loading || !captchaToken} className="w-full h-10">
+            <Button type="submit" disabled={loading || (!isDev && !captchaToken)} className="w-full h-10">
               {loading ? "Hesap oluşturuluyor…" : "Kayıt Ol"}
             </Button>
           </form>
