@@ -19,8 +19,8 @@ export async function GET() {
         difficulty: true,
         ageGroup: true,
         createdAt: true,
+        curriculumGoalIds: true,
         student: { select: { id: true, name: true } },
-        curriculumGoal: { select: { curriculumId: true } },
         _count: { select: { assignments: true } },
       },
     });

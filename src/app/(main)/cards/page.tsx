@@ -22,12 +22,12 @@ interface CardItem {
   difficulty: string;
   ageGroup: string;
   createdAt: string;
+  curriculumGoalIds: string[];
   student: { id: string; name: string } | null;
-  curriculumGoal: { curriculumId: string } | null;
   _count: { assignments: number };
 }
 
-interface Curriculum { id: string; area: string; title: string }
+interface Curriculum { id: string; area: string; title: string; goals: { id: string }[] }
 
 type SortBy = "newest" | "oldest" | "name" | "assignments";
 
@@ -139,12 +139,21 @@ export default function CardsPage() {
     setFilterCurriculum("");
   }
 
+  // goalId → curriculumId lookup (built from curricula that include goals)
+  const goalToCurriculumId = useMemo(() => {
+    const map: Record<string, string> = {};
+    curricula.forEach((c) => c.goals?.forEach((g) => { map[g.id] = c.id; }));
+    return map;
+  }, [curricula]);
+
   const filtered = useMemo(() => {
     let list = [...cards];
     if (filterCategory !== "all")   list = list.filter((c) => c.category === filterCategory);
     if (filterDifficulty !== "all") list = list.filter((c) => c.difficulty === filterDifficulty);
     if (filterAgeGroup !== "all")   list = list.filter((c) => c.ageGroup === filterAgeGroup);
-    if (filterCurriculum !== "")    list = list.filter((c) => c.curriculumGoal?.curriculumId === filterCurriculum);
+    if (filterCurriculum !== "")    list = list.filter((c) =>
+      c.curriculumGoalIds.some((gId) => goalToCurriculumId[gId] === filterCurriculum)
+    );
 
     list.sort((a, b) => {
       switch (sortBy) {
@@ -156,7 +165,7 @@ export default function CardsPage() {
       }
     });
     return list;
-  }, [cards, filterCategory, filterDifficulty, filterAgeGroup, filterCurriculum, sortBy]);
+  }, [cards, filterCategory, filterDifficulty, filterAgeGroup, filterCurriculum, sortBy, goalToCurriculumId]);
 
   if (loading) {
     return (

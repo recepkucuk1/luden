@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
 
     // Seçilen tüm müfredat hedeflerini DB'den al ve prompt metnini oluştur
     let curriculumGoalText: string | undefined;
-    const firstGoalId = curriculumGoalIds[0] ?? null;
     if (curriculumGoalIds.length > 0) {
       const goals = await prisma.curriculumGoal.findMany({
         where: { id: { in: curriculumGoalIds } },
@@ -92,7 +91,7 @@ export async function POST(request: NextRequest) {
         ageGroup,
         therapistId: session.user.id,
         studentId: studentId ?? null,
-        curriculumGoalId: firstGoalId,
+        curriculumGoalIds: curriculumGoalIds,
       },
     });
 

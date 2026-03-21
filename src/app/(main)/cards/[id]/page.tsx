@@ -7,6 +7,14 @@ import { CardPreview } from "@/components/cards/CardPreview";
 import { AssignStudentsModal } from "@/components/cards/AssignStudentsModal";
 import type { GeneratedCard } from "@/lib/prompts";
 
+interface CurriculumGoal {
+  id: string;
+  code: string;
+  title: string;
+  isMainGoal: boolean;
+  curriculum: { code: string; title: string };
+}
+
 interface CardRecord {
   id: string;
   title: string;
@@ -17,13 +25,7 @@ interface CardRecord {
   createdAt: string;
   student: { id: string; name: string } | null;
   _count: { assignments: number };
-  curriculumGoal: {
-    id: string;
-    code: string;
-    title: string;
-    isMainGoal: boolean;
-    curriculum: { code: string; title: string };
-  } | null;
+  curriculumGoals: CurriculumGoal[];
 }
 
 export default function CardDetailPage({
@@ -116,17 +118,29 @@ export default function CardDetailPage({
       </div>
 
       <main className="mx-auto max-w-3xl px-6 py-8">
-        {/* Müfredat Hedefi */}
-        {card.curriculumGoal && (
-          <div className="mb-4 flex items-start gap-2 rounded-xl border border-purple-200 bg-purple-50 px-4 py-3">
-            <span className="text-purple-500 text-sm mt-0.5">🎯</span>
-            <div>
-              <p className="text-xs font-semibold text-purple-700 mb-0.5">
-                {card.curriculumGoal.curriculum.code} {card.curriculumGoal.curriculum.title}
+        {/* Müfredat Hedefleri */}
+        {card.curriculumGoals.length > 0 && (
+          <div className="mb-4 rounded-xl border border-purple-200 bg-purple-50 px-4 py-3">
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-purple-500 text-sm">🎯</span>
+              <p className="text-xs font-semibold text-purple-700">
+                Müfredat Hedefleri ({card.curriculumGoals.length})
               </p>
-              <p className="text-xs text-purple-600">
-                {card.curriculumGoal.code} — {card.curriculumGoal.title}
-              </p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              {card.curriculumGoals.map((goal) => (
+                <div key={goal.id} className="flex items-start gap-2">
+                  <span className="rounded-full bg-purple-200 px-1.5 py-0.5 text-[10px] font-semibold text-purple-800 shrink-0 mt-px">
+                    {goal.code}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-purple-500 leading-none mb-0.5">
+                      {goal.curriculum.code} {goal.curriculum.title}
+                    </p>
+                    <p className="text-xs text-purple-700 leading-snug">{goal.title}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

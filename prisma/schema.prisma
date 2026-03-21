@@ -57,8 +57,7 @@ model Card {
   studentId String?
   student   Student? @relation(fields: [studentId], references: [id])
 
-  curriculumGoalId String?
-  curriculumGoal   CurriculumGoal? @relation(fields: [curriculumGoalId], references: [id])
+  curriculumGoalIds String[] @default([])
 
   assignments CardAssignment[]
 }
@@ -93,7 +92,6 @@ model CurriculumGoal {
   curriculumId String
   curriculum   Curriculum @relation(fields: [curriculumId], references: [id])
 
-  cards    Card[]
   progress StudentProgress[]
 }
 

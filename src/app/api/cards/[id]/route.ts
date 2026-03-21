@@ -19,15 +19,6 @@ export async function GET(
       include: {
         student: { select: { id: true, name: true } },
         _count: { select: { assignments: true } },
-        curriculumGoal: {
-          select: {
-            id: true,
-            code: true,
-            title: true,
-            isMainGoal: true,
-            curriculum: { select: { code: true, title: true } },
-          },
-        },
       },
     });
 
@@ -35,7 +26,27 @@ export async function GET(
       return NextResponse.json({ error: "Kart bulunamadı" }, { status: 404 });
     }
 
-    return NextResponse.json({ card });
+    let curriculumGoals: Array<{
+      id: string;
+      code: string;
+      title: string;
+      isMainGoal: boolean;
+      curriculum: { code: string; title: string };
+    }> = [];
+    if (card.curriculumGoalIds.length > 0) {
+      curriculumGoals = await prisma.curriculumGoal.findMany({
+        where: { id: { in: card.curriculumGoalIds } },
+        select: {
+          id: true,
+          code: true,
+          title: true,
+          isMainGoal: true,
+          curriculum: { select: { code: true, title: true } },
+        },
+      });
+    }
+
+    return NextResponse.json({ card: { ...card, curriculumGoals } });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("[GET /api/cards/[id]] HATA:", message);
