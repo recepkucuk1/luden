@@ -98,7 +98,7 @@ export async function generateStudentProfile(studentId: string): Promise<void> {
 
   const message = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: 2048,
+    max_tokens: 4096,
     messages: [{ role: "user", content: prompt }],
   });
 
