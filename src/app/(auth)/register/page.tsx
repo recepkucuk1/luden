@@ -183,7 +183,7 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <Button type="submit" disabled={loading} className="w-full h-10">
+            <Button type="submit" disabled={loading || !captchaToken} className="w-full h-10">
               {loading ? "Hesap oluşturuluyor…" : "Kayıt Ol"}
             </Button>
           </form>

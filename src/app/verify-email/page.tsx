@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -12,6 +12,26 @@ function VerifyEmailContent() {
 
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
+  const [resendEmail, setResendEmail] = useState("");
+  const [resendSent, setResendSent] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleResend() {
+    const email = emailInputRef.current?.value ?? resendEmail;
+    if (!email) return;
+    setResendLoading(true);
+    try {
+      await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      setResendSent(true);
+    } finally {
+      setResendLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (!token) {
@@ -20,11 +40,7 @@ function VerifyEmailContent() {
       return;
     }
 
-    fetch("/api/auth/verify-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    })
+    fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.success) {
@@ -81,9 +97,30 @@ function VerifyEmailContent() {
               </svg>
             </div>
             <h1 className="text-lg font-bold text-zinc-900 mb-2">Doğrulama Başarısız</h1>
-            <p className="text-sm text-zinc-500 mb-6">{message}</p>
-            <Link href="/register" className="text-sm font-medium text-[#FE703A] hover:underline">
-              Tekrar kayıt ol
+            <p className="text-sm text-zinc-500 mb-5">{message}</p>
+            {resendSent ? (
+              <p className="text-sm text-green-600 font-medium mb-4">✓ Doğrulama emaili gönderildi!</p>
+            ) : (
+              <div className="space-y-2 mb-4">
+                <input
+                  ref={emailInputRef}
+                  type="email"
+                  placeholder="Email adresiniz"
+                  value={resendEmail}
+                  onChange={(e) => setResendEmail(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023435]/30"
+                />
+                <button
+                  onClick={handleResend}
+                  disabled={resendLoading}
+                  className="w-full rounded-xl bg-[#FE703A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-60 transition-colors"
+                >
+                  {resendLoading ? "Gönderiliyor…" : "Yeni Doğrulama Emaili Gönder"}
+                </button>
+              </div>
+            )}
+            <Link href="/login" className="text-xs text-zinc-400 hover:text-zinc-600">
+              Giriş sayfasına dön
             </Link>
           </>
         )}

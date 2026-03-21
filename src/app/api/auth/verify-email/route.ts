@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const { token } = await request.json();
-    if (!token || typeof token !== "string") {
+    const token = request.nextUrl.searchParams.get("token");
+    if (!token) {
       return NextResponse.json({ error: "Geçersiz token." }, { status: 400 });
     }
 
