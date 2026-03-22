@@ -8,6 +8,15 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { GlowyWavesHero } from "@/components/ui/glowy-waves-hero-shadcnui";
 import { Pricing, type PricingPlan } from "@/components/ui/pricing";
+import {
+  IconSparkles,
+  IconUsers,
+  IconFileDownload,
+  IconTarget,
+  IconLock,
+  IconBuilding,
+} from "@tabler/icons-react";
+import { FeaturesSectionWithHoverEffects } from "@/components/ui/feature-section-with-hover-effects";
 
 // ─── FAQ Accordion ────────────────────────────────────────────────────────────
 const FAQ_ITEMS = [
@@ -67,32 +76,32 @@ function FaqAccordion() {
 // ─── Features ─────────────────────────────────────────────────────────────────
 const FEATURES = [
   {
-    icon: "✨",
+    icon: <IconSparkles size={24} />,
     title: "AI Destekli Kart Üretimi",
     desc: "Claude AI ile saniyeler içinde öğrenciye özel, pedagojik açıdan zengin öğrenme kartları oluşturun.",
   },
   {
-    icon: "👥",
+    icon: <IconUsers size={24} />,
     title: "Öğrenci Yönetimi",
     desc: "Tüm öğrencilerinizi tek yerden takip edin. Profil, tanı, yaş ve çalışma alanı bilgilerini kaydedin.",
   },
   {
-    icon: "📄",
+    icon: <IconFileDownload size={24} />,
     title: "PDF İndirme",
     desc: "Oluşturduğunuz kartları profesyonel PDF formatında indirin, yazdırın ve seanslarınızda kullanın.",
   },
   {
-    icon: "🎯",
+    icon: <IconTarget size={24} />,
     title: "Kişiselleştirilebilir İçerik",
     desc: "Kategori, zorluk seviyesi ve yaş grubuna göre özelleştirilmiş kartlar üretin.",
   },
   {
-    icon: "🔒",
+    icon: <IconLock size={24} />,
     title: "Güvenli ve Özel",
     desc: "Verileriniz şifreli bağlantılar üzerinden aktarılır. Öğrenci bilgileri yalnızca size aittir.",
   },
   {
-    icon: "🏢",
+    icon: <IconBuilding size={24} />,
     title: "Çoklu Uzman Desteği",
     desc: "Kliniğinizdeki tüm terapistlerin ortak platform üzerinden çalışmasını sağlayın.",
     soon: true,
@@ -217,35 +226,14 @@ export default function LandingPage() {
       <GlowyWavesHero />
 
       {/* ── Features ── */}
-      <section id="features" className="px-6 py-20 bg-white">
-        <div className="mx-auto max-w-5xl">
-          <div className="text-center mb-12">
+      <section id="features" className="bg-white">
+        <div className="mx-auto max-w-5xl px-6 pt-20">
+          <div className="text-center mb-0">
             <h2 className="text-2xl font-bold text-zinc-900 mb-3">Her şey tek platformda</h2>
             <p className="text-sm text-zinc-500">Terapistlerin ihtiyaç duyduğu tüm araçlar, basit ve hızlı.</p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className={cn(
-                  "rounded-2xl border border-zinc-200 bg-white p-6",
-                  f.soon && "opacity-60"
-                )}
-              >
-                <div className="rounded-2xl bg-[#FE703A]/10 p-3 text-2xl w-fit mb-4">{f.icon}</div>
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-sm font-semibold text-zinc-900">{f.title}</h3>
-                  {f.soon && (
-                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500">
-                      Yakında
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-zinc-500 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
         </div>
+        <FeaturesSectionWithHoverEffects features={FEATURES} />
       </section>
 
       {/* ── Pricing ── */}
