@@ -12,6 +12,12 @@ export const progressStatusSchema = z.enum([
   "completed",
 ]);
 
+export const cardStatusSchema = z.enum([
+  "not_started",
+  "in_progress",
+  "completed",
+]);
+
 export const nameSchema = z.string().min(2).max(100).trim();
 export const emailSchema = z.string().email();
 

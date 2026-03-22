@@ -24,10 +24,15 @@ export async function GET(
 
     const assignments = await prisma.cardAssignment.findMany({
       where: { cardId },
-      select: { studentId: true },
+      select: { id: true, studentId: true, status: true },
     });
 
     return NextResponse.json({
+      assignments: assignments.map((a: { id: string; studentId: string; status: string }) => ({
+        id: a.id,
+        studentId: a.studentId,
+        status: a.status,
+      })),
       assignedStudentIds: assignments.map((a: { studentId: string }) => a.studentId),
     });
   } catch (error) {

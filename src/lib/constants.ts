@@ -60,6 +60,18 @@ export const AGE_LABEL: Record<string, string> = {
   adult: "Yetişkin",
 };
 
+export const CARD_STATUS_LABEL: Record<string, string> = {
+  not_started: "Başlanmadı",
+  in_progress: "Devam Ediyor",
+  completed: "Tamamlandı",
+};
+
+export const CARD_STATUS_COLOR: Record<string, string> = {
+  not_started: "bg-zinc-100 text-zinc-500",
+  in_progress: "bg-blue-100 text-blue-700",
+  completed: "bg-emerald-100 text-emerald-700",
+};
+
 export function calcAge(birthDate: string | null): string {
   if (!birthDate) return "";
   const birth = new Date(birthDate);

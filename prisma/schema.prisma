@@ -69,6 +69,7 @@ model CardAssignment {
   id         String   @id @default(cuid())
   cardId     String
   studentId  String
+  status     String   @default("not_started") // "not_started" | "in_progress" | "completed"
   assignedAt DateTime @default(now())
 
   card    Card    @relation(fields: [cardId], references: [id], onDelete: Cascade)

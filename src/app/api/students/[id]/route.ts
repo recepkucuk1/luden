@@ -23,7 +23,10 @@ export async function GET(
         cards: { orderBy: { createdAt: "desc" } },
         assignments: {
           orderBy: { assignedAt: "desc" },
-          include: {
+          select: {
+            id: true,
+            status: true,
+            assignedAt: true,
             card: { select: { id: true, title: true, category: true, difficulty: true, ageGroup: true, createdAt: true } },
           },
         },

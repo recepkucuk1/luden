@@ -16,6 +16,8 @@ import {
   WORK_AREA_COLOR,
   DIFFICULTY_LABEL,
   DIFFICULTY_COLOR,
+  CARD_STATUS_LABEL,
+  CARD_STATUS_COLOR,
   calcAge,
 } from "@/lib/constants";
 import { ProgressTab } from "@/components/students/ProgressTab";
@@ -67,6 +69,7 @@ interface StudentCard {
 
 interface AssignedCard {
   id: string;
+  status: string;
   assignedAt: string;
   card: {
     id: string;
@@ -682,32 +685,83 @@ export default function StudentDetailPage({
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {student.assignments.map((assignment) => (
-                <Link
+                <div
                   key={assignment.id}
-                  href={`/cards/${assignment.card.id}`}
-                  className="group rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden block p-4"
+                  className="group rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden"
                 >
-                  <div className="flex flex-wrap gap-1.5 mb-2 pr-8">
-                    <Badge className={WORK_AREA_COLOR[assignment.card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
-                      {WORK_AREA_LABEL[assignment.card.category] ?? assignment.card.category}
-                    </Badge>
-                    <Badge className={DIFFICULTY_COLOR[assignment.card.difficulty] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
-                      {DIFFICULTY_LABEL[assignment.card.difficulty] ?? assignment.card.difficulty}
-                    </Badge>
-                    <Badge className="bg-zinc-100 text-zinc-600" style={{ fontSize: "10px" }}>
-                      {assignment.card.ageGroup}
-                    </Badge>
-                  </div>
-                  <h3 className="font-semibold text-zinc-900 text-sm mb-1">{assignment.card.title}</h3>
-                  <div className="flex items-center justify-between mt-2">
-                    <p className="text-xs text-zinc-400">
+                  <Link href={`/cards/${assignment.card.id}`} className="block p-4 pb-2">
+                    <div className="flex flex-wrap gap-1.5 mb-2 pr-8">
+                      <Badge className={WORK_AREA_COLOR[assignment.card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                        {WORK_AREA_LABEL[assignment.card.category] ?? assignment.card.category}
+                      </Badge>
+                      <Badge className={DIFFICULTY_COLOR[assignment.card.difficulty] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                        {DIFFICULTY_LABEL[assignment.card.difficulty] ?? assignment.card.difficulty}
+                      </Badge>
+                      <Badge className="bg-zinc-100 text-zinc-600" style={{ fontSize: "10px" }}>
+                        {assignment.card.ageGroup}
+                      </Badge>
+                    </div>
+                    <h3 className="font-semibold text-zinc-900 text-sm mb-1">{assignment.card.title}</h3>
+                    <p className="text-xs text-zinc-400 mt-1">
                       {new Date(assignment.assignedAt).toLocaleDateString("tr-TR")}
                     </p>
-                    <span className="text-xs text-blue-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                      Detay →
-                    </span>
+                  </Link>
+                  {/* Durum Seçici */}
+                  <div className="px-4 pb-3 pt-1">
+                    <div className="flex items-center gap-1.5">
+                      {(["not_started", "in_progress", "completed"] as const).map((s) => (
+                        <button
+                          key={s}
+                          onClick={async () => {
+                            const prev = assignment.status;
+                            setStudent((p) =>
+                              p
+                                ? {
+                                    ...p,
+                                    assignments: p.assignments.map((a) =>
+                                      a.id === assignment.id ? { ...a, status: s } : a
+                                    ),
+                                  }
+                                : p
+                            );
+                            try {
+                              const res = await fetch(
+                                `/api/cards/assignments/${assignment.id}/status`,
+                                {
+                                  method: "PUT",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ status: s }),
+                                }
+                              );
+                              if (!res.ok) throw new Error();
+                              toast.success(`Durum: ${CARD_STATUS_LABEL[s]}`);
+                            } catch {
+                              setStudent((p) =>
+                                p
+                                  ? {
+                                      ...p,
+                                      assignments: p.assignments.map((a) =>
+                                        a.id === assignment.id ? { ...a, status: prev } : a
+                                      ),
+                                    }
+                                  : p
+                              );
+                              toast.error("Durum güncellenemedi");
+                            }
+                          }}
+                          className={cn(
+                            "flex-1 rounded-lg px-2 py-1.5 text-[11px] font-medium transition-all border",
+                            assignment.status === s
+                              ? CARD_STATUS_COLOR[s] + " border-current/20"
+                              : "border-zinc-200 bg-white text-zinc-400 hover:text-zinc-600 hover:border-zinc-300"
+                          )}
+                        >
+                          {CARD_STATUS_LABEL[s]}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}
