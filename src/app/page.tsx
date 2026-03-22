@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { GlowyWavesHero } from "@/components/ui/glowy-waves-hero-shadcnui";
+import { Pricing, type PricingPlan } from "@/components/ui/pricing";
 
 // ─── FAQ Accordion ────────────────────────────────────────────────────────────
 const FAQ_ITEMS = [
@@ -98,54 +100,55 @@ const FEATURES = [
 ];
 
 // ─── Pricing ──────────────────────────────────────────────────────────────────
-const PLANS = [
+const PLANS: PricingPlan[] = [
   {
     name: "Ücretsiz",
-    price: "₺0",
-    period: "/ ay",
-    desc: "Başlamak için ideal",
+    price: 0,
+    yearlyPrice: 0,
+    period: "ay",
+    description: "Başlamak için ideal",
     features: [
       "5 öğrenciye kadar",
       "Aylık 20 kart",
       "PDF indirme",
       "Temel özellikler",
     ],
-    cta: "Ücretsiz Başla",
-    ctaHref: "/register",
-    highlight: false,
-    badge: null,
+    buttonText: "Ücretsiz Başla",
+    href: "/register",
+    isPopular: false,
   },
   {
     name: "Pro",
-    price: "₺299",
-    period: "/ ay",
-    desc: "Bireysel terapistler için",
+    price: 299,
+    yearlyPrice: 299,
+    period: "ay",
+    description: "Bireysel terapistler için",
     features: [
       "Sınırsız öğrenci",
       "Sınırsız kart",
       "PDF indirme",
       "Öncelikli destek",
     ],
-    cta: "Yakında",
-    ctaHref: null,
-    highlight: true,
-    badge: "Yakında",
+    buttonText: "Yakında",
+    href: null,
+    isPopular: true,
   },
   {
     name: "Kurumsal",
-    price: "Özel",
+    price: null,
+    yearlyPrice: null,
     period: "",
-    desc: "Klinikler ve kurumlar için",
+    description: "Klinikler ve kurumlar için",
     features: [
       "Çoklu uzman hesabı",
       "Özel entegrasyon",
       "Kurumsal fatura",
       "Öncelikli destek",
     ],
-    cta: "İletişime Geç",
-    ctaHref: "mailto:merhaba@ludenvox.com",
-    highlight: false,
-    badge: null,
+    buttonText: "İletişime Geç",
+    href: "mailto:merhaba@ludenvox.com",
+    isPopular: false,
+    customPriceLabel: "Özel",
   },
 ];
 
@@ -211,38 +214,7 @@ export default function LandingPage() {
       </header>
 
       {/* ── Hero ── */}
-      <section className="px-6 pt-24 pb-20 text-center bg-[#023435]">
-        <div className="mx-auto max-w-3xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#FE703A]/30 bg-[#FE703A]/20 px-4 py-1.5 text-xs font-medium text-[#FE703A] mb-8">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#FE703A] animate-pulse" />
-            AI Destekli · Dil ve Konuşma Terapisi
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight tracking-tight mb-6">
-            Dil, Konuşma ve İşitme{" "}
-            <span className="text-[#FE703A]">Uzmanları</span> için
-            <br />
-            AI Destekli Öğrenme Kartları
-          </h1>
-          <p className="text-lg text-white/70 leading-relaxed mb-10 max-w-xl mx-auto">
-            Saniyeler içinde kişiselleştirilmiş öğrenme materyalleri üretin,
-            öğrencilerinizi takip edin.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
-              href="/register"
-              className="w-full sm:w-auto rounded-xl bg-[#FE703A] px-8 py-3 text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors shadow-sm"
-            >
-              Ücretsiz Başla
-            </Link>
-            <a
-              href="#features"
-              className="w-full sm:w-auto rounded-xl border border-white/30 px-8 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
-            >
-              Nasıl Çalışır?
-            </a>
-          </div>
-        </div>
-      </section>
+      <GlowyWavesHero />
 
       {/* ── Features ── */}
       <section id="features" className="px-6 py-20 bg-white">
@@ -277,70 +249,8 @@ export default function LandingPage() {
       </section>
 
       {/* ── Pricing ── */}
-      <section id="pricing" className="px-6 py-20 bg-zinc-50">
-        <div className="mx-auto max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-zinc-900 mb-3">Şeffaf fiyatlandırma</h2>
-            <p className="text-sm text-zinc-500">İhtiyacınıza uygun planı seçin. İstediğiniz zaman geçiş yapın.</p>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-3">
-            {PLANS.map((plan) => (
-              <div
-                key={plan.name}
-                className={cn(
-                  "rounded-2xl border p-6 flex flex-col",
-                  plan.highlight
-                    ? "border-[#FE703A] bg-[#FE703A]/5 ring-1 ring-[#FE703A]/20"
-                    : "border-zinc-200 bg-white"
-                )}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-semibold text-zinc-900">{plan.name}</span>
-                  {plan.badge && (
-                    <span className="rounded-full bg-[#FE703A] px-2.5 py-0.5 text-[10px] font-semibold text-white">
-                      {plan.badge}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-baseline gap-1 mt-3 mb-1">
-                  <span className="text-3xl font-bold text-zinc-900">{plan.price}</span>
-                  <span className="text-sm text-zinc-400">{plan.period}</span>
-                </div>
-                <p className="text-xs text-zinc-500 mb-5">{plan.desc}</p>
-                <ul className="space-y-2 mb-6 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-zinc-600">
-                      <svg className="h-4 w-4 text-[#FE703A] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                {plan.ctaHref ? (
-                  <Link
-                    href={plan.ctaHref}
-                    className={cn(
-                      "block w-full rounded-xl py-2.5 text-center text-sm font-semibold transition-colors",
-                      plan.highlight
-                        ? "bg-[#FE703A] text-white hover:bg-[#FE703A]/90"
-                        : "border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
-                    )}
-                  >
-                    {plan.cta}
-                  </Link>
-                ) : (
-                  <button
-                    disabled
-                    className="w-full rounded-xl py-2.5 text-center text-sm font-semibold bg-zinc-100 text-zinc-400 cursor-not-allowed"
-                  >
-                    {plan.cta}
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+      <section id="pricing" className="bg-zinc-50">
+        <Pricing plans={PLANS} />
       </section>
 
       {/* ── FAQ ── */}
