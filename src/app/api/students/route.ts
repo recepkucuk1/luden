@@ -57,6 +57,18 @@ export async function POST(request: NextRequest) {
     }
     const { name, birthDate, workArea, diagnosis, notes, curriculumIds } = parsed.data;
 
+    // ── Ücretsiz plan limiti: maksimum 5 öğrenci ──
+    const FREE_STUDENT_LIMIT = 5;
+    const studentCount = await prisma.student.count({
+      where: { therapistId: session.user.id },
+    });
+    if (studentCount >= FREE_STUDENT_LIMIT) {
+      return NextResponse.json(
+        { error: `Ücretsiz planda en fazla ${FREE_STUDENT_LIMIT} öğrenci ekleyebilirsiniz.` },
+        { status: 403 }
+      );
+    }
+
     const student = await prisma.student.create({
       data: {
         name,

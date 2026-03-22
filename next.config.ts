@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
             "img-src 'self' data: blob:",
             "font-src 'self'",
             "frame-src 'self' https://newassets.hcaptcha.com",
-            "connect-src 'self' https://hcaptcha.com https://sentry.hcaptcha.com",
+            "connect-src 'self' https://hcaptcha.com https://sentry.hcaptcha.com https://vitals.vercel-insights.com https://va.vercel-scripts.com",
             "worker-src 'self' blob:",
           ].join("; "),
         },

@@ -4,6 +4,12 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { logError } from "@/lib/utils";
+import { z } from "zod";
+
+const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(1, "Mevcut şifre zorunludur."),
+  newPassword: z.string().min(8, "Yeni şifre en az 8 karakter olmalıdır.").max(100),
+});
 
 export async function PUT(request: NextRequest) {
   try {
@@ -15,22 +21,14 @@ export async function PUT(request: NextRequest) {
     const { allowed, retryAfter } = rateLimit(`profile:password:${session.user.id}`, 3);
     if (!allowed) return rateLimitResponse(retryAfter);
 
-    const body = await request.json();
-    const { currentPassword, newPassword } = body;
-
-    if (!currentPassword || !newPassword) {
+    const parsed = passwordChangeSchema.safeParse(await request.json());
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Mevcut şifre ve yeni şifre zorunludur." },
+        { error: parsed.error.issues[0]?.message ?? "Geçersiz istek verisi" },
         { status: 400 }
       );
     }
-
-    if (newPassword.length < 8) {
-      return NextResponse.json(
-        { error: "Yeni şifre en az 8 karakter olmalıdır." },
-        { status: 400 }
-      );
-    }
+    const { currentPassword, newPassword } = parsed.data;
 
     const therapist = await prisma.therapist.findUnique({
       where: { id: session.user.id },

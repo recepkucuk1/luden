@@ -179,8 +179,8 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white text-zinc-900">
       {/* ── Header ── */}
       <header className={cn(
-        "sticky top-0 z-40 px-6 py-3 transition-colors duration-300",
-        scrolled ? "bg-[#023435]" : "bg-[#023435]"
+        "sticky top-0 z-40 px-6 py-3 transition-colors duration-300 bg-[#023435]",
+        scrolled && "shadow-lg"
       )}>
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
           <Link href="/" className="shrink-0">

@@ -12,10 +12,11 @@ export async function GET() {
 
     const therapistId = session.user.id;
 
-    const [allCards, recentCardsRaw, recentStudentsRaw, totalStudents] = await Promise.all([
-      prisma.card.findMany({
+    const [categoryGroups, recentCardsRaw, recentStudentsRaw, totalStudents] = await Promise.all([
+      prisma.card.groupBy({
+        by: ["category"],
         where: { therapistId },
-        select: { category: true },
+        _count: true,
       }),
       prisma.card.findMany({
         where: { therapistId },
@@ -40,8 +41,10 @@ export async function GET() {
     ]);
 
     const byCategory: Record<string, number> = {};
-    for (const card of allCards) {
-      byCategory[card.category] = (byCategory[card.category] ?? 0) + 1;
+    let totalCards = 0;
+    for (const group of categoryGroups) {
+      byCategory[group.category] = group._count;
+      totalCards += group._count;
     }
 
     const recentStudents = recentStudentsRaw.map((s) => ({
@@ -53,7 +56,7 @@ export async function GET() {
     }));
 
     return NextResponse.json({
-      stats: { students: totalStudents, cards: allCards.length, byCategory },
+      stats: { students: totalStudents, cards: totalCards, byCategory },
       recentCards: recentCardsRaw,
       recentStudents,
     });

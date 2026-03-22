@@ -45,6 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             role: therapist.role,
           };
         } catch (error) {
+          if (error instanceof EmailNotVerifiedError) throw error;
           console.error("[auth] authorize hatası:", error);
           return null;
         }

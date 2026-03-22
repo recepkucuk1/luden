@@ -25,6 +25,23 @@ export async function POST(request: NextRequest) {
     }
     const { category, difficulty, ageGroup, focusArea, studentId, curriculumGoalIds = [] } = parsed.data;
 
+    // ── Ücretsiz plan limiti: aylık maksimum 20 kart ──
+    const FREE_MONTHLY_CARD_LIMIT = 20;
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyCardCount = await prisma.card.count({
+      where: {
+        therapistId: session.user.id,
+        createdAt: { gte: monthStart },
+      },
+    });
+    if (monthlyCardCount >= FREE_MONTHLY_CARD_LIMIT) {
+      return NextResponse.json(
+        { error: `Ücretsiz planda aylık en fazla ${FREE_MONTHLY_CARD_LIMIT} kart oluşturabilirsiniz.` },
+        { status: 403 }
+      );
+    }
+
     // Seçilen tüm müfredat hedeflerini DB'den al ve prompt metnini oluştur
     let curriculumGoalText: string | undefined;
     if (curriculumGoalIds.length > 0) {
