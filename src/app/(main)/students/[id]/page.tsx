@@ -115,6 +115,12 @@ export default function StudentDetailPage({
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
   const [swipeOpenId, setSwipeOpenId] = useState<string | null>(null);
 
+  // Yaklaşan dersler
+  const [upcomingLessons, setUpcomingLessons] = useState<{
+    id: string; title: string; date: string;
+    startTime: string; endTime: string; status: string;
+  }[]>([]);
+
   // Eğitim Profili — polling
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -245,15 +251,17 @@ export default function StudentDetailPage({
   useEffect(() => {
     async function load() {
       try {
-        const [sRes, cRes] = await Promise.all([
+        const [sRes, cRes, lRes] = await Promise.all([
           fetch(`/api/students/${id}`),
           fetch("/api/curriculum"),
+          fetch(`/api/lessons?studentId=${id}&upcoming=true`),
         ]);
         if (sRes.status === 404) { setNotFound(true); return; }
-        const [sData, cData] = await Promise.all([sRes.json(), cRes.json()]);
+        const [sData, cData, lData] = await Promise.all([sRes.json(), cRes.json(), lRes.json()]);
         if (!sRes.ok) throw new Error(sData.error || `HTTP ${sRes.status}`);
         setStudent(sData.student);
         setCurricula(cData.curricula ?? []);
+        setUpcomingLessons(lData.lessons ?? []);
       } catch (err) {
         console.error("Öğrenci yüklenemedi:", err);
         setNotFound(true);
@@ -462,6 +470,34 @@ export default function StudentDetailPage({
                   </Button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Yaklaşan Dersler */}
+        {upcomingLessons.length > 0 && (
+          <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-zinc-900">Yaklaşan Dersler</h2>
+              <a href="/calendar" className="text-xs text-[#FE703A] hover:underline">Takvime git →</a>
+            </div>
+            <div className="space-y-2">
+              {upcomingLessons.map((l) => {
+                const d = new Date(l.date);
+                const dateStr = d.toLocaleDateString("tr-TR", { weekday: "short", day: "numeric", month: "short" });
+                const statusColor = l.status === "COMPLETED" ? "text-emerald-600" : l.status === "CANCELLED" ? "text-zinc-400" : "text-[#107996]";
+                return (
+                  <div key={l.id} className="flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2">
+                    <div>
+                      <p className="text-xs font-medium text-zinc-700">{l.title}</p>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">{dateStr} · {l.startTime}–{l.endTime}</p>
+                    </div>
+                    <span className={cn("text-[10px] font-semibold", statusColor)}>
+                      {l.status === "COMPLETED" ? "Tamamlandı" : l.status === "CANCELLED" ? "İptal" : "Planlandı"}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

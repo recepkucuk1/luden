@@ -32,6 +32,12 @@ enum CreditTransactionType {
   SPEND
 }
 
+enum LessonStatus {
+  PLANNED
+  COMPLETED
+  CANCELLED
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model Therapist {
@@ -56,6 +62,7 @@ model Therapist {
   progress      StudentProgress[]
   subscriptions Subscription[]
   creditTxns    CreditTransaction[]
+  lessons       Lesson[]
 }
 
 model Plan {
@@ -113,6 +120,7 @@ model Student {
   cards       Card[]
   assignments CardAssignment[]
   progress    StudentProgress[]
+  lessons     Lesson[]
 }
 
 model Card {
@@ -169,6 +177,25 @@ model CurriculumGoal {
   curriculum   Curriculum @relation(fields: [curriculumId], references: [id])
 
   progress StudentProgress[]
+}
+
+model Lesson {
+  id           String       @id @default(cuid())
+  therapistId  String
+  studentId    String
+  title        String
+  date         DateTime
+  startTime    String       // "09:00"
+  endTime      String       // "10:00"
+  note         String?
+  isRecurring  Boolean      @default(false)
+  recurringDay Int?         // 0=Pazar, 1=Pazartesi ... 6=Cumartesi
+  status       LessonStatus @default(PLANNED)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  therapist Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 model StudentProgress {
