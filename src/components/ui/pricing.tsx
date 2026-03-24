@@ -17,6 +17,7 @@ export interface PricingPlan {
   price: number | null;
   yearlyPrice: number | null;
   period: string;
+  yearlyPeriod?: string;
   features: string[];
   description: string;
   buttonText: string;
@@ -29,15 +30,17 @@ interface PricingProps {
   plans: PricingPlan[];
   title?: string;
   description?: string;
+  creditNote?: string;
 }
 
 export function Pricing({
   plans,
   title = "Şeffaf fiyatlandırma",
   description = "İhtiyacınıza uygun planı seçin. İstediğiniz zaman geçiş yapın.",
+  creditNote,
 }: PricingProps) {
   const [isMonthly, setIsMonthly] = useState(true);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
   const switchRef = useRef<HTMLButtonElement>(null);
 
   const handleToggle = (checked: boolean) => {
@@ -65,7 +68,7 @@ export function Pricing({
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-20">
+    <div className="mx-auto max-w-6xl px-6 py-20">
       <div className="mb-12 text-center">
         <h2 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{title}</h2>
         <p className="mt-2 text-sm text-zinc-500">{description}</p>
@@ -80,11 +83,11 @@ export function Pricing({
         />
         <Label className="text-sm font-medium text-zinc-700">
           Yıllık{" "}
-          <span className="font-semibold text-[#FE703A]">(%20 indirim)</span>
+          <span className="font-semibold text-[#FE703A]">(%15 indirim)</span>
         </Label>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 pt-8 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 pt-8 sm:grid-cols-2 lg:grid-cols-4">
         {plans.map((plan, index) => (
           <motion.div
             key={index}
@@ -94,8 +97,7 @@ export function Pricing({
                 ? {
                     y: plan.isPopular ? -20 : 0,
                     opacity: 1,
-                    x: index === 2 ? -30 : index === 0 ? 30 : 0,
-                    scale: index === 0 || index === 2 ? 0.94 : 1.0,
+                    scale: index === 0 || index === 3 ? 0.94 : 1.0,
                   }
                 : {}
             }
@@ -111,9 +113,9 @@ export function Pricing({
             className={cn(
               "relative flex flex-col rounded-2xl border bg-white p-6",
               plan.isPopular ? "border-2 border-[#FE703A]" : "border-zinc-200",
-              !plan.isPopular && "md:mt-5",
+              !plan.isPopular && "lg:mt-5",
               index === 0 && "origin-right",
-              index === 2 && "origin-left"
+              index === 3 && "origin-left"
             )}
           >
             {plan.isPopular && (
@@ -142,7 +144,7 @@ export function Pricing({
                           style: "currency",
                           currency: "TRY",
                           minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
+                          maximumFractionDigits: 2,
                           currencyDisplay: "narrowSymbol",
                         }}
                         transformTiming={{ duration: 500, easing: "ease-out" }}
@@ -151,7 +153,7 @@ export function Pricing({
                     </span>
                     {plan.period && (
                       <span className="text-sm font-medium text-zinc-400">
-                        / {plan.period}
+                        / {isMonthly ? plan.period : (plan.yearlyPeriod ?? plan.period)}
                       </span>
                     )}
                   </>
@@ -199,6 +201,13 @@ export function Pricing({
               <p className="mt-4 text-center text-xs text-zinc-400">
                 {plan.description}
               </p>
+
+              {creditNote && (
+                <p className="mt-3 rounded-xl bg-zinc-50 px-3 py-2.5 text-[11px] leading-relaxed text-zinc-400">
+                  <span className="font-medium text-zinc-500">Kredi nedir?</span>{" "}
+                  {creditNote}
+                </p>
+              )}
             </div>
           </motion.div>
         ))}

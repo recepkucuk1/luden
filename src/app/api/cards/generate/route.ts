@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { cardGenerateBodySchema, zodError } from "@/lib/validation";
+import { deductCredits } from "@/lib/credits";
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,19 +26,11 @@ export async function POST(request: NextRequest) {
     }
     const { category, difficulty, ageGroup, focusArea, studentId, curriculumGoalIds = [] } = parsed.data;
 
-    // ── Ücretsiz plan limiti: aylık maksimum 20 kart ──
-    const FREE_MONTHLY_CARD_LIMIT = 20;
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const monthlyCardCount = await prisma.card.count({
-      where: {
-        therapistId: session.user.id,
-        createdAt: { gte: monthStart },
-      },
-    });
-    if (monthlyCardCount >= FREE_MONTHLY_CARD_LIMIT) {
+    // ── Kredi kontrolü ve düşümü ──
+    const creditResult = await deductCredits(session.user.id, "card_generate");
+    if (!creditResult.ok) {
       return NextResponse.json(
-        { error: `Ücretsiz planda aylık en fazla ${FREE_MONTHLY_CARD_LIMIT} kart oluşturabilirsiniz.` },
+        { error: `Yetersiz kredi. Mevcut krediniz: ${creditResult.credits}. Kart oluşturmak için 20 kredi gereklidir.` },
         { status: 403 }
       );
     }

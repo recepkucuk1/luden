@@ -49,11 +49,20 @@ export async function POST(request: NextRequest) {
     const verifyToken = crypto.randomUUID();
     const verifyExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 saat
 
-    await prisma.therapist.create({
+    const newTherapist = await prisma.therapist.create({
       data: {
         name, email, password: hashed, specialty: [],
         emailVerifyToken: verifyToken,
         emailVerifyExpires: verifyExpires,
+      },
+    });
+
+    await prisma.creditTransaction.create({
+      data: {
+        therapistId: newTherapist.id,
+        amount: 40,
+        type: "EARN",
+        description: "Kayıt bonusu",
       },
     });
 

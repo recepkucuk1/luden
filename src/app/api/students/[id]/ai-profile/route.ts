@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { generateStudentProfile } from "@/lib/generateProfile";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { deductCredits } from "@/lib/credits";
 
 export async function POST(
   _request: NextRequest,
@@ -27,6 +28,15 @@ export async function POST(
     });
     if (!student) {
       return NextResponse.json({ error: "Öğrenci bulunamadı" }, { status: 404 });
+    }
+
+    // ── Kredi kontrolü ve düşümü ──
+    const creditResult = await deductCredits(session.user.id, "ai_profile");
+    if (!creditResult.ok) {
+      return NextResponse.json(
+        { error: `Yetersiz kredi. Mevcut krediniz: ${creditResult.credits}. AI profil için 20 kredi gereklidir.` },
+        { status: 403 }
+      );
     }
 
     await generateStudentProfile(id);

@@ -22,7 +22,11 @@ import { FeaturesSectionWithHoverEffects } from "@/components/ui/feature-section
 const FAQ_ITEMS = [
   {
     q: "Ücretsiz plan ne kadar süre geçerli?",
-    a: "Ücretsiz plan süre sınırı olmaksızın kullanılabilir. 5 öğrenci ve aylık 20 kart limitiyle başlangıç için idealdir.",
+    a: "Ücretsiz plan süre sınırı olmaksızın kullanılabilir. 2 öğrenci ve 40 başlangıç kredisiyle başlamak için idealdir.",
+  },
+  {
+    q: "Kredi sistemi nasıl çalışıyor?",
+    a: "Her öğrenme kartı üretimi veya AI eğitim profili oluşturma 20 kredi harcar. Pro planda dönem başında 2.000, Advanced planda 10.000 kredi yüklenir.",
   },
   {
     q: "Verilerim güvende mi?",
@@ -30,11 +34,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "Kaç öğrenci ekleyebilirim?",
-    a: "Ücretsiz planda 5 öğrenciye kadar ekleyebilirsiniz. Pro planda sınır yoktur.",
+    a: "Ücretsiz planda 2 öğrenci, Pro planda 200 öğrenci ekleyebilirsiniz. Advanced ve Enterprise planlarda sınır yoktur.",
   },
   {
     q: "Fatura ve ödeme nasıl işliyor?",
-    a: "Pro plan şu an geliştirme aşamasındadır. Yakında kredi kartı ve havale seçenekleriyle aylık veya yıllık abonelik sunulacak.",
+    a: "Kredi kartı ve havale seçenekleriyle aylık veya yıllık abonelik alabilirsiniz. Yıllık abonelikte %15 indirim uygulanır.",
   },
 ];
 
@@ -109,55 +113,78 @@ const FEATURES = [
 ];
 
 // ─── Pricing ──────────────────────────────────────────────────────────────────
+const CREDIT_NOTE = "Her öğrenme kartı veya eğitim profili 20 kredi harcar. Krediler dönem başında yüklenir.";
+
 const PLANS: PricingPlan[] = [
   {
-    name: "Ücretsiz",
+    name: "Free",
     price: 0,
     yearlyPrice: 0,
     period: "ay",
     description: "Başlamak için ideal",
     features: [
-      "5 öğrenciye kadar",
-      "Aylık 20 kart",
-      "PDF indirme",
-      "Temel özellikler",
+      "2 öğrenci",
+      "40 başlangıç kredisi",
+      "Kart üretimi: 20 kredi",
+      "PDF indirme yok",
     ],
-    buttonText: "Ücretsiz Başla",
+    buttonText: "Hemen Başla",
     href: "/register",
     isPopular: false,
   },
   {
     name: "Pro",
-    price: 299,
-    yearlyPrice: 299,
+    price: 379,
+    yearlyPrice: 3865.80,
     period: "ay",
+    yearlyPeriod: "yıl",
     description: "Bireysel terapistler için",
     features: [
-      "Sınırsız öğrenci",
-      "Sınırsız kart",
-      "PDF indirme",
-      "Öncelikli destek",
+      "200 öğrenci",
+      "2.000 kredi / dönem",
+      "Kart üretimi: 20 kredi",
+      "Eğitim profili: 20 kredi",
+      "PDF indirme ✓",
     ],
-    buttonText: "Yakında",
-    href: null,
+    buttonText: "Satın Al",
+    href: "/register",
     isPopular: true,
   },
   {
-    name: "Kurumsal",
+    name: "Advanced",
+    price: 1499,
+    yearlyPrice: 15289.80,
+    period: "ay",
+    yearlyPeriod: "yıl",
+    description: "Yoğun çalışan uzmanlar için",
+    features: [
+      "Sınırsız öğrenci",
+      "10.000 kredi / dönem",
+      "Kart üretimi: 20 kredi",
+      "Eğitim profili: 20 kredi",
+      "PDF indirme ✓",
+    ],
+    buttonText: "Satın Al",
+    href: "/register",
+    isPopular: false,
+  },
+  {
+    name: "Enterprise",
     price: null,
     yearlyPrice: null,
     period: "",
     description: "Klinikler ve kurumlar için",
     features: [
-      "Çoklu uzman hesabı",
-      "Özel entegrasyon",
-      "Kurumsal fatura",
+      "Sınırsız öğrenci",
+      "Özel kredi paketi",
+      "Tüm özellikler",
+      "PDF indirme ✓",
       "Öncelikli destek",
     ],
     buttonText: "İletişime Geç",
     href: "mailto:merhaba@ludenvox.com",
     isPopular: false,
-    customPriceLabel: "Özel",
+    customPriceLabel: "İletişim",
   },
 ];
 
@@ -238,7 +265,7 @@ export default function LandingPage() {
 
       {/* ── Pricing ── */}
       <section id="pricing" className="bg-zinc-50">
-        <Pricing plans={PLANS} />
+        <Pricing plans={PLANS} creditNote={CREDIT_NOTE} />
       </section>
 
       {/* ── FAQ ── */}

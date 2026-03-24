@@ -3119,6 +3119,24 @@ async function main() {
     await prisma.therapist.update({ where: { id: oldest.id }, data: { role: "admin" } });
     console.log(`\n  ★  Admin: ${oldest.name} (${oldest.email})`);
   }
+
+  // ─── Plan verileri ──────────────────────────────────────────────────────────
+  console.log("\n─── Planlar ─────────────────────────────────────────────────────");
+  const PLANS = [
+    { type: "FREE"     as const, studentLimit: 2,   creditAmount: 40,    monthlyPrice: 0,      yearlyPrice: 0,      pdfEnabled: false },
+    { type: "PRO"      as const, studentLimit: 200,  creditAmount: 2000,  monthlyPrice: 37900,  yearlyPrice: 386580,  pdfEnabled: true  },
+    { type: "ADVANCED" as const, studentLimit: -1,   creditAmount: 10000, monthlyPrice: 149900, yearlyPrice: 1528980, pdfEnabled: true  },
+    { type: "ENTERPRISE" as const, studentLimit: -1, creditAmount: -1,    monthlyPrice: 0,      yearlyPrice: 0,      pdfEnabled: true  },
+  ];
+
+  for (const plan of PLANS) {
+    await prisma.plan.upsert({
+      where: { type: plan.type },
+      create: plan,
+      update: plan,
+    });
+    console.log(`  ✓  Plan ${plan.type}`);
+  }
 }
 
 main()

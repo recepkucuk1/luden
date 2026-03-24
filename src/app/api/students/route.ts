@@ -57,14 +57,15 @@ export async function POST(request: NextRequest) {
     }
     const { name, birthDate, workArea, diagnosis, notes, curriculumIds } = parsed.data;
 
-    // ── Ücretsiz plan limiti: maksimum 5 öğrenci ──
-    const FREE_STUDENT_LIMIT = 5;
-    const studentCount = await prisma.student.count({
-      where: { therapistId: session.user.id },
-    });
-    if (studentCount >= FREE_STUDENT_LIMIT) {
+    // ── Plan limiti kontrolü ──
+    const [therapist, studentCount] = await Promise.all([
+      prisma.therapist.findUnique({ where: { id: session.user.id }, select: { studentLimit: true } }),
+      prisma.student.count({ where: { therapistId: session.user.id } }),
+    ]);
+    const limit = therapist?.studentLimit ?? 2;
+    if (studentCount >= limit) {
       return NextResponse.json(
-        { error: `Ücretsiz planda en fazla ${FREE_STUDENT_LIMIT} öğrenci ekleyebilirsiniz.` },
+        { error: `Planınızda en fazla ${limit} öğrenci ekleyebilirsiniz.` },
         { status: 403 }
       );
     }

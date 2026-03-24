@@ -6,6 +6,34 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum PlanType {
+  FREE
+  PRO
+  ADVANCED
+  ENTERPRISE
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PENDING
+}
+
+enum CreditTransactionType {
+  EARN
+  SPEND
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
 model Therapist {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -13,15 +41,59 @@ model Therapist {
   password  String
   specialty String[] // ["speech", "language", "hearing"]
   role      String   @default("user") // "user" | "admin"
-  emailVerified       Boolean   @default(false)
-  emailVerifyToken    String?   @unique
-  emailVerifyExpires  DateTime?
+  emailVerified      Boolean   @default(false)
+  emailVerifyToken   String?   @unique
+  emailVerifyExpires DateTime?
+  credits      Int      @default(40)
+  studentLimit Int      @default(2)
+  pdfEnabled   Boolean  @default(false)
+  planType     PlanType @default(FREE)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  students  Student[]
-  cards     Card[]
-  progress  StudentProgress[]
+  students      Student[]
+  cards         Card[]
+  progress      StudentProgress[]
+  subscriptions Subscription[]
+  creditTxns    CreditTransaction[]
+}
+
+model Plan {
+  id           String   @id @default(cuid())
+  type         PlanType @unique
+  studentLimit Int      // -1 = sınırsız
+  creditAmount Int      // dönem başı yüklenen kredi
+  monthlyPrice Int      // kuruş cinsinden (37900 = 379 TL)
+  yearlyPrice  Int      // kuruş cinsinden
+  pdfEnabled   Boolean
+  createdAt    DateTime @default(now())
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id               String             @id @default(cuid())
+  therapistId      String
+  planId           String
+  status           SubscriptionStatus @default(PENDING)
+  billingCycle     BillingCycle
+  currentPeriodEnd DateTime
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  therapist Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  plan      Plan      @relation(fields: [planId], references: [id])
+}
+
+model CreditTransaction {
+  id          String                @id @default(cuid())
+  therapistId String
+  amount      Int
+  type        CreditTransactionType
+  description String
+  createdAt   DateTime              @default(now())
+
+  therapist Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 }
 
 model Student {
