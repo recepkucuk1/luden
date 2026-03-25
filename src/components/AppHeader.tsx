@@ -71,7 +71,7 @@ export function AppHeader() {
             ))}
             {session?.user?.role === "admin" && (
               <Link
-                href="/admin"
+                href="/admin/users"
                 className={cn(
                   "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
                   isActive("/admin")
@@ -111,7 +111,7 @@ export function AppHeader() {
                   <div className="absolute right-0 top-full mt-1.5 w-52 rounded-xl border border-zinc-200 bg-white shadow-lg py-1.5">
                     {session.user.role === "admin" && (
                       <Link
-                        href="/admin"
+                        href="/admin/users"
                         onClick={() => setOpen(false)}
                         className="flex items-center px-4 py-2 text-sm text-[#023435] font-medium hover:bg-[#023435]/5 transition-colors"
                       >
@@ -208,7 +208,7 @@ export function AppHeader() {
               <div className="h-px bg-white/10 my-1" />
               {session.user.role === "admin" && (
                 <Link
-                  href="/admin"
+                  href="/admin/users"
                   onClick={() => setMobileOpen(false)}
                   className="block rounded-lg px-4 py-2.5 text-sm font-medium text-[#FE703A] hover:bg-white/10 transition-colors"
                 >
