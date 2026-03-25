@@ -8,26 +8,34 @@ import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type PlanType = "FREE" | "PRO" | "ADVANCED" | "ENTERPRISE";
+type PlanType     = "FREE" | "PRO" | "ADVANCED" | "ENTERPRISE";
+type BillingCycle = "MONTHLY" | "YEARLY";
+
+interface Subscription {
+  currentPeriodEnd: string;
+  billingCycle:     BillingCycle;
+}
 
 interface UserRow {
-  id: string;
-  name: string;
-  email: string;
-  specialty: string[];
-  role: string;
-  planType: PlanType;
-  credits: number;
-  studentLimit: number;
-  suspended: boolean;
-  lastLogin: string | null;
-  createdAt: string;
-  _count: { students: number; cards: number };
+  id:            string;
+  name:          string;
+  email:         string;
+  specialty:     string[];
+  role:          string;
+  planType:      PlanType;
+  credits:       number;
+  studentLimit:  number;
+  pdfEnabled:    boolean;
+  suspended:     boolean;
+  lastLogin:     string | null;
+  createdAt:     string;
+  subscriptions: Subscription[];
+  _count:        { students: number; cards: number };
 }
 
 interface PlanCount {
   planType: PlanType;
-  _count: { _all: number };
+  _count:   { _all: number };
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -43,163 +51,114 @@ const PLAN_LABEL: Record<PlanType, string> = {
   FREE: "Free", PRO: "Pro", ADVANCED: "Advanced", ENTERPRISE: "Enterprise",
 };
 
-const PLANS: PlanType[] = ["FREE", "PRO", "ADVANCED", "ENTERPRISE"];
+const PLAN_INFO: Record<PlanType, { students: string; credits: string }> = {
+  FREE:       { students: "2 öğrenci",   credits: "40 kredi"     },
+  PRO:        { students: "200 öğrenci", credits: "2.000 kredi"  },
+  ADVANCED:   { students: "Sınırsız",   credits: "10.000 kredi"  },
+  ENTERPRISE: { students: "Sınırsız",   credits: "Özel"          },
+};
 
-function fmtDate(str: string | null) {
+const PLANS: PlanType[] = ["FREE", "PRO", "ADVANCED", "ENTERPRISE"];
+const CREDIT_PRESETS    = [50, 100, 500, 1000, 2000];
+
+function fmtDate(str: string | null | undefined) {
   if (!str) return "—";
   return new Date(str).toLocaleDateString("tr-TR", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function fmtLimit(n: number) {
-  return n === -1 ? "∞" : String(n);
+function activeSub(u: UserRow): Subscription | null {
+  return u.subscriptions?.[0] ?? null;
 }
 
-// ─── Modals ───────────────────────────────────────────────────────────────────
+// ─── Manage Modal ─────────────────────────────────────────────────────────────
 
-function PlanModal({
+function ManageModal({
   user,
   onClose,
-  onSave,
+  onUpdate,
 }: {
-  user: UserRow;
-  onClose: () => void;
-  onSave: (planType: PlanType) => void;
+  user:     UserRow;
+  onClose:  () => void;
+  onUpdate: (patch: Partial<UserRow>) => void;
 }) {
-  const [selected, setSelected] = useState<PlanType>(user.planType);
-  const [saving, setSaving] = useState(false);
+  const sub = activeSub(user);
 
-  async function handleSave() {
-    setSaving(true);
+  const [planType,     setPlanType]     = useState<PlanType>(user.planType);
+  const [billing,      setBilling]      = useState<BillingCycle>(sub?.billingCycle ?? "YEARLY");
+  const [creditAmount, setCreditAmount] = useState("");
+  const [savingPlan,   setSavingPlan]   = useState(false);
+  const [savingCredit, setSavingCredit] = useState(false);
+
+  async function handleSavePlan() {
+    if (planType === user.planType && billing === (sub?.billingCycle ?? "YEARLY")) {
+      toast("Değişiklik yok");
+      return;
+    }
+    setSavingPlan(true);
     try {
-      const res = await fetch(`/api/admin/users/${user.id}/plan`, {
-        method: "PUT",
+      const res  = await fetch(`/api/admin/users/${user.id}/plan`, {
+        method:  "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planType: selected }),
+        body:    JSON.stringify({ planType, billingCycle: billing }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+
+      // Compute new subscription end for optimistic UI
+      const periodEnd = new Date();
+      if (billing === "YEARLY") periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+      else periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+      onUpdate({
+        planType,
+        studentLimit:  data.user.studentLimit,
+        pdfEnabled:    data.user.pdfEnabled,
+        subscriptions: [{ currentPeriodEnd: periodEnd.toISOString(), billingCycle: billing }],
+      });
       toast.success("Plan güncellendi");
-      onSave(selected);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Hata oluştu");
     } finally {
-      setSaving(false);
+      setSavingPlan(false);
     }
   }
 
-  const PLAN_INFO: Record<PlanType, { students: string; credits: string }> = {
-    FREE:       { students: "2 öğrenci", credits: "40 kredi"     },
-    PRO:        { students: "200 öğrenci", credits: "2.000 kredi" },
-    ADVANCED:   { students: "Sınırsız", credits: "10.000 kredi"  },
-    ENTERPRISE: { students: "Sınırsız", credits: "Özel"          },
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
-          <div>
-            <h2 className="text-sm font-semibold text-zinc-900">Plan Değiştir</h2>
-            <p className="text-xs text-zinc-400 mt-0.5">{user.name}</p>
-          </div>
-          <button onClick={onClose} className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 transition-colors">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        <div className="px-5 py-4 space-y-2">
-          {PLANS.map((plan) => (
-            <button
-              key={plan}
-              onClick={() => setSelected(plan)}
-              className={cn(
-                "w-full rounded-xl border p-3 text-left transition-colors",
-                selected === plan
-                  ? "border-[#023435] bg-[#023435]/5"
-                  : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <span className={cn(
-                  "rounded-full border px-2.5 py-0.5 text-xs font-semibold",
-                  PLAN_BADGE[plan]
-                )}>
-                  {PLAN_LABEL[plan]}
-                </span>
-                {selected === plan && (
-                  <span className="h-4 w-4 rounded-full bg-[#023435] flex items-center justify-center">
-                    <svg className="h-2.5 w-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </span>
-                )}
-              </div>
-              <p className="mt-1.5 text-xs text-zinc-500">
-                {PLAN_INFO[plan].students} · {PLAN_INFO[plan].credits}
-              </p>
-            </button>
-          ))}
-        </div>
-
-        <div className="border-t border-zinc-100 px-5 py-4 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl border border-zinc-200 px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 transition-colors">İptal</button>
-          <button
-            onClick={handleSave}
-            disabled={saving || selected === user.planType}
-            className="rounded-xl bg-[#023435] px-4 py-2 text-sm font-semibold text-white hover:bg-[#023435]/90 disabled:opacity-50 transition-colors"
-          >
-            {saving ? "Kaydediliyor..." : "Kaydet"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CreditsModal({
-  user,
-  onClose,
-  onSave,
-}: {
-  user: UserRow;
-  onClose: () => void;
-  onSave: (newCredits: number) => void;
-}) {
-  const [amount, setAmount] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  const PRESETS = [50, 100, 500, 1000, 2000];
-
-  async function handleSave() {
-    const n = parseInt(amount);
+  async function handleAddCredit() {
+    const n = parseInt(creditAmount);
     if (!n || n < 1) { toast.error("Geçerli bir miktar girin"); return; }
-    setSaving(true);
+    setSavingCredit(true);
     try {
-      const res = await fetch(`/api/admin/users/${user.id}/credits`, {
-        method: "POST",
+      const res  = await fetch(`/api/admin/users/${user.id}/credits`, {
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: n }),
+        body:    JSON.stringify({ amount: n }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      onUpdate({ credits: data.user.credits });
+      setCreditAmount("");
       toast.success(`${n} kredi eklendi`);
-      onSave(data.user.credits);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Hata oluştu");
     } finally {
-      setSaving(false);
+      setSavingCredit(false);
     }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
           <div>
-            <h2 className="text-sm font-semibold text-zinc-900">Kredi Ekle</h2>
-            <p className="text-xs text-zinc-400 mt-0.5">{user.name} · Mevcut: {user.credits} kredi</p>
+            <h2 className="text-sm font-semibold text-zinc-900">Üyelik Yönet</h2>
+            <p className="text-xs text-zinc-400 mt-0.5">{user.name} · {user.email}</p>
           </div>
           <button onClick={onClose} className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 transition-colors">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -208,46 +167,122 @@ function CreditsModal({
           </button>
         </div>
 
-        <div className="px-5 py-4 space-y-4">
-          {/* Presets */}
-          <div className="flex flex-wrap gap-2">
-            {PRESETS.map((n) => (
-              <button
-                key={n}
-                onClick={() => setAmount(String(n))}
-                className={cn(
-                  "rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors",
-                  amount === String(n)
-                    ? "bg-[#FE703A] text-white border-[#FE703A]"
-                    : "border-zinc-200 text-zinc-600 hover:border-[#FE703A]/40 hover:text-[#FE703A]"
-                )}
-              >
-                +{n}
-              </button>
-            ))}
-          </div>
-          {/* Custom input */}
+        <div className="px-5 py-4 space-y-5">
+
+          {/* ── Plan Seçimi ── */}
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-600">Özel miktar</label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Kredi miktarı..."
-              min={1}
-              className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30"
-            />
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Plan</p>
+            <div className="grid grid-cols-2 gap-2">
+              {PLANS.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPlanType(p)}
+                  className={cn(
+                    "rounded-xl border p-3 text-left transition-colors",
+                    planType === p
+                      ? "border-[#023435] bg-[#023435]/5"
+                      : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+                  )}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className={cn("rounded-full border px-2 py-0.5 text-[11px] font-semibold", PLAN_BADGE[p])}>
+                      {PLAN_LABEL[p]}
+                    </span>
+                    {planType === p && (
+                      <span className="h-3.5 w-3.5 rounded-full bg-[#023435] flex items-center justify-center">
+                        <svg className="h-2 w-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-zinc-400">{PLAN_INFO[p].students}</p>
+                  <p className="text-[11px] text-zinc-400">{PLAN_INFO[p].credits}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Fatura Döngüsü ── */}
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Fatura Döngüsü</p>
+            <div className="flex rounded-xl border border-zinc-200 p-0.5 w-fit">
+              {(["MONTHLY", "YEARLY"] as BillingCycle[]).map((b) => (
+                <button
+                  key={b}
+                  onClick={() => setBilling(b)}
+                  className={cn(
+                    "rounded-lg px-4 py-1.5 text-xs font-medium transition-colors",
+                    billing === b ? "bg-[#023435] text-white" : "text-zinc-500 hover:text-zinc-700"
+                  )}
+                >
+                  {b === "MONTHLY" ? "Aylık" : "Yıllık"}
+                </button>
+              ))}
+            </div>
+            {sub && (
+              <p className="mt-1.5 text-[11px] text-zinc-400">
+                Mevcut bitiş: {fmtDate(sub.currentPeriodEnd)}
+              </p>
+            )}
+          </div>
+
+          {/* ── Plan Kaydet ── */}
+          <button
+            onClick={handleSavePlan}
+            disabled={savingPlan}
+            className="w-full rounded-xl bg-[#023435] py-2.5 text-sm font-semibold text-white hover:bg-[#023435]/90 disabled:opacity-50 transition-colors"
+          >
+            {savingPlan ? "Kaydediliyor..." : "Planı Kaydet"}
+          </button>
+
+          <div className="border-t border-zinc-100" />
+
+          {/* ── Kredi Ekle ── */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Kredi Ekle</p>
+              <span className="text-xs text-zinc-500">Mevcut: <strong>{user.credits.toLocaleString("tr-TR")}</strong></span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {CREDIT_PRESETS.map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setCreditAmount(String(n))}
+                  className={cn(
+                    "rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors",
+                    creditAmount === String(n)
+                      ? "bg-[#FE703A] text-white border-[#FE703A]"
+                      : "border-zinc-200 text-zinc-600 hover:border-[#FE703A]/40 hover:text-[#FE703A]"
+                  )}
+                >
+                  +{n}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                value={creditAmount}
+                onChange={(e) => setCreditAmount(e.target.value)}
+                placeholder="Özel miktar..."
+                min={1}
+                className="flex-1 rounded-xl border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30"
+              />
+              <button
+                onClick={handleAddCredit}
+                disabled={savingCredit || !creditAmount}
+                className="rounded-xl bg-[#FE703A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-50 transition-colors"
+              >
+                {savingCredit ? "..." : "Ekle"}
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-zinc-100 px-5 py-4 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl border border-zinc-200 px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 transition-colors">İptal</button>
-          <button
-            onClick={handleSave}
-            disabled={saving || !amount}
-            className="rounded-xl bg-[#FE703A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-50 transition-colors"
-          >
-            {saving ? "Ekleniyor..." : "Ekle"}
+        <div className="border-t border-zinc-100 px-5 py-3 flex justify-end">
+          <button onClick={onClose} className="text-sm text-zinc-400 hover:text-zinc-600 transition-colors">
+            Kapat
           </button>
         </div>
       </div>
@@ -260,19 +295,17 @@ function CreditsModal({
 function ActionDropdown({
   user,
   currentUserId,
-  onChangePlan,
-  onAddCredits,
+  onManage,
   onToggleRole,
   onToggleSuspend,
   onDelete,
 }: {
-  user: UserRow;
-  currentUserId: string;
-  onChangePlan: () => void;
-  onAddCredits: () => void;
-  onToggleRole: () => void;
+  user:            UserRow;
+  currentUserId:   string;
+  onManage:        () => void;
+  onToggleRole:    () => void;
   onToggleSuspend: () => void;
-  onDelete: () => void;
+  onDelete:        () => void;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -289,38 +322,29 @@ function ActionDropdown({
   const item = "flex w-full items-center gap-2.5 px-4 py-2 text-sm text-left transition-colors";
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative flex items-center gap-1.5 justify-end" ref={ref}>
+      {/* Yönet butonu — her zaman görünür */}
+      <button
+        onClick={onManage}
+        className="rounded-lg border border-[#023435]/20 bg-[#023435]/5 px-2.5 py-1.5 text-xs font-semibold text-[#023435] hover:bg-[#023435]/10 transition-colors"
+      >
+        Yönet
+      </button>
+
+      {/* Diğer işlemler dropdown */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="rounded-lg border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+        className="rounded-lg border border-zinc-200 p-1.5 text-zinc-400 hover:bg-zinc-50 transition-colors"
       >
-        İşlemler ▾
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01" />
+        </svg>
       </button>
 
       {open && (
         <div className="absolute right-0 top-full mt-1 w-52 rounded-xl border border-zinc-200 bg-white shadow-lg py-1.5 z-20">
-          <button
-            onClick={() => { setOpen(false); onChangePlan(); }}
-            className={cn(item, "text-zinc-700 hover:bg-zinc-50")}
-          >
-            <svg className="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            Planı Değiştir
-          </button>
-          <button
-            onClick={() => { setOpen(false); onAddCredits(); }}
-            className={cn(item, "text-zinc-700 hover:bg-zinc-50")}
-          >
-            <svg className="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Kredi Ekle
-          </button>
-
           {!isSelf && (
             <>
-              <div className="my-1 border-t border-zinc-100" />
               <button
                 onClick={() => { setOpen(false); onToggleRole(); }}
                 className={cn(item, "text-zinc-700 hover:bg-zinc-50")}
@@ -354,6 +378,9 @@ function ActionDropdown({
               </button>
             </>
           )}
+          {isSelf && (
+            <p className="px-4 py-2 text-xs text-zinc-400">Kendi hesabınız</p>
+          )}
         </div>
       )}
     </div>
@@ -371,11 +398,9 @@ export default function AdminUsersPage() {
   const [loading,    setLoading]    = useState(true);
   const [search,     setSearch]     = useState("");
 
-  // Modals
-  const [planModal,    setPlanModal]    = useState<UserRow | null>(null);
-  const [creditsModal, setCreditsModal] = useState<UserRow | null>(null);
-  const [confirmDel,   setConfirmDel]   = useState<string | null>(null);
-  const [deleting,     setDeleting]     = useState(false);
+  const [manageUser, setManageUser] = useState<UserRow | null>(null);
+  const [confirmDel, setConfirmDel] = useState<string | null>(null);
+  const [deleting,   setDeleting]   = useState(false);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -395,11 +420,17 @@ export default function AdminUsersPage() {
     return planCounts.find((p) => p.planType === pt)?._count._all ?? 0;
   }
 
+  function updateUser(id: string, patch: Partial<UserRow>) {
+    setUsers((prev) => prev.map((u) => u.id === id ? { ...u, ...patch } : u));
+    // manageUser'ı da güncelle
+    setManageUser((prev) => prev?.id === id ? { ...prev, ...patch } : prev);
+  }
+
   async function handleToggleRole(user: UserRow) {
     const res  = await fetch(`/api/admin/users/${user.id}/role`, { method: "PATCH" });
     const data = await res.json();
     if (!res.ok) { toast.error(data.error); return; }
-    setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, role: data.user.role } : u));
+    updateUser(user.id, { role: data.user.role });
     toast.success(data.user.role === "admin" ? "Admin yapıldı" : "Admin yetkisi alındı");
   }
 
@@ -407,7 +438,7 @@ export default function AdminUsersPage() {
     const res  = await fetch(`/api/admin/users/${user.id}/suspend`, { method: "PATCH" });
     const data = await res.json();
     if (!res.ok) { toast.error(data.error); return; }
-    setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, suspended: data.user.suspended } : u));
+    updateUser(user.id, { suspended: data.user.suspended });
     toast.success(data.user.suspended ? "Hesap askıya alındı" : "Askı kaldırıldı");
   }
 
@@ -418,8 +449,7 @@ export default function AdminUsersPage() {
       setUsers((prev) => prev.filter((u) => u.id !== id));
       toast.success("Hesap silindi");
     } else {
-      const d = await res.json();
-      toast.error(d.error);
+      toast.error((await res.json()).error);
     }
     setDeleting(false);
     setConfirmDel(null);
@@ -441,6 +471,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 space-y-6">
+
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -458,10 +489,10 @@ export default function AdminUsersPage() {
       {/* ── Özet kartlar ── */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
-          { label: "Toplam Kullanıcı", value: users.length, color: "border-l-[#023435]", textColor: "text-[#023435]" },
-          { label: "Free Plan",        value: planCount("FREE"),       color: "border-l-zinc-400",    textColor: "text-zinc-700" },
-          { label: "Pro Plan",         value: planCount("PRO"),        color: "border-l-[#107996]",   textColor: "text-[#107996]" },
-          { label: "Advanced Plan",    value: planCount("ADVANCED"),   color: "border-l-[#FE703A]",   textColor: "text-[#FE703A]" },
+          { label: "Toplam Kullanıcı", value: users.length,          color: "border-l-[#023435]", textColor: "text-[#023435]"  },
+          { label: "Free",             value: planCount("FREE"),      color: "border-l-zinc-400",  textColor: "text-zinc-600"   },
+          { label: "Pro",              value: planCount("PRO"),       color: "border-l-[#107996]", textColor: "text-[#107996]"  },
+          { label: "Advanced",         value: planCount("ADVANCED"),  color: "border-l-[#FE703A]", textColor: "text-[#FE703A]"  },
         ].map((card) => (
           <div key={card.label} className={cn("rounded-xl border border-zinc-200 bg-white p-5 border-l-4", card.color)}>
             <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">{card.label}</p>
@@ -472,7 +503,6 @@ export default function AdminUsersPage() {
 
       {/* ── Tablo ── */}
       <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
-        {/* Toolbar */}
         <div className="flex items-center justify-between gap-4 border-b border-zinc-100 px-6 py-4">
           <h2 className="text-sm font-semibold text-zinc-800">Kullanıcılar</h2>
           <input
@@ -491,89 +521,96 @@ export default function AdminUsersPage() {
                 <th className="text-left px-5 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Ad / Email</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Plan</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Kredi</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Üyelik Bitiş</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Öğrenci</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Kayıt</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Son Giriş</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
-              {filtered.map((u) => (
-                <tr
-                  key={u.id}
-                  className={cn(
-                    "transition-colors",
-                    u.suspended ? "bg-red-50/50" : "hover:bg-zinc-50"
-                  )}
-                >
-                  {/* Ad / Email */}
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-zinc-800">{u.name}</span>
-                      {u.role === "admin" && (
-                        <span className="rounded-full bg-[#023435] px-1.5 py-0.5 text-[10px] font-bold text-white">Admin</span>
-                      )}
-                      {u.suspended && (
-                        <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-600">Askıda</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-zinc-400 mt-0.5">{u.email}</p>
-                  </td>
-
-                  {/* Plan */}
-                  <td className="px-4 py-3.5">
-                    <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-semibold", PLAN_BADGE[u.planType])}>
-                      {PLAN_LABEL[u.planType]}
-                    </span>
-                  </td>
-
-                  {/* Kredi */}
-                  <td className="px-4 py-3.5">
-                    <span className="font-semibold text-zinc-800">{u.credits.toLocaleString("tr-TR")}</span>
-                    <span className="text-zinc-400 text-xs"> / {fmtLimit(u.studentLimit === -1 ? -1 : u.studentLimit)} öğr.</span>
-                  </td>
-
-                  {/* Öğrenci */}
-                  <td className="px-4 py-3.5 text-center">
-                    <span className="font-semibold text-zinc-700">{u._count.students}</span>
-                    {u.studentLimit !== -1 && (
-                      <span className="text-zinc-400 text-xs"> / {u.studentLimit}</span>
-                    )}
-                  </td>
-
-                  {/* Kayıt */}
-                  <td className="px-4 py-3.5 text-xs text-zinc-500 whitespace-nowrap">{fmtDate(u.createdAt)}</td>
-
-                  {/* Son Giriş */}
-                  <td className="px-4 py-3.5 text-xs text-zinc-500 whitespace-nowrap">{fmtDate(u.lastLogin)}</td>
-
-                  {/* İşlemler */}
-                  <td className="px-4 py-3.5 text-right">
-                    {confirmDel === u.id ? (
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => setConfirmDel(null)} className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors">İptal</button>
-                        <button
-                          onClick={() => handleDelete(u.id)}
-                          disabled={deleting}
-                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
-                        >
-                          {deleting ? "Siliniyor…" : "Onayla"}
-                        </button>
+              {filtered.map((u) => {
+                const sub = activeSub(u);
+                return (
+                  <tr
+                    key={u.id}
+                    className={cn("transition-colors", u.suspended ? "bg-red-50/50" : "hover:bg-zinc-50")}
+                  >
+                    {/* Ad / Email */}
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-zinc-800">{u.name}</span>
+                        {u.role === "admin" && (
+                          <span className="rounded-full bg-[#023435] px-1.5 py-0.5 text-[10px] font-bold text-white">Admin</span>
+                        )}
+                        {u.suspended && (
+                          <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-600">Askıda</span>
+                        )}
                       </div>
-                    ) : (
-                      <ActionDropdown
-                        user={u}
-                        currentUserId={session!.user!.id!}
-                        onChangePlan={() => setPlanModal(u)}
-                        onAddCredits={() => setCreditsModal(u)}
-                        onToggleRole={() => handleToggleRole(u)}
-                        onToggleSuspend={() => handleToggleSuspend(u)}
-                        onDelete={() => setConfirmDel(u.id)}
-                      />
-                    )}
-                  </td>
-                </tr>
-              ))}
+                      <p className="text-xs text-zinc-400 mt-0.5">{u.email}</p>
+                    </td>
+
+                    {/* Plan */}
+                    <td className="px-4 py-3.5">
+                      <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-semibold", PLAN_BADGE[u.planType])}>
+                        {PLAN_LABEL[u.planType]}
+                      </span>
+                      {sub && (
+                        <p className="text-[10px] text-zinc-400 mt-0.5">
+                          {sub.billingCycle === "MONTHLY" ? "Aylık" : "Yıllık"}
+                        </p>
+                      )}
+                    </td>
+
+                    {/* Kredi */}
+                    <td className="px-4 py-3.5">
+                      <span className="font-semibold text-zinc-800">{u.credits.toLocaleString("tr-TR")}</span>
+                    </td>
+
+                    {/* Üyelik Bitiş */}
+                    <td className="px-4 py-3.5 text-xs text-zinc-500 whitespace-nowrap">
+                      {sub ? fmtDate(sub.currentPeriodEnd) : "—"}
+                    </td>
+
+                    {/* Öğrenci */}
+                    <td className="px-4 py-3.5 text-center">
+                      <span className="font-semibold text-zinc-700">{u._count.students}</span>
+                      {u.studentLimit !== -1 && (
+                        <span className="text-zinc-400 text-xs"> / {u.studentLimit}</span>
+                      )}
+                    </td>
+
+                    {/* Son Giriş */}
+                    <td className="px-4 py-3.5 text-xs text-zinc-500 whitespace-nowrap">
+                      {fmtDate(u.lastLogin)}
+                    </td>
+
+                    {/* İşlemler */}
+                    <td className="px-4 py-3.5">
+                      {confirmDel === u.id ? (
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => setConfirmDel(null)} className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors">İptal</button>
+                          <button
+                            onClick={() => handleDelete(u.id)}
+                            disabled={deleting}
+                            className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                          >
+                            {deleting ? "Siliniyor…" : "Onayla"}
+                          </button>
+                        </div>
+                      ) : (
+                        <ActionDropdown
+                          user={u}
+                          currentUserId={session!.user!.id!}
+                          onManage={() => setManageUser(u)}
+                          onToggleRole={() => handleToggleRole(u)}
+                          onToggleSuspend={() => handleToggleSuspend(u)}
+                          onDelete={() => setConfirmDel(u.id)}
+                        />
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
 
               {filtered.length === 0 && (
                 <tr>
@@ -587,25 +624,12 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* ── Modals ── */}
-      {planModal && (
-        <PlanModal
-          user={planModal}
-          onClose={() => setPlanModal(null)}
-          onSave={(planType) => {
-            setUsers((prev) => prev.map((u) => u.id === planModal.id ? { ...u, planType } : u));
-            setPlanModal(null);
-          }}
-        />
-      )}
-      {creditsModal && (
-        <CreditsModal
-          user={creditsModal}
-          onClose={() => setCreditsModal(null)}
-          onSave={(newCredits) => {
-            setUsers((prev) => prev.map((u) => u.id === creditsModal.id ? { ...u, credits: newCredits } : u));
-            setCreditsModal(null);
-          }}
+      {/* ── Manage Modal ── */}
+      {manageUser && (
+        <ManageModal
+          user={manageUser}
+          onClose={() => setManageUser(null)}
+          onUpdate={(patch) => updateUser(manageUser.id, patch)}
         />
       )}
     </div>

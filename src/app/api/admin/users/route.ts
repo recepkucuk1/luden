@@ -36,6 +36,12 @@ export async function GET() {
         lastLogin: true,
         createdAt: true,
         _count: { select: { students: true, cards: true } },
+        subscriptions: {
+          where: { status: "ACTIVE" },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          select: { currentPeriodEnd: true, billingCycle: true },
+        },
       },
     }),
     prisma.therapist.groupBy({

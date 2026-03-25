@@ -11,7 +11,8 @@ const PLAN_DEFAULTS = {
 } as const;
 
 const schema = z.object({
-  planType: z.enum(["FREE", "PRO", "ADVANCED", "ENTERPRISE"]),
+  planType:     z.enum(["FREE", "PRO", "ADVANCED", "ENTERPRISE"]),
+  billingCycle: z.enum(["MONTHLY", "YEARLY"]).default("YEARLY"),
 });
 
 async function requireAdmin() {
@@ -30,46 +31,38 @@ export async function PUT(
 
   const { id } = await params;
   const parsed = schema.safeParse(await request.json());
-  if (!parsed.success) return NextResponse.json({ error: "Geçersiz plan" }, { status: 400 });
+  if (!parsed.success) return NextResponse.json({ error: "Geçersiz istek" }, { status: 400 });
 
-  const { planType } = parsed.data;
+  const { planType, billingCycle } = parsed.data;
   const defaults = PLAN_DEFAULTS[planType];
-
-  // Plan kaydını bul
   const plan = await prisma.plan.findFirst({ where: { type: planType } });
 
   const updated = await prisma.therapist.update({
     where: { id },
-    data: {
-      planType,
-      studentLimit: defaults.studentLimit,
-      pdfEnabled:   defaults.pdfEnabled,
-    },
+    data: { planType, studentLimit: defaults.studentLimit, pdfEnabled: defaults.pdfEnabled },
     select: { id: true, planType: true, studentLimit: true, pdfEnabled: true },
   });
 
-  // Subscription güncelle veya oluştur
   if (plan) {
+    const periodEnd = new Date();
+    if (billingCycle === "YEARLY") {
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    } else {
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+    }
+
     const existing = await prisma.subscription.findFirst({
       where: { therapistId: id, status: "ACTIVE" },
     });
-    const periodEnd = new Date();
-    periodEnd.setFullYear(periodEnd.getFullYear() + 1);
 
     if (existing) {
       await prisma.subscription.update({
         where: { id: existing.id },
-        data: { planId: plan.id, status: "ACTIVE", currentPeriodEnd: periodEnd },
+        data: { planId: plan.id, status: "ACTIVE", billingCycle, currentPeriodEnd: periodEnd },
       });
     } else {
       await prisma.subscription.create({
-        data: {
-          therapistId: id,
-          planId: plan.id,
-          status: "ACTIVE",
-          billingCycle: "YEARLY",
-          currentPeriodEnd: periodEnd,
-        },
+        data: { therapistId: id, planId: plan.id, status: "ACTIVE", billingCycle, currentPeriodEnd: periodEnd },
       });
     }
   }
