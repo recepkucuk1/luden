@@ -38,6 +38,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             throw new EmailNotVerifiedError();
           }
 
+          // Son giriş tarihini kaydet
+          await prisma.therapist.update({
+            where: { id: therapist.id },
+            data: { lastLogin: new Date() },
+          });
+
           return {
             id: therapist.id,
             email: therapist.email,

@@ -69,6 +69,19 @@ export function AppHeader() {
                 {item.label}
               </Link>
             ))}
+            {session?.user?.role === "admin" && (
+              <Link
+                href="/admin"
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                  isActive("/admin")
+                    ? "text-[#FE703A] font-semibold hover:bg-white/10"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
+                )}
+              >
+                Admin
+              </Link>
+            )}
           </nav>
 
           {/* Sağ: Kullanıcı dropdown + hamburger */}

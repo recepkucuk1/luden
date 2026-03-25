@@ -54,6 +54,8 @@ model Therapist {
   studentLimit Int      @default(2)
   pdfEnabled   Boolean  @default(false)
   planType     PlanType @default(FREE)
+  suspended    Boolean  @default(false)
+  lastLogin    DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

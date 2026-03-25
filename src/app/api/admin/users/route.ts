@@ -20,22 +20,31 @@ export async function GET() {
     return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
   }
 
-  const users = await prisma.therapist.findMany({
-    orderBy: { createdAt: "asc" },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      specialty: true,
-      role: true,
-      createdAt: true,
-      _count: {
-        select: { students: true, cards: true },
+  const [users, planCounts] = await Promise.all([
+    prisma.therapist.findMany({
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        specialty: true,
+        role: true,
+        planType: true,
+        credits: true,
+        studentLimit: true,
+        suspended: true,
+        lastLogin: true,
+        createdAt: true,
+        _count: { select: { students: true, cards: true } },
       },
-    },
-  });
+    }),
+    prisma.therapist.groupBy({
+      by: ["planType"],
+      _count: { _all: true },
+    }),
+  ]);
 
-  return NextResponse.json({ users });
+  return NextResponse.json({ users, planCounts });
 }
 
 export async function DELETE(request: NextRequest) {
