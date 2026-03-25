@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse, getClientIp } from "@/lib/rateLimit";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request.headers);
@@ -29,9 +30,8 @@ export async function POST(request: NextRequest) {
     data: { token, userId: therapist.id, expiresAt },
   });
 
-  // TODO: Email servisi entegrasyonu (Resend / Nodemailer)
   const resetUrl = `${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/reset-password/${token}`;
-  console.log(`[forgot-password] Şifre sıfırlama linki — ${email}: ${resetUrl}`);
+  await sendPasswordResetEmail(email, resetUrl);
 
   return successResponse;
 }
