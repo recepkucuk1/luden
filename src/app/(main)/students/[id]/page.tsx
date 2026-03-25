@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -110,7 +110,7 @@ export default function StudentDetailPage({
   const [notFound, setNotFound] = useState(false);
   const [activeTab, setActiveTab] = useState<"cards" | "progress" | "aiProfile">("cards");
   const [generatingProfile, setGeneratingProfile] = useState(false);
-  const [profileTimedOut, setProfileTimedOut] = useState(false);
+  const [confirmRegenerate, setConfirmRegenerate] = useState(false);
   const [confirmCardId, setConfirmCardId] = useState<string | null>(null);
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
   const [swipeOpenId, setSwipeOpenId] = useState<string | null>(null);
@@ -121,55 +121,16 @@ export default function StudentDetailPage({
     startTime: string; endTime: string; status: string;
   }[]>([]);
 
-  // Eğitim Profili — polling
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  function stopPolling() {
-    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-  }
-
-  useEffect(() => {
-    // Profil henüz hazır değilse (yeni öğrenci oluşturuldu, arka planda üretiliyor)
-    if (student && !student.aiProfile && !generatingProfile) {
-      setProfileTimedOut(false);
-
-      // 30 saniye sonra timeout
-      const timeoutId = setTimeout(() => {
-        stopPolling();
-        setProfileTimedOut(true);
-      }, 30_000);
-
-      pollRef.current = setInterval(async () => {
-        try {
-          const res = await fetch(`/api/students/${id}`);
-          if (!res.ok) return;
-          const data = await res.json();
-          if (data.student?.aiProfile) {
-            setStudent((prev) => prev ? { ...prev, aiProfile: data.student.aiProfile } : prev);
-            stopPolling();
-            clearTimeout(timeoutId);
-          }
-        } catch { /* sessiz */ }
-      }, 3000);
-
-      return () => {
-        stopPolling();
-        clearTimeout(timeoutId);
-      };
-    } else {
-      stopPolling();
-    }
-    return () => stopPolling();
-  }, [id, student?.aiProfile, generatingProfile]);
-
   async function handleGenerateProfile() {
     if (!student) return;
     setGeneratingProfile(true);
+    setConfirmRegenerate(false);
     try {
       const res = await fetch(`/api/students/${student.id}/ai-profile`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Hata oluştu");
       setStudent((prev) => prev ? { ...prev, aiProfile: data.aiProfile } : prev);
+      toast.success("Eğitim profili oluşturuldu");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Profil oluşturulamadı, tekrar deneyin");
     } finally {
@@ -543,41 +504,69 @@ export default function StudentDetailPage({
               <div>
                 <h2 className="text-base font-semibold text-zinc-900">Eğitim Profili</h2>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  AI destekli klinik arka plan ve uzman önerileri
+                  AI destekli klinik arka plan ve uzman önerileri · 20 kredi
                 </p>
               </div>
+              {student.aiProfile && !generatingProfile && (
+                <button
+                  onClick={() => setConfirmRegenerate(true)}
+                  className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+                >
+                  Yeniden Üret
+                </button>
+              )}
             </div>
 
-            {!student.aiProfile && !generatingProfile && !profileTimedOut && (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="h-6 w-6 rounded-full border-2 border-[#FE703A]/20 border-t-[#FE703A] animate-spin mx-auto mb-4" />
-                <p className="text-sm font-medium text-zinc-500">Profil hazırlanıyor…</p>
-                <p className="text-xs text-zinc-400 mt-1">Bu birkaç saniye sürebilir.</p>
+            {/* Yeniden üret onay diyaloğu */}
+            {confirmRegenerate && (
+              <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm font-medium text-amber-800 mb-1">Mevcut profil silinecek, devam et?</p>
+                <p className="text-xs text-amber-600 mb-3">Yeni profil oluşturmak 20 kredi harcar.</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleGenerateProfile}
+                    className="rounded-lg bg-[#FE703A] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#FE703A]/90 transition-colors"
+                  >
+                    Evet, Yeniden Üret
+                  </button>
+                  <button
+                    onClick={() => setConfirmRegenerate(false)}
+                    className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+                  >
+                    İptal
+                  </button>
+                </div>
               </div>
             )}
 
-            {!student.aiProfile && !generatingProfile && profileTimedOut && (
+            {/* Boş durum */}
+            {!student.aiProfile && !generatingProfile && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="text-3xl mb-3">⚠️</div>
-                <p className="text-sm font-medium text-zinc-600">Profil oluşturulamadı.</p>
-                <p className="text-xs text-zinc-400 mt-1">Lütfen daha sonra tekrar deneyin.</p>
+                <div className="text-4xl mb-3">🧠</div>
+                <p className="text-sm font-medium text-zinc-700 mb-1">Henüz eğitim profili oluşturulmadı</p>
+                <p className="text-xs text-zinc-400 mb-5">
+                  AI, öğrencinin bilgilerine göre klinik arka plan ve uzman önerileri hazırlar.
+                </p>
                 <button
                   onClick={handleGenerateProfile}
-                  className="mt-4 rounded-lg border border-zinc-200 px-4 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+                  className="rounded-xl bg-[#FE703A] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors shadow-sm"
                 >
-                  Tekrar Dene
+                  ✨ Eğitim Profili Üret
                 </button>
               </div>
             )}
 
-            {generatingProfile && !student.aiProfile && (
+            {/* Yükleniyor */}
+            {generatingProfile && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="h-6 w-6 rounded-full border-2 border-[#FE703A]/20 border-t-[#FE703A] animate-spin mx-auto mb-4" />
                 <p className="text-sm font-medium text-zinc-500">Profil oluşturuluyor…</p>
+                <p className="text-xs text-zinc-400 mt-1">Bu birkaç saniye sürebilir.</p>
               </div>
             )}
 
-            {student.aiProfile && (
+            {/* Profil içeriği */}
+            {student.aiProfile && !generatingProfile && (
               <div className="space-y-3 min-w-0">
                 {parseProfileSections(student.aiProfile).map((section) => {
                   const style = SECTION_STYLE[section.title] ?? {
