@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse, getClientIp } from "@/lib/rateLimit";
 import { registerBodySchema, zodError } from "@/lib/validation";
-import { sendVerificationEmail } from "@/lib/email";
 import { logError } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
@@ -46,14 +45,11 @@ export async function POST(request: NextRequest) {
     }
 
     const hashed = await bcrypt.hash(password, 12);
-    const verifyToken = crypto.randomUUID();
-    const verifyExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 saat
 
     const newTherapist = await prisma.therapist.create({
       data: {
         name, email, password: hashed, specialty: [],
-        emailVerifyToken: verifyToken,
-        emailVerifyExpires: verifyExpires,
+        emailVerified: true,
       },
     });
 
@@ -65,8 +61,6 @@ export async function POST(request: NextRequest) {
         description: "Kayıt bonusu",
       },
     });
-
-    await sendVerificationEmail(email, verifyToken);
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
@@ -170,8 +171,6 @@ export default function RegisterPage() {
   
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [successEmail, setSuccessEmail] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
@@ -318,35 +317,14 @@ export default function RegisterPage() {
       return;
     }
 
-    setSuccessEmail(email);
-    setSuccess(true);
-    setLoading(false);
-  }
-
-  // --- Success State Render ---
-  if (success) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white p-8">
-        <div className="w-full max-w-sm text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mx-auto mb-5">
-            <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-zinc-900 mb-2">Emailinizi kontrol edin</h2>
-          <p className="text-sm text-zinc-500 mb-1">
-            Doğrulama linki şu adrese gönderildi:
-          </p>
-          <p className="text-sm font-semibold text-zinc-700 mb-6">{successEmail}</p>
-          <p className="text-xs text-zinc-400 mb-6">
-            Linke tıklayarak hesabınızı aktifleştirin. Email gelmezse spam klasörünü kontrol edin.
-          </p>
-          <Button onClick={() => router.push("/login")} className="w-full h-10 bg-[#023435] hover:bg-[#023435]/90 text-white">
-            Giriş Sayfasına Git
-          </Button>
-        </div>
-      </div>
-    );
+    // Kayıt başarılı — otomatik giriş yap
+    const result = await signIn("credentials", { email, password, redirect: false });
+    if (result?.error) {
+      setError("Kayıt başarılı ancak giriş yapılamadı. Lütfen giriş sayfasına gidin.");
+      setLoading(false);
+      return;
+    }
+    router.push("/dashboard");
   }
 
   // Determine if purple character is in the "surprised" skewed state masking eyes due to password vision.
