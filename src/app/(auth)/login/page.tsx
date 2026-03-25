@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -170,12 +170,15 @@ const EyeBall = ({
   );
 };
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const resetSuccess = searchParams.get("reset") === "success";
+
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -569,7 +572,12 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-sm font-medium">Şifre</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-sm font-medium">Şifre</Label>
+                <Link href="/forgot-password" className="text-xs text-zinc-400 hover:text-[#FE703A] transition-colors">
+                  Şifremi unuttum
+                </Link>
+              </div>
               <div className="relative">
                 <Input
                   id="password"
@@ -597,6 +605,12 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {resetSuccess && (
+              <div className="rounded-lg bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-700">
+                Şifreniz güncellendi. Yeni şifrenizle giriş yapabilirsiniz.
+              </div>
+            )}
+
             {error && (
               <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
                 {error}
@@ -622,5 +636,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -59,12 +59,13 @@ model Therapist {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  students      Student[]
-  cards         Card[]
-  progress      StudentProgress[]
-  subscriptions Subscription[]
-  creditTxns    CreditTransaction[]
-  lessons       Lesson[]
+  students           Student[]
+  cards              Card[]
+  progress           StudentProgress[]
+  subscriptions      Subscription[]
+  creditTxns         CreditTransaction[]
+  lessons            Lesson[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Plan {
@@ -216,4 +217,14 @@ model StudentProgress {
   therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, goalId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user Therapist @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
