@@ -5,13 +5,10 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn, toInputDate } from "@/lib/utils";
 import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
-import { CurriculumPicker } from "@/components/students/CurriculumPicker";
+import { StudentForm, StudentFormData } from "@/components/students/StudentForm";
 
 type FilterArea = "all" | "speech" | "language" | "hearing";
 type SortBy = "name" | "birthDate-asc" | "birthDate-desc" | "lastCard" | "mostCards";
@@ -44,44 +41,23 @@ const SORT_OPTIONS: { value: SortBy; label: string }[] = [
   { value: "mostCards", label: "En çok kart üretilene göre" },
 ];
 
-const WORK_AREAS = [
-  { value: "speech", label: "Konuşma", icon: "🗣️" },
-  { value: "language", label: "Dil", icon: "📚" },
-  { value: "hearing", label: "İşitme", icon: "👂" },
-];
-
-
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
 
   const [filterArea, setFilterArea] = useState<FilterArea>("all");
   const [sortBy, setSortBy] = useState<SortBy>("name");
 
   // Curriculum
   const [curricula, setCurricula] = useState<{id:string;area:string;title:string}[]>([]);
-  const [newCurriculumIds, setNewCurriculumIds] = useState<string[]>([]);
 
-  // Yeni öğrenci formu
-  const [name, setName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [workArea, setWorkArea] = useState("speech");
-  const [diagnosis, setDiagnosis] = useState("");
-  const [notes, setNotes] = useState("");
-
-  // Düzenleme modalı
+  // Modals
+  const [showForm, setShowForm] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editBirthDate, setEditBirthDate] = useState("");
-  const [editWorkArea, setEditWorkArea] = useState("speech");
-  const [editDiagnosis, setEditDiagnosis] = useState("");
-  const [editNotes, setEditNotes] = useState("");
-  const [editSubmitting, setEditSubmitting] = useState(false);
-  const [editError, setEditError] = useState<string | null>(null);
+  
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Silme
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -102,50 +78,7 @@ export default function StudentsPage() {
     }
   }
 
-  function openEdit(student: Student) {
-    setEditingStudent(student);
-    setEditName(student.name);
-    setEditBirthDate(toInputDate(student.birthDate));
-    setEditWorkArea(student.workArea);
-    setEditDiagnosis(student.diagnosis ?? "");
-    setEditNotes(student.notes ?? "");
-    setEditError(null);
-  }
-
-  async function handleEdit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!editingStudent || !editName.trim()) { setEditError("Ad Soyad zorunludur."); return; }
-    setEditSubmitting(true);
-    setEditError(null);
-    try {
-      const res = await fetch(`/api/students/${editingStudent.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: editName, birthDate: editBirthDate || null,
-          workArea: editWorkArea, diagnosis: editDiagnosis, notes: editNotes,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Hata oluştu");
-      setStudents((prev) =>
-        prev.map((s) =>
-          s.id === editingStudent.id
-            ? { ...s, name: editName, birthDate: editBirthDate || null, workArea: editWorkArea, diagnosis: editDiagnosis || null, notes: editNotes || null }
-            : s
-        )
-      );
-      toast.success("Değişiklikler kaydedildi");
-      setEditingStudent(null);
-    } catch (err) {
-      toast.error("Bir hata oluştu, tekrar deneyin");
-      setEditError(err instanceof Error ? err.message : "Hata oluştu");
-    } finally {
-      setEditSubmitting(false);
-    }
-  }
-
-  const [hasMore, setHasMore]       = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -190,32 +123,67 @@ export default function StudentsPage() {
     fetch("/api/curriculum")
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(d => setCurricula(d.curricula ?? []))
-      .catch(() => {/* curriculum is optional — form still works without it */});
+      .catch(() => {/* curriculum is optional */});
   }, []);
 
-  function resetForm() {
-    setName(""); setBirthDate(""); setWorkArea("speech");
-    setDiagnosis(""); setNotes(""); setFormError(null);
-    setNewCurriculumIds([]);
-  }
 
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    if (!name.trim()) { setFormError("Ad Soyad zorunludur."); return; }
+  async function handleCreate(data: StudentFormData) {
+    if (!data.name.trim()) { setFormError("Ad Soyad zorunludur."); return; }
     setSubmitting(true);
     setFormError(null);
     try {
       const res = await fetch("/api/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, birthDate: birthDate || null, workArea, diagnosis, notes, curriculumIds: newCurriculumIds }),
+        body: JSON.stringify({ 
+          name: data.name, 
+          birthDate: data.birthDate || null, 
+          workArea: data.workArea, 
+          diagnosis: data.diagnosis, 
+          notes: data.notes, 
+          curriculumIds: data.curriculumIds 
+        }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Hata oluştu");
+      const responseData = await res.json();
+      if (!res.ok) throw new Error(responseData.error || "Hata oluştu");
       toast.success("Öğrenci başarıyla eklendi");
       setShowForm(false);
-      resetForm();
       fetchStudents();
+    } catch (err) {
+      toast.error("Bir hata oluştu, tekrar deneyin");
+      setFormError(err instanceof Error ? err.message : "Hata oluştu");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleEdit(data: StudentFormData) {
+    if (!editingStudent || !data.name.trim()) { setFormError("Ad Soyad zorunludur."); return; }
+    setSubmitting(true);
+    setFormError(null);
+    try {
+      const res = await fetch(`/api/students/${editingStudent.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.name, 
+          birthDate: data.birthDate || null,
+          workArea: data.workArea, 
+          diagnosis: data.diagnosis, 
+          notes: data.notes,
+        }),
+      });
+      const responseData = await res.json();
+      if (!res.ok) throw new Error(responseData.error || "Hata oluştu");
+      setStudents((prev) =>
+        prev.map((s) =>
+          s.id === editingStudent.id
+            ? { ...s, name: data.name, birthDate: data.birthDate || null, workArea: data.workArea, diagnosis: data.diagnosis || null, notes: data.notes || null }
+            : s
+        )
+      );
+      toast.success("Değişiklikler kaydedildi");
+      setEditingStudent(null);
     } catch (err) {
       toast.error("Bir hata oluştu, tekrar deneyin");
       setFormError(err instanceof Error ? err.message : "Hata oluştu");
@@ -263,7 +231,7 @@ export default function StudentsPage() {
             )}
           </p>
         </div>
-        <Button onClick={() => { setShowForm(true); resetForm(); }}>
+        <Button onClick={() => { setFormError(null); setShowForm(true); }}>
           + Yeni Öğrenci
         </Button>
       </div>
@@ -320,91 +288,15 @@ export default function StudentsPage() {
           <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-bold text-zinc-900">Yeni Öğrenci Ekle</h2>
-              <button
-                onClick={() => setShowForm(false)}
-                className="text-zinc-400 hover:text-zinc-600 text-lg leading-none"
-              >
-                ✕
-              </button>
+              <button onClick={() => setShowForm(false)} className="text-zinc-400 hover:text-zinc-600 text-lg leading-none">✕</button>
             </div>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-sm font-medium">Ad Soyad *</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Öğrenci adı"
-                  autoFocus
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="birthDate" className="text-sm font-medium">Doğum Tarihi</Label>
-                <Input
-                  id="birthDate"
-                  type="date"
-                  value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Çalışma Alanı *</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {WORK_AREAS.map((w) => (
-                    <button
-                      key={w.value}
-                      type="button"
-                      onClick={() => setWorkArea(w.value)}
-                      className={cn(
-                        "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all text-xs font-medium",
-                        workArea === w.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
-                      )}
-                    >
-                      <span className="text-lg">{w.icon}</span>
-                      {w.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <CurriculumPicker
-                key={workArea}
-                curricula={curricula}
-                selectedIds={newCurriculumIds}
-                onChange={setNewCurriculumIds}
-                defaultOpenKey={workArea}
-              />
-              <div className="space-y-1.5">
-                <Label htmlFor="diagnosis" className="text-sm font-medium">Tanı</Label>
-                <Input
-                  id="diagnosis"
-                  value={diagnosis}
-                  onChange={(e) => setDiagnosis(e.target.value)}
-                  placeholder="Örn: Dil gelişim gecikmesi"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="notes" className="text-sm font-medium">Notlar</Label>
-                <Textarea
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Öğrenci hakkında ek notlar..."
-                  rows={2}
-                  className="resize-none text-sm"
-                />
-              </div>
-              {formError && <p className="text-xs text-red-500">{formError}</p>}
-              <div className="flex gap-2 pt-1">
-                <Button type="submit" disabled={submitting} className="flex-1">
-                  {submitting ? "Kaydediliyor…" : "Kaydet"}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)} className="flex-1">
-                  İptal
-                </Button>
-              </div>
-            </form>
+            <StudentForm 
+              curricula={curricula}
+              onSubmit={handleCreate}
+              onCancel={() => setShowForm(false)}
+              submitting={submitting}
+              error={formError}
+            />
           </div>
         </div>
       )}
@@ -415,61 +307,22 @@ export default function StudentsPage() {
           <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-bold text-zinc-900">Öğrenci Düzenle</h2>
-              <button
-                onClick={() => setEditingStudent(null)}
-                className="text-zinc-400 hover:text-zinc-600 text-lg leading-none"
-              >
-                ✕
-              </button>
+              <button onClick={() => setEditingStudent(null)} className="text-zinc-400 hover:text-zinc-600 text-lg leading-none">✕</button>
             </div>
-            <form onSubmit={handleEdit} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-name" className="text-sm font-medium">Ad Soyad *</Label>
-                <Input id="edit-name" value={editName} onChange={(e) => setEditName(e.target.value)} autoFocus />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-birthDate" className="text-sm font-medium">Doğum Tarihi</Label>
-                <Input id="edit-birthDate" type="date" value={editBirthDate} onChange={(e) => setEditBirthDate(e.target.value)} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">Çalışma Alanı *</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {WORK_AREAS.map((w) => (
-                    <button
-                      key={w.value}
-                      type="button"
-                      onClick={() => setEditWorkArea(w.value)}
-                      className={cn(
-                        "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all text-xs font-medium",
-                        editWorkArea === w.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
-                      )}
-                    >
-                      <span className="text-lg">{w.icon}</span>
-                      {w.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-diagnosis" className="text-sm font-medium">Tanı</Label>
-                <Input id="edit-diagnosis" value={editDiagnosis} onChange={(e) => setEditDiagnosis(e.target.value)} placeholder="Örn: Dil gelişim gecikmesi" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="edit-notes" className="text-sm font-medium">Notlar</Label>
-                <Textarea id="edit-notes" value={editNotes} onChange={(e) => setEditNotes(e.target.value)} rows={2} className="resize-none text-sm" />
-              </div>
-              {editError && <p className="text-xs text-red-500">{editError}</p>}
-              <div className="flex gap-2 pt-1">
-                <Button type="submit" disabled={editSubmitting} className="flex-1">
-                  {editSubmitting ? "Kaydediliyor…" : "Kaydet"}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setEditingStudent(null)} className="flex-1">
-                  İptal
-                </Button>
-              </div>
-            </form>
+            <StudentForm 
+              initialValues={{
+                name: editingStudent.name,
+                birthDate: toInputDate(editingStudent.birthDate) || "",
+                workArea: editingStudent.workArea,
+                diagnosis: editingStudent.diagnosis || "",
+                notes: editingStudent.notes || ""
+              }}
+              curricula={curricula}
+              onSubmit={handleEdit}
+              onCancel={() => setEditingStudent(null)}
+              submitting={submitting}
+              error={formError}
+            />
           </div>
         </div>
       )}
@@ -502,10 +355,7 @@ export default function StudentsPage() {
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((student) => (
-            <div
-              key={student.id}
-              className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all"
-            >
+            <div key={student.id} className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all">
               <Link href={`/students/${student.id}`} className="block p-5">
                 <div className="mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#023435]/10 text-[#023435] font-bold text-sm">
@@ -518,57 +368,34 @@ export default function StudentsPage() {
                     {WORK_AREA_LABEL[student.workArea] ?? student.workArea}
                   </Badge>
                   {student.birthDate && <span>{calcAge(student.birthDate)}</span>}
-                  {student.diagnosis && (
-                    <span className="truncate">{student.diagnosis}</span>
-                  )}
+                  {student.diagnosis && <span className="truncate">{student.diagnosis}</span>}
                 </div>
                 <div className="mt-3 pt-3 border-t border-zinc-100 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-zinc-400">
                       {student._count.cards} kart
-                      {student.latestCardAt && (
-                        <span className="ml-1">
-                          · {new Date(student.latestCardAt).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })}
-                        </span>
-                      )}
+                      {student.latestCardAt && <span className="ml-1">· {new Date(student.latestCardAt).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })}</span>}
                     </span>
-                    <span className="text-xs text-[#FE703A] font-medium group-hover:underline">
-                      Detay →
-                    </span>
+                    <span className="text-xs text-[#FE703A] font-medium group-hover:underline">Detay →</span>
                   </div>
                   {student.progressSummary.total > 0 && (
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] text-zinc-400">
-                          {student.progressSummary.completed}/{student.progressSummary.total} hedef tamamlandı
-                        </span>
-                        <span className="text-[10px] font-semibold text-zinc-500">
-                          {Math.round((student.progressSummary.completed / student.progressSummary.total) * 100)}%
-                        </span>
+                        <span className="text-[10px] text-zinc-400">{student.progressSummary.completed}/{student.progressSummary.total} hedef tamamlandı</span>
+                        <span className="text-[10px] font-semibold text-zinc-500">{Math.round((student.progressSummary.completed / student.progressSummary.total) * 100)}%</span>
                       </div>
                       <div className="h-1 w-full rounded-full bg-zinc-100 overflow-hidden">
-                        <div
-                          className="h-full bg-emerald-500 transition-all duration-500 rounded-full"
-                          style={{ width: `${(student.progressSummary.completed / student.progressSummary.total) * 100}%` }}
-                        />
+                        <div className="h-full bg-emerald-500 transition-all duration-500 rounded-full" style={{ width: `${(student.progressSummary.completed / student.progressSummary.total) * 100}%` }} />
                       </div>
                     </div>
                   )}
                 </div>
               </Link>
               <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => openEdit(student)}
-                  className="rounded-lg p-1.5 text-zinc-400 hover:text-[#023435] hover:bg-[#023435]/5 transition-colors"
-                  title="Düzenle"
-                >
+                <button onClick={() => { setFormError(null); setEditingStudent(student); }} className="rounded-lg p-1.5 text-zinc-400 hover:text-[#023435] hover:bg-[#023435]/5 transition-colors" title="Düzenle">
                   <Pencil size={14} />
                 </button>
-                <button
-                  onClick={() => setConfirmDeleteId(student.id)}
-                  className="rounded-lg p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                  title="Sil"
-                >
+                <button onClick={() => setConfirmDeleteId(student.id)} className="rounded-lg p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Sil">
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -576,22 +403,11 @@ export default function StudentsPage() {
               {/* Silme onayı */}
               {confirmDeleteId === student.id && (
                 <div className="absolute inset-0 rounded-2xl bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center gap-3 p-4 z-10">
-                  <p className="text-sm font-medium text-zinc-700 text-center">
-                    Bu öğrenciyi silmek istediğinize emin misiniz?
-                  </p>
+                  <p className="text-sm font-medium text-zinc-700 text-center">Bu öğrenciyi silmek istediğinize emin misiniz?</p>
                   <p className="text-xs text-zinc-400 text-center">Tüm kartları da silinecek.</p>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => setConfirmDeleteId(null)}
-                      className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs text-zinc-600 hover:bg-zinc-50 transition-colors"
-                    >
-                      İptal
-                    </button>
-                    <button
-                      onClick={() => handleDelete(student.id)}
-                      disabled={deletingId === student.id}
-                      className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-white hover:bg-red-700 disabled:opacity-60 transition-colors"
-                    >
+                    <button onClick={() => setConfirmDeleteId(null)} className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs text-zinc-600 hover:bg-zinc-50 transition-colors">İptal</button>
+                    <button onClick={() => handleDelete(student.id)} disabled={deletingId === student.id} className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-white hover:bg-red-700 disabled:opacity-60 transition-colors">
                       {deletingId === student.id ? "Siliniyor…" : "Evet, Sil"}
                     </button>
                   </div>
@@ -605,11 +421,7 @@ export default function StudentsPage() {
       {/* Daha fazla yükle */}
       {hasMore && (
         <div className="flex justify-center mt-6 pb-8">
-          <button
-            onClick={loadMoreStudents}
-            disabled={loadingMore}
-            className="rounded-xl border border-zinc-200 px-6 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 transition-colors"
-          >
+          <button onClick={loadMoreStudents} disabled={loadingMore} className="rounded-xl border border-zinc-200 px-6 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 transition-colors">
             {loadingMore ? "Yükleniyor…" : "Daha fazla yükle"}
           </button>
         </div>
