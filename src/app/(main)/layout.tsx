@@ -1,10 +1,12 @@
-import { AppHeader } from "@/components/AppHeader";
+import { Sidebar } from "@/components/ui/dashboard-with-collapsible-sidebar";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <AppHeader />
-      {children}
+    <div className="flex min-h-screen w-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
+      <Sidebar />
+      <div className="flex-1 w-full flex flex-col pt-16 md:pt-0 h-screen overflow-auto">
+        {children}
+      </div>
     </div>
   );
 }
