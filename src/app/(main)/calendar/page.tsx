@@ -138,9 +138,17 @@ function LessonModal({
   const isEdit = !!lesson;
   const [studentId,    setStudentId]    = useState(lesson?.studentId ?? "");
   const [title,        setTitle]        = useState(lesson?.title ?? "");
-  const [date,         setDate]         = useState(
-    lesson ? lesson.date.slice(0, 10) : (initialDate ? initialDate.toISOString().slice(0, 10) : "")
-  );
+
+  // Tarih: 3 ayrı alan (GG / AA / YYYY)
+  const _initDate = lesson ? lesson.date.slice(0, 10) : (initialDate ? initialDate.toISOString().slice(0, 10) : "");
+  const [dayStr,   setDayStr]   = useState(_initDate ? String(parseInt(_initDate.slice(8, 10), 10)) : "");
+  const [monthStr, setMonthStr] = useState(_initDate ? String(parseInt(_initDate.slice(5, 7), 10))  : "");
+  const [yearStr,  setYearStr]  = useState(_initDate ? _initDate.slice(0, 4) : "");
+  // YYYY-MM-DD formatında birleştirilmiş değer
+  const date = (dayStr && monthStr && yearStr && yearStr.length === 4)
+    ? `${yearStr}-${monthStr.padStart(2, "0")}-${dayStr.padStart(2, "0")}`
+    : "";
+
   const [startTime,    setStartTime]    = useState(lesson?.startTime ?? "09:00");
   const [endTime,      setEndTime]      = useState(lesson?.endTime   ?? "10:00");
   const [note,         setNote]         = useState(lesson?.note ?? "");
@@ -224,7 +232,25 @@ function LessonModal({
           </div>
           <div>
             <label className={labelCls}>Tarih</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} style={{ colorScheme: "light" }} />
+            <div className="flex items-center gap-1.5">
+              <input
+                type="number" min={1} max={31} placeholder="GG"
+                value={dayStr} onChange={(e) => setDayStr(e.target.value)}
+                className={cn(inputCls, "w-16 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none")}
+              />
+              <span className="text-[#023435]/40 font-medium select-none">/</span>
+              <input
+                type="number" min={1} max={12} placeholder="AA"
+                value={monthStr} onChange={(e) => setMonthStr(e.target.value)}
+                className={cn(inputCls, "w-16 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none")}
+              />
+              <span className="text-[#023435]/40 font-medium select-none">/</span>
+              <input
+                type="number" min={2020} max={2035} placeholder="YYYY"
+                value={yearStr} onChange={(e) => setYearStr(e.target.value)}
+                className={cn(inputCls, "w-24 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none")}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

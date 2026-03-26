@@ -646,7 +646,7 @@ export default function StudentDetailPage({
                     )}
                     <div className="flex items-center justify-between mt-2">
                       <p className="text-xs text-zinc-400">
-                        {new Date(card.createdAt).toLocaleDateString("tr-TR")}
+                        {new Date(card.createdAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" })}
                       </p>
                       <span className="text-xs text-[#FE703A] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                         Detay →
@@ -728,7 +728,7 @@ export default function StudentDetailPage({
                     </div>
                     <h3 className="font-semibold text-zinc-900 text-sm mb-1">{assignment.card.title}</h3>
                     <p className="text-xs text-zinc-400 mt-1">
-                      {new Date(assignment.assignedAt).toLocaleDateString("tr-TR")}
+                      {new Date(assignment.assignedAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" })}
                     </p>
                   </Link>
                   {/* Durum Seçici */}

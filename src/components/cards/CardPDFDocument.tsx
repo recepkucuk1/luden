@@ -293,7 +293,7 @@ interface CardPDFDocumentProps {
 }
 
 export function CardPDFDocument({ card }: CardPDFDocumentProps) {
-  const today = new Date().toLocaleDateString("tr-TR");
+  const today = new Date().toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
   const diffColor = DIFFICULTY_COLOR[card.difficulty] ?? "#2563eb";
 
   return (
