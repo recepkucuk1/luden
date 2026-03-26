@@ -520,9 +520,9 @@ export default function LandingPage() {
             <Image
               src="/logo.svg"
               alt="LudenLab"
-              width={120}
-              height={44}
-              className="h-9 w-auto brightness-0 invert"
+              width={160}
+              height={56}
+              className="h-12 w-auto brightness-0 invert"
               priority
             />
           </Link>
@@ -585,9 +585,9 @@ export default function LandingPage() {
               <Image
                 src="/logo.svg"
                 alt="LudenLab"
-                width={120}
-                height={44}
-                className="h-8 w-auto mb-3 brightness-0 invert"
+                width={160}
+                height={56}
+                className="h-10 w-auto mb-3 brightness-0 invert"
               />
               <p className="text-xs text-white/60 leading-relaxed max-w-[200px]">
                 Dil, konuşma ve işitme uzmanları için AI destekli öğrenme kartı platformu.
