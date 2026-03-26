@@ -188,17 +188,17 @@ function LessonModal({
     }
   }
 
-  const inputCls = "w-full rounded-xl border border-[rgba(2,52,53,0.15)] bg-white px-3 py-2 text-sm text-[#023435] placeholder-[#023435]/30 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/40";
+  const inputCls = "w-full rounded-xl border border-[rgba(2,52,53,0.15)] bg-[#f8fafa] px-3 py-2 text-sm text-[#023435] placeholder-[#023435]/40 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/40";
   const labelCls = "mb-1.5 block text-xs font-medium text-[#023435]/60";
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(2,52,53,0.7)", backdropFilter: "blur(4px)" }}
+      style={{ background: "rgba(2,52,53,0.4)", backdropFilter: "blur(4px)" }}
       onClick={onClose}
     >
       <div
-        className={cn("w-full max-w-md rounded-2xl shadow-2xl", GLASS)}
+        className="w-full max-w-md rounded-2xl shadow-2xl bg-white border border-[rgba(2,52,53,0.12)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.1)] px-5 py-4">
@@ -213,7 +213,7 @@ function LessonModal({
         <div className="px-5 py-4 space-y-4">
           <div>
             <label className={labelCls}>Öğrenci</label>
-            <select value={studentId} onChange={(e) => setStudentId(e.target.value)} className={inputCls} style={{ colorScheme: "dark" }}>
+            <select value={studentId} onChange={(e) => setStudentId(e.target.value)} className={inputCls} style={{ colorScheme: "light" }}>
               <option value="">Öğrenci seçin</option>
               {students.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
@@ -224,16 +224,16 @@ function LessonModal({
           </div>
           <div>
             <label className={labelCls}>Tarih</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} style={{ colorScheme: "dark" }} />
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} style={{ colorScheme: "light" }} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelCls}>Başlangıç</label>
-              <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={inputCls} style={{ colorScheme: "dark" }} />
+              <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={inputCls} style={{ colorScheme: "light" }} />
             </div>
             <div>
               <label className={labelCls}>Bitiş</label>
-              <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={inputCls} style={{ colorScheme: "dark" }} />
+              <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={inputCls} style={{ colorScheme: "light" }} />
             </div>
           </div>
           <div>
@@ -340,11 +340,11 @@ function LessonDetailModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(2,52,53,0.7)", backdropFilter: "blur(4px)" }}
+      style={{ background: "rgba(2,52,53,0.4)", backdropFilter: "blur(4px)" }}
       onClick={onClose}
     >
       <div
-        className={cn("w-full max-w-sm rounded-2xl shadow-2xl", GLASS)}
+        className="w-full max-w-sm rounded-2xl shadow-2xl bg-white border border-[rgba(2,52,53,0.12)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="border-b border-[rgba(2,52,53,0.1)] px-5 py-4">
@@ -405,7 +405,7 @@ function LessonDetailModal({
             {editingNote ? (
               <div className="space-y-2">
                 <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3}
-                  className="w-full resize-none rounded-xl border border-[rgba(2,52,53,0.15)] bg-white px-3 py-2 text-sm text-[#023435] placeholder-[#023435]/30 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/40" />
+                  className="w-full resize-none rounded-xl border border-[rgba(2,52,53,0.15)] bg-[#f8fafa] px-3 py-2 text-sm text-[#023435] placeholder-[#023435]/40 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/40" />
                 <div className="flex gap-3">
                   <button onClick={() => setEditingNote(false)} className="text-xs text-[#023435]/30 hover:text-[#023435]/60 transition-colors">İptal</button>
                   <button onClick={saveNote} disabled={saving} className="text-xs font-semibold text-[#FE703A] disabled:opacity-50 transition-colors">
