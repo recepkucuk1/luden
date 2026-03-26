@@ -299,7 +299,7 @@ export function CardPDFDocument({ card }: CardPDFDocumentProps) {
   return (
     <Document
       title={sanitize(card.title)}
-      author="LudanLab"
+      author="LudenLab"
       subject="Öğrenme Kartı"
     >
       <Page size="A4" style={styles.page}>
@@ -308,7 +308,7 @@ export function CardPDFDocument({ card }: CardPDFDocumentProps) {
         <View style={styles.header}>
           <Image src={LOGO_SRC} style={styles.logo} />
           <View style={styles.headerRight}>
-            <Text style={styles.appName}>LudanLab</Text>
+            <Text style={styles.appName}>LudenLab</Text>
             <Text style={styles.dateText}>{today}</Text>
           </View>
         </View>
@@ -424,7 +424,7 @@ export function CardPDFDocument({ card }: CardPDFDocumentProps) {
 
         {/* Footer */}
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>LudanLab — AI Destekli Öğrenme Kartı</Text>
+          <Text style={styles.footerText}>LudenLab — AI Destekli Öğrenme Kartı</Text>
           <Text
             style={styles.footerText}
             render={({ pageNumber, totalPages }) =>

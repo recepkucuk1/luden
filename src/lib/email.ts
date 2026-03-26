@@ -118,7 +118,7 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string): P
   const { data, error } = await resend.emails.send({
     from: FROM,
     to: email,
-    subject: "Şifre Sıfırlama Talebi — LudanLab",
+    subject: "Şifre Sıfırlama Talebi — LudenLab",
     html: passwordResetEmailHtml(resetUrl),
   });
 

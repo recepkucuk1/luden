@@ -467,7 +467,7 @@ export function AnimatedAuthPanel({ isTyping, showPassword, passwordLength }: An
       </div>
 
       <div className="relative z-20 flex flex-col items-start text-xs text-[#692137]/60">
-        <p>© {new Date().getFullYear()} LudanLab</p>
+        <p>© {new Date().getFullYear()} LudenLab</p>
       </div>
 
       {/* Decorative elements */}

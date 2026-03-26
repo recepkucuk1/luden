@@ -182,7 +182,7 @@ const PLANS: PricingPlan[] = [
       "Öncelikli destek",
     ],
     buttonText: "İletişime Geç",
-    href: "mailto:merhaba@ludanlab.com",
+    href: "mailto:merhaba@ludenlab.com",
     isPopular: false,
     customPriceLabel: "İletişim",
   },
@@ -225,7 +225,7 @@ export default function LandingPage() {
           <Link href="/" className="shrink-0">
             <Image
               src="/logo.svg"
-              alt="LudanLab"
+              alt="LudenLab"
               width={120}
               height={44}
               className="h-9 w-auto brightness-0 invert"
@@ -287,7 +287,7 @@ export default function LandingPage() {
             <div>
               <Image
                 src="/logo.svg"
-                alt="LudanLab"
+                alt="LudenLab"
                 width={120}
                 height={44}
                 className="h-8 w-auto mb-3 brightness-0 invert"
@@ -324,15 +324,15 @@ export default function LandingPage() {
             <div>
               <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">İletişim</p>
               <a
-                href="mailto:merhaba@ludanlab.com"
+                href="mailto:merhaba@ludenlab.com"
                 className="text-sm text-white/60 hover:text-white transition-colors block mb-4"
               >
-                merhaba@ludanlab.com
+                merhaba@ludenlab.com
               </a>
               <div className="flex items-center gap-3">
                 {/* Instagram */}
                 <a
-                  href="https://instagram.com/ludanlab"
+                  href="https://instagram.com/ludenlab"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors"
@@ -344,7 +344,7 @@ export default function LandingPage() {
                 </a>
                 {/* LinkedIn */}
                 <a
-                  href="https://linkedin.com/company/ludanlab"
+                  href="https://linkedin.com/company/ludenlab"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors"
@@ -359,7 +359,7 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-white/40">
-            © {new Date().getFullYear()} LudanLab. Tüm hakları saklıdır.
+            © {new Date().getFullYear()} LudenLab. Tüm hakları saklıdır.
           </div>
         </div>
       </footer>
