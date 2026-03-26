@@ -10,8 +10,8 @@ const nextConfig: NextConfig = {
           key: "Content-Security-Policy",
           value: [
             "default-src 'self'",
-            // NOTE: unsafe-eval kaldırıldı — @react-pdf/renderer WASM'ın çalışmaması durumunda geri eklenebilir
-            "script-src 'self' 'unsafe-inline' https://js.hcaptcha.com",
+            // NOTE: unsafe-eval geri eklendi — @react-pdf/renderer WASM gerektiriyor
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.hcaptcha.com",
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: blob:",
             "font-src 'self'",

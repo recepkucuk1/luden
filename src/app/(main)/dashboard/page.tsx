@@ -253,7 +253,7 @@ export default function DashboardPage() {
                 </span>
                 <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{stats?.byCategory.speech ?? 0}</span>
               </div>
-              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
+              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
                 <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: `${stats && stats.students > 0 ? ((stats.byCategory.speech || 0) / stats.students) * 100 : 0}%` }}></div>
               </div>
               
@@ -263,7 +263,7 @@ export default function DashboardPage() {
                 </span>
                 <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{stats?.byCategory.language ?? 0}</span>
               </div>
-              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
+              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
                 <div className="bg-orange-500 h-1.5 rounded-full" style={{ width: `${stats && stats.students > 0 ? ((stats.byCategory.language || 0) / stats.students) * 100 : 0}%` }}></div>
               </div>
               
@@ -273,7 +273,7 @@ export default function DashboardPage() {
                 </span>
                 <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{stats?.byCategory.hearing ?? 0}</span>
               </div>
-              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
+              <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
                 <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${stats && stats.students > 0 ? ((stats.byCategory.hearing || 0) / stats.students) * 100 : 0}%` }}></div>
               </div>
             </div>

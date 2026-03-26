@@ -308,7 +308,7 @@ export function CardPDFDocument({ card }: CardPDFDocumentProps) {
         <View style={styles.header}>
           <Image src={LOGO_SRC} style={styles.logo} />
           <View style={styles.headerRight}>
-            <Text style={styles.appName}>TERAPİMAT</Text>
+            <Text style={styles.appName}>LudanLab</Text>
             <Text style={styles.dateText}>{today}</Text>
           </View>
         </View>
