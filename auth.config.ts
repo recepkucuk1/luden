@@ -21,10 +21,6 @@ export const authConfig: NextAuthConfig = {
         return true;
       }
       if (!isLoggedIn) return Response.redirect(new URL("/login", nextUrl));
-      // Askıya alınmış kullanıcıyı oturumu kapat
-      if ((auth?.user as { role?: string })?.role === "suspended") {
-        return Response.redirect(new URL("/api/auth/signout", nextUrl));
-      }
       return true;
     },
   },
