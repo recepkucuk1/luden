@@ -280,7 +280,7 @@ export function AnimatedAuthPanel({ isTyping, showPassword, passwordLength }: An
       <div className="relative z-20">
         <div className="flex items-center gap-2 text-lg font-semibold text-[#692137]">
           <div 
-            className="h-9 w-[120px] bg-[#692137]" 
+            className="h-16 w-[200px] bg-[#692137]"
             style={{
               WebkitMaskImage: 'url(/logo.svg)',
               WebkitMaskSize: 'contain',

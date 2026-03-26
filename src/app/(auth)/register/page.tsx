@@ -88,7 +88,7 @@ export default function RegisterPage() {
         <div className="w-full max-w-sm">
           {/* Mobil logo */}
           <div className="lg:hidden text-center mb-8">
-            <Image src="/logo.svg" alt="Luden" width={120} height={44} className="h-8 w-auto mx-auto" />
+            <Image src="/logo.svg" alt="Luden" width={200} height={72} className="h-14 w-auto mx-auto" />
           </div>
 
           <div className="mb-8">
