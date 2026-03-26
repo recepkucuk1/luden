@@ -16,11 +16,15 @@ export async function GET() {
     return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
   }
 
-  const [totalUsers, totalStudents, totalCards] = await Promise.all([
-    prisma.therapist.count(),
-    prisma.student.count(),
-    prisma.card.count(),
-  ]);
-
-  return NextResponse.json({ totalUsers, totalStudents, totalCards });
+  try {
+    const [totalUsers, totalStudents, totalCards] = await Promise.all([
+      prisma.therapist.count(),
+      prisma.student.count(),
+      prisma.card.count(),
+    ]);
+    return NextResponse.json({ totalUsers, totalStudents, totalCards });
+  } catch (error) {
+    console.error("[admin/stats]", error);
+    return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
+  }
 }

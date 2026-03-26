@@ -100,6 +100,9 @@ export default function CardsPage() {
   const [cards, setCards]         = useState<CardItem[]>([]);
   const [curricula, setCurricula] = useState<Curriculum[]>([]);
   const [loading, setLoading]     = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore]     = useState(false);
+  const [page, setPage]           = useState(1);
   const [assigningCard, setAssigningCard] = useState<CardItem | null>(null);
   const [swipeOpenId, setSwipeOpenId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -114,13 +117,31 @@ export default function CardsPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/cards").then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch("/api/cards?page=1&limit=20").then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
       fetch("/api/curriculum").then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
     ]).then(([cData, curData]) => {
       setCards(cData.cards ?? []);
+      setHasMore(cData.hasMore ?? false);
+      setPage(1);
       setCurricula(curData.curricula ?? []);
     }).catch(() => toast.error("Veriler yüklenemedi")).finally(() => setLoading(false));
   }, []);
+
+  async function loadMore() {
+    const nextPage = page + 1;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/cards?page=${nextPage}&limit=20`);
+      const data = await res.json();
+      setCards((prev) => [...prev, ...(data.cards ?? [])]);
+      setHasMore(data.hasMore ?? false);
+      setPage(nextPage);
+    } catch {
+      toast.error("Kartlar yüklenemedi");
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   function handleSaved(cardId: string, assignedCount: number) {
     setCards((prev) =>
@@ -365,6 +386,19 @@ export default function CardsPage() {
                   </div>
                   </SwipeableCard>
                 ))}
+              </div>
+            )}
+
+            {/* Daha fazla yükle */}
+            {hasMore && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="rounded-xl border border-zinc-200 px-6 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 transition-colors"
+                >
+                  {loadingMore ? "Yükleniyor…" : "Daha fazla yükle"}
+                </button>
               </div>
             )}
           </>

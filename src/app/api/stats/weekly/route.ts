@@ -23,10 +23,12 @@ export async function GET() {
       prisma.card.count({
         where: { therapistId, createdAt: { gte: sevenDaysAgo } },
       }),
-      // Streak için tüm tamamlanan hedefler
+      // Streak için tamamlanan hedefler (son 100)
       prisma.studentProgress.findMany({
         where: { therapistId, status: "completed" },
         select: { updatedAt: true },
+        orderBy: { updatedAt: "desc" },
+        take: 100,
       }),
     ]);
 

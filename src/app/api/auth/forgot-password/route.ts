@@ -23,10 +23,11 @@ export async function POST(request: NextRequest) {
     await prisma.passwordResetToken.deleteMany({ where: { userId: therapist.id } });
 
     const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 saat
 
     await prisma.passwordResetToken.create({
-      data: { token, userId: therapist.id, expiresAt },
+      data: { token: tokenHash, userId: therapist.id, expiresAt },
     });
 
     const resetUrl = `${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/reset-password/${token}`;
@@ -34,9 +35,10 @@ export async function POST(request: NextRequest) {
     try {
       await sendPasswordResetEmail(email, resetUrl);
     } catch (emailErr) {
-      // Email gönderilemese bile token oluşturuldu — sadece logla, 500 dönme
       console.error("[forgot-password] Email gönderilemedi:", emailErr);
-      console.log(`[forgot-password] Sıfırlama linki (manuel): ${resetUrl}`);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[forgot-password] Sıfırlama linki (manuel): ${resetUrl}`);
+      }
     }
 
     return NextResponse.json({ success: true });

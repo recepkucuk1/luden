@@ -35,7 +35,7 @@ export async function GET() {
         where: { therapistId },
         orderBy: { createdAt: "desc" },
         take: 5,
-        include: { cards: { select: { id: true } } },
+        include: { _count: { select: { cards: true } } },
       }),
       prisma.student.count({ where: { therapistId } }),
     ]);
@@ -52,7 +52,7 @@ export async function GET() {
       name: s.name,
       workArea: s.workArea,
       createdAt: s.createdAt,
-      cardCount: s.cards.length,
+      cardCount: s._count.cards,
     }));
 
     return NextResponse.json({

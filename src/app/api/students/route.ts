@@ -5,42 +5,52 @@ import { generateStudentProfile } from "@/lib/generateProfile";
 import { logError } from "@/lib/utils";
 import { studentBodySchema, zodError } from "@/lib/validation";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
 
-    const students = await prisma.student.findMany({
-      where: { therapistId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      include: {
-        cards: { select: { id: true, createdAt: true } },
-        progress: { select: { status: true } },
-      },
-    });
+    const { searchParams } = new URL(request.url);
+    const page  = Math.max(1, parseInt(searchParams.get("page")  ?? "1",  10));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10)));
+    const skip  = (page - 1) * limit;
+
+    const [total, students] = await Promise.all([
+      prisma.student.count({ where: { therapistId: session.user.id } }),
+      prisma.student.findMany({
+        where: { therapistId: session.user.id },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          _count: { select: { cards: true } },
+          cards: { select: { createdAt: true }, orderBy: { createdAt: "desc" }, take: 1 },
+          progress: { select: { status: true }, take: 200 },
+        },
+      }),
+    ]);
 
     return NextResponse.json({
-      students: students.map((s) => {
-        const sorted = [...s.cards].sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        return {
-          ...s,
-          _count: { cards: s.cards.length },
-          latestCardAt: sorted[0]?.createdAt ?? null,
-          progressSummary: {
-            completed: s.progress.filter((p) => p.status === "completed").length,
-            total: s.progress.length,
-          },
-        };
-      }),
+      students: students.map((s) => ({
+        ...s,
+        _count: { cards: s._count.cards },
+        latestCardAt: s.cards[0]?.createdAt ?? null,
+        progressSummary: {
+          completed: s.progress.filter((p) => p.status === "completed").length,
+          total: s.progress.length,
+        },
+        cards: undefined,
+        progress: undefined,
+      })),
+      total,
+      page,
+      hasMore: skip + limit < total,
     });
   } catch (error) {
     logError("GET /api/students", error);
-    const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
   }
 }
 
@@ -94,7 +104,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ student }, { status: 201 });
   } catch (error) {
     logError("POST /api/students", error);
-    const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
   }
 }

@@ -145,14 +145,20 @@ export default function StudentsPage() {
     }
   }
 
+  const [hasMore, setHasMore]       = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
   const fetchStudents = useCallback(async () => {
     setLoading(true);
     setFetchError(null);
     try {
-      const res = await fetch("/api/students");
+      const res = await fetch("/api/students?page=1&limit=20");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
       setStudents(data.students ?? []);
+      setHasMore(data.hasMore ?? false);
+      setCurrentPage(1);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setFetchError(msg);
@@ -160,6 +166,23 @@ export default function StudentsPage() {
       setLoading(false);
     }
   }, []);
+
+  async function loadMoreStudents() {
+    const nextPage = currentPage + 1;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/students?page=${nextPage}&limit=20`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setStudents((prev) => [...prev, ...(data.students ?? [])]);
+      setHasMore(data.hasMore ?? false);
+      setCurrentPage(nextPage);
+    } catch {
+      toast.error("Öğrenciler yüklenemedi");
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   useEffect(() => { fetchStudents(); }, [fetchStudents]);
 
@@ -576,6 +599,19 @@ export default function StudentsPage() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Daha fazla yükle */}
+      {hasMore && (
+        <div className="flex justify-center mt-6 pb-8">
+          <button
+            onClick={loadMoreStudents}
+            disabled={loadingMore}
+            className="rounded-xl border border-zinc-200 px-6 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60 transition-colors"
+          >
+            {loadingMore ? "Yükleniyor…" : "Daha fazla yükle"}
+          </button>
         </div>
       )}
     </main>

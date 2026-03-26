@@ -21,28 +21,28 @@ export async function POST(
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
 
-  const { id } = await params;
-  const parsed = schema.safeParse(await request.json());
-  if (!parsed.success) return NextResponse.json({ error: "Geçersiz miktar" }, { status: 400 });
+  try {
+    const { id } = await params;
+    const parsed = schema.safeParse(await request.json());
+    if (!parsed.success) return NextResponse.json({ error: "Geçersiz miktar" }, { status: 400 });
 
-  const { amount } = parsed.data;
+    const { amount } = parsed.data;
 
-  const updated = await prisma.$transaction(async (tx) => {
-    const therapist = await tx.therapist.update({
-      where: { id },
-      data: { credits: { increment: amount } },
-      select: { id: true, credits: true },
+    const updated = await prisma.$transaction(async (tx) => {
+      const therapist = await tx.therapist.update({
+        where: { id },
+        data: { credits: { increment: amount } },
+        select: { id: true, credits: true },
+      });
+      await tx.creditTransaction.create({
+        data: { therapistId: id, amount, type: "EARN", description: "Admin tarafından eklendi" },
+      });
+      return therapist;
     });
-    await tx.creditTransaction.create({
-      data: {
-        therapistId: id,
-        amount,
-        type: "EARN",
-        description: "Admin tarafından eklendi",
-      },
-    });
-    return therapist;
-  });
 
-  return NextResponse.json({ user: updated });
+    return NextResponse.json({ user: updated });
+  } catch (error) {
+    console.error("[admin/credits]", error);
+    return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
+  }
 }

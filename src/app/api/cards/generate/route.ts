@@ -5,7 +5,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { cardGenerateBodySchema, zodError } from "@/lib/validation";
-import { deductCredits } from "@/lib/credits";
+import { checkCredits, deductCredits } from "@/lib/credits";
+import { CREDIT_COSTS } from "@/lib/plans";
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,13 +27,24 @@ export async function POST(request: NextRequest) {
     }
     const { category, difficulty, ageGroup, focusArea, studentId, curriculumGoalIds = [] } = parsed.data;
 
-    // ── Kredi kontrolü ve düşümü ──
-    const creditResult = await deductCredits(session.user.id, "card_generate");
-    if (!creditResult.ok) {
+    // ── Kredi ön kontrolü (hızlı, non-atomic) ──
+    const creditCheck = await checkCredits(session.user.id, "card_generate");
+    if (!creditCheck.ok) {
       return NextResponse.json(
-        { error: `Yetersiz kredi. Mevcut krediniz: ${creditResult.credits}. Kart oluşturmak için 20 kredi gereklidir.` },
+        { error: `Yetersiz kredi. Mevcut krediniz: ${creditCheck.credits}. Kart oluşturmak için ${CREDIT_COSTS.card_generate} kredi gereklidir.` },
         { status: 403 }
       );
+    }
+
+    // ── IDOR kontrolü: öğrenci bu terapiste ait mi? ──
+    if (studentId) {
+      const studentOwner = await prisma.student.findFirst({
+        where: { id: studentId, therapistId: session.user.id },
+        select: { id: true },
+      });
+      if (!studentOwner) {
+        return NextResponse.json({ error: "Öğrenci bulunamadı" }, { status: 403 });
+      }
     }
 
     // Seçilen tüm müfredat hedeflerini DB'den al ve prompt metnini oluştur
@@ -88,25 +100,38 @@ export async function POST(request: NextRequest) {
 
     const card = { ...cardContent, category, difficulty, ageGroup };
 
-    const dbCard = await prisma.card.create({
-      data: {
-        title: (cardContent.title as string) ?? "Öğrenme Kartı",
-        content: cardContent as Parameters<typeof prisma.card.create>[0]["data"]["content"],
-        category,
-        difficulty,
-        ageGroup,
-        therapistId: session.user.id,
-        studentId: studentId ?? null,
-        curriculumGoalIds: curriculumGoalIds,
-      },
+    // ── Kart kaydet + Krediyi atomik düş (AI başarılıysa) ──
+    const dbCard = await prisma.$transaction(async (tx) => {
+      const therapist = await tx.therapist.findUnique({
+        where: { id: session.user.id },
+        select: { credits: true },
+      });
+      if (!therapist || therapist.credits < CREDIT_COSTS.card_generate) {
+        throw new Error("INSUFFICIENT_CREDITS");
+      }
+      const created = await tx.card.create({
+        data: {
+          title: (cardContent.title as string) ?? "Öğrenme Kartı",
+          content: cardContent as Parameters<typeof prisma.card.create>[0]["data"]["content"],
+          category,
+          difficulty,
+          ageGroup,
+          therapistId: session.user.id,
+          studentId: studentId ?? null,
+          curriculumGoalIds: curriculumGoalIds,
+        },
+      });
+      await tx.therapist.update({ where: { id: session.user.id }, data: { credits: { decrement: CREDIT_COSTS.card_generate } } });
+      await tx.creditTransaction.create({ data: { therapistId: session.user.id, amount: CREDIT_COSTS.card_generate, type: "SPEND", description: "Öğrenme kartı üretimi" } });
+      return created;
     });
 
     return NextResponse.json({ success: true, card, cardId: dbCard.id });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    const stack = error instanceof Error ? error.stack : undefined;
-    console.error("[/api/cards/generate] HATA:", message);
-    if (stack) console.error(stack);
-    return NextResponse.json({ error: message }, { status: 500 });
+    if (error instanceof Error && error.message === "INSUFFICIENT_CREDITS") {
+      return NextResponse.json({ error: "Yetersiz kredi. Kart oluşturulamadı." }, { status: 403 });
+    }
+    console.error("[/api/cards/generate] HATA:", error);
+    return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
   }
 }

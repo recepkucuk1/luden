@@ -46,20 +46,13 @@ export async function POST(request: NextRequest) {
 
     const hashed = await bcrypt.hash(password, 12);
 
-    const newTherapist = await prisma.therapist.create({
-      data: {
-        name, email, password: hashed, specialty: [],
-        emailVerified: true,
-      },
-    });
-
-    await prisma.creditTransaction.create({
-      data: {
-        therapistId: newTherapist.id,
-        amount: 40,
-        type: "EARN",
-        description: "Kayıt bonusu",
-      },
+    await prisma.$transaction(async (tx) => {
+      const newTherapist = await tx.therapist.create({
+        data: { name, email, password: hashed, specialty: [], emailVerified: true },
+      });
+      await tx.creditTransaction.create({
+        data: { therapistId: newTherapist.id, amount: 40, type: "EARN", description: "Kayıt bonusu" },
+      });
     });
 
     return NextResponse.json({ success: true });

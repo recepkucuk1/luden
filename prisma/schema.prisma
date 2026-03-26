@@ -104,6 +104,8 @@ model CreditTransaction {
   createdAt   DateTime              @default(now())
 
   therapist Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@index([therapistId])
 }
 
 model Student {
@@ -124,6 +126,8 @@ model Student {
   assignments CardAssignment[]
   progress    StudentProgress[]
   lessons     Lesson[]
+
+  @@index([therapistId])
 }
 
 model Card {
@@ -146,6 +150,10 @@ model Card {
   curriculumGoalIds String[] @default([])
 
   assignments CardAssignment[]
+
+  @@index([therapistId])
+  @@index([studentId])
+  @@index([category])
 }
 
 model CardAssignment {
@@ -199,6 +207,9 @@ model Lesson {
 
   therapist Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
   student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([therapistId])
+  @@index([date])
 }
 
 model StudentProgress {
@@ -217,6 +228,8 @@ model StudentProgress {
   therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, goalId])
+  @@index([therapistId])
+  @@index([status])
 }
 
 model PasswordResetToken {

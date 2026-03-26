@@ -31,8 +31,7 @@ export async function GET(
     return NextResponse.json({ progress });
   } catch (error) {
     logError("GET /api/students/[id]/progress", error);
-    const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
   }
 }
 
@@ -86,7 +85,6 @@ export async function PUT(
     return NextResponse.json({ saved: updates.length });
   } catch (error) {
     logError("PUT /api/students/[id]/progress", error);
-    const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
   }
 }

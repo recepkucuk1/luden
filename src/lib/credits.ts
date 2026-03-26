@@ -1,6 +1,23 @@
 import { prisma } from "@/lib/db";
 import { CREDIT_COSTS } from "@/lib/plans";
 
+/**
+ * Non-atomic credit check (no deduction). Use as a fast pre-flight before expensive operations.
+ * Always follow up with deductCredits() in the same request to atomically deduct.
+ */
+export async function checkCredits(
+  therapistId: string,
+  type: keyof typeof CREDIT_COSTS
+): Promise<{ ok: boolean; credits: number }> {
+  const cost = CREDIT_COSTS[type];
+  const therapist = await prisma.therapist.findUnique({
+    where: { id: therapistId },
+    select: { credits: true },
+  });
+  const credits = therapist?.credits ?? 0;
+  return { ok: credits >= cost, credits };
+}
+
 type CreditCostKey = keyof typeof CREDIT_COSTS;
 
 const DESCRIPTIONS: Record<CreditCostKey, string> = {

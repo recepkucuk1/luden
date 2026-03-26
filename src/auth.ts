@@ -18,7 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           const therapist = await prisma.therapist.findUnique({
             where: { email: credentials.email as string },
-            select: { id: true, email: true, name: true, password: true, role: true },
+            select: { id: true, email: true, name: true, password: true, role: true, suspended: true },
           });
 
           if (!therapist) return null;
@@ -29,6 +29,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           );
 
           if (!isValid) return null;
+
+          if (therapist.suspended) return null;
 
           // Son giriş tarihini kaydet
           await prisma.therapist.update({
@@ -61,18 +63,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       if (token?.id) session.user.id = token.id as string;
-      // token.role varsa kullan; yoksa (eski token) DB'den çek
-      if (token?.role) {
-        session.user.role = token.role as string;
-      } else if (token?.id) {
-        const therapist = await prisma.therapist.findUnique({
-          where: { id: token.id as string },
-          select: { role: true },
-        });
-        session.user.role = therapist?.role ?? "user";
-      } else {
-        session.user.role = "user";
+      if (!token?.id) { session.user.role = "user"; return session; }
+
+      const therapist = await prisma.therapist.findUnique({
+        where: { id: token.id as string },
+        select: { role: true, suspended: true },
+      });
+
+      // Askıya alınmış kullanıcının oturumunu sonlandır
+      if (!therapist || therapist.suspended) {
+        // null döndürmek mümkün değil ama boş session döndürerek istemciyi logout'a zorla
+        session.user.id = "";
+        session.user.role = "suspended";
+        return session;
       }
+
+      session.user.role = therapist.role ?? "user";
       return session;
     },
   },

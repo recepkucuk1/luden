@@ -18,11 +18,14 @@ export async function GET() {
       prisma.studentProgress.findMany({
         where: { therapistId, status: "completed" },
         select: { studentId: true, updatedAt: true },
+        orderBy: { updatedAt: "desc" },
+        take: 100,
       }),
       prisma.studentProgress.findMany({
         where: { therapistId },
         select: { studentId: true },
         distinct: ["studentId"],
+        take: 100,
       }),
     ]);
 
