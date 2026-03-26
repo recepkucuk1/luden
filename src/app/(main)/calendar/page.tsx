@@ -124,6 +124,39 @@ function collectLessonDates(lessons: Lesson[], year: number, month: number): Dat
   return expandLessons(lessons, start, end).map((l) => l.displayDate);
 }
 
+// ─── 24-saat TimeSelect ───────────────────────────────────────────────────────
+
+const HOURS   = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
+const MINUTES = ["00", "15", "30", "45"];
+
+function TimeSelect({ value, onChange, inputCls }: {
+  value: string;
+  onChange: (v: string) => void;
+  inputCls: string;
+}) {
+  const [hh, mm] = value.split(":").map((p) => p.padStart(2, "0"));
+  const selectCls = inputCls + " cursor-pointer";
+  return (
+    <div className="flex items-center gap-1.5">
+      <select
+        value={hh ?? "09"}
+        onChange={(e) => onChange(`${e.target.value}:${mm ?? "00"}`)}
+        className={cn(selectCls, "w-20 text-center")}
+      >
+        {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
+      </select>
+      <span className="text-[#023435]/50 font-semibold select-none">:</span>
+      <select
+        value={mm ?? "00"}
+        onChange={(e) => onChange(`${hh ?? "09"}:${e.target.value}`)}
+        className={cn(selectCls, "w-20 text-center")}
+      >
+        {MINUTES.map((m) => <option key={m} value={m}>{m}</option>)}
+      </select>
+    </div>
+  );
+}
+
 // ─── Add/Edit Modal ───────────────────────────────────────────────────────────
 
 function LessonModal({
@@ -255,11 +288,11 @@ function LessonModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelCls}>Başlangıç</label>
-              <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={inputCls} style={{ colorScheme: "light" }} />
+              <TimeSelect value={startTime} onChange={setStartTime} inputCls={inputCls} />
             </div>
             <div>
               <label className={labelCls}>Bitiş</label>
-              <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={inputCls} style={{ colorScheme: "light" }} />
+              <TimeSelect value={endTime} onChange={setEndTime} inputCls={inputCls} />
             </div>
           </div>
           <div>
