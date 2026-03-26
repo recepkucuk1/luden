@@ -8,7 +8,7 @@ import "./globals.css";
 const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "TerapiMat — AI Destekli Öğrenme Kartı Üreticisi",
+  title: "LudanLab — AI Destekli Öğrenme Kartı Üreticisi",
   description: "Dil, konuşma ve işitme uzmanları için AI destekli öğrenme kartı üreticisi.",
 };
 

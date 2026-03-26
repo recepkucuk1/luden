@@ -299,7 +299,7 @@ export function CardPDFDocument({ card }: CardPDFDocumentProps) {
   return (
     <Document
       title={sanitize(card.title)}
-      author="TerapiMat"
+      author="LudanLab"
       subject="Öğrenme Kartı"
     >
       <Page size="A4" style={styles.page}>
@@ -424,7 +424,7 @@ export function CardPDFDocument({ card }: CardPDFDocumentProps) {
 
         {/* Footer */}
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>TerapiMat — AI Destekli Öğrenme Kartı</Text>
+          <Text style={styles.footerText}>LudanLab — AI Destekli Öğrenme Kartı</Text>
           <Text
             style={styles.footerText}
             render={({ pageNumber, totalPages }) =>
