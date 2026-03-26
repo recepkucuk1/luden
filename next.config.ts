@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
           value: [
             "default-src 'self'",
             // NOTE: unsafe-eval kaldırıldı — @react-pdf/renderer WASM'ın çalışmaması durumunda geri eklenebilir
-            "script-src 'self' https://js.hcaptcha.com",
+            "script-src 'self' 'unsafe-inline' https://js.hcaptcha.com",
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: blob:",
             "font-src 'self'",
