@@ -322,8 +322,8 @@ function HowItWorksCarousel() {
             />
           </div>
 
-          {/* Slide */}
-          <div className="px-7 pt-8 pb-4 md:px-10 md:pt-10 min-h-[360px]">
+          {/* Slide — sabit yükseklik, içerik üstten hizalı */}
+          <div className="px-7 pt-8 pb-4 md:px-10 md:pt-10 h-[480px] flex flex-col justify-start overflow-y-auto">
             <Panel />
           </div>
 
