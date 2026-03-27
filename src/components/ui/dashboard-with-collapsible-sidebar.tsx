@@ -223,7 +223,7 @@ const Logo = ({ size = "normal" }: { size?: "small" | "normal" }) => {
     <div className={`grid ${dim} shrink-0 place-content-center rounded-lg bg-gradient-to-br from-[#023435] to-[#04595B] shadow-sm`}>
        <svg
         width={size === "small" ? "16" : "20"}
-        height="auto"
+        height={size === "small" ? "12" : "16"}
         viewBox="0 0 50 39"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
