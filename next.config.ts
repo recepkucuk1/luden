@@ -1,20 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  turbopack: {},
   headers: async () => [
-    {
-      source: "/_next/static/:path*",
-      headers: [
-        { key: "Content-Type", value: "application/javascript" },
-      ],
-    },
-    {
-      source: "/_next/static/css/:path*",
-      headers: [
-        { key: "Content-Type", value: "text/css" },
-      ],
-    },
     {
       source: "/(.*)",
       headers: [
