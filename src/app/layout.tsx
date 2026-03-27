@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "sonner";
-import { Analytics } from "@vercel/analytics/next";
 import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import "./globals.css";
 
@@ -18,7 +17,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${jakarta.variable} antialiased`}>
         <AuthSessionProvider>{children}</AuthSessionProvider>
         <Toaster position="bottom-right" duration={3000} richColors />
-        <Analytics />
       </body>
     </html>
   );
