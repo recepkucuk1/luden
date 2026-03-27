@@ -9,6 +9,7 @@ const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin
 export const metadata: Metadata = {
   title: "LudenLab — AI Destekli Öğrenme Kartı Üreticisi",
   description: "Dil, konuşma ve işitme uzmanları için AI destekli öğrenme kartı üreticisi.",
+  icons: { icon: "/favicon.ico" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
