@@ -30,7 +30,7 @@ interface CardItem {
   _count: { assignments: number };
 }
 
-type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation" | "homework" | "session_summary";
+type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation" | "homework" | "session_summary" | "matching_game";
 
 const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }[] = [
   { value: "all",             label: "Tümü" },
@@ -39,6 +39,7 @@ const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }
   { value: "articulation",    label: "Artikülasyon",      href: "/tools/articulation" },
   { value: "homework",        label: "Ev Ödevi",           href: "/tools/homework" },
   { value: "session_summary", label: "Oturum Özeti",      href: "/tools/session-summary" },
+  { value: "matching_game",   label: "Kelime Eşleştirme", href: "/tools/matching-game" },
 ];
 
 const TOOL_TYPE_BADGE: Record<string, string> = {
@@ -47,6 +48,7 @@ const TOOL_TYPE_BADGE: Record<string, string> = {
   ARTICULATION_DRILL: "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20",
   HOMEWORK_MATERIAL:  "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
   SESSION_SUMMARY:    "bg-purple-50 text-purple-700 border-purple-200",
+  MATCHING_GAME:      "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
 };
 
 const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
@@ -55,6 +57,7 @@ const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
   ARTICULATION_DRILL: "Artikülasyon",
   HOMEWORK_MATERIAL:  "Ev Ödevi",
   SESSION_SUMMARY:    "Oturum Özeti",
+  MATCHING_GAME:      "Kelime Eşleştirme",
 };
 
 function resolveToolType(toolType: string | null): string {
@@ -194,6 +197,24 @@ const SS_PERFORMANCE_OPTIONS = [
   { value: "needs_support", label: "Ek Destek Gerekiyor" },
 ];
 
+// ── Kelime Eşleştirme filtre seçenekleri ─────────────────────────────────────
+const MG_MATCH_TYPE_OPTIONS = [
+  { value: "all",        label: "Tümü" },
+  { value: "definition", label: "Kelime — Tanım" },
+  { value: "image_desc", label: "Kelime — Resim" },
+  { value: "synonym",    label: "Eş Anlamlı" },
+  { value: "antonym",    label: "Zıt Anlamlı" },
+  { value: "category",   label: "Kategori" },
+  { value: "sentence",   label: "Cümle Tamamlama" },
+];
+
+const MG_DIFFICULTY_OPTIONS = [
+  { value: "all",    label: "Tümü" },
+  { value: "easy",   label: "Kolay" },
+  { value: "medium", label: "Orta" },
+  { value: "hard",   label: "Zor" },
+];
+
 const SELECT_CLS =
   "rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#023435]/30 cursor-pointer";
 
@@ -311,6 +332,9 @@ export default function CardsPage() {
   // Filtreler — oturum özeti
   const [filterSsType,        setFilterSsType]        = useState("all");
   const [filterSsPerformance, setFilterSsPerformance] = useState("all");
+  // Filtreler — kelime eşleştirme
+  const [filterMgMatchType,  setFilterMgMatchType]  = useState("all");
+  const [filterMgDifficulty, setFilterMgDifficulty] = useState("all");
 
   useEffect(() => {
     Promise.all([
@@ -364,7 +388,9 @@ export default function CardsPage() {
     filterHwMaterial !== "all" ||
     filterHwDuration !== "all" ||
     filterSsType !== "all" ||
-    filterSsPerformance !== "all";
+    filterSsPerformance !== "all" ||
+    filterMgMatchType !== "all" ||
+    filterMgDifficulty !== "all";
 
   function clearFilters() {
     setFilterStudent("");
@@ -383,6 +409,8 @@ export default function CardsPage() {
     setFilterHwDuration("all");
     setFilterSsType("all");
     setFilterSsPerformance("all");
+    setFilterMgMatchType("all");
+    setFilterMgDifficulty("all");
   }
 
   // goalId → curriculumId lookup
@@ -416,6 +444,7 @@ export default function CardsPage() {
         if (filterToolType === "articulation")   return tt === "ARTICULATION_DRILL";
         if (filterToolType === "homework")       return tt === "HOMEWORK_MATERIAL";
         if (filterToolType === "session_summary") return tt === "SESSION_SUMMARY";
+        if (filterToolType === "matching_game")   return tt === "MATCHING_GAME";
         return true;
       });
     }
@@ -487,6 +516,16 @@ export default function CardsPage() {
       }
     }
 
+    // Kelime eşleştirme filtreleri
+    if (filterToolType === "matching_game") {
+      if (filterMgMatchType !== "all") {
+        list = list.filter((c) => (c.content?.matchType as string | undefined) === filterMgMatchType);
+      }
+      if (filterMgDifficulty !== "all") {
+        list = list.filter((c) => (c.content?.difficulty as string | undefined) === filterMgDifficulty);
+      }
+    }
+
     // Artikülasyon filtreleri
     if (filterToolType === "articulation") {
       if (filterSounds.length > 0) {
@@ -526,6 +565,7 @@ export default function CardsPage() {
     filterSounds, filterLevel, filterTheme,
     filterHwArea, filterHwMaterial, filterHwDuration,
     filterSsType, filterSsPerformance,
+    filterMgMatchType, filterMgDifficulty,
     sortBy,
   ]);
 
@@ -676,6 +716,19 @@ export default function CardsPage() {
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Sonuç</span>
                     <PillGroup options={SS_PERFORMANCE_OPTIONS} value={filterSsPerformance} onChange={setFilterSsPerformance} activeClass="border-purple-400 bg-purple-50 text-purple-700" />
+                  </div>
+                </div>
+              )}
+
+              {filterToolType === "matching_game" && (
+                <div className="border-t border-zinc-100 pt-3 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tür</span>
+                    <PillGroup options={MG_MATCH_TYPE_OPTIONS} value={filterMgMatchType} onChange={setFilterMgMatchType} activeClass="border-[#107996] bg-[#107996]/10 text-[#107996]" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Zorluk</span>
+                    <PillGroup options={MG_DIFFICULTY_OPTIONS} value={filterMgDifficulty} onChange={setFilterMgDifficulty} activeClass="border-[#107996] bg-[#107996]/10 text-[#107996]" />
                   </div>
                 </div>
               )}

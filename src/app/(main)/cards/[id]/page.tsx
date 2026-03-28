@@ -10,6 +10,7 @@ import { SocialStoryView, type SocialStoryContent } from "@/components/cards/Soc
 import { ArticulationView, type ArticulationContent } from "@/components/cards/ArticulationView";
 import { HomeworkView, type HomeworkContent } from "@/components/cards/HomeworkView";
 import { SessionSummaryView, type SessionSummaryContent } from "@/components/cards/SessionSummaryView";
+import { MatchingGameView, type MatchingGameContent } from "@/components/cards/MatchingGameView";
 import type { GeneratedCard } from "@/lib/prompts";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ const TOOL_TYPE_BADGE: Record<string, { label: string; cls: string }> = {
   ARTICULATION_DRILL: { label: "Artikülasyon",        cls: "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20" },
   HOMEWORK_MATERIAL:  { label: "Ev Ödevi Materyali",  cls: "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30" },
   SESSION_SUMMARY:    { label: "Oturum Özeti",        cls: "bg-purple-50 text-purple-700 border-purple-200" },
+  MATCHING_GAME:      { label: "Kelime Eşleştirme",   cls: "bg-[#107996]/10 text-[#107996] border-[#107996]/20" },
 };
 
 async function downloadSocialStoryPDF(card: CardRecord) {
@@ -383,6 +385,175 @@ async function downloadSessionSummaryParentPDF(card: CardRecord) {
   URL.revokeObjectURL(url);
 }
 
+async function downloadMatchingGameTablePDF(card: CardRecord) {
+  const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
+  Font.register({
+    family: "NotoSans",
+    fonts: [
+      { src: `${window.location.origin}/fonts/NotoSans-Regular.ttf`, fontWeight: "normal" },
+      { src: `${window.location.origin}/fonts/NotoSans-Bold.ttf`,    fontWeight: "bold" },
+    ],
+  });
+
+  const game = card.content as Record<string, unknown>;
+  const pairs = Array.isArray(game.pairs) ? (game.pairs as { id: number; cardA: string; cardB: string; hint?: string }[]) : [];
+  const MATCH_TYPE_LABEL: Record<string, string> = {
+    definition: "Kelime — Tanım", image_desc: "Kelime — Resim Açıklaması",
+    synonym: "Eş Anlamlı", antonym: "Zıt Anlamlı", category: "Kategori Eşleştirme", sentence: "Cümle Tamamlama",
+  };
+
+  const S = StyleSheet.create({
+    page:     { fontFamily: "NotoSans", fontSize: 10, color: "#18181b", padding: 44 },
+    title:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 18, color: "#023435", marginBottom: 6 },
+    badges:   { flexDirection: "row", gap: 8, marginBottom: 16 },
+    badge:    { fontSize: 8, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
+    tableHdr: { flexDirection: "row", backgroundColor: "#f4f4f5", borderRadius: 4, paddingVertical: 6, paddingHorizontal: 10, marginBottom: 4 },
+    thNum:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#a1a1aa", width: 24 },
+    thA:      { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#52525b", flex: 1 },
+    thB:      { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#52525b", flex: 1 },
+    row:      { flexDirection: "row", paddingVertical: 5, paddingHorizontal: 10, borderBottomWidth: 1, borderBottomColor: "#f4f4f5" },
+    cellNum:  { fontSize: 9, color: "#a1a1aa", width: 24 },
+    cellA:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, flex: 1, color: "#18181b" },
+    cellB:    { fontSize: 9, flex: 1, color: "#3f3f46" },
+    box:      { borderRadius: 4, padding: 10, marginTop: 12 },
+    boxTitle: { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, marginBottom: 4 },
+    boxText:  { fontSize: 9, lineHeight: 1.6 },
+  });
+
+  const Doc = () => (
+    <Document title={card.title} author="LudenLab">
+      <Page size="A4" style={S.page}>
+        <Text style={S.title}>{card.title}</Text>
+        <View style={S.badges}>
+          <Text style={[S.badge, { backgroundColor: "#107996" + "20", color: "#107996" }]}>
+            {MATCH_TYPE_LABEL[game.matchType as string] ?? (game.matchType as string)}
+          </Text>
+          <Text style={[S.badge, { backgroundColor: "#f4f4f5", color: "#52525b" }]}>
+            {game.difficulty === "easy" ? "Kolay" : game.difficulty === "medium" ? "Orta" : "Zor"}
+          </Text>
+          <Text style={[S.badge, { backgroundColor: "#f4f4f5", color: "#52525b" }]}>{pairs.length} çift</Text>
+        </View>
+        <View style={S.tableHdr}>
+          <Text style={S.thNum}>#</Text>
+          <Text style={S.thA}>Kart A</Text>
+          <Text style={S.thB}>Kart B</Text>
+        </View>
+        {pairs.map((pair, i) => (
+          <View key={i} style={[S.row, i % 2 === 1 ? { backgroundColor: "#fafafa" } : {}]}>
+            <Text style={S.cellNum}>{pair.id ?? i + 1}</Text>
+            <Text style={S.cellA}>{pair.cardA}</Text>
+            <Text style={S.cellB}>{pair.cardB}{pair.hint ? ` (${pair.hint})` : ""}</Text>
+          </View>
+        ))}
+        {game.instructions ? (
+          <View style={[S.box, { backgroundColor: "#f4f4f5" }]}>
+            <Text style={S.boxTitle}>Nasıl Oynanır</Text>
+            <Text style={S.boxText}>{game.instructions as string}</Text>
+          </View>
+        ) : null}
+        {game.adaptations ? (
+          <View style={[S.box, { backgroundColor: "#f4f4f5" }]}>
+            <Text style={S.boxTitle}>Uyarlama Önerileri</Text>
+            <Text style={S.boxText}>{game.adaptations as string}</Text>
+          </View>
+        ) : null}
+        {game.expertNotes ? (
+          <View style={[S.box, { backgroundColor: "#fffbeb" }]}>
+            <Text style={[S.boxTitle, { color: "#92400e" }]}>Uzman Notları</Text>
+            <Text style={[S.boxText, { color: "#78350f" }]}>{game.expertNotes as string}</Text>
+          </View>
+        ) : null}
+      </Page>
+    </Document>
+  );
+
+  const blob = await pdf(<Doc />).toBlob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `${card.title.replace(/\s+/g, "_")}_Tablo.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function downloadMatchingGameCardsPDF(card: CardRecord) {
+  const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
+  Font.register({
+    family: "NotoSans",
+    fonts: [
+      { src: `${window.location.origin}/fonts/NotoSans-Regular.ttf`, fontWeight: "normal" },
+      { src: `${window.location.origin}/fonts/NotoSans-Bold.ttf`,    fontWeight: "bold" },
+    ],
+  });
+
+  const game  = card.content as Record<string, unknown>;
+  const pairs = Array.isArray(game.pairs) ? (game.pairs as { id: number; cardA: string; cardB: string }[]) : [];
+
+  // Interleave: B cards first then A cards, alternating
+  const shuffled: { text: string; isA: boolean; pairId: number }[] = [];
+  pairs.forEach((p, i) => {
+    shuffled.push({ text: p.cardA, isA: true,  pairId: p.id ?? i + 1 });
+    shuffled.push({ text: p.cardB, isA: false, pairId: p.id ?? i + 1 });
+  });
+  // Simple deterministic shuffle: reverse interleave
+  const cards2: typeof shuffled = [];
+  for (let i = 0; i < shuffled.length; i += 2) cards2.push(shuffled[i + 1]!);
+  for (let i = 0; i < shuffled.length; i += 2) cards2.push(shuffled[i]!);
+
+  const S = StyleSheet.create({
+    page:     { fontFamily: "NotoSans", fontSize: 10, color: "#18181b", padding: 36 },
+    title:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 14, color: "#023435", marginBottom: 4 },
+    sub:      { fontSize: 9, color: "#71717a", marginBottom: 16 },
+    grid:     { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    cardA:    { width: "30%", minHeight: 80, borderWidth: 2, borderStyle: "dashed", borderColor: "#107996", borderRadius: 6, padding: 10, backgroundColor: "#f0f9ff", justifyContent: "center" },
+    cardB:    { width: "30%", minHeight: 80, borderWidth: 2, borderStyle: "dashed", borderColor: "#FE703A", borderRadius: 6, padding: 10, backgroundColor: "#fff7ed", justifyContent: "center" },
+    cardTxt:  { fontSize: 10, lineHeight: 1.5, color: "#18181b", textAlign: "center" },
+    p2title:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 14, color: "#023435", marginBottom: 12 },
+    ansRow:   { flexDirection: "row", gap: 6, marginBottom: 4, alignItems: "center" },
+    ansNum:   { fontSize: 9, color: "#a1a1aa", width: 20 },
+    ansA:     { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, flex: 1, color: "#18181b" },
+    ansArr:   { fontSize: 9, color: "#a1a1aa", width: 14, textAlign: "center" },
+    ansB:     { fontSize: 9, flex: 1, color: "#3f3f46" },
+  });
+
+  const Doc = () => (
+    <Document title={card.title} author="LudenLab">
+      {/* Page 1 — shuffled cut cards */}
+      <Page size="A4" style={S.page}>
+        <Text style={S.title}>{card.title}</Text>
+        <Text style={S.sub}>Kartları kesin ve karıştırın. Mavi kenarlı = Kart A · Turuncu kenarlı = Kart B</Text>
+        <View style={S.grid}>
+          {cards2.map((c, i) => (
+            <View key={i} style={c.isA ? S.cardA : S.cardB}>
+              <Text style={S.cardTxt}>{c.text}</Text>
+            </View>
+          ))}
+        </View>
+      </Page>
+      {/* Page 2 — answer key */}
+      <Page size="A4" style={S.page}>
+        <Text style={S.p2title}>Cevap Anahtarı</Text>
+        {pairs.map((pair, i) => (
+          <View key={i} style={S.ansRow}>
+            <Text style={S.ansNum}>{pair.id ?? i + 1}.</Text>
+            <Text style={S.ansA}>{pair.cardA}</Text>
+            <Text style={S.ansArr}>→</Text>
+            <Text style={S.ansB}>{pair.cardB}</Text>
+          </View>
+        ))}
+      </Page>
+    </Document>
+  );
+
+  const blob = await pdf(<Doc />).toBlob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `${card.title.replace(/\s+/g, "_")}_Kartlar.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 async function downloadHomeworkPDFFromCard(card: CardRecord) {
   const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
 
@@ -529,6 +700,7 @@ export default function CardDetailPage({
   const [showAssign, setShowAssign]   = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadingParent, setDownloadingParent] = useState(false);
+  const [downloadingCards, setDownloadingCards] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -563,6 +735,8 @@ export default function CardDetailPage({
         await downloadHomeworkPDFFromCard(card);
       } else if (tt === "SESSION_SUMMARY") {
         await downloadSessionSummaryFullPDF(card);
+      } else if (tt === "MATCHING_GAME") {
+        await downloadMatchingGameTablePDF(card);
       } else {
         // LEARNING_CARD — mevcut CardPreview PDF'i kullanılır (aşağıda buton var)
         return;
@@ -588,6 +762,21 @@ export default function CardDetailPage({
       toast.error("PDF oluşturulamadı", { id: loadingToast });
     } finally {
       setDownloadingParent(false);
+    }
+  }
+
+  async function handleDownloadCardsPDF() {
+    if (!card) return;
+    setDownloadingCards(true);
+    const loadingToast = toast.loading("Kesme kartları hazırlanıyor…");
+    try {
+      await downloadMatchingGameCardsPDF(card);
+      toast.success("PDF indirildi", { id: loadingToast });
+    } catch (err) {
+      console.error("[PDF] hata:", err);
+      toast.error("PDF oluşturulamadı", { id: loadingToast });
+    } finally {
+      setDownloadingCards(false);
     }
   }
 
@@ -679,6 +868,8 @@ export default function CardDetailPage({
             <HomeworkView hw={card.content as unknown as HomeworkContent} />
           ) : toolType === "SESSION_SUMMARY" ? (
             <SessionSummaryView summary={card.content as unknown as SessionSummaryContent} />
+          ) : toolType === "MATCHING_GAME" ? (
+            <MatchingGameView game={card.content as unknown as MatchingGameContent} />
           ) : (
             (() => {
               const raw = card.content;
@@ -710,6 +901,24 @@ export default function CardDetailPage({
           </p>
           <div className="flex items-center gap-2">
             {/* PDF butonları */}
+            {toolType === "MATCHING_GAME" && (
+              <>
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={downloading || downloadingCards}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#FE703A] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors disabled:opacity-60"
+                >
+                  {downloading ? "Hazırlanıyor…" : "PDF — Tablo"}
+                </button>
+                <button
+                  onClick={handleDownloadCardsPDF}
+                  disabled={downloading || downloadingCards}
+                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] hover:bg-[#023435]/10 transition-colors disabled:opacity-60"
+                >
+                  {downloadingCards ? "Hazırlanıyor…" : "PDF — Kesme Kartları"}
+                </button>
+              </>
+            )}
             {(toolType === "SOCIAL_STORY" || toolType === "ARTICULATION_DRILL" || toolType === "HOMEWORK_MATERIAL") && (
               <button
                 onClick={handleDownloadPDF}
