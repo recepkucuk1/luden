@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
           id: true,
           title: true,
           category: true,
+          toolType: true,
           difficulty: true,
           ageGroup: true,
           createdAt: true,

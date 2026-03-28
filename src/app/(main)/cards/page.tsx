@@ -20,12 +20,38 @@ interface CardItem {
   id: string;
   title: string;
   category: string;
+  toolType: string | null;
   difficulty: string;
   ageGroup: string;
   createdAt: string;
   curriculumGoalIds: string[];
   student: { id: string; name: string } | null;
   _count: { assignments: number };
+}
+
+type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation";
+
+const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }[] = [
+  { value: "all",          label: "Tümü" },
+  { value: "learning",     label: "Öğrenme Kartı",     href: "/generate" },
+  { value: "social_story", label: "Sosyal Hikaye",     href: "/tools/social-story" },
+  { value: "articulation", label: "Artikülasyon",      href: "/tools/articulation" },
+];
+
+const TOOL_TYPE_BADGE: Record<string, string> = {
+  LEARNING_CARD:      "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
+  SOCIAL_STORY:       "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
+  ARTICULATION_DRILL: "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20",
+};
+
+const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
+  LEARNING_CARD:      "Öğrenme Kartı",
+  SOCIAL_STORY:       "Sosyal Hikaye",
+  ARTICULATION_DRILL: "Artikülasyon",
+};
+
+function resolveToolType(toolType: string | null): string {
+  return toolType ?? "LEARNING_CARD";
 }
 
 interface Curriculum { id: string; area: string; title: string; goals: { id: string }[] }
@@ -109,6 +135,7 @@ export default function CardsPage() {
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
 
   // Filtreler
+  const [filterToolType,   setFilterToolType]   = useState<ToolTypeFilter>("all");
   const [filterCategory,   setFilterCategory]   = useState("all");
   const [filterDifficulty, setFilterDifficulty] = useState("all");
   const [filterAgeGroup,   setFilterAgeGroup]   = useState("all");
@@ -152,12 +179,14 @@ export default function CardsPage() {
   }
 
   const hasActiveFilters =
+    filterToolType !== "all" ||
     filterCategory !== "all" ||
     filterDifficulty !== "all" ||
     filterAgeGroup !== "all" ||
     filterCurriculum !== "";
 
   function clearFilters() {
+    setFilterToolType("all");
     setFilterCategory("all");
     setFilterDifficulty("all");
     setFilterAgeGroup("all");
@@ -173,6 +202,17 @@ export default function CardsPage() {
 
   const filtered = useMemo(() => {
     let list = [...cards];
+
+    if (filterToolType !== "all") {
+      list = list.filter((c) => {
+        const tt = resolveToolType(c.toolType);
+        if (filterToolType === "learning")     return tt === "LEARNING_CARD";
+        if (filterToolType === "social_story") return tt === "SOCIAL_STORY";
+        if (filterToolType === "articulation") return tt === "ARTICULATION_DRILL";
+        return true;
+      });
+    }
+
     if (filterCategory !== "all")   list = list.filter((c) => c.category === filterCategory);
     if (filterDifficulty !== "all") list = list.filter((c) => c.difficulty === filterDifficulty);
     if (filterAgeGroup !== "all")   list = list.filter((c) => c.ageGroup === filterAgeGroup);
@@ -234,6 +274,25 @@ export default function CardsPage() {
           </div>
         ) : (
           <>
+            {/* ── Araç Türü Filtresi ── */}
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {TOOL_TYPE_OPTIONS.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => setFilterToolType(o.value)}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                    filterToolType === o.value
+                      ? "bg-[#023435] text-white border-[#023435]"
+                      : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+                  )}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+
             {/* ── Filtre + Sıralama ── */}
             <div className="mb-6 space-y-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
               {/* Kategori */}
@@ -325,10 +384,31 @@ export default function CardsPage() {
             {/* ── Liste ── */}
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white py-16 text-center">
-                <p className="text-sm text-zinc-500 mb-2">Bu filtrelere uyan kart bulunamadı.</p>
-                <button onClick={clearFilters} className="text-xs text-[#FE703A] hover:underline">
-                  Filtreleri temizle
-                </button>
+                {filterToolType !== "all" ? (() => {
+                  const opt = TOOL_TYPE_OPTIONS.find((o) => o.value === filterToolType);
+                  return (
+                    <>
+                      <p className="text-sm text-zinc-500 mb-3">
+                        Henüz {opt?.label} üretmediniz.
+                      </p>
+                      {opt?.href && (
+                        <a
+                          href={opt.href}
+                          className="rounded-lg bg-[#FE703A] px-4 py-2 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors"
+                        >
+                          Üretmeye Başla
+                        </a>
+                      )}
+                    </>
+                  );
+                })() : (
+                  <>
+                    <p className="text-sm text-zinc-500 mb-2">Bu filtrelere uyan kart bulunamadı.</p>
+                    <button onClick={clearFilters} className="text-xs text-[#FE703A] hover:underline">
+                      Filtreleri temizle
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -353,6 +433,18 @@ export default function CardsPage() {
                     </button>
                     <Link href={`/cards/${card.id}`} className="block p-4 flex-1">
                       <div className="flex flex-wrap gap-1.5 mb-2 pr-8">
+                        {/* Araç türü badge */}
+                        {(() => {
+                          const tt = resolveToolType(card.toolType);
+                          const badgeCls = TOOL_TYPE_BADGE[tt];
+                          const label    = TOOL_TYPE_BADGE_LABEL[tt];
+                          if (!label) return null;
+                          return (
+                            <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-semibold", badgeCls)}>
+                              {label}
+                            </span>
+                          );
+                        })()}
                         <Badge className={WORK_AREA_COLOR[card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
                           {WORK_AREA_LABEL[card.category] ?? card.category}
                         </Badge>
