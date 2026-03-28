@@ -22,6 +22,7 @@ import {
   NotebookPen,
   Puzzle,
   Gamepad2,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ const TOOLS_SUB = [
   { title: "Oturum Özeti",   href: "/tools/session-summary",  Icon: NotebookPen   },
   { title: "Kelime Eşleştirme", href: "/tools/matching-game", Icon: Puzzle        },
   { title: "Sesletim Aktivitesi", href: "/tools/phonation",  Icon: Gamepad2      },
+  { title: "İletişim Panosu",    href: "/tools/comm-board", Icon: MessageSquare },
 ];
 
 export const Sidebar = () => {

@@ -47,7 +47,7 @@ const SECTIONS: ToolSection[] = [
     items: [
       { title: "Kelime Eşleştirme", href: "/tools/matching-game", desc: "Kelime-tanım eşleştirme kartları", active: true },
       { title: "Sesletim Aktivitesi", href: "/tools/phonation", desc: "Oyunlaştırılmış ses çalışmaları", active: true },
-      { title: "İletişim Panosu", href: "/tools/comm-board", desc: "Görsel iletişim panoları", active: false },
+      { title: "İletişim Panosu", href: "/tools/comm-board", desc: "Görsel iletişim panoları", active: true  },
     ],
   },
 ];

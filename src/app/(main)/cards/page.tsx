@@ -30,7 +30,7 @@ interface CardItem {
   _count: { assignments: number };
 }
 
-type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation" | "homework" | "session_summary" | "matching_game" | "phonation";
+type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation" | "homework" | "session_summary" | "matching_game" | "phonation" | "comm_board";
 
 const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }[] = [
   { value: "all",             label: "Tümü" },
@@ -41,6 +41,7 @@ const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }
   { value: "session_summary", label: "Oturum Özeti",      href: "/tools/session-summary" },
   { value: "matching_game",   label: "Kelime Eşleştirme", href: "/tools/matching-game" },
   { value: "phonation",       label: "Sesletim Aktivitesi", href: "/tools/phonation" },
+  { value: "comm_board",      label: "İletişim Panosu",     href: "/tools/comm-board" },
 ];
 
 const TOOL_TYPE_BADGE: Record<string, string> = {
@@ -50,7 +51,8 @@ const TOOL_TYPE_BADGE: Record<string, string> = {
   HOMEWORK_MATERIAL:  "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
   SESSION_SUMMARY:    "bg-purple-50 text-purple-700 border-purple-200",
   MATCHING_GAME:      "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
-  PHONATION_ACTIVITY: "bg-green-50 text-green-700 border-green-200",
+  PHONATION_ACTIVITY:   "bg-green-50 text-green-700 border-green-200",
+  COMMUNICATION_BOARD:  "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
 };
 
 const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
@@ -60,7 +62,8 @@ const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
   HOMEWORK_MATERIAL:  "Ev Ödevi",
   SESSION_SUMMARY:    "Oturum Özeti",
   MATCHING_GAME:      "Kelime Eşleştirme",
-  PHONATION_ACTIVITY: "Sesletim Aktivitesi",
+  PHONATION_ACTIVITY:  "Sesletim Aktivitesi",
+  COMMUNICATION_BOARD: "İletişim Panosu",
 };
 
 function resolveToolType(toolType: string | null): string {
@@ -242,6 +245,31 @@ const PA_SOUND_OPTIONS = [
   "/f/", "/v/", "/h/", "/y/",
 ];
 
+// ── İletişim Panosu filtre seçenekleri ───────────────────────────────────────
+const CB_BOARD_TYPE_OPTIONS = [
+  { value: "all",            label: "Tümü" },
+  { value: "basic_needs",    label: "Temel İhtiyaçlar" },
+  { value: "emotions",       label: "Duygular" },
+  { value: "daily_routines", label: "Günlük Rutinler" },
+  { value: "school",         label: "Okul Aktiviteleri" },
+  { value: "social",         label: "Sosyal İfadeler" },
+  { value: "requests",       label: "İstek ve Seçim" },
+];
+
+const CB_LAYOUT_OPTIONS = [
+  { value: "all",   label: "Tümü" },
+  { value: "grid",  label: "Grid" },
+  { value: "strip", label: "Satır" },
+];
+
+const CB_SYMBOL_COUNT_OPTIONS = [
+  { value: "all", label: "Tümü" },
+  { value: "4",   label: "4" },
+  { value: "6",   label: "6" },
+  { value: "9",   label: "9" },
+  { value: "12",  label: "12" },
+];
+
 const SELECT_CLS =
   "rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#023435]/30 cursor-pointer";
 
@@ -366,6 +394,10 @@ export default function CardsPage() {
   const [filterPaType,       setFilterPaType]       = useState("all");
   const [filterPaDifficulty, setFilterPaDifficulty] = useState("all");
   const [filterPaSounds,     setFilterPaSounds]     = useState<string[]>([]);
+  // Filtreler — iletişim panosu
+  const [filterCbBoardType,   setFilterCbBoardType]   = useState("all");
+  const [filterCbLayout,      setFilterCbLayout]      = useState("all");
+  const [filterCbSymbolCount, setFilterCbSymbolCount] = useState("all");
 
   useEffect(() => {
     Promise.all([
@@ -424,7 +456,10 @@ export default function CardsPage() {
     filterMgDifficulty !== "all" ||
     filterPaType !== "all" ||
     filterPaDifficulty !== "all" ||
-    filterPaSounds.length > 0;
+    filterPaSounds.length > 0 ||
+    filterCbBoardType !== "all" ||
+    filterCbLayout !== "all" ||
+    filterCbSymbolCount !== "all";
 
   function clearFilters() {
     setFilterStudent("");
@@ -448,6 +483,9 @@ export default function CardsPage() {
     setFilterPaType("all");
     setFilterPaDifficulty("all");
     setFilterPaSounds([]);
+    setFilterCbBoardType("all");
+    setFilterCbLayout("all");
+    setFilterCbSymbolCount("all");
   }
 
   // goalId → curriculumId lookup
@@ -483,6 +521,7 @@ export default function CardsPage() {
         if (filterToolType === "session_summary") return tt === "SESSION_SUMMARY";
         if (filterToolType === "matching_game")   return tt === "MATCHING_GAME";
         if (filterToolType === "phonation")       return tt === "PHONATION_ACTIVITY";
+        if (filterToolType === "comm_board")      return tt === "COMMUNICATION_BOARD";
         return true;
       });
     }
@@ -571,6 +610,19 @@ export default function CardsPage() {
       }
     }
 
+    // İletişim panosu filtreleri
+    if (filterToolType === "comm_board") {
+      if (filterCbBoardType !== "all") {
+        list = list.filter((c) => (c.content?.boardType as string | undefined) === filterCbBoardType);
+      }
+      if (filterCbLayout !== "all") {
+        list = list.filter((c) => (c.content?.layout as string | undefined) === filterCbLayout);
+      }
+      if (filterCbSymbolCount !== "all") {
+        list = list.filter((c) => String(c.content?.symbolCount ?? "") === filterCbSymbolCount);
+      }
+    }
+
     // Kelime eşleştirme filtreleri
     if (filterToolType === "matching_game") {
       if (filterMgMatchType !== "all") {
@@ -622,6 +674,7 @@ export default function CardsPage() {
     filterSsType, filterSsPerformance,
     filterMgMatchType, filterMgDifficulty,
     filterPaType, filterPaDifficulty, filterPaSounds,
+    filterCbBoardType, filterCbLayout, filterCbSymbolCount,
     sortBy,
   ]);
 
@@ -802,6 +855,23 @@ export default function CardsPage() {
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Zorluk</span>
                     <PillGroup options={MG_DIFFICULTY_OPTIONS} value={filterMgDifficulty} onChange={setFilterMgDifficulty} activeClass="border-[#107996] bg-[#107996]/10 text-[#107996]" />
+                  </div>
+                </div>
+              )}
+
+              {filterToolType === "comm_board" && (
+                <div className="border-t border-zinc-100 pt-3 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tür</span>
+                    <PillGroup options={CB_BOARD_TYPE_OPTIONS} value={filterCbBoardType} onChange={setFilterCbBoardType} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Düzen</span>
+                    <PillGroup options={CB_LAYOUT_OPTIONS} value={filterCbLayout} onChange={setFilterCbLayout} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Sembol</span>
+                    <PillGroup options={CB_SYMBOL_COUNT_OPTIONS} value={filterCbSymbolCount} onChange={setFilterCbSymbolCount} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
                   </div>
                 </div>
               )}

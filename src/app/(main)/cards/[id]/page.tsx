@@ -12,6 +12,7 @@ import { HomeworkView, type HomeworkContent } from "@/components/cards/HomeworkV
 import { SessionSummaryView, type SessionSummaryContent } from "@/components/cards/SessionSummaryView";
 import { MatchingGameView, type MatchingGameContent } from "@/components/cards/MatchingGameView";
 import { PhonationView, type PhonationActivityContent } from "@/components/cards/PhonationView";
+import { CommBoardView, type CommBoardContent } from "@/components/cards/CommBoardView";
 import type { GeneratedCard } from "@/lib/prompts";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +45,8 @@ const TOOL_TYPE_BADGE: Record<string, { label: string; cls: string }> = {
   HOMEWORK_MATERIAL:  { label: "Ev Ödevi Materyali",  cls: "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30" },
   SESSION_SUMMARY:    { label: "Oturum Özeti",        cls: "bg-purple-50 text-purple-700 border-purple-200" },
   MATCHING_GAME:      { label: "Kelime Eşleştirme",   cls: "bg-[#107996]/10 text-[#107996] border-[#107996]/20" },
-  PHONATION_ACTIVITY: { label: "Sesletim Aktivitesi", cls: "bg-green-50 text-green-700 border-green-200" },
+  PHONATION_ACTIVITY:  { label: "Sesletim Aktivitesi", cls: "bg-green-50 text-green-700 border-green-200" },
+  COMMUNICATION_BOARD: { label: "İletişim Panosu",     cls: "bg-[#023435]/10 text-[#023435] border-[#023435]/20" },
 };
 
 async function downloadSocialStoryPDF(card: CardRecord) {
@@ -639,6 +641,232 @@ async function downloadPhonationPDF(card: CardRecord) {
   URL.revokeObjectURL(url);
 }
 
+async function downloadCommBoardPDF(card: CardRecord, variant: "board" | "report") {
+  const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
+  Font.register({
+    family: "NotoSans",
+    fonts: [
+      { src: `${window.location.origin}/fonts/NotoSans-Regular.ttf`, fontWeight: "normal" },
+      { src: `${window.location.origin}/fonts/NotoSans-Bold.ttf`,    fontWeight: "bold" },
+    ],
+  });
+  Font.registerHyphenationCallback((word) => [word]);
+
+  const board       = card.content as Record<string, unknown>;
+  const colorCoding = board.colorCoding !== false;
+  const cells       = Array.isArray(board.cells) ? (board.cells as CommBoardContent["cells"]) : [];
+  const cols        = (board.cols as number) ?? 3;
+  const rows        = (board.rows as number) ?? Math.ceil(cells.length / cols);
+  const today       = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const studentName = card.student?.name;
+
+  const FG_BG: Record<string, string> = {
+    yellow: "#FEF3C7", green: "#D1FAE5", blue: "#DBEAFE",
+    pink: "#FCE7F3",   orange: "#FFEDD5", white: "#F9FAFB",
+  };
+  const FG_BORDER: Record<string, string> = {
+    yellow: "#F59E0B", green: "#10B981", blue: "#3B82F6",
+    pink: "#EC4899",   orange: "#F97316", white: "#D4D4D8",
+  };
+  const FG_TEXT: Record<string, string> = {
+    yellow: "#92400E", green: "#065F46", blue: "#1E3A8A",
+    pink: "#831843",   orange: "#7C2D12", white: "#3F3F46",
+  };
+
+  const BOARD_TYPE_LABEL: Record<string, string> = {
+    basic_needs: "Temel İhtiyaçlar", emotions: "Duygular",
+    daily_routines: "Günlük Rutinler", school: "Okul Aktiviteleri",
+    social: "Sosyal İfadeler", requests: "İstek ve Seçim", custom: "Özel",
+  };
+
+  if (variant === "board") {
+    // ── Pano PDF — büyük hücre grid, sembol alanı boş ──────────────────────
+    const CONTENT_W = 515;
+    const GAP = 4;
+    const cellW = Math.floor((CONTENT_W - GAP * (cols - 1)) / cols);
+    const CONTENT_H = 842 - 80 - 50 - rows * GAP;
+    const cellH = Math.floor(CONTENT_H / rows);
+
+    const S = StyleSheet.create({
+      page:     { fontFamily: "NotoSans", padding: 40, paddingBottom: 50 },
+      title:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 16, color: "#023435", marginBottom: 2 },
+      subtitle: { fontSize: 9, color: "#71717a", marginBottom: 12 },
+      row:      { flexDirection: "row" },
+      cell:     { borderWidth: 2, borderRadius: 6, padding: 6, flexDirection: "column", alignItems: "center" },
+      cellWord: { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 12, textAlign: "center", marginBottom: 4 },
+      cellBox:  { flex: 1, width: "100%", borderWidth: 1, borderRadius: 4, backgroundColor: "#fff", alignItems: "center", justifyContent: "center" },
+      footer:   { position: "absolute", bottom: 20, left: 40, right: 40, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: "#e4e4e7", paddingTop: 5 },
+      footTxt:  { fontSize: 7, color: "#a1a1aa" },
+    });
+
+    const gridRows: (typeof cells)[] = [];
+    for (let r = 0; r < rows; r++) gridRows.push(cells.slice(r * cols, (r + 1) * cols));
+
+    const Doc = () => (
+      <Document title={card.title} author="LudenLab">
+        <Page size="A4" style={S.page}>
+          <Text style={S.title}>{card.title}</Text>
+          <Text style={S.subtitle}>
+            {studentName ? `Öğrenci: ${studentName} · ` : ""}
+            {rows}×{cols} İletişim Panosu · {today}
+          </Text>
+          {gridRows.map((rowCells, ri) => (
+            <View key={ri} style={[S.row, { marginBottom: ri < rows - 1 ? GAP : 0 }]}>
+              {rowCells.map((cell, ci) => {
+                const color = colorCoding ? (cell.fitzgeraldColor ?? "white") : "white";
+                return (
+                  <View
+                    key={ci}
+                    style={[
+                      S.cell,
+                      {
+                        width: cellW, height: cellH,
+                        marginRight: ci < rowCells.length - 1 ? GAP : 0,
+                        backgroundColor: FG_BG[color] ?? "#F9FAFB",
+                        borderColor: FG_BORDER[color] ?? "#D4D4D8",
+                        borderStyle: "dashed",
+                      },
+                    ]}
+                  >
+                    <Text style={[S.cellWord, { color: FG_TEXT[color] ?? "#3F3F46" }]}>{cell.word}</Text>
+                    <View style={[S.cellBox, { borderColor: FG_BORDER[color] ?? "#D4D4D8", borderStyle: "dashed" }]} />
+                  </View>
+                );
+              })}
+            </View>
+          ))}
+          <View style={S.footer} fixed>
+            <Text style={S.footTxt}>LudenLab — ludenlab.com</Text>
+            <Text style={S.footTxt}>Görsel iletişim panosu — sembol yapıştırın</Text>
+          </View>
+        </Page>
+      </Document>
+    );
+
+    const blob = await pdf(<Doc />).toBlob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `${card.title.replace(/\s+/g, "_")}_pano.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    return;
+  }
+
+  // ── Tam Rapor PDF ─────────────────────────────────────────────────────────
+  const COLOR_LABEL: Record<string, string> = {
+    yellow: "Sarı — İsim", green: "Yeşil — Fiil", blue: "Mavi — Sıfat",
+    pink: "Pembe — Sosyal", orange: "Turuncu — Soru", white: "Beyaz — Diğer",
+  };
+
+  const S = StyleSheet.create({
+    page:      { fontFamily: "NotoSans", fontSize: 10, color: "#18181b", padding: 44, paddingBottom: 70 },
+    title:     { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 18, color: "#023435", marginBottom: 6 },
+    infoRow:   { flexDirection: "row", flexWrap: "wrap", marginBottom: 16, borderBottomWidth: 1, borderBottomColor: "#e4e4e7", paddingBottom: 10 },
+    badge:     { fontSize: 8, color: "#52525b", backgroundColor: "#f4f4f5", borderRadius: 99, paddingHorizontal: 8, paddingVertical: 3, marginRight: 6, marginBottom: 4 },
+    secHdr:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, color: "#71717a", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 },
+    tblWrap:   { borderWidth: 1, borderColor: "#e4e4e7", borderRadius: 4, marginBottom: 12, overflow: "hidden" },
+    tHdr:      { flexDirection: "row", backgroundColor: "#f4f4f5", paddingVertical: 5, paddingHorizontal: 8 },
+    thPos:     { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#a1a1aa", width: 28 },
+    thWord:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#71717a", width: 80 },
+    thDesc:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#71717a", flex: 1 },
+    thColor:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#71717a", width: 70 },
+    tRow:      { flexDirection: "row", paddingVertical: 5, paddingHorizontal: 8, borderTopWidth: 1, borderTopColor: "#f4f4f5", alignItems: "flex-start" },
+    tdPos:     { fontSize: 9, color: "#a1a1aa", width: 28, paddingTop: 1 },
+    tdWord:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, color: "#18181b", width: 80 },
+    tdDesc:    { fontSize: 9, color: "#52525b", flex: 1, lineHeight: 1.5 },
+    tdColor:   { width: 70 },
+    colorBadge:{ borderRadius: 3, paddingHorizontal: 5, paddingVertical: 2, alignSelf: "flex-start" },
+    colorTxt:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 7 },
+    box:       { borderRadius: 4, padding: 10, marginBottom: 10, borderWidth: 1 },
+    boxTitle:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, marginBottom: 3 },
+    boxText:   { fontSize: 9, lineHeight: 1.6 },
+    footer:    { position: "absolute", bottom: 28, left: 44, right: 44, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: "#e4e4e7", paddingTop: 6 },
+    footTxt:   { fontSize: 8, color: "#a1a1aa" },
+  });
+
+  const Doc = () => (
+    <Document title={card.title} author="LudenLab">
+      <Page size="A4" style={S.page}>
+        <Text style={S.title}>{card.title}</Text>
+        <View style={S.infoRow}>
+          {studentName ? <Text style={S.badge}>Öğrenci: {studentName}</Text> : null}
+          <Text style={S.badge}>{BOARD_TYPE_LABEL[board.boardType as string] ?? (board.boardType as string)}</Text>
+          <Text style={S.badge}>{`${rows}×${cols} — ${(board.symbolCount as number | undefined) ?? cells.length} sembol`}</Text>
+          <Text style={S.badge}>{board.layout === "grid" ? "Grid" : "Satır"}</Text>
+          {colorCoding ? <Text style={S.badge}>Fitzgerald renk kodu</Text> : null}
+          <Text style={S.badge}>{today}</Text>
+        </View>
+
+        <Text style={S.secHdr}>Semboller ({cells.length} hücre)</Text>
+        <View style={S.tblWrap}>
+          <View style={S.tHdr}>
+            <Text style={S.thPos}>#</Text>
+            <Text style={S.thWord}>Kelime</Text>
+            <Text style={S.thDesc}>Görsel Açıklama</Text>
+            {colorCoding ? <Text style={S.thColor}>Renk</Text> : null}
+          </View>
+          {cells.map((cell, i) => {
+            const color = colorCoding ? (cell.fitzgeraldColor ?? "white") : "white";
+            return (
+              <View key={i} style={[S.tRow, { backgroundColor: i % 2 === 1 ? "#fafafa" : "#fff" }]}>
+                <Text style={S.tdPos}>{cell.position ?? i + 1}</Text>
+                <Text style={S.tdWord}>{cell.word}{cell.sentence ? `\n"${cell.sentence}"` : ""}</Text>
+                <Text style={S.tdDesc}>{cell.visualDescription}{cell.usage ? `\n↳ ${cell.usage}` : ""}</Text>
+                {colorCoding ? (
+                  <View style={S.tdColor}>
+                    <View style={[S.colorBadge, { backgroundColor: FG_BG[color] ?? "#F9FAFB" }]}>
+                      <Text style={[S.colorTxt, { color: FG_TEXT[color] ?? "#3F3F46" }]}>{COLOR_LABEL[color] ?? color}</Text>
+                    </View>
+                  </View>
+                ) : null}
+              </View>
+            );
+          })}
+        </View>
+
+        {board.instructions ? (
+          <View style={[S.box, { backgroundColor: "#f9fafb", borderColor: "#e4e4e7" }]}>
+            <Text style={[S.boxTitle, { color: "#374151" }]}>Kullanım Talimatları</Text>
+            <Text style={[S.boxText, { color: "#4b5563" }]}>{board.instructions as string}</Text>
+          </View>
+        ) : null}
+        {board.expertNotes ? (
+          <View style={[S.box, { backgroundColor: "#fffbeb", borderColor: "#fde68a" }]}>
+            <Text style={[S.boxTitle, { color: "#92400e" }]}>Uzman Notları</Text>
+            <Text style={[S.boxText, { color: "#78350f" }]}>{board.expertNotes as string}</Text>
+          </View>
+        ) : null}
+        {board.homeGuidance ? (
+          <View style={[S.box, { backgroundColor: "#eff6ff", borderColor: "#bfdbfe" }]}>
+            <Text style={[S.boxTitle, { color: "#1e40af" }]}>Veli Rehberi</Text>
+            <Text style={[S.boxText, { color: "#1e3a8a" }]}>{board.homeGuidance as string}</Text>
+          </View>
+        ) : null}
+        {board.adaptations ? (
+          <View style={[S.box, { backgroundColor: "#f9fafb", borderColor: "#e4e4e7" }]}>
+            <Text style={[S.boxTitle, { color: "#374151" }]}>Uyarlama Önerileri</Text>
+            <Text style={[S.boxText, { color: "#4b5563" }]}>{board.adaptations as string}</Text>
+          </View>
+        ) : null}
+
+        <View style={S.footer} fixed>
+          <Text style={S.footTxt}>LudenLab — ludenlab.com</Text>
+          <Text style={S.footTxt}>{today}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+
+  const blob = await pdf(<Doc />).toBlob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `${card.title.replace(/\s+/g, "_")}_tam_rapor.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 async function downloadMatchingGameTablePDF(card: CardRecord) {
   const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
   Font.register({
@@ -955,6 +1183,8 @@ export default function CardDetailPage({
   const [downloading, setDownloading] = useState(false);
   const [downloadingParent, setDownloadingParent] = useState(false);
   const [downloadingCards, setDownloadingCards] = useState(false);
+  const [downloadingBoardPDF, setDownloadingBoardPDF]   = useState(false);
+  const [downloadingReportPDF, setDownloadingReportPDF] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -1033,6 +1263,36 @@ export default function CardDetailPage({
       toast.error("PDF oluşturulamadı", { id: loadingToast });
     } finally {
       setDownloadingCards(false);
+    }
+  }
+
+  async function handleDownloadBoardPDF() {
+    if (!card) return;
+    setDownloadingBoardPDF(true);
+    const loadingToast = toast.loading("Pano PDF hazırlanıyor…");
+    try {
+      await downloadCommBoardPDF(card, "board");
+      toast.success("Pano PDF indirildi", { id: loadingToast });
+    } catch (err) {
+      console.error("[PDF] hata:", err);
+      toast.error("PDF oluşturulamadı", { id: loadingToast });
+    } finally {
+      setDownloadingBoardPDF(false);
+    }
+  }
+
+  async function handleDownloadReportPDF() {
+    if (!card) return;
+    setDownloadingReportPDF(true);
+    const loadingToast = toast.loading("Tam rapor PDF hazırlanıyor…");
+    try {
+      await downloadCommBoardPDF(card, "report");
+      toast.success("Tam rapor PDF indirildi", { id: loadingToast });
+    } catch (err) {
+      console.error("[PDF] hata:", err);
+      toast.error("PDF oluşturulamadı", { id: loadingToast });
+    } finally {
+      setDownloadingReportPDF(false);
     }
   }
 
@@ -1128,6 +1388,8 @@ export default function CardDetailPage({
             <MatchingGameView game={card.content as unknown as MatchingGameContent} />
           ) : toolType === "PHONATION_ACTIVITY" ? (
             <PhonationView activity={card.content as unknown as PhonationActivityContent} />
+          ) : toolType === "COMMUNICATION_BOARD" ? (
+            <CommBoardView board={card.content as unknown as CommBoardContent} />
           ) : (
             (() => {
               const raw = card.content;
@@ -1185,6 +1447,24 @@ export default function CardDetailPage({
               >
                 {downloading ? "Hazırlanıyor…" : "PDF İndir"}
               </button>
+            )}
+            {toolType === "COMMUNICATION_BOARD" && (
+              <>
+                <button
+                  onClick={handleDownloadBoardPDF}
+                  disabled={downloadingBoardPDF || downloadingReportPDF}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#FE703A] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors disabled:opacity-60"
+                >
+                  {downloadingBoardPDF ? "Hazırlanıyor…" : "PDF — Pano"}
+                </button>
+                <button
+                  onClick={handleDownloadReportPDF}
+                  disabled={downloadingBoardPDF || downloadingReportPDF}
+                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] hover:bg-[#023435]/10 transition-colors disabled:opacity-60"
+                >
+                  {downloadingReportPDF ? "Hazırlanıyor…" : "PDF — Tam Rapor"}
+                </button>
+              </>
             )}
             {toolType === "SESSION_SUMMARY" && (
               <>
