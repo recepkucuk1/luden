@@ -30,7 +30,7 @@ interface CardItem {
   _count: { assignments: number };
 }
 
-type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation" | "homework" | "session_summary" | "matching_game" | "phonation" | "comm_board";
+type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation" | "homework" | "session_summary" | "matching_game" | "phonation" | "comm_board" | "weekly_plan";
 
 const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }[] = [
   { value: "all",             label: "Tümü" },
@@ -42,6 +42,7 @@ const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }
   { value: "matching_game",   label: "Kelime Eşleştirme", href: "/tools/matching-game" },
   { value: "phonation",       label: "Sesletim Aktivitesi", href: "/tools/phonation" },
   { value: "comm_board",      label: "İletişim Panosu",     href: "/tools/comm-board" },
+  { value: "weekly_plan",     label: "Haftalık Plan",        href: "/tools/weekly-plan" },
 ];
 
 const TOOL_TYPE_BADGE: Record<string, string> = {
@@ -53,6 +54,7 @@ const TOOL_TYPE_BADGE: Record<string, string> = {
   MATCHING_GAME:      "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
   PHONATION_ACTIVITY:   "bg-green-50 text-green-700 border-green-200",
   COMMUNICATION_BOARD:  "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
+  WEEKLY_PLAN:          "bg-amber-50 text-amber-700 border-amber-200",
 };
 
 const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
@@ -64,6 +66,7 @@ const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
   MATCHING_GAME:      "Kelime Eşleştirme",
   PHONATION_ACTIVITY:  "Sesletim Aktivitesi",
   COMMUNICATION_BOARD: "İletişim Panosu",
+  WEEKLY_PLAN:         "Haftalık Plan",
 };
 
 function resolveToolType(toolType: string | null): string {
@@ -270,6 +273,15 @@ const CB_SYMBOL_COUNT_OPTIONS = [
   { value: "12",  label: "12" },
 ];
 
+// ── Haftalık Plan filtre seçenekleri ─────────────────────────────────────────
+const WP_SESSIONS_OPTIONS = [
+  { value: "all", label: "Tümü" },
+  { value: "2",   label: "2 ders" },
+  { value: "3",   label: "3 ders" },
+  { value: "4",   label: "4 ders" },
+  { value: "5",   label: "5 ders" },
+];
+
 const SELECT_CLS =
   "rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#023435]/30 cursor-pointer";
 
@@ -398,6 +410,8 @@ export default function CardsPage() {
   const [filterCbBoardType,   setFilterCbBoardType]   = useState("all");
   const [filterCbLayout,      setFilterCbLayout]      = useState("all");
   const [filterCbSymbolCount, setFilterCbSymbolCount] = useState("all");
+  // Filtreler — haftalık plan
+  const [filterWpSessions, setFilterWpSessions] = useState("all");
 
   useEffect(() => {
     Promise.all([
@@ -459,7 +473,8 @@ export default function CardsPage() {
     filterPaSounds.length > 0 ||
     filterCbBoardType !== "all" ||
     filterCbLayout !== "all" ||
-    filterCbSymbolCount !== "all";
+    filterCbSymbolCount !== "all" ||
+    filterWpSessions !== "all";
 
   function clearFilters() {
     setFilterStudent("");
@@ -486,6 +501,7 @@ export default function CardsPage() {
     setFilterCbBoardType("all");
     setFilterCbLayout("all");
     setFilterCbSymbolCount("all");
+    setFilterWpSessions("all");
   }
 
   // goalId → curriculumId lookup
@@ -522,6 +538,7 @@ export default function CardsPage() {
         if (filterToolType === "matching_game")   return tt === "MATCHING_GAME";
         if (filterToolType === "phonation")       return tt === "PHONATION_ACTIVITY";
         if (filterToolType === "comm_board")      return tt === "COMMUNICATION_BOARD";
+        if (filterToolType === "weekly_plan")     return tt === "WEEKLY_PLAN";
         return true;
       });
     }
@@ -610,6 +627,13 @@ export default function CardsPage() {
       }
     }
 
+    // Haftalık plan filtreleri
+    if (filterToolType === "weekly_plan") {
+      if (filterWpSessions !== "all") {
+        list = list.filter((c) => String(c.content?.sessionsPerWeek ?? "") === filterWpSessions);
+      }
+    }
+
     // İletişim panosu filtreleri
     if (filterToolType === "comm_board") {
       if (filterCbBoardType !== "all") {
@@ -675,6 +699,7 @@ export default function CardsPage() {
     filterMgMatchType, filterMgDifficulty,
     filterPaType, filterPaDifficulty, filterPaSounds,
     filterCbBoardType, filterCbLayout, filterCbSymbolCount,
+    filterWpSessions,
     sortBy,
   ]);
 
@@ -872,6 +897,15 @@ export default function CardsPage() {
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Sembol</span>
                     <PillGroup options={CB_SYMBOL_COUNT_OPTIONS} value={filterCbSymbolCount} onChange={setFilterCbSymbolCount} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
+                  </div>
+                </div>
+              )}
+
+              {filterToolType === "weekly_plan" && (
+                <div className="border-t border-zinc-100 pt-3 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Ders Sayısı</span>
+                    <PillGroup options={WP_SESSIONS_OPTIONS} value={filterWpSessions} onChange={setFilterWpSessions} activeClass="border-amber-400 bg-amber-50 text-amber-700" />
                   </div>
                 </div>
               )}

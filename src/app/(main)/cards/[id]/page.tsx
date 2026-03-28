@@ -13,6 +13,7 @@ import { SessionSummaryView, type SessionSummaryContent } from "@/components/car
 import { MatchingGameView, type MatchingGameContent } from "@/components/cards/MatchingGameView";
 import { PhonationView, type PhonationActivityContent } from "@/components/cards/PhonationView";
 import { CommBoardView, type CommBoardContent } from "@/components/cards/CommBoardView";
+import { WeeklyPlanView, type WeeklyPlanContent } from "@/components/cards/WeeklyPlanView";
 import type { GeneratedCard } from "@/lib/prompts";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,7 @@ const TOOL_TYPE_BADGE: Record<string, { label: string; cls: string }> = {
   MATCHING_GAME:      { label: "Kelime Eşleştirme",   cls: "bg-[#107996]/10 text-[#107996] border-[#107996]/20" },
   PHONATION_ACTIVITY:  { label: "Sesletim Aktivitesi", cls: "bg-green-50 text-green-700 border-green-200" },
   COMMUNICATION_BOARD: { label: "İletişim Panosu",     cls: "bg-[#023435]/10 text-[#023435] border-[#023435]/20" },
+  WEEKLY_PLAN:         { label: "Haftalık Plan",        cls: "bg-amber-50 text-amber-700 border-amber-200" },
 };
 
 async function downloadSocialStoryPDF(card: CardRecord) {
@@ -867,6 +869,161 @@ async function downloadCommBoardPDF(card: CardRecord, variant: "board" | "report
   URL.revokeObjectURL(url);
 }
 
+async function downloadWeeklyPlanPDF(card: CardRecord) {
+  const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
+  Font.register({
+    family: "NotoSans",
+    fonts: [
+      { src: `${window.location.origin}/fonts/NotoSans-Regular.ttf`, fontWeight: "normal" },
+      { src: `${window.location.origin}/fonts/NotoSans-Bold.ttf`,    fontWeight: "bold" },
+    ],
+  });
+  Font.registerHyphenationCallback((word) => [word]);
+
+  const plan  = card.content as Record<string, unknown>;
+  const days  = Array.isArray(plan.days) ? (plan.days as WeeklyPlanContent["days"]) : [];
+  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+
+  const S = StyleSheet.create({
+    page:      { fontFamily: "NotoSans", fontSize: 9, color: "#18181b", padding: 36, paddingBottom: 60 },
+    title:     { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 16, color: "#023435", marginBottom: 3 },
+    weekRange: { fontSize: 9, color: "#71717a", marginBottom: 14 },
+    dayWrap:   { marginBottom: 12, borderWidth: 1, borderColor: "#e4e4e7", borderRadius: 4, overflow: "hidden" },
+    dayHdr:    { flexDirection: "row", justifyContent: "space-between", backgroundColor: "#023435", paddingVertical: 5, paddingHorizontal: 8 },
+    dayName:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 10, color: "#fff" },
+    dayDate:   { fontSize: 8, color: "#ffffff99" },
+    dayDur:    { fontSize: 8, color: "#ffffff99" },
+    dayBody:   { padding: 8, backgroundColor: "#fff" },
+    focusBadge:{ alignSelf: "flex-start", borderRadius: 99, paddingHorizontal: 6, paddingVertical: 2, backgroundColor: "#f4f4f5", marginBottom: 4 },
+    focusTxt:  { fontSize: 8, color: "#52525b" },
+    objective: { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, color: "#18181b", marginBottom: 8 },
+    section:   { borderRadius: 3, padding: 6, marginBottom: 5 },
+    secLabel:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, textTransform: "uppercase", marginBottom: 3 },
+    secText:   { fontSize: 8, lineHeight: 1.5 },
+    stepRow:   { flexDirection: "row", marginBottom: 2 },
+    stepNum:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, width: 14, color: "#107996" },
+    stepText:  { fontSize: 8, flex: 1, lineHeight: 1.4 },
+    tagRow:    { flexDirection: "row", flexWrap: "wrap", marginTop: 3 },
+    tag:       { borderRadius: 99, paddingHorizontal: 5, paddingVertical: 1, marginRight: 3, marginBottom: 2, backgroundColor: "#f4f4f5" },
+    tagTxt:    { fontSize: 7, color: "#52525b" },
+    dayNote:   { fontSize: 7, color: "#a1a1aa", fontStyle: "italic", borderTopWidth: 1, borderTopColor: "#f4f4f5", paddingTop: 4, marginTop: 4 },
+    infoBox:   { borderRadius: 4, padding: 8, marginBottom: 10, borderWidth: 1 },
+    boxTitle:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, marginBottom: 3 },
+    boxText:   { fontSize: 8, lineHeight: 1.5 },
+    footer:    { position: "absolute", bottom: 20, left: 36, right: 36, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: "#e4e4e7", paddingTop: 5 },
+    footTxt:   { fontSize: 7, color: "#a1a1aa" },
+  });
+
+  const Doc = () => (
+    <Document title={card.title} author="LudenLab">
+      <Page size="A4" style={S.page}>
+        <Text style={S.title}>{card.title}</Text>
+        <Text style={S.weekRange}>
+          {plan.weekRange as string ?? ""}
+          {card.student?.name ? ` · ${card.student.name}` : ""}
+          {plan.sessionsPerWeek ? ` · ${plan.sessionsPerWeek as number} ders` : ""}
+          {plan.sessionDuration ? ` · ${plan.sessionDuration as string} dk/ders` : ""}
+        </Text>
+
+        {plan.studentSummary ? (
+          <View style={[S.infoBox, { backgroundColor: "#f9fafb", borderColor: "#e4e4e7", marginBottom: 12 }]}>
+            <Text style={[S.boxTitle, { color: "#374151" }]}>Öğrenci Özeti</Text>
+            <Text style={[S.boxText, { color: "#4b5563" }]}>{plan.studentSummary as string}</Text>
+          </View>
+        ) : null}
+
+        {days.map((day, di) => (
+          <View key={di} style={S.dayWrap}>
+            <View style={S.dayHdr}>
+              <View>
+                <Text style={S.dayName}>{day.dayName}</Text>
+                <Text style={S.dayDate}>{day.date}</Text>
+              </View>
+              <Text style={S.dayDur}>{day.duration}</Text>
+            </View>
+            <View style={S.dayBody}>
+              <View style={S.focusBadge}><Text style={S.focusTxt}>{day.focusArea}</Text></View>
+              <Text style={S.objective}>{day.objective}</Text>
+              <View style={[S.section, { backgroundColor: "#eff6ff" }]}>
+                <Text style={[S.secLabel, { color: "#1d4ed8" }]}>🌅 Isınma — {day.warmup.duration}</Text>
+                <Text style={S.secText}>{day.warmup.activity}</Text>
+                {day.warmup.materials && day.warmup.materials.length > 0 ? (
+                  <View style={S.tagRow}>{day.warmup.materials.map((m, i) => <View key={i} style={S.tag}><Text style={S.tagTxt}>{m}</Text></View>)}</View>
+                ) : null}
+              </View>
+              <View style={[S.section, { backgroundColor: "#fff", borderLeftWidth: 3, borderLeftColor: "#107996" }]}>
+                <Text style={[S.secLabel, { color: "#107996" }]}>📚 Ana Çalışma — {day.mainWork.duration}</Text>
+                <Text style={[S.secText, { marginBottom: 4 }]}>{day.mainWork.activity}</Text>
+                {day.mainWork.steps?.map((step, si) => (
+                  <View key={si} style={S.stepRow}>
+                    <Text style={S.stepNum}>{si + 1}.</Text>
+                    <Text style={S.stepText}>{step}</Text>
+                  </View>
+                ))}
+                {day.mainWork.targetGoals && day.mainWork.targetGoals.length > 0 ? (
+                  <View style={S.tagRow}>{day.mainWork.targetGoals.map((g, i) => <View key={i} style={[S.tag, { backgroundColor: "#02343515" }]}><Text style={[S.tagTxt, { color: "#023435" }]}>🎯 {g}</Text></View>)}</View>
+                ) : null}
+                {day.mainWork.materials && day.mainWork.materials.length > 0 ? (
+                  <View style={S.tagRow}>{day.mainWork.materials.map((m, i) => <View key={i} style={S.tag}><Text style={S.tagTxt}>{m}</Text></View>)}</View>
+                ) : null}
+              </View>
+              <View style={[S.section, { backgroundColor: "#f0fdf4" }]}>
+                <Text style={[S.secLabel, { color: "#16a34a" }]}>🎯 Kapanış — {day.closing.duration}</Text>
+                <Text style={S.secText}>{day.closing.activity}</Text>
+              </View>
+              {day.notes ? <Text style={S.dayNote}>{day.notes}</Text> : null}
+            </View>
+          </View>
+        ))}
+
+        {plan.weeklyGoal ? (
+          <View style={[S.infoBox, { backgroundColor: "#fff7ed", borderColor: "#fed7aa" }]}>
+            <Text style={[S.boxTitle, { color: "#c2410c" }]}>Haftalık Hedef</Text>
+            <Text style={[S.boxText, { color: "#7c2d12" }]}>{plan.weeklyGoal as string}</Text>
+          </View>
+        ) : null}
+        {plan.materialsNeeded && (plan.materialsNeeded as string[]).length > 0 ? (
+          <View style={[S.infoBox, { backgroundColor: "#f9fafb", borderColor: "#e4e4e7" }]}>
+            <Text style={[S.boxTitle, { color: "#374151" }]}>Haftalık Materyaller</Text>
+            <Text style={[S.boxText, { color: "#4b5563" }]}>{(plan.materialsNeeded as string[]).join(" · ")}</Text>
+          </View>
+        ) : null}
+        {plan.parentCommunication ? (
+          <View style={[S.infoBox, { backgroundColor: "#eff6ff", borderColor: "#bfdbfe" }]}>
+            <Text style={[S.boxTitle, { color: "#1e40af" }]}>Veli Bilgilendirmesi</Text>
+            <Text style={[S.boxText, { color: "#1e3a8a" }]}>{plan.parentCommunication as string}</Text>
+          </View>
+        ) : null}
+        {plan.expertNotes ? (
+          <View style={[S.infoBox, { backgroundColor: "#fffbeb", borderColor: "#fde68a" }]}>
+            <Text style={[S.boxTitle, { color: "#92400e" }]}>Uzman Notları</Text>
+            <Text style={[S.boxText, { color: "#78350f" }]}>{plan.expertNotes as string}</Text>
+          </View>
+        ) : null}
+        {plan.nextWeekSuggestion ? (
+          <View style={[S.infoBox, { backgroundColor: "#f9fafb", borderColor: "#e4e4e7" }]}>
+            <Text style={[S.boxTitle, { color: "#374151" }]}>Gelecek Hafta Önerisi</Text>
+            <Text style={[S.boxText, { color: "#4b5563" }]}>{plan.nextWeekSuggestion as string}</Text>
+          </View>
+        ) : null}
+
+        <View style={S.footer} fixed>
+          <Text style={S.footTxt}>LudenLab — ludenlab.com</Text>
+          <Text style={S.footTxt}>{today}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+
+  const blob = await pdf(<Doc />).toBlob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `${card.title.replace(/\s+/g, "_")}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 async function downloadMatchingGameTablePDF(card: CardRecord) {
   const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
   Font.register({
@@ -1223,6 +1380,8 @@ export default function CardDetailPage({
         await downloadMatchingGameTablePDF(card);
       } else if (tt === "PHONATION_ACTIVITY") {
         await downloadPhonationPDF(card);
+      } else if (tt === "WEEKLY_PLAN") {
+        await downloadWeeklyPlanPDF(card);
       } else {
         // LEARNING_CARD — mevcut CardPreview PDF'i kullanılır (aşağıda buton var)
         return;
@@ -1390,6 +1549,8 @@ export default function CardDetailPage({
             <PhonationView activity={card.content as unknown as PhonationActivityContent} />
           ) : toolType === "COMMUNICATION_BOARD" ? (
             <CommBoardView board={card.content as unknown as CommBoardContent} />
+          ) : toolType === "WEEKLY_PLAN" ? (
+            <WeeklyPlanView plan={card.content as unknown as WeeklyPlanContent} />
           ) : (
             (() => {
               const raw = card.content;
@@ -1439,7 +1600,7 @@ export default function CardDetailPage({
                 </button>
               </>
             )}
-            {(toolType === "SOCIAL_STORY" || toolType === "ARTICULATION_DRILL" || toolType === "HOMEWORK_MATERIAL" || toolType === "PHONATION_ACTIVITY") && (
+            {(toolType === "SOCIAL_STORY" || toolType === "ARTICULATION_DRILL" || toolType === "HOMEWORK_MATERIAL" || toolType === "PHONATION_ACTIVITY" || toolType === "WEEKLY_PLAN") && (
               <button
                 onClick={handleDownloadPDF}
                 disabled={downloading}
