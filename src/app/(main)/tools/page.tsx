@@ -27,7 +27,7 @@ const SECTIONS: ToolSection[] = [
       { title: "Öğrenme Kartı", href: "/generate", desc: "Müfredat hedefine uygun öğrenme kartları", active: true },
       { title: "Sosyal Hikaye", href: "/tools/social-story", desc: "Carol Gray formatında sosyal hikayeler", active: true },
       { title: "Artikülasyon Alıştırması", href: "/tools/articulation", desc: "Hedef ses bazlı alıştırma kartları", active: true },
-      { title: "Ev Ödevi Materyali", href: "/tools/homework", desc: "Veli yönlendirmeli ev egzersizleri", active: false },
+      { title: "Ev Ödevi Materyali", href: "/tools/homework", desc: "Veli yönlendirmeli ev egzersizleri", active: true },
     ],
   },
   {

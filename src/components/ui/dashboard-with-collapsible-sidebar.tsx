@@ -18,13 +18,15 @@ import {
   BookOpen,
   FileText,
   Mic,
+  ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TOOLS_SUB = [
-  { title: "Öğrenme Kartı", href: "/generate",              Icon: BookOpen },
-  { title: "Sosyal Hikaye",   href: "/tools/social-story",   Icon: FileText },
-  { title: "Artikülasyon",    href: "/tools/articulation",   Icon: Mic     },
+  { title: "Öğrenme Kartı", href: "/generate",              Icon: BookOpen      },
+  { title: "Sosyal Hikaye",  href: "/tools/social-story",   Icon: FileText      },
+  { title: "Artikülasyon",   href: "/tools/articulation",   Icon: Mic           },
+  { title: "Ev Ödevi",       href: "/tools/homework",        Icon: ClipboardList },
 ];
 
 export const Sidebar = () => {

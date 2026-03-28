@@ -8,6 +8,7 @@ import { CardPreview } from "@/components/cards/CardPreview";
 import { AssignStudentsModal } from "@/components/cards/AssignStudentsModal";
 import { SocialStoryView, type SocialStoryContent } from "@/components/cards/SocialStoryView";
 import { ArticulationView, type ArticulationContent } from "@/components/cards/ArticulationView";
+import { HomeworkView, type HomeworkContent } from "@/components/cards/HomeworkView";
 import type { GeneratedCard } from "@/lib/prompts";
 import { cn } from "@/lib/utils";
 
@@ -34,9 +35,10 @@ interface CardRecord {
 }
 
 const TOOL_TYPE_BADGE: Record<string, { label: string; cls: string }> = {
-  LEARNING_CARD:      { label: "Öğrenme Kartı", cls: "bg-[#107996]/10 text-[#107996] border-[#107996]/20" },
-  SOCIAL_STORY:       { label: "Sosyal Hikaye",  cls: "bg-[#023435]/10 text-[#023435] border-[#023435]/20" },
-  ARTICULATION_DRILL: { label: "Artikülasyon",   cls: "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20" },
+  LEARNING_CARD:      { label: "Öğrenme Kartı",      cls: "bg-[#107996]/10 text-[#107996] border-[#107996]/20" },
+  SOCIAL_STORY:       { label: "Sosyal Hikaye",       cls: "bg-[#023435]/10 text-[#023435] border-[#023435]/20" },
+  ARTICULATION_DRILL: { label: "Artikülasyon",        cls: "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20" },
+  HOMEWORK_MATERIAL:  { label: "Ev Ödevi Materyali",  cls: "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30" },
 };
 
 async function downloadSocialStoryPDF(card: CardRecord) {
@@ -195,6 +197,106 @@ async function downloadArticulationPDF(card: CardRecord) {
   URL.revokeObjectURL(url);
 }
 
+async function downloadHomeworkPDFFromCard(card: CardRecord) {
+  const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
+
+  Font.register({
+    family: "NotoSans",
+    fonts: [
+      { src: `${window.location.origin}/fonts/NotoSans-Regular.ttf`, fontWeight: "normal" },
+      { src: `${window.location.origin}/fonts/NotoSans-Bold.ttf`,    fontWeight: "bold" },
+    ],
+  });
+
+  const hw = card.content as unknown as HomeworkContent;
+  const MTLABEL: Record<string, string> = {
+    exercise: "Ev Egzersizi", observation: "Gözlem Formu", daily_activity: "Günlük Aktivite",
+  };
+
+  const styles = StyleSheet.create({
+    page:      { fontFamily: "NotoSans", fontSize: 10, color: "#18181b", padding: 44, backgroundColor: "#fff" },
+    title:     { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 18, color: "#023435", marginBottom: 6 },
+    badges:    { flexDirection: "row", gap: 6, marginBottom: 16, flexWrap: "wrap" },
+    badge:     { fontSize: 8, fontWeight: "bold", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
+    intro:     { marginBottom: 14, padding: 10, borderRadius: 6, backgroundColor: "#f4f4f5" },
+    introText: { fontSize: 10, lineHeight: 1.6, color: "#3f3f46" },
+    matHeader: { fontWeight: "bold", fontSize: 9, color: "#71717a", marginBottom: 4 },
+    matItem:   { fontSize: 9, color: "#3f3f46", marginBottom: 2 },
+    stepRow:   { flexDirection: "row", gap: 8, marginBottom: 8, alignItems: "flex-start" },
+    stepNum:   { fontWeight: "bold", fontSize: 9, color: "#107996", width: 18 },
+    stepText:  { flex: 1, fontSize: 10, lineHeight: 1.6, color: "#3f3f46" },
+    stepTip:   { fontSize: 8, color: "#71717a", fontStyle: "italic", marginTop: 2 },
+    section:   { marginTop: 12, padding: 10, borderRadius: 6 },
+    secTitle:  { fontWeight: "bold", fontSize: 9, marginBottom: 4 },
+    secText:   { fontSize: 9, lineHeight: 1.6 },
+    freq:      { marginTop: 10, fontSize: 9, color: "#52525b" },
+  });
+
+  const Doc = () => (
+    <Document title={hw.title} author="LudenLab">
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.title}>{hw.title}</Text>
+        <View style={styles.badges}>
+          <Text style={[styles.badge, { backgroundColor: "#e0f2fe", color: "#0369a1" }]}>
+            {MTLABEL[hw.materialType] ?? hw.materialType}
+          </Text>
+          {hw.duration && <Text style={[styles.badge, { backgroundColor: "#f4f4f5", color: "#52525b" }]}>{hw.duration}</Text>}
+          {hw.targetArea && <Text style={[styles.badge, { backgroundColor: "#f4f4f5", color: "#52525b" }]}>{hw.targetArea}</Text>}
+        </View>
+        {hw.introduction && <View style={styles.intro}><Text style={styles.introText}>{hw.introduction}</Text></View>}
+        {hw.materials && hw.materials.length > 0 && (
+          <View style={{ marginBottom: 12 }}>
+            <Text style={styles.matHeader}>Gerekli Malzemeler</Text>
+            {hw.materials.map((m, i) => <Text key={i} style={styles.matItem}>• {m}</Text>)}
+          </View>
+        )}
+        {hw.steps && hw.steps.length > 0 && (
+          <View style={{ marginBottom: 12 }}>
+            <Text style={[styles.matHeader, { marginBottom: 8 }]}>Adımlar</Text>
+            {hw.steps.map((step, i) => (
+              <View key={i} style={styles.stepRow}>
+                <Text style={styles.stepNum}>{step.stepNumber ?? i + 1}.</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.stepText}>{step.instruction}</Text>
+                  {step.tip && <Text style={styles.stepTip}>› {step.tip}</Text>}
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+        {hw.watchFor && (
+          <View style={[styles.section, { backgroundColor: "#fefce8" }]}>
+            <Text style={[styles.secTitle, { color: "#92400e" }]}>Dikkat Edin</Text>
+            <Text style={[styles.secText, { color: "#78350f" }]}>{hw.watchFor}</Text>
+          </View>
+        )}
+        {hw.celebration && (
+          <View style={[styles.section, { backgroundColor: "#f0fdf4" }]}>
+            <Text style={[styles.secTitle, { color: "#14532d" }]}>Kutlama Anı</Text>
+            <Text style={[styles.secText, { color: "#166534" }]}>{hw.celebration}</Text>
+          </View>
+        )}
+        {hw.frequency && <Text style={styles.freq}>Önerilen Sıklık: {hw.frequency}</Text>}
+        {hw.adaptations && (
+          <View style={[styles.section, { backgroundColor: "#f9fafb" }]}>
+            <Text style={[styles.secTitle, { color: "#374151" }]}>Uyarlama Önerileri</Text>
+            <Text style={[styles.secText, { color: "#4b5563" }]}>{hw.adaptations}</Text>
+          </View>
+        )}
+        {/* expertNotes intentionally excluded from PDF */}
+      </Page>
+    </Document>
+  );
+
+  const blob = await pdf(<Doc />).toBlob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `${card.title.replace(/\s+/g, "_")}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function CardDetailPage({
   params,
 }: {
@@ -238,6 +340,8 @@ export default function CardDetailPage({
         await downloadSocialStoryPDF(card);
       } else if (tt === "ARTICULATION_DRILL") {
         await downloadArticulationPDF(card);
+      } else if (tt === "HOMEWORK_MATERIAL") {
+        await downloadHomeworkPDFFromCard(card);
       } else {
         // LEARNING_CARD — mevcut CardPreview PDF'i kullanılır (aşağıda buton var)
         return;
@@ -335,6 +439,8 @@ export default function CardDetailPage({
             <SocialStoryView story={card.content as unknown as SocialStoryContent} />
           ) : toolType === "ARTICULATION_DRILL" ? (
             <ArticulationView drill={card.content as unknown as ArticulationContent} />
+          ) : toolType === "HOMEWORK_MATERIAL" ? (
+            <HomeworkView hw={card.content as unknown as HomeworkContent} />
           ) : (
             (() => {
               const raw = card.content;
@@ -366,7 +472,7 @@ export default function CardDetailPage({
           </p>
           <div className="flex items-center gap-2">
             {/* PDF butonu — LEARNING_CARD CardPreview içinde zaten mevcut; diğerleri için burada göster */}
-            {(toolType === "SOCIAL_STORY" || toolType === "ARTICULATION_DRILL") && (
+            {(toolType === "SOCIAL_STORY" || toolType === "ARTICULATION_DRILL" || toolType === "HOMEWORK_MATERIAL") && (
               <button
                 onClick={handleDownloadPDF}
                 disabled={downloading}

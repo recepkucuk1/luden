@@ -30,25 +30,28 @@ interface CardItem {
   _count: { assignments: number };
 }
 
-type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation";
+type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation" | "homework";
 
 const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }[] = [
   { value: "all",          label: "Tümü" },
   { value: "learning",     label: "Öğrenme Kartı",     href: "/generate" },
   { value: "social_story", label: "Sosyal Hikaye",     href: "/tools/social-story" },
   { value: "articulation", label: "Artikülasyon",      href: "/tools/articulation" },
+  { value: "homework",     label: "Ev Ödevi",           href: "/tools/homework" },
 ];
 
 const TOOL_TYPE_BADGE: Record<string, string> = {
   LEARNING_CARD:      "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
   SOCIAL_STORY:       "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
   ARTICULATION_DRILL: "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20",
+  HOMEWORK_MATERIAL:  "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
 };
 
 const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
   LEARNING_CARD:      "Öğrenme Kartı",
   SOCIAL_STORY:       "Sosyal Hikaye",
   ARTICULATION_DRILL: "Artikülasyon",
+  HOMEWORK_MATERIAL:  "Ev Ödevi",
 };
 
 function resolveToolType(toolType: string | null): string {
@@ -143,6 +146,32 @@ const THEME_OPTIONS = [
   { value: "Okul eşyaları",    label: "Okul eşyaları" },
   { value: "Vücut bölümleri",  label: "Vücut bölümleri" },
   { value: "Spor ve oyunlar",  label: "Spor ve oyunlar" },
+];
+
+// ── Ev Ödevi filtre seçenekleri ──────────────────────────────────────────────
+const HW_AREA_OPTIONS = [
+  { value: "all",                                       label: "Tümü" },
+  { value: "Artikülasyon / Ses çalışması",              label: "Artikülasyon" },
+  { value: "Dil gelişimi / Kelime hazinesi",            label: "Dil gelişimi" },
+  { value: "Akıcı konuşma",                             label: "Akıcı konuşma" },
+  { value: "Pragmatik dil / Sosyal iletişim",           label: "Pragmatik dil" },
+  { value: "İşitsel algı / Dinleme becerileri",         label: "İşitsel algı" },
+  { value: "Oral motor egzersizler",                    label: "Oral motor" },
+  { value: "Diğer",                                     label: "Diğer" },
+];
+
+const HW_MATERIAL_OPTIONS = [
+  { value: "all",            label: "Tümü" },
+  { value: "exercise",       label: "Ev Egzersizi" },
+  { value: "observation",    label: "Gözlem Formu" },
+  { value: "daily_activity", label: "Günlük Aktivite" },
+];
+
+const HW_DURATION_OPTIONS = [
+  { value: "all",       label: "Tümü" },
+  { value: "10 dakika", label: "10 dk" },
+  { value: "15 dakika", label: "15 dk" },
+  { value: "20 dakika", label: "20 dk" },
 ];
 
 const SELECT_CLS =
@@ -255,6 +284,10 @@ export default function CardsPage() {
   const [filterSounds,  setFilterSounds]  = useState<string[]>([]);
   const [filterLevel,   setFilterLevel]   = useState("all");
   const [filterTheme,   setFilterTheme]   = useState("all");
+  // Filtreler — ev ödevi
+  const [filterHwArea,     setFilterHwArea]     = useState("all");
+  const [filterHwMaterial, setFilterHwMaterial] = useState("all");
+  const [filterHwDuration, setFilterHwDuration] = useState("all");
 
   useEffect(() => {
     Promise.all([
@@ -303,7 +336,10 @@ export default function CardsPage() {
     filterStoryLength !== "all" ||
     filterSounds.length > 0 ||
     filterLevel !== "all" ||
-    filterTheme !== "all";
+    filterTheme !== "all" ||
+    filterHwArea !== "all" ||
+    filterHwMaterial !== "all" ||
+    filterHwDuration !== "all";
 
   function clearFilters() {
     setFilterStudent("");
@@ -317,6 +353,9 @@ export default function CardsPage() {
     setFilterSounds([]);
     setFilterLevel("all");
     setFilterTheme("all");
+    setFilterHwArea("all");
+    setFilterHwMaterial("all");
+    setFilterHwDuration("all");
   }
 
   // goalId → curriculumId lookup
@@ -348,6 +387,7 @@ export default function CardsPage() {
         if (filterToolType === "learning")     return tt === "LEARNING_CARD";
         if (filterToolType === "social_story") return tt === "SOCIAL_STORY";
         if (filterToolType === "articulation") return tt === "ARTICULATION_DRILL";
+        if (filterToolType === "homework")     return tt === "HOMEWORK_MATERIAL";
         return true;
       });
     }
@@ -393,6 +433,22 @@ export default function CardsPage() {
       }
     }
 
+    // Ev ödevi filtreleri
+    if (filterToolType === "homework") {
+      if (filterHwArea !== "all") {
+        list = list.filter((c) => {
+          const area = c.content?.targetArea as string | undefined;
+          return area === filterHwArea;
+        });
+      }
+      if (filterHwMaterial !== "all") {
+        list = list.filter((c) => (c.content?.materialType as string | undefined) === filterHwMaterial);
+      }
+      if (filterHwDuration !== "all") {
+        list = list.filter((c) => (c.content?.duration as string | undefined) === filterHwDuration);
+      }
+    }
+
     // Artikülasyon filtreleri
     if (filterToolType === "articulation") {
       if (filterSounds.length > 0) {
@@ -430,6 +486,7 @@ export default function CardsPage() {
     filterCategory, filterDifficulty, filterCurriculum, goalToCurriculumId,
     filterSituation, filterEnvironment, filterStoryLength,
     filterSounds, filterLevel, filterTheme,
+    filterHwArea, filterHwMaterial, filterHwDuration,
     sortBy,
   ]);
 
@@ -584,6 +641,23 @@ export default function CardsPage() {
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tema</span>
                     <PillGroup options={THEME_OPTIONS} value={filterTheme} onChange={setFilterTheme} activeClass="border-[#FE703A] bg-[#FE703A]/10 text-[#FE703A]" />
+                  </div>
+                </div>
+              )}
+
+              {filterToolType === "homework" && (
+                <div className="border-t border-zinc-100 pt-3 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Alan</span>
+                    <PillGroup options={HW_AREA_OPTIONS} value={filterHwArea} onChange={setFilterHwArea} activeClass="border-[#F4AE10] bg-[#F4AE10]/10 text-amber-800" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tür</span>
+                    <PillGroup options={HW_MATERIAL_OPTIONS} value={filterHwMaterial} onChange={setFilterHwMaterial} activeClass="border-[#F4AE10] bg-[#F4AE10]/10 text-amber-800" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Süre</span>
+                    <PillGroup options={HW_DURATION_OPTIONS} value={filterHwDuration} onChange={setFilterHwDuration} activeClass="border-[#F4AE10] bg-[#F4AE10]/10 text-amber-800" />
                   </div>
                 </div>
               )}
