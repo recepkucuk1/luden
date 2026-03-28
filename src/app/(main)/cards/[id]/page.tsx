@@ -213,77 +213,108 @@ async function downloadHomeworkPDFFromCard(card: CardRecord) {
     exercise: "Ev Egzersizi", observation: "Gözlem Formu", daily_activity: "Günlük Aktivite",
   };
 
-  const styles = StyleSheet.create({
-    page:      { fontFamily: "NotoSans", fontSize: 10, color: "#18181b", padding: 44, backgroundColor: "#fff" },
-    title:     { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 18, color: "#023435", marginBottom: 6 },
-    badges:    { flexDirection: "row", gap: 6, marginBottom: 16, flexWrap: "wrap" },
-    badge:     { fontSize: 8, fontWeight: "bold", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 99 },
-    intro:     { marginBottom: 14, padding: 10, borderRadius: 6, backgroundColor: "#f4f4f5" },
+  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const studentName = card.student?.name;
+
+  const S = StyleSheet.create({
+    page:      { fontFamily: "NotoSans", fontSize: 10, color: "#18181b", padding: 44 },
+    title:     { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 20, color: "#023435", marginBottom: 6 },
+    infoRow:   { flexDirection: "row", marginBottom: 18, borderBottomWidth: 1, borderBottomColor: "#e4e4e7", paddingBottom: 10 },
+    infoText:  { fontSize: 9, color: "#52525b", marginRight: 16 },
+    sectionHdr:{ fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, color: "#71717a", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 },
+    intro:     { backgroundColor: "#f4f4f5", borderRadius: 4, padding: 10, marginBottom: 14 },
     introText: { fontSize: 10, lineHeight: 1.6, color: "#3f3f46" },
-    matHeader: { fontWeight: "bold", fontSize: 9, color: "#71717a", marginBottom: 4 },
-    matItem:   { fontSize: 9, color: "#3f3f46", marginBottom: 2 },
-    stepRow:   { flexDirection: "row", gap: 8, marginBottom: 8, alignItems: "flex-start" },
-    stepNum:   { fontWeight: "bold", fontSize: 9, color: "#107996", width: 18 },
+    matItem:   { fontSize: 9, color: "#3f3f46", marginBottom: 3 },
+    stepRow:   { flexDirection: "row", marginBottom: 10, alignItems: "flex-start" },
+    stepNum:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 10, color: "#107996", width: 22 },
     stepText:  { flex: 1, fontSize: 10, lineHeight: 1.6, color: "#3f3f46" },
-    stepTip:   { fontSize: 8, color: "#71717a", fontStyle: "italic", marginTop: 2 },
-    section:   { marginTop: 12, padding: 10, borderRadius: 6 },
-    secTitle:  { fontWeight: "bold", fontSize: 9, marginBottom: 4 },
-    secText:   { fontSize: 9, lineHeight: 1.6 },
-    freq:      { marginTop: 10, fontSize: 9, color: "#52525b" },
+    stepTip:   { fontSize: 8, color: "#a1a1aa", marginTop: 3, paddingLeft: 4, borderLeftWidth: 2, borderLeftColor: "#d4d4d8" },
+    box:       { borderRadius: 4, padding: 10, marginBottom: 10 },
+    boxTitle:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, marginBottom: 4 },
+    boxText:   { fontSize: 9, lineHeight: 1.6 },
+    freq:      { fontSize: 9, color: "#52525b", marginBottom: 10 },
+    footer:    { position: "absolute", bottom: 28, left: 44, right: 44, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: "#e4e4e7", paddingTop: 6 },
+    footerTxt: { fontSize: 8, color: "#a1a1aa" },
   });
 
+  const steps = Array.isArray(hw.steps)    ? hw.steps    : [];
+  const mats  = Array.isArray(hw.materials) ? hw.materials : [];
+
   const Doc = () => (
-    <Document title={hw.title} author="LudenLab">
-      <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>{hw.title}</Text>
-        <View style={styles.badges}>
-          <Text style={[styles.badge, { backgroundColor: "#e0f2fe", color: "#0369a1" }]}>
-            {MTLABEL[hw.materialType] ?? hw.materialType}
+    <Document title={hw.title ?? card.title} author="LudenLab">
+      <Page size="A4" style={S.page}>
+
+        <Text style={S.title}>{hw.title ?? card.title}</Text>
+
+        <View style={S.infoRow}>
+          {studentName ? <Text style={S.infoText}>Öğrenci: {studentName}</Text> : null}
+          {hw.duration   ? <Text style={S.infoText}>Süre: {hw.duration}</Text>   : null}
+          {hw.targetArea ? <Text style={S.infoText}>{hw.targetArea}</Text>       : null}
+          <Text style={[S.infoText, { marginRight: 0 }]}>
+            {MTLABEL[hw.materialType] ?? hw.materialType ?? ""}
           </Text>
-          {hw.duration && <Text style={[styles.badge, { backgroundColor: "#f4f4f5", color: "#52525b" }]}>{hw.duration}</Text>}
-          {hw.targetArea && <Text style={[styles.badge, { backgroundColor: "#f4f4f5", color: "#52525b" }]}>{hw.targetArea}</Text>}
+          <Text style={[S.infoText, { marginLeft: "auto", marginRight: 0 }]}>{today}</Text>
         </View>
-        {hw.introduction && <View style={styles.intro}><Text style={styles.introText}>{hw.introduction}</Text></View>}
-        {hw.materials && hw.materials.length > 0 && (
-          <View style={{ marginBottom: 12 }}>
-            <Text style={styles.matHeader}>Gerekli Malzemeler</Text>
-            {hw.materials.map((m, i) => <Text key={i} style={styles.matItem}>• {m}</Text>)}
+
+        {hw.introduction ? (
+          <View style={S.intro}>
+            <Text style={S.introText}>{hw.introduction}</Text>
           </View>
-        )}
-        {hw.steps && hw.steps.length > 0 && (
+        ) : null}
+
+        {mats.length > 0 ? (
           <View style={{ marginBottom: 12 }}>
-            <Text style={[styles.matHeader, { marginBottom: 8 }]}>Adımlar</Text>
-            {hw.steps.map((step, i) => (
-              <View key={i} style={styles.stepRow}>
-                <Text style={styles.stepNum}>{step.stepNumber ?? i + 1}.</Text>
+            <Text style={S.sectionHdr}>Gerekli Malzemeler</Text>
+            {mats.map((m, i) => (
+              <Text key={i} style={S.matItem}>• {m}</Text>
+            ))}
+          </View>
+        ) : null}
+
+        {steps.length > 0 ? (
+          <View style={{ marginBottom: 12 }}>
+            <Text style={S.sectionHdr}>Adımlar</Text>
+            {steps.map((step, i) => (
+              <View key={i} style={S.stepRow}>
+                <Text style={S.stepNum}>{step.stepNumber ?? i + 1}.</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.stepText}>{step.instruction}</Text>
-                  {step.tip && <Text style={styles.stepTip}>› {step.tip}</Text>}
+                  <Text style={S.stepText}>{step.instruction ?? ""}</Text>
+                  {step.tip ? <Text style={S.stepTip}>İpucu: {step.tip}</Text> : null}
                 </View>
               </View>
             ))}
           </View>
-        )}
-        {hw.watchFor && (
-          <View style={[styles.section, { backgroundColor: "#fefce8" }]}>
-            <Text style={[styles.secTitle, { color: "#92400e" }]}>Dikkat Edin</Text>
-            <Text style={[styles.secText, { color: "#78350f" }]}>{hw.watchFor}</Text>
+        ) : null}
+
+        {hw.watchFor ? (
+          <View style={[S.box, { backgroundColor: "#fefce8", borderWidth: 1, borderColor: "#fde68a" }]}>
+            <Text style={[S.boxTitle, { color: "#92400e" }]}>⚠ Dikkat Edin</Text>
+            <Text style={[S.boxText,  { color: "#78350f" }]}>{hw.watchFor}</Text>
           </View>
-        )}
-        {hw.celebration && (
-          <View style={[styles.section, { backgroundColor: "#f0fdf4" }]}>
-            <Text style={[styles.secTitle, { color: "#14532d" }]}>Kutlama Anı</Text>
-            <Text style={[styles.secText, { color: "#166534" }]}>{hw.celebration}</Text>
+        ) : null}
+
+        {hw.celebration ? (
+          <View style={[S.box, { backgroundColor: "#f0fdf4", borderWidth: 1, borderColor: "#bbf7d0" }]}>
+            <Text style={[S.boxTitle, { color: "#14532d" }]}>★ Kutlama Anı</Text>
+            <Text style={[S.boxText,  { color: "#166534" }]}>{hw.celebration}</Text>
           </View>
-        )}
-        {hw.frequency && <Text style={styles.freq}>Önerilen Sıklık: {hw.frequency}</Text>}
-        {hw.adaptations && (
-          <View style={[styles.section, { backgroundColor: "#f9fafb" }]}>
-            <Text style={[styles.secTitle, { color: "#374151" }]}>Uyarlama Önerileri</Text>
-            <Text style={[styles.secText, { color: "#4b5563" }]}>{hw.adaptations}</Text>
+        ) : null}
+
+        {hw.frequency ? <Text style={S.freq}>Önerilen Sıklık: {hw.frequency}</Text> : null}
+
+        {hw.adaptations ? (
+          <View style={[S.box, { backgroundColor: "#f9fafb", borderWidth: 1, borderColor: "#e4e4e7" }]}>
+            <Text style={[S.boxTitle, { color: "#374151" }]}>Uyarlama Önerileri</Text>
+            <Text style={[S.boxText,  { color: "#4b5563" }]}>{hw.adaptations}</Text>
           </View>
-        )}
-        {/* expertNotes intentionally excluded from PDF */}
+        ) : null}
+
+        {/* expertNotes — PDF'e dahil edilmez */}
+
+        <View style={S.footer} fixed>
+          <Text style={S.footerTxt}>LudenLab — ludenlab.com</Text>
+          <Text style={S.footerTxt}>{today}</Text>
+        </View>
       </Page>
     </Document>
   );
