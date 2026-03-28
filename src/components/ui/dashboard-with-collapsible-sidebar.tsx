@@ -24,6 +24,7 @@ import {
   Gamepad2,
   MessageSquare,
   CalendarCheck,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +38,7 @@ const TOOLS_SUB = [
   { title: "Sesletim Aktivitesi", href: "/tools/phonation",  Icon: Gamepad2      },
   { title: "İletişim Panosu",    href: "/tools/comm-board",   Icon: MessageSquare },
   { title: "Haftalık Plan",      href: "/tools/weekly-plan",  Icon: CalendarCheck },
+  { title: "Hedef Takip",        href: "/tools/goal-tracker", Icon: Target        },
 ];
 
 export const Sidebar = () => {

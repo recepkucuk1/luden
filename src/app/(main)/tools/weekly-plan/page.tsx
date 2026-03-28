@@ -108,184 +108,177 @@ function formatWeekRange(weekStart: string): string {
 // ─── PDF Download ─────────────────────────────────────────────────────────────
 
 async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: string) {
-  const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
+  const jsPDF    = (await import("jspdf")).default;
+  const autoTable = (await import("jspdf-autotable")).default;
 
-  Font.register({
-    family: "NotoSans",
-    fonts: [
-      { src: `${window.location.origin}/fonts/NotoSans-Regular.ttf`, fontWeight: "normal" },
-      { src: `${window.location.origin}/fonts/NotoSans-Bold.ttf`,    fontWeight: "bold" },
-    ],
-  });
-  Font.registerHyphenationCallback((word) => [word]);
-
-  const days  = Array.isArray(plan.days) ? plan.days : [];
+  const doc   = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const W     = 210;
+  const L     = 14;
+  const R     = W - 14;
   const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
 
-  const S = StyleSheet.create({
-    page:      { fontFamily: "NotoSans", fontSize: 9, color: "#18181b", padding: 36, paddingBottom: 60 },
-    title:     { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 16, color: "#023435", marginBottom: 3 },
-    weekRange: { fontSize: 9, color: "#71717a", marginBottom: 14 },
-    dayWrap:   { marginBottom: 14, borderWidth: 1, borderColor: "#e4e4e7", borderRadius: 4, overflow: "hidden" },
-    dayHdr:    { flexDirection: "row", justifyContent: "space-between", backgroundColor: "#023435", paddingVertical: 5, paddingHorizontal: 8 },
-    dayName:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 10, color: "#fff" },
-    dayDate:   { fontSize: 8, color: "#ffffff99" },
-    dayDur:    { fontSize: 8, color: "#ffffff99" },
-    dayBody:   { padding: 8, backgroundColor: "#fff" },
-    focusBadge:{ alignSelf: "flex-start", borderRadius: 99, paddingHorizontal: 6, paddingVertical: 2, backgroundColor: "#f4f4f5", marginBottom: 4 },
-    focusTxt:  { fontSize: 8, color: "#52525b" },
-    objective: { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, color: "#18181b", marginBottom: 8 },
-    sectionWrap:  { borderRadius: 3, padding: 6, marginBottom: 5 },
-    sectionLabel: { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, textTransform: "uppercase", marginBottom: 3 },
-    sectionText:  { fontSize: 8, lineHeight: 1.5 },
-    stepRow:   { flexDirection: "row", marginBottom: 2 },
-    stepNum:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, width: 14, color: "#107996" },
-    stepText:  { fontSize: 8, flex: 1, lineHeight: 1.4 },
-    tagRow:    { flexDirection: "row", flexWrap: "wrap", marginTop: 3 },
-    tag:       { borderRadius: 99, paddingHorizontal: 5, paddingVertical: 1, marginRight: 3, marginBottom: 2, backgroundColor: "#f4f4f5" },
-    tagTxt:    { fontSize: 7, color: "#52525b" },
-    note:      { fontSize: 7, color: "#a1a1aa", fontStyle: "italic", borderTopWidth: 1, borderTopColor: "#f4f4f5", paddingTop: 4, marginTop: 4 },
-    infoBox:   { borderRadius: 4, padding: 8, marginBottom: 10, borderWidth: 1 },
-    boxTitle:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, marginBottom: 3 },
-    boxText:   { fontSize: 8, lineHeight: 1.5 },
-    footer:    { position: "absolute", bottom: 20, left: 36, right: 36, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: "#e4e4e7", paddingTop: 5 },
-    footTxt:   { fontSize: 7, color: "#a1a1aa" },
-  });
+  // Load NotoSans for Turkish characters
+  const [regResp, boldResp] = await Promise.all([
+    fetch(`${window.location.origin}/fonts/NotoSans-Regular.ttf`),
+    fetch(`${window.location.origin}/fonts/NotoSans-Bold.ttf`),
+  ]);
+  const regBuf  = await regResp.arrayBuffer();
+  const boldBuf = await boldResp.arrayBuffer();
+  const toB64   = (buf: ArrayBuffer) => {
+    let bin = "";
+    new Uint8Array(buf).forEach(b => { bin += String.fromCharCode(b); });
+    return btoa(bin);
+  };
+  doc.addFileToVFS("NotoSans-Regular.ttf", toB64(regBuf));
+  doc.addFileToVFS("NotoSans-Bold.ttf",    toB64(boldBuf));
+  doc.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
+  doc.addFont("NotoSans-Bold.ttf",    "NotoSans", "bold");
 
-  const Doc = () => (
-    <Document title={plan.title} author="LudenLab">
-      <Page size="A4" style={S.page}>
-        <Text style={S.title}>{plan.title}</Text>
-        <Text style={S.weekRange}>
-          {plan.weekRange}{studentName ? ` · ${studentName}` : ""}{plan.sessionsPerWeek ? ` · ${plan.sessionsPerWeek} ders` : ""}{plan.sessionDuration ? ` · ${plan.sessionDuration} dk/ders` : ""}
-        </Text>
+  const days = Array.isArray(plan.days) ? plan.days : [];
 
-        {plan.studentSummary ? (
-          <View style={[S.infoBox, { backgroundColor: "#f9fafb", borderColor: "#e4e4e7", marginBottom: 12 }]}>
-            <Text style={[S.boxTitle, { color: "#374151" }]}>Öğrenci Özeti</Text>
-            <Text style={[S.boxText, { color: "#4b5563" }]}>{plan.studentSummary}</Text>
-          </View>
-        ) : null}
+  // ── Title + header info ──────────────────────────────────────────────────
+  doc.setFont("NotoSans", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor("#023435");
+  doc.text(plan.title, L, 20);
 
-        {days.map((day, di) => (
-          <View key={di} style={S.dayWrap}>
-            <View style={S.dayHdr}>
-              <View>
-                <Text style={S.dayName}>{day.dayName}</Text>
-                <Text style={S.dayDate}>{day.date}</Text>
-              </View>
-              <Text style={S.dayDur}>{day.duration}</Text>
-            </View>
-            <View style={S.dayBody}>
-              <View style={S.focusBadge}>
-                <Text style={S.focusTxt}>{day.focusArea}</Text>
-              </View>
-              <Text style={S.objective}>{day.objective}</Text>
+  doc.setFont("NotoSans", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor("#71717a");
+  const meta = [
+    plan.weekRange,
+    studentName ?? "",
+    plan.sessionsPerWeek ? `${plan.sessionsPerWeek} ders/hafta` : "",
+    plan.sessionDuration ? `${plan.sessionDuration} dk/ders` : "",
+  ].filter(Boolean).join("  |  ");
+  doc.text(meta, L, 26);
 
-              {/* Warmup */}
-              <View style={[S.sectionWrap, { backgroundColor: "#eff6ff" }]}>
-                <Text style={[S.sectionLabel, { color: "#1d4ed8" }]}>🌅 Isınma — {day.warmup.duration}</Text>
-                <Text style={S.sectionText}>{day.warmup.activity}</Text>
-                {day.warmup.materials && day.warmup.materials.length > 0 ? (
-                  <View style={S.tagRow}>
-                    {day.warmup.materials.map((m, i) => (
-                      <View key={i} style={S.tag}><Text style={S.tagTxt}>{m}</Text></View>
-                    ))}
-                  </View>
-                ) : null}
-              </View>
+  let y = 32;
 
-              {/* Main work */}
-              <View style={[S.sectionWrap, { backgroundColor: "#fff", borderLeftWidth: 3, borderLeftColor: "#107996" }]}>
-                <Text style={[S.sectionLabel, { color: "#107996" }]}>📚 Ana Çalışma — {day.mainWork.duration}</Text>
-                <Text style={[S.sectionText, { marginBottom: 4 }]}>{day.mainWork.activity}</Text>
-                {day.mainWork.steps && day.mainWork.steps.length > 0
-                  ? day.mainWork.steps.map((step, si) => (
-                      <View key={si} style={S.stepRow}>
-                        <Text style={S.stepNum}>{si + 1}.</Text>
-                        <Text style={S.stepText}>{step}</Text>
-                      </View>
-                    ))
-                  : null}
-                {day.mainWork.targetGoals && day.mainWork.targetGoals.length > 0 ? (
-                  <View style={S.tagRow}>
-                    {day.mainWork.targetGoals.map((g, i) => (
-                      <View key={i} style={[S.tag, { backgroundColor: "#023435" + "15" }]}>
-                        <Text style={[S.tagTxt, { color: "#023435" }]}>🎯 {g}</Text>
-                      </View>
-                    ))}
-                  </View>
-                ) : null}
-                {day.mainWork.materials && day.mainWork.materials.length > 0 ? (
-                  <View style={S.tagRow}>
-                    {day.mainWork.materials.map((m, i) => (
-                      <View key={i} style={S.tag}><Text style={S.tagTxt}>{m}</Text></View>
-                    ))}
-                  </View>
-                ) : null}
-              </View>
+  // ── Day sections ─────────────────────────────────────────────────────────
+  for (let di = 0; di < days.length; di++) {
+    const day = days[di];
 
-              {/* Closing */}
-              <View style={[S.sectionWrap, { backgroundColor: "#f0fdf4" }]}>
-                <Text style={[S.sectionLabel, { color: "#16a34a" }]}>🎯 Kapanış — {day.closing.duration}</Text>
-                <Text style={S.sectionText}>{day.closing.activity}</Text>
-              </View>
+    // Check page space — if less than 60mm left, add a new page
+    if (y > 240) {
+      doc.addPage();
+      y = 16;
+    }
 
-              {day.notes ? <Text style={S.note}>{day.notes}</Text> : null}
-            </View>
-          </View>
-        ))}
+    // Day heading bar
+    doc.setFillColor("#023435");
+    doc.roundedRect(L, y, R - L, 8, 1.5, 1.5, "F");
+    doc.setFont("NotoSans", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor("#ffffff");
+    doc.text(`${day.dayNumber}. GUN — ${day.dayName}, ${day.date}`, L + 3, y + 5.5);
+    doc.setFont("NotoSans", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor("#ffffff99" as unknown as string);
+    doc.text(day.duration, R - 3, y + 5.5, { align: "right" });
+    y += 10;
 
-        {plan.weeklyGoal ? (
-          <View style={[S.infoBox, { backgroundColor: "#fff7ed", borderColor: "#fed7aa" }]}>
-            <Text style={[S.boxTitle, { color: "#c2410c" }]}>Haftalık Hedef</Text>
-            <Text style={[S.boxText, { color: "#7c2d12" }]}>{plan.weeklyGoal}</Text>
-          </View>
-        ) : null}
+    // Focus + objective
+    doc.setFont("NotoSans", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor("#52525b");
+    doc.text(`Odak: ${day.focusArea}`, L, y + 4);
+    y += 5;
+    doc.setFont("NotoSans", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor("#18181b");
+    const objLines = doc.splitTextToSize(day.objective, R - L - 2);
+    doc.text(objLines, L, y + 4);
+    y += objLines.length * 4.5 + 2;
 
-        {plan.materialsNeeded && plan.materialsNeeded.length > 0 ? (
-          <View style={[S.infoBox, { backgroundColor: "#f9fafb", borderColor: "#e4e4e7" }]}>
-            <Text style={[S.boxTitle, { color: "#374151" }]}>Haftalık Materyaller</Text>
-            <Text style={[S.boxText, { color: "#4b5563" }]}>{plan.materialsNeeded.join(" · ")}</Text>
-          </View>
-        ) : null}
+    // Activity table
+    const mainSteps = day.mainWork.steps?.join("; ") ?? "";
+    const mainText  = mainSteps ? `${day.mainWork.activity}\n${mainSteps}` : day.mainWork.activity;
 
-        {plan.parentCommunication ? (
-          <View style={[S.infoBox, { backgroundColor: "#eff6ff", borderColor: "#bfdbfe" }]}>
-            <Text style={[S.boxTitle, { color: "#1e40af" }]}>Veli Bilgilendirmesi</Text>
-            <Text style={[S.boxText, { color: "#1e3a8a" }]}>{plan.parentCommunication}</Text>
-          </View>
-        ) : null}
+    autoTable(doc, {
+      head: [["Bolum", "Aktivite", "Sure"]],
+      body: [
+        ["Isinma",      day.warmup.activity,  day.warmup.duration],
+        ["Ana Calisma", mainText,              day.mainWork.duration],
+        ["Kapanis",     day.closing.activity,  day.closing.duration],
+      ],
+      startY: y,
+      margin:  { left: L, right: 14 },
+      styles:  { font: "NotoSans", fontSize: 8.5, cellPadding: 2.5, textColor: [24, 24, 27], overflow: "linebreak" },
+      headStyles: { fillColor: [2, 52, 53], textColor: 255, fontStyle: "bold", fontSize: 8 },
+      columnStyles: { 0: { cellWidth: 28, fontStyle: "bold" }, 2: { cellWidth: 20, halign: "center" } },
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 2;
 
-        {plan.expertNotes ? (
-          <View style={[S.infoBox, { backgroundColor: "#fffbeb", borderColor: "#fde68a" }]}>
-            <Text style={[S.boxTitle, { color: "#92400e" }]}>Uzman Notları</Text>
-            <Text style={[S.boxText, { color: "#78350f" }]}>{plan.expertNotes}</Text>
-          </View>
-        ) : null}
+    // Materials (if any)
+    const mats = [...(day.warmup.materials ?? []), ...(day.mainWork.materials ?? [])];
+    if (mats.length > 0) {
+      doc.setFont("NotoSans", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor("#52525b");
+      const matText = `Materyaller: ${mats.join(", ")}`;
+      const matLines = doc.splitTextToSize(matText, R - L - 2);
+      doc.text(matLines, L, y + 3.5);
+      y += matLines.length * 3.8 + 1;
+    }
 
-        {plan.nextWeekSuggestion ? (
-          <View style={[S.infoBox, { backgroundColor: "#f9fafb", borderColor: "#e4e4e7" }]}>
-            <Text style={[S.boxTitle, { color: "#374151" }]}>Gelecek Hafta Önerisi</Text>
-            <Text style={[S.boxText, { color: "#4b5563" }]}>{plan.nextWeekSuggestion}</Text>
-          </View>
-        ) : null}
+    // Day note
+    if (day.notes) {
+      doc.setFont("NotoSans", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor("#a1a1aa");
+      const noteLines = doc.splitTextToSize(`Not: ${day.notes}`, R - L - 2);
+      doc.text(noteLines, L, y + 3.5);
+      y += noteLines.length * 3.8 + 1;
+    }
 
-        <View style={S.footer} fixed>
-          <Text style={S.footTxt}>LudenLab — ludenlab.com</Text>
-          <Text style={S.footTxt}>{today}</Text>
-        </View>
-      </Page>
-    </Document>
-  );
+    // Separator line between days
+    if (di < days.length - 1) {
+      doc.setDrawColor("#e4e4e7");
+      doc.line(L, y + 2, R, y + 2);
+      y += 6;
+    } else {
+      y += 4;
+    }
+  }
 
-  const blob = await pdf(<Doc />).toBlob();
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement("a");
-  a.href     = url;
-  a.download = `${plan.title.replace(/\s+/g, "_")}.pdf`;
-  a.click();
-  URL.revokeObjectURL(url);
+  // ── Footer sections ───────────────────────────────────────────────────────
+  const addSection = (title: string, text: string, fillRgb: [number,number,number], titleColor: string) => {
+    if (y > 255) { doc.addPage(); y = 16; }
+    doc.setFillColor(...fillRgb);
+    doc.roundedRect(L, y, R - L, 5, 1, 1, "F");
+    doc.setFont("NotoSans", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(titleColor);
+    doc.text(title, L + 3, y + 3.5);
+    y += 7;
+    doc.setFont("NotoSans", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor("#18181b");
+    const lines = doc.splitTextToSize(text, R - L - 2);
+    doc.text(lines, L, y);
+    y += lines.length * 4.2 + 5;
+  };
+
+  if (plan.weeklyGoal)            addSection("Haftalik Hedef",      plan.weeklyGoal,                    [255, 247, 237], "#c2410c");
+  if (plan.materialsNeeded?.length) addSection("Gerekli Materyaller", plan.materialsNeeded.join(", "), [249, 250, 251], "#374151");
+  if (plan.parentCommunication)   addSection("Veli Bilgilendirme",  plan.parentCommunication,           [239, 246, 255], "#1e40af");
+
+  // ── PDF footer ────────────────────────────────────────────────────────────
+  const pageCount = doc.getNumberOfPages();
+  for (let p = 1; p <= pageCount; p++) {
+    doc.setPage(p);
+    doc.setDrawColor("#e4e4e7");
+    doc.line(L, 285, R, 285);
+    doc.setFont("NotoSans", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor("#a1a1aa");
+    doc.text("LudenLab — ludenlab.com", L, 290);
+    doc.text(today, R, 290, { align: "right" });
+  }
+
+  doc.save(`${plan.title.replace(/\s+/g, "_")}.pdf`);
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
