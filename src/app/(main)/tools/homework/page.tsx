@@ -255,10 +255,11 @@ async function downloadHomeworkPDF(hw: HomeworkContent, studentName?: string) {
     intro:     { backgroundColor: "#f4f4f5", borderRadius: 4, padding: 10, marginBottom: 14 },
     introText: { fontSize: 10, lineHeight: 1.6, color: "#3f3f46" },
     matItem:   { fontSize: 9, color: "#3f3f46", marginBottom: 3 },
-    stepRow:   { flexDirection: "row", marginBottom: 10, alignItems: "flex-start" },
+    stepWrap:  { marginBottom: 12 },
+    stepRow:   { flexDirection: "row" },
     stepNum:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 10, color: "#107996", width: 22 },
     stepText:  { flex: 1, fontSize: 10, lineHeight: 1.6, color: "#3f3f46" },
-    stepTip:   { fontSize: 8, color: "#a1a1aa", marginTop: 3, paddingLeft: 4, borderLeftWidth: 2, borderLeftColor: "#d4d4d8" },
+    stepTip:   { fontSize: 8, color: "#a1a1aa", marginTop: 4, marginLeft: 22, paddingLeft: 6, borderLeftWidth: 2, borderLeftColor: "#d4d4d8" },
     box:       { borderRadius: 4, padding: 10, marginBottom: 10 },
     boxTitle:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, marginBottom: 4 },
     boxText:   { fontSize: 9, lineHeight: 1.6 },
@@ -310,12 +311,12 @@ async function downloadHomeworkPDF(hw: HomeworkContent, studentName?: string) {
           <View style={{ marginBottom: 12 }}>
             <Text style={S.sectionHdr}>Adımlar</Text>
             {steps.map((step, i) => (
-              <View key={i} style={S.stepRow}>
-                <Text style={S.stepNum}>{step.stepNumber ?? i + 1}.</Text>
-                <View style={{ flex: 1 }}>
+              <View key={i} style={S.stepWrap}>
+                <View style={S.stepRow}>
+                  <Text style={S.stepNum}>{step.stepNumber ?? i + 1}.</Text>
                   <Text style={S.stepText}>{step.instruction ?? ""}</Text>
-                  {step.tip ? <Text style={S.stepTip}>İpucu: {step.tip}</Text> : null}
                 </View>
+                {step.tip ? <Text style={S.stepTip}>İpucu: {step.tip}</Text> : null}
               </View>
             ))}
           </View>
