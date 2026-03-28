@@ -21,6 +21,7 @@ import {
   ClipboardList,
   NotebookPen,
   Puzzle,
+  Gamepad2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,7 @@ const TOOLS_SUB = [
   { title: "Ev Ödevi",       href: "/tools/homework",          Icon: ClipboardList },
   { title: "Oturum Özeti",   href: "/tools/session-summary",  Icon: NotebookPen   },
   { title: "Kelime Eşleştirme", href: "/tools/matching-game", Icon: Puzzle        },
+  { title: "Sesletim Aktivitesi", href: "/tools/phonation",  Icon: Gamepad2      },
 ];
 
 export const Sidebar = () => {

@@ -11,6 +11,7 @@ import { ArticulationView, type ArticulationContent } from "@/components/cards/A
 import { HomeworkView, type HomeworkContent } from "@/components/cards/HomeworkView";
 import { SessionSummaryView, type SessionSummaryContent } from "@/components/cards/SessionSummaryView";
 import { MatchingGameView, type MatchingGameContent } from "@/components/cards/MatchingGameView";
+import { PhonationView, type PhonationActivityContent } from "@/components/cards/PhonationView";
 import type { GeneratedCard } from "@/lib/prompts";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +44,7 @@ const TOOL_TYPE_BADGE: Record<string, { label: string; cls: string }> = {
   HOMEWORK_MATERIAL:  { label: "Ev Ödevi Materyali",  cls: "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30" },
   SESSION_SUMMARY:    { label: "Oturum Özeti",        cls: "bg-purple-50 text-purple-700 border-purple-200" },
   MATCHING_GAME:      { label: "Kelime Eşleştirme",   cls: "bg-[#107996]/10 text-[#107996] border-[#107996]/20" },
+  PHONATION_ACTIVITY: { label: "Sesletim Aktivitesi", cls: "bg-green-50 text-green-700 border-green-200" },
 };
 
 async function downloadSocialStoryPDF(card: CardRecord) {
@@ -381,6 +383,202 @@ async function downloadSessionSummaryParentPDF(card: CardRecord) {
   const a    = document.createElement("a");
   a.href     = url;
   a.download = `Veli_Notu_${(card.student?.name ?? "ogrenci").replace(/\s+/g, "_")}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function downloadPhonationPDF(card: CardRecord) {
+  const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
+  Font.register({
+    family: "NotoSans",
+    fonts: [
+      { src: `${window.location.origin}/fonts/NotoSans-Regular.ttf`, fontWeight: "normal" },
+      { src: `${window.location.origin}/fonts/NotoSans-Bold.ttf`,    fontWeight: "bold" },
+    ],
+  });
+
+  const activity = card.content as Record<string, unknown>;
+  const sounds   = Array.isArray(activity.targetSounds) ? (activity.targetSounds as string[]) : [];
+  const today    = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+
+  const ACTIVITY_TYPE_LABEL: Record<string, string> = {
+    sound_hunt: "Ses Avı", bingo: "Tombala", snakes_ladders: "Yılan Merdiven",
+    word_chain: "Kelime Zinciri", sound_maze: "Ses Labirenti",
+  };
+
+  const S = StyleSheet.create({
+    page:     { fontFamily: "NotoSans", fontSize: 10, color: "#18181b", padding: 44, paddingBottom: 70 },
+    title:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 18, color: "#023435", marginBottom: 6 },
+    infoRow:  { flexDirection: "row", flexWrap: "wrap", marginBottom: 16, borderBottomWidth: 1, borderBottomColor: "#e4e4e7", paddingBottom: 10 },
+    badge:    { fontSize: 8, color: "#52525b", backgroundColor: "#f4f4f5", borderRadius: 99, paddingHorizontal: 8, paddingVertical: 3, marginRight: 6, marginBottom: 4 },
+    sHdr:     { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, color: "#71717a", marginBottom: 6 },
+    gridWrap: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 12 },
+    gridCell: { width: "18%", borderWidth: 1, borderColor: "#e4e4e7", borderRadius: 4, padding: 6, alignItems: "center", justifyContent: "center", minHeight: 40 },
+    gridTxt:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, textAlign: "center" },
+    tHdr:     { flexDirection: "row", backgroundColor: "#f4f4f5", paddingVertical: 6, paddingHorizontal: 8, marginBottom: 2 },
+    tHdrNum:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#a1a1aa", width: 24 },
+    tHdrCell: { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#71717a", flex: 1 },
+    tRow:     { flexDirection: "row", paddingVertical: 5, paddingHorizontal: 8, borderBottomWidth: 1, borderBottomColor: "#f4f4f5" },
+    tNum:     { fontSize: 9, color: "#a1a1aa", width: 24 },
+    tCell:    { fontSize: 9, color: "#18181b", flex: 1 },
+    chainRow: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
+    chainNum: { fontSize: 8, color: "#a1a1aa", width: 18 },
+    chainWrd: { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 10, color: "#6d28d9" },
+    chainCon: { fontSize: 8, color: "#8b5cf6", marginLeft: 8 },
+    box:      { borderRadius: 4, padding: 10, marginBottom: 8, marginTop: 10 },
+    boxTitle: { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, marginBottom: 4 },
+    boxText:  { fontSize: 9, lineHeight: 1.6 },
+    footer:   { position: "absolute", bottom: 28, left: 44, right: 44, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: "#e4e4e7", paddingTop: 6 },
+    footTxt:  { fontSize: 8, color: "#a1a1aa" },
+  });
+
+  const aType = activity.activityType as string;
+
+  const renderBody = () => {
+    if (aType === "sound_hunt") {
+      const objects = Array.isArray(activity.objects) ? (activity.objects as { name: string; hasTargetSound: boolean }[]) : [];
+      return (
+        <View>
+          {activity.scene ? (
+            <View style={[S.box, { backgroundColor: "#f0f9ff", borderWidth: 1, borderColor: "#bae6fd" }]}>
+              <Text style={[S.boxTitle, { color: "#0369a1" }]}>Sahne</Text>
+              <Text style={[S.boxText, { color: "#0c4a6e" }]}>{activity.scene as string}</Text>
+            </View>
+          ) : null}
+          <Text style={S.sHdr}>Nesneler ({objects.length})</Text>
+          <View style={S.gridWrap}>
+            {objects.map((o, i) => (
+              <View key={i} style={S.gridCell}>
+                <Text style={S.gridTxt}>{o.name}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={[S.box, { backgroundColor: "#f0f9ff", borderWidth: 1, borderColor: "#bae6fd" }]}>
+            <Text style={[S.boxTitle, { color: "#0369a1" }]}>Cevap Anahtarı</Text>
+            <Text style={[S.boxText, { color: "#0c4a6e" }]}>{objects.filter((o) => o.hasTargetSound).map((o) => o.name).join(" · ")}</Text>
+          </View>
+        </View>
+      );
+    }
+    if (aType === "bingo") {
+      const grid = activity.grid as { rows: number; cols: number; cells: { word: string }[] } | undefined;
+      if (!grid) return null;
+      return (
+        <View>
+          <Text style={S.sHdr}>Tombala Kartı — {grid.rows}×{grid.cols}</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 3, marginBottom: 10 }}>
+            {grid.cells.map((cell, i) => (
+              <View key={i} style={{ width: `${Math.floor(100 / grid.cols) - 1}%`, borderWidth: 2, borderColor: "#f59e0b", borderRadius: 4, padding: 6, alignItems: "center", justifyContent: "center", minHeight: 44, backgroundColor: "#fffbeb" }}>
+                <Text style={{ fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, textAlign: "center", color: "#92400e" }}>{cell.word}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      );
+    }
+    if (aType === "snakes_ladders") {
+      const grid = activity.grid as { cells: { position: number; word: string; isLadder?: boolean; isSnake?: boolean }[] } | undefined;
+      if (!grid) return null;
+      return (
+        <View>
+          <Text style={S.sHdr}>Oyun Tahtası ({grid.cells.length} kare)</Text>
+          <View style={S.tHdr}>
+            <Text style={S.tHdrNum}>#</Text>
+            <Text style={S.tHdrCell}>Kelime</Text>
+            <Text style={[S.tHdrCell, { flex: 0, width: 80 }]}>Tür</Text>
+          </View>
+          {grid.cells.map((cell, i) => (
+            <View key={i} style={[S.tRow, { backgroundColor: i % 2 === 1 ? "#fafafa" : "#fff" }]}>
+              <Text style={S.tNum}>{cell.position}</Text>
+              <Text style={S.tCell}>{cell.word}</Text>
+              <Text style={[S.tCell, { flex: 0, width: 80, color: cell.isLadder ? "#16a34a" : cell.isSnake ? "#dc2626" : "#a1a1aa" }]}>
+                {cell.isLadder ? "↑ Merdiven" : cell.isSnake ? "↓ Yılan" : "Normal"}
+              </Text>
+            </View>
+          ))}
+        </View>
+      );
+    }
+    if (aType === "word_chain") {
+      const chain = Array.isArray(activity.wordChain) ? (activity.wordChain as { order: number; word: string; connection?: string }[]) : [];
+      return (
+        <View>
+          <Text style={S.sHdr}>Kelime Zinciri ({chain.length} kelime)</Text>
+          {chain.map((item, i) => (
+            <View key={i} style={S.chainRow}>
+              <Text style={S.chainNum}>{item.order}.</Text>
+              <Text style={S.chainWrd}>{item.word}</Text>
+              {item.connection ? <Text style={S.chainCon}>{item.connection}</Text> : null}
+            </View>
+          ))}
+        </View>
+      );
+    }
+    if (aType === "sound_maze") {
+      const grid = activity.grid as { cells: { word: string; hasTargetSound: boolean }[] } | undefined;
+      if (!grid) return null;
+      const correct = grid.cells.filter((c) => c.hasTargetSound);
+      const wrong   = grid.cells.filter((c) => !c.hasTargetSound);
+      return (
+        <View>
+          <Text style={S.sHdr}>Labirent ({grid.cells.length} kelime)</Text>
+          <View style={[S.box, { backgroundColor: "#f0fdf4", borderWidth: 1, borderColor: "#86efac" }]}>
+            <Text style={[S.boxTitle, { color: "#166534" }]}>✓ Doğru Yol</Text>
+            <Text style={[S.boxText, { color: "#14532d" }]}>{correct.map((c) => c.word).join(" → ")}</Text>
+          </View>
+          <View style={[S.box, { backgroundColor: "#fef2f2", borderWidth: 1, borderColor: "#fca5a5" }]}>
+            <Text style={[S.boxTitle, { color: "#991b1b" }]}>✗ Yanlış Yollar</Text>
+            <Text style={[S.boxText, { color: "#7f1d1d" }]}>{wrong.map((c) => c.word).join(" · ")}</Text>
+          </View>
+        </View>
+      );
+    }
+    return null;
+  };
+
+  const Doc = () => (
+    <Document title={card.title} author="LudenLab">
+      <Page size="A4" style={S.page}>
+        <Text style={S.title}>{card.title}</Text>
+        <View style={S.infoRow}>
+          {card.student?.name ? <Text style={S.badge}>Öğrenci: {card.student.name}</Text> : null}
+          <Text style={S.badge}>{ACTIVITY_TYPE_LABEL[aType] ?? aType}</Text>
+          <Text style={S.badge}>{activity.difficulty === "easy" ? "Kolay" : activity.difficulty === "medium" ? "Orta" : "Zor"}</Text>
+          {sounds.map((s, i) => <Text key={i} style={S.badge}>{s}</Text>)}
+          {activity.theme ? <Text style={S.badge}>{activity.theme as string}</Text> : null}
+        </View>
+        {renderBody()}
+        {activity.instructions ? (
+          <View style={[S.box, { backgroundColor: "#f9fafb", borderWidth: 1, borderColor: "#e4e4e7" }]}>
+            <Text style={[S.boxTitle, { color: "#374151" }]}>Nasıl Oynanır</Text>
+            <Text style={[S.boxText, { color: "#4b5563" }]}>{activity.instructions as string}</Text>
+          </View>
+        ) : null}
+        {activity.adaptations ? (
+          <View style={[S.box, { backgroundColor: "#f9fafb", borderWidth: 1, borderColor: "#e4e4e7" }]}>
+            <Text style={[S.boxTitle, { color: "#374151" }]}>Uyarlama Önerileri</Text>
+            <Text style={[S.boxText, { color: "#4b5563" }]}>{activity.adaptations as string}</Text>
+          </View>
+        ) : null}
+        {activity.expertNotes ? (
+          <View style={[S.box, { backgroundColor: "#fffbeb", borderWidth: 1, borderColor: "#fde68a" }]}>
+            <Text style={[S.boxTitle, { color: "#92400e" }]}>Uzman Notları</Text>
+            <Text style={[S.boxText, { color: "#78350f" }]}>{activity.expertNotes as string}</Text>
+          </View>
+        ) : null}
+        <View style={S.footer} fixed>
+          <Text style={S.footTxt}>LudenLab — ludenlab.com</Text>
+          <Text style={S.footTxt}>{today}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+
+  const blob = await pdf(<Doc />).toBlob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `${card.title.replace(/\s+/g, "_")}_sesletim.pdf`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -737,6 +935,8 @@ export default function CardDetailPage({
         await downloadSessionSummaryFullPDF(card);
       } else if (tt === "MATCHING_GAME") {
         await downloadMatchingGameTablePDF(card);
+      } else if (tt === "PHONATION_ACTIVITY") {
+        await downloadPhonationPDF(card);
       } else {
         // LEARNING_CARD — mevcut CardPreview PDF'i kullanılır (aşağıda buton var)
         return;
@@ -870,6 +1070,8 @@ export default function CardDetailPage({
             <SessionSummaryView summary={card.content as unknown as SessionSummaryContent} />
           ) : toolType === "MATCHING_GAME" ? (
             <MatchingGameView game={card.content as unknown as MatchingGameContent} />
+          ) : toolType === "PHONATION_ACTIVITY" ? (
+            <PhonationView activity={card.content as unknown as PhonationActivityContent} />
           ) : (
             (() => {
               const raw = card.content;
@@ -919,7 +1121,7 @@ export default function CardDetailPage({
                 </button>
               </>
             )}
-            {(toolType === "SOCIAL_STORY" || toolType === "ARTICULATION_DRILL" || toolType === "HOMEWORK_MATERIAL") && (
+            {(toolType === "SOCIAL_STORY" || toolType === "ARTICULATION_DRILL" || toolType === "HOMEWORK_MATERIAL" || toolType === "PHONATION_ACTIVITY") && (
               <button
                 onClick={handleDownloadPDF}
                 disabled={downloading}

@@ -30,7 +30,7 @@ interface CardItem {
   _count: { assignments: number };
 }
 
-type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation" | "homework" | "session_summary" | "matching_game";
+type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation" | "homework" | "session_summary" | "matching_game" | "phonation";
 
 const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }[] = [
   { value: "all",             label: "Tümü" },
@@ -40,6 +40,7 @@ const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }
   { value: "homework",        label: "Ev Ödevi",           href: "/tools/homework" },
   { value: "session_summary", label: "Oturum Özeti",      href: "/tools/session-summary" },
   { value: "matching_game",   label: "Kelime Eşleştirme", href: "/tools/matching-game" },
+  { value: "phonation",       label: "Sesletim Aktivitesi", href: "/tools/phonation" },
 ];
 
 const TOOL_TYPE_BADGE: Record<string, string> = {
@@ -49,6 +50,7 @@ const TOOL_TYPE_BADGE: Record<string, string> = {
   HOMEWORK_MATERIAL:  "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
   SESSION_SUMMARY:    "bg-purple-50 text-purple-700 border-purple-200",
   MATCHING_GAME:      "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
+  PHONATION_ACTIVITY: "bg-green-50 text-green-700 border-green-200",
 };
 
 const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
@@ -58,6 +60,7 @@ const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
   HOMEWORK_MATERIAL:  "Ev Ödevi",
   SESSION_SUMMARY:    "Oturum Özeti",
   MATCHING_GAME:      "Kelime Eşleştirme",
+  PHONATION_ACTIVITY: "Sesletim Aktivitesi",
 };
 
 function resolveToolType(toolType: string | null): string {
@@ -215,6 +218,30 @@ const MG_DIFFICULTY_OPTIONS = [
   { value: "hard",   label: "Zor" },
 ];
 
+// ── Sesletim Aktivitesi filtre seçenekleri ────────────────────────────────────
+const PA_ACTIVITY_TYPE_OPTIONS = [
+  { value: "all",            label: "Tümü" },
+  { value: "sound_hunt",     label: "Ses Avı" },
+  { value: "bingo",          label: "Tombala" },
+  { value: "snakes_ladders", label: "Yılan Merdiven" },
+  { value: "word_chain",     label: "Kelime Zinciri" },
+  { value: "sound_maze",     label: "Ses Labirenti" },
+];
+
+const PA_DIFFICULTY_OPTIONS = [
+  { value: "all",    label: "Tümü" },
+  { value: "easy",   label: "Kolay" },
+  { value: "medium", label: "Orta" },
+  { value: "hard",   label: "Zor" },
+];
+
+const PA_SOUND_OPTIONS = [
+  "/s/", "/z/", "/ş/", "/ç/", "/c/", "/j/",
+  "/r/", "/l/", "/n/", "/m/",
+  "/k/", "/g/", "/t/", "/d/", "/p/", "/b/",
+  "/f/", "/v/", "/h/", "/y/",
+];
+
 const SELECT_CLS =
   "rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#023435]/30 cursor-pointer";
 
@@ -335,6 +362,10 @@ export default function CardsPage() {
   // Filtreler — kelime eşleştirme
   const [filterMgMatchType,  setFilterMgMatchType]  = useState("all");
   const [filterMgDifficulty, setFilterMgDifficulty] = useState("all");
+  // Filtreler — sesletim aktivitesi
+  const [filterPaType,       setFilterPaType]       = useState("all");
+  const [filterPaDifficulty, setFilterPaDifficulty] = useState("all");
+  const [filterPaSounds,     setFilterPaSounds]     = useState<string[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -390,7 +421,10 @@ export default function CardsPage() {
     filterSsType !== "all" ||
     filterSsPerformance !== "all" ||
     filterMgMatchType !== "all" ||
-    filterMgDifficulty !== "all";
+    filterMgDifficulty !== "all" ||
+    filterPaType !== "all" ||
+    filterPaDifficulty !== "all" ||
+    filterPaSounds.length > 0;
 
   function clearFilters() {
     setFilterStudent("");
@@ -411,6 +445,9 @@ export default function CardsPage() {
     setFilterSsPerformance("all");
     setFilterMgMatchType("all");
     setFilterMgDifficulty("all");
+    setFilterPaType("all");
+    setFilterPaDifficulty("all");
+    setFilterPaSounds([]);
   }
 
   // goalId → curriculumId lookup
@@ -445,6 +482,7 @@ export default function CardsPage() {
         if (filterToolType === "homework")       return tt === "HOMEWORK_MATERIAL";
         if (filterToolType === "session_summary") return tt === "SESSION_SUMMARY";
         if (filterToolType === "matching_game")   return tt === "MATCHING_GAME";
+        if (filterToolType === "phonation")       return tt === "PHONATION_ACTIVITY";
         return true;
       });
     }
@@ -516,6 +554,23 @@ export default function CardsPage() {
       }
     }
 
+    // Sesletim aktivitesi filtreleri
+    if (filterToolType === "phonation") {
+      if (filterPaType !== "all") {
+        list = list.filter((c) => (c.content?.activityType as string | undefined) === filterPaType);
+      }
+      if (filterPaDifficulty !== "all") {
+        list = list.filter((c) => (c.content?.difficulty as string | undefined) === filterPaDifficulty);
+      }
+      if (filterPaSounds.length > 0) {
+        list = list.filter((c) => {
+          const sounds = c.content?.targetSounds as string[] | undefined;
+          if (!sounds) return false;
+          return filterPaSounds.some((fs) => sounds.includes(fs));
+        });
+      }
+    }
+
     // Kelime eşleştirme filtreleri
     if (filterToolType === "matching_game") {
       if (filterMgMatchType !== "all") {
@@ -566,6 +621,7 @@ export default function CardsPage() {
     filterHwArea, filterHwMaterial, filterHwDuration,
     filterSsType, filterSsPerformance,
     filterMgMatchType, filterMgDifficulty,
+    filterPaType, filterPaDifficulty, filterPaSounds,
     sortBy,
   ]);
 
@@ -716,6 +772,23 @@ export default function CardsPage() {
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Sonuç</span>
                     <PillGroup options={SS_PERFORMANCE_OPTIONS} value={filterSsPerformance} onChange={setFilterSsPerformance} activeClass="border-purple-400 bg-purple-50 text-purple-700" />
+                  </div>
+                </div>
+              )}
+
+              {filterToolType === "phonation" && (
+                <div className="border-t border-zinc-100 pt-3 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tür</span>
+                    <PillGroup options={PA_ACTIVITY_TYPE_OPTIONS} value={filterPaType} onChange={setFilterPaType} activeClass="border-green-400 bg-green-50 text-green-700" />
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0 mt-1.5">Hedef Ses</span>
+                    <MultiPillGroup options={PA_SOUND_OPTIONS} values={filterPaSounds} onChange={setFilterPaSounds} activeClass="border-green-400 bg-green-50 text-green-700" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Zorluk</span>
+                    <PillGroup options={PA_DIFFICULTY_OPTIONS} value={filterPaDifficulty} onChange={setFilterPaDifficulty} activeClass="border-green-400 bg-green-50 text-green-700" />
                   </div>
                 </div>
               )}
