@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
           ageGroup: true,
           createdAt: true,
           curriculumGoalIds: true,
+          content: true,
           student: { select: { id: true, name: true } },
           _count: { select: { assignments: true } },
         },

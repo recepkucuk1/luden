@@ -156,6 +156,9 @@ Bu öğrenci için uygun artikülasyon alıştırma materyali üret.`;
       throw new Error("JSON parse hatası");
     }
 
+    // Filtreleme için tema metadata'sını content'e ekle
+    if (theme && theme !== "none") drillContent.theme = theme;
+
     // Kaydet + kredi düş (atomik)
     const dbCard = await prisma.$transaction(async (tx) => {
       const fresh = await tx.therapist.findUnique({

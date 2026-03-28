@@ -25,6 +25,7 @@ interface CardItem {
   ageGroup: string;
   createdAt: string;
   curriculumGoalIds: string[];
+  content: Record<string, unknown> | null;
   student: { id: string; name: string } | null;
   _count: { assignments: number };
 }
@@ -87,6 +88,63 @@ const SORT_OPTIONS: { value: SortBy; label: string }[] = [
   { value: "assignments", label: "En çok atanan önce" },
 ];
 
+// ── Sosyal Hikaye filtre seçenekleri ──────────────────────────────────────────
+const SITUATION_OPTIONS = [
+  { value: "all",                       label: "Tümü" },
+  { value: "Sıra bekleme",              label: "Sıra bekleme" },
+  { value: "Selamlaşma",                label: "Selamlaşma" },
+  { value: "Paylaşma",                  label: "Paylaşma" },
+  { value: "Duygularını ifade etme",    label: "Duygularını ifade etme" },
+  { value: "Sınıf kurallarına uyma",    label: "Sınıf kurallarına uyma" },
+  { value: "Arkadaş edinme",            label: "Arkadaş edinme" },
+  { value: "Çatışma çözme",             label: "Çatışma çözme" },
+  { value: "Özür dileme",               label: "Özür dileme" },
+  { value: "Yardım isteme",             label: "Yardım isteme" },
+];
+
+const ENVIRONMENT_OPTIONS = [
+  { value: "all",                    label: "Tümü" },
+  { value: "Okul",                   label: "Okul" },
+  { value: "Ev",                     label: "Ev" },
+  { value: "Park",                   label: "Park" },
+  { value: "Market",                 label: "Market" },
+  { value: "Hastane",                label: "Hastane" },
+  { value: "Rehabilitasyon merkezi", label: "Rehabilitasyon merkezi" },
+];
+
+const STORY_LENGTH_OPTIONS = [
+  { value: "all",    label: "Tümü" },
+  { value: "short",  label: "Kısa" },
+  { value: "medium", label: "Orta" },
+  { value: "long",   label: "Uzun" },
+];
+
+// ── Artikülasyon filtre seçenekleri ───────────────────────────────────────────
+const SOUND_OPTIONS = [
+  "/s/", "/z/", "/ş/", "/ç/", "/r/", "/l/", "/k/", "/g/",
+  "/t/", "/d/", "/n/", "/m/", "/p/", "/b/", "/f/", "/v/", "/h/",
+];
+
+const ARTICULATON_LEVEL_OPTIONS = [
+  { value: "all",        label: "Tümü" },
+  { value: "isolated",   label: "İzole Ses" },
+  { value: "syllable",   label: "Hece" },
+  { value: "word",       label: "Kelime" },
+  { value: "sentence",   label: "Cümle" },
+  { value: "contextual", label: "Bağlam" },
+];
+
+const THEME_OPTIONS = [
+  { value: "all",              label: "Tümü" },
+  { value: "Hayvanlar",        label: "Hayvanlar" },
+  { value: "Yiyecekler",       label: "Yiyecekler" },
+  { value: "Mevsimler ve hava",label: "Mevsimler" },
+  { value: "Meslekler",        label: "Meslekler" },
+  { value: "Okul eşyaları",    label: "Okul eşyaları" },
+  { value: "Vücut bölümleri",  label: "Vücut bölümleri" },
+  { value: "Spor ve oyunlar",  label: "Spor ve oyunlar" },
+];
+
 const SELECT_CLS =
   "rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#023435]/30 cursor-pointer";
 
@@ -122,6 +180,52 @@ function PillGroup({
   );
 }
 
+function MultiPillGroup({
+  options,
+  values,
+  onChange,
+  activeClass,
+}: {
+  options: string[];
+  values: string[];
+  onChange: (v: string[]) => void;
+  activeClass: string;
+}) {
+  const toggle = (v: string) =>
+    onChange(values.includes(v) ? values.filter((x) => x !== v) : [...values, v]);
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      <button
+        type="button"
+        onClick={() => onChange([])}
+        className={cn(
+          "rounded-lg px-3 py-1.5 text-xs font-medium transition-all border",
+          values.length === 0
+            ? activeClass
+            : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-700 hover:border-zinc-300"
+        )}
+      >
+        Tümü
+      </button>
+      {options.map((o) => (
+        <button
+          key={o}
+          type="button"
+          onClick={() => toggle(o)}
+          className={cn(
+            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all border",
+            values.includes(o)
+              ? activeClass
+              : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-700 hover:border-zinc-300"
+          )}
+        >
+          {o}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function CardsPage() {
   const [cards, setCards]         = useState<CardItem[]>([]);
   const [curricula, setCurricula] = useState<Curriculum[]>([]);
@@ -134,13 +238,23 @@ export default function CardsPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
 
-  // Filtreler
+  // Filtreler — ortak
   const [filterToolType,   setFilterToolType]   = useState<ToolTypeFilter>("all");
+  const [filterStudent,    setFilterStudent]    = useState("");
+  const [filterAgeGroup,   setFilterAgeGroup]   = useState("all");
+  const [sortBy, setSortBy] = useState<SortBy>("newest");
+  // Filtreler — öğrenme kartı
   const [filterCategory,   setFilterCategory]   = useState("all");
   const [filterDifficulty, setFilterDifficulty] = useState("all");
-  const [filterAgeGroup,   setFilterAgeGroup]   = useState("all");
   const [filterCurriculum, setFilterCurriculum] = useState("");
-  const [sortBy, setSortBy] = useState<SortBy>("newest");
+  // Filtreler — sosyal hikaye
+  const [filterSituation,    setFilterSituation]    = useState("all");
+  const [filterEnvironment,  setFilterEnvironment]  = useState("all");
+  const [filterStoryLength,  setFilterStoryLength]  = useState("all");
+  // Filtreler — artikülasyon
+  const [filterSounds,  setFilterSounds]  = useState<string[]>([]);
+  const [filterLevel,   setFilterLevel]   = useState("all");
+  const [filterTheme,   setFilterTheme]   = useState("all");
 
   useEffect(() => {
     Promise.all([
@@ -179,26 +293,51 @@ export default function CardsPage() {
   }
 
   const hasActiveFilters =
-    filterToolType !== "all" ||
+    filterStudent !== "" ||
+    filterAgeGroup !== "all" ||
     filterCategory !== "all" ||
     filterDifficulty !== "all" ||
-    filterAgeGroup !== "all" ||
-    filterCurriculum !== "";
+    filterCurriculum !== "" ||
+    filterSituation !== "all" ||
+    filterEnvironment !== "all" ||
+    filterStoryLength !== "all" ||
+    filterSounds.length > 0 ||
+    filterLevel !== "all" ||
+    filterTheme !== "all";
 
   function clearFilters() {
-    setFilterToolType("all");
+    setFilterStudent("");
+    setFilterAgeGroup("all");
     setFilterCategory("all");
     setFilterDifficulty("all");
-    setFilterAgeGroup("all");
     setFilterCurriculum("");
+    setFilterSituation("all");
+    setFilterEnvironment("all");
+    setFilterStoryLength("all");
+    setFilterSounds([]);
+    setFilterLevel("all");
+    setFilterTheme("all");
   }
 
-  // goalId → curriculumId lookup (built from curricula that include goals)
+  // goalId → curriculumId lookup
   const goalToCurriculumId = useMemo(() => {
     const map: Record<string, string> = {};
     curricula.forEach((c) => c.goals?.forEach((g) => { map[g.id] = c.id; }));
     return map;
   }, [curricula]);
+
+  // Kartlardan benzersiz öğrenci listesi
+  const uniqueStudents = useMemo(() => {
+    const seen = new Set<string>();
+    const result: { id: string; name: string }[] = [];
+    cards.forEach((c) => {
+      if (c.student && !seen.has(c.student.id)) {
+        seen.add(c.student.id);
+        result.push(c.student);
+      }
+    });
+    return result.sort((a, b) => a.name.localeCompare(b.name, "tr"));
+  }, [cards]);
 
   const filtered = useMemo(() => {
     let list = [...cards];
@@ -213,12 +352,68 @@ export default function CardsPage() {
       });
     }
 
-    if (filterCategory !== "all")   list = list.filter((c) => c.category === filterCategory);
-    if (filterDifficulty !== "all") list = list.filter((c) => c.difficulty === filterDifficulty);
-    if (filterAgeGroup !== "all")   list = list.filter((c) => c.ageGroup === filterAgeGroup);
-    if (filterCurriculum !== "")    list = list.filter((c) =>
-      c.curriculumGoalIds.some((gId) => goalToCurriculumId[gId] === filterCurriculum)
-    );
+    // Ortak filtreler (tüm araç türleri)
+    if (filterStudent !== "")   list = list.filter((c) => c.student?.id === filterStudent);
+    if (filterAgeGroup !== "all") list = list.filter((c) => c.ageGroup === filterAgeGroup);
+
+    // Öğrenme kartı filtreleri
+    if (filterToolType === "learning") {
+      if (filterCategory !== "all")   list = list.filter((c) => c.category === filterCategory);
+      if (filterDifficulty !== "all") list = list.filter((c) => c.difficulty === filterDifficulty);
+      if (filterCurriculum !== "")    list = list.filter((c) =>
+        c.curriculumGoalIds.some((gId) => goalToCurriculumId[gId] === filterCurriculum)
+      );
+    }
+
+    // Sosyal hikaye filtreleri
+    if (filterToolType === "social_story") {
+      if (filterSituation !== "all") {
+        list = list.filter((c) => {
+          const sit = c.content?.situation as string | undefined;
+          return sit === filterSituation;
+        });
+      }
+      if (filterEnvironment !== "all") {
+        list = list.filter((c) => {
+          const env = c.content?.environment as string | undefined;
+          return env === filterEnvironment;
+        });
+      }
+      if (filterStoryLength !== "all") {
+        list = list.filter((c) => {
+          const stored = c.content?.length as string | undefined;
+          if (stored) return stored === filterStoryLength;
+          // Eski kartlar için cümle sayısına göre tahmin et
+          const cnt = (c.content?.sentences as unknown[] | undefined)?.length ?? 0;
+          if (filterStoryLength === "short")  return cnt <= 5;
+          if (filterStoryLength === "medium") return cnt >= 6 && cnt <= 10;
+          if (filterStoryLength === "long")   return cnt > 10;
+          return true;
+        });
+      }
+    }
+
+    // Artikülasyon filtreleri
+    if (filterToolType === "articulation") {
+      if (filterSounds.length > 0) {
+        list = list.filter((c) => {
+          const sounds = c.content?.targetSounds as string[] | undefined;
+          if (!sounds) return false;
+          return filterSounds.some((fs) =>
+            sounds.some((s) => s.toLowerCase().includes(fs.replace(/\//g, "").toLowerCase()))
+          );
+        });
+      }
+      if (filterLevel !== "all") {
+        list = list.filter((c) => (c.content?.level as string | undefined) === filterLevel);
+      }
+      if (filterTheme !== "all") {
+        list = list.filter((c) => {
+          const theme = c.content?.theme as string | undefined;
+          return theme === filterTheme;
+        });
+      }
+    }
 
     list.sort((a, b) => {
       switch (sortBy) {
@@ -230,7 +425,13 @@ export default function CardsPage() {
       }
     });
     return list;
-  }, [cards, filterCategory, filterDifficulty, filterAgeGroup, filterCurriculum, sortBy, goalToCurriculumId]);
+  }, [
+    cards, filterToolType, filterStudent, filterAgeGroup,
+    filterCategory, filterDifficulty, filterCurriculum, goalToCurriculumId,
+    filterSituation, filterEnvironment, filterStoryLength,
+    filterSounds, filterLevel, filterTheme,
+    sortBy,
+  ]);
 
   async function handleDeleteCard(cardId: string) {
     setDeletingCardId(cardId);
@@ -293,31 +494,27 @@ export default function CardsPage() {
               ))}
             </div>
 
-            {/* ── Filtre + Sıralama ── */}
+            {/* ── Filtre Paneli ── */}
             <div className="mb-6 space-y-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              {/* Kategori */}
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Kategori</span>
-                <PillGroup
-                  options={CATEGORY_OPTIONS}
-                  value={filterCategory}
-                  onChange={setFilterCategory}
-                  activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]"
-                />
-              </div>
 
-              {/* Zorluk */}
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Zorluk</span>
-                <PillGroup
-                  options={DIFFICULTY_OPTIONS}
-                  value={filterDifficulty}
-                  onChange={setFilterDifficulty}
-                  activeClass="border-amber-400 bg-amber-50 text-amber-700"
-                />
-              </div>
+              {/* Ortak: Öğrenci */}
+              {uniqueStudents.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Öğrenci</span>
+                  <select
+                    value={filterStudent}
+                    onChange={(e) => setFilterStudent(e.target.value)}
+                    className={cn(SELECT_CLS, filterStudent !== "" && "border-[#023435] bg-[#023435]/5 text-[#023435]")}
+                  >
+                    <option value="">Tüm öğrenciler</option>
+                    {uniqueStudents.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-              {/* Yaş */}
+              {/* Ortak: Yaş Grubu */}
               <div className="flex items-center gap-3">
                 <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Yaş</span>
                 <PillGroup
@@ -328,49 +525,88 @@ export default function CardsPage() {
                 />
               </div>
 
-              {/* Modül + Sıralama + Temizle */}
-              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-zinc-100">
-                {curricula.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Modül</span>
-                    <select
-                      value={filterCurriculum}
-                      onChange={(e) => setFilterCurriculum(e.target.value)}
-                      className={cn(
-                        SELECT_CLS,
-                        filterCurriculum !== "" && "border-teal-400 bg-teal-50 text-teal-700"
-                      )}
-                    >
-                      <option value="">Tüm modüller</option>
-                      {curricula.map((c) => (
-                        <option key={c.id} value={c.id}>{c.title}</option>
-                      ))}
-                    </select>
+              {/* Araç türüne özel filtreler */}
+              {filterToolType === "learning" && (
+                <div className="border-t border-zinc-100 pt-3 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Kategori</span>
+                    <PillGroup options={CATEGORY_OPTIONS} value={filterCategory} onChange={setFilterCategory} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
                   </div>
-                )}
-
-                <div className="ml-auto flex items-center gap-2">
-                  {hasActiveFilters && (
-                    <button
-                      onClick={clearFilters}
-                      className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors underline-offset-2 hover:underline"
-                    >
-                      Filtreleri Temizle
-                    </button>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Zorluk</span>
+                    <PillGroup options={DIFFICULTY_OPTIONS} value={filterDifficulty} onChange={setFilterDifficulty} activeClass="border-amber-400 bg-amber-50 text-amber-700" />
+                  </div>
+                  {curricula.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Modül</span>
+                      <select
+                        value={filterCurriculum}
+                        onChange={(e) => setFilterCurriculum(e.target.value)}
+                        className={cn(SELECT_CLS, filterCurriculum !== "" && "border-teal-400 bg-teal-50 text-teal-700")}
+                      >
+                        <option value="">Tüm modüller</option>
+                        {curricula.map((c) => (
+                          <option key={c.id} value={c.id}>{c.title}</option>
+                        ))}
+                      </select>
+                    </div>
                   )}
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as SortBy)}
-                    className={cn(
-                      SELECT_CLS,
-                      sortBy !== "newest" && "border-[#023435] bg-[#023435]/5 text-[#023435]"
-                    )}
-                  >
-                    {SORT_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
                 </div>
+              )}
+
+              {filterToolType === "social_story" && (
+                <div className="border-t border-zinc-100 pt-3 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Durum</span>
+                    <PillGroup options={SITUATION_OPTIONS} value={filterSituation} onChange={setFilterSituation} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Ortam</span>
+                    <PillGroup options={ENVIRONMENT_OPTIONS} value={filterEnvironment} onChange={setFilterEnvironment} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Uzunluk</span>
+                    <PillGroup options={STORY_LENGTH_OPTIONS} value={filterStoryLength} onChange={setFilterStoryLength} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
+                  </div>
+                </div>
+              )}
+
+              {filterToolType === "articulation" && (
+                <div className="border-t border-zinc-100 pt-3 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0 mt-1.5">Hedef Ses</span>
+                    <MultiPillGroup options={SOUND_OPTIONS} values={filterSounds} onChange={setFilterSounds} activeClass="border-[#FE703A] bg-[#FE703A]/10 text-[#FE703A]" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Seviye</span>
+                    <PillGroup options={ARTICULATON_LEVEL_OPTIONS} value={filterLevel} onChange={setFilterLevel} activeClass="border-[#FE703A] bg-[#FE703A]/10 text-[#FE703A]" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tema</span>
+                    <PillGroup options={THEME_OPTIONS} value={filterTheme} onChange={setFilterTheme} activeClass="border-[#FE703A] bg-[#FE703A]/10 text-[#FE703A]" />
+                  </div>
+                </div>
+              )}
+
+              {/* Sıralama + Filtreleri Temizle */}
+              <div className="flex items-center justify-end gap-2 pt-1 border-t border-zinc-100">
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors underline-offset-2 hover:underline"
+                  >
+                    Filtreleri Temizle
+                  </button>
+                )}
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortBy)}
+                  className={cn(SELECT_CLS, sortBy !== "newest" && "border-[#023435] bg-[#023435]/5 text-[#023435]")}
+                >
+                  {SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -422,7 +658,7 @@ export default function CardsPage() {
                     onDeletePress={() => { setSwipeOpenId(null); setConfirmDeleteId(card.id); }}
                   >
                   <div
-                    className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden flex flex-col"
+                    className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden flex flex-col min-h-[168px]"
                   >
                     {/* Hover delete button — desktop only (hidden on touch via opacity) */}
                     <button
@@ -445,9 +681,11 @@ export default function CardsPage() {
                             </span>
                           );
                         })()}
-                        <Badge className={WORK_AREA_COLOR[card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
-                          {WORK_AREA_LABEL[card.category] ?? card.category}
-                        </Badge>
+                        {WORK_AREA_LABEL[card.category] && (
+                          <Badge className={WORK_AREA_COLOR[card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                            {WORK_AREA_LABEL[card.category]}
+                          </Badge>
+                        )}
                         <Badge className={DIFFICULTY_COLOR[card.difficulty] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
                           {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
                         </Badge>

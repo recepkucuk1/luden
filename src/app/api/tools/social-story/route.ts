@@ -141,6 +141,11 @@ Bu öğrenci için uygun bir sosyal hikaye yaz.`;
       throw new Error("JSON parse hatası");
     }
 
+    // Filtreleme için metadata'yı content'e ekle
+    storyContent.situation   = situation;
+    storyContent.environment = environment;
+    storyContent.length      = length;
+
     // Kaydet + kredi düş (atomik)
     const dbCard = await prisma.$transaction(async (tx) => {
       const fresh = await tx.therapist.findUnique({
