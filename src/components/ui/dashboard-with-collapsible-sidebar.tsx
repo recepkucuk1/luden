@@ -15,49 +15,14 @@ import {
   LogOut,
   Menu,
   X,
-  BookOpen,
-  FileText,
-  Mic,
-  ClipboardList,
-  NotebookPen,
-  Puzzle,
-  Gamepad2,
-  MessageSquare,
-  CalendarCheck,
-  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const TOOLS_SUB = [
-  { title: "Öğrenme Kartı", href: "/generate",                Icon: BookOpen      },
-  { title: "Sosyal Hikaye",  href: "/tools/social-story",     Icon: FileText      },
-  { title: "Artikülasyon",   href: "/tools/articulation",     Icon: Mic           },
-  { title: "Ev Ödevi",       href: "/tools/homework",          Icon: ClipboardList },
-  { title: "Oturum Özeti",   href: "/tools/session-summary",  Icon: NotebookPen   },
-  { title: "Kelime Eşleştirme", href: "/tools/matching-game", Icon: Puzzle        },
-  { title: "Sesletim Aktivitesi", href: "/tools/phonation",  Icon: Gamepad2      },
-  { title: "İletişim Panosu",    href: "/tools/comm-board",   Icon: MessageSquare },
-  { title: "Haftalık Plan",      href: "/tools/weekly-plan",  Icon: CalendarCheck },
-  { title: "Hedef Takip",        href: "/tools/goal-tracker", Icon: Target        },
-];
 
 export const Sidebar = () => {
   const [open, setOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
-
-  const toolsActive =
-    pathname === "/tools" ||
-    pathname.startsWith("/tools/") ||
-    pathname === "/generate";
-
-  const [toolsOpen, setToolsOpen] = useState(toolsActive);
-
-  // Keep accordion open when navigating into tools area
-  useEffect(() => {
-    if (toolsActive) setToolsOpen(true);
-  }, [toolsActive]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -72,10 +37,11 @@ export const Sidebar = () => {
   }, [pathname]);
 
   const navItems = [
-    { icon: Home,       title: "Dashboard",  href: "/dashboard" },
-    { icon: Users,      title: "Öğrenciler", href: "/students"  },
-    { icon: Layers,     title: "Kütüphane",  href: "/cards"     },
-    { icon: CalendarDays, title: "Takvim",   href: "/calendar"  },
+    { icon: Home,         title: "Dashboard",  href: "/dashboard"   },
+    { icon: Wand2,        title: "Araçlar",    href: "/tools"       },
+    { icon: Users,        title: "Öğrenciler", href: "/students"    },
+    { icon: Layers,       title: "Kütüphane",  href: "/cards"       },
+    { icon: CalendarDays, title: "Takvim",     href: "/calendar"    },
   ];
 
   const adminItems = [
@@ -115,76 +81,6 @@ export const Sidebar = () => {
         <TitleSection open={open} userName={session?.user?.name || "Kullanıcı"} />
 
         <div className="space-y-1 mb-8 overflow-y-auto max-h-[calc(100vh-250px)] no-scrollbar">
-          {/* Dashboard */}
-          <Option
-            Icon={Home}
-            title="Dashboard"
-            href="/dashboard"
-            currentPath={pathname}
-            open={open}
-          />
-
-          {/* Araçlar accordion */}
-          <div>
-            <button
-              onClick={() => { if (open) setToolsOpen((v) => !v); }}
-              className={cn(
-                "relative flex h-11 w-full items-center rounded-md transition-all duration-200",
-                toolsActive
-                  ? "bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 shadow-sm border-l-2 border-blue-500"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900"
-              )}
-            >
-              <div className="grid h-full w-12 place-content-center">
-                <Wand2 className="h-4 w-4" />
-              </div>
-              {open && (
-                <>
-                  <span className="flex-1 text-left text-sm font-medium">Araçlar</span>
-                  <ChevronDown
-                    className={cn(
-                      "mr-3 h-3.5 w-3.5 transition-transform duration-200 text-gray-400",
-                      toolsOpen && "rotate-180"
-                    )}
-                  />
-                </>
-              )}
-            </button>
-
-            {/* Sub-items */}
-            {open && toolsOpen && (
-              <div className="ml-5 mt-0.5 space-y-0.5 border-l border-gray-100 dark:border-gray-800 pl-3">
-                <Link
-                  href="/tools"
-                  className={cn(
-                    "flex h-8 items-center rounded-md px-2 text-xs font-medium transition-colors",
-                    pathname === "/tools"
-                      ? "text-blue-700 bg-blue-50"
-                      : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                  )}
-                >
-                  Tüm Araçlar
-                </Link>
-                {TOOLS_SUB.map((sub) => (
-                  <Link
-                    key={sub.href}
-                    href={sub.href}
-                    className={cn(
-                      "flex h-8 items-center gap-2 rounded-md px-2 text-xs font-medium transition-colors",
-                      pathname === sub.href || pathname.startsWith(sub.href + "/")
-                        ? "text-blue-700 bg-blue-50"
-                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                    )}
-                  >
-                    <sub.Icon className="h-3 w-3 shrink-0" />
-                    {sub.title}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Remaining nav items */}
           {navItems.map((item) => (
             <Option
               key={item.href}
