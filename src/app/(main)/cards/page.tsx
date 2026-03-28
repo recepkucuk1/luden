@@ -30,14 +30,15 @@ interface CardItem {
   _count: { assignments: number };
 }
 
-type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation" | "homework";
+type ToolTypeFilter = "all" | "learning" | "social_story" | "articulation" | "homework" | "session_summary";
 
 const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }[] = [
-  { value: "all",          label: "Tümü" },
-  { value: "learning",     label: "Öğrenme Kartı",     href: "/generate" },
-  { value: "social_story", label: "Sosyal Hikaye",     href: "/tools/social-story" },
-  { value: "articulation", label: "Artikülasyon",      href: "/tools/articulation" },
-  { value: "homework",     label: "Ev Ödevi",           href: "/tools/homework" },
+  { value: "all",             label: "Tümü" },
+  { value: "learning",        label: "Öğrenme Kartı",     href: "/generate" },
+  { value: "social_story",    label: "Sosyal Hikaye",     href: "/tools/social-story" },
+  { value: "articulation",    label: "Artikülasyon",      href: "/tools/articulation" },
+  { value: "homework",        label: "Ev Ödevi",           href: "/tools/homework" },
+  { value: "session_summary", label: "Oturum Özeti",      href: "/tools/session-summary" },
 ];
 
 const TOOL_TYPE_BADGE: Record<string, string> = {
@@ -45,6 +46,7 @@ const TOOL_TYPE_BADGE: Record<string, string> = {
   SOCIAL_STORY:       "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
   ARTICULATION_DRILL: "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20",
   HOMEWORK_MATERIAL:  "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
+  SESSION_SUMMARY:    "bg-purple-50 text-purple-700 border-purple-200",
 };
 
 const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
@@ -52,6 +54,7 @@ const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
   SOCIAL_STORY:       "Sosyal Hikaye",
   ARTICULATION_DRILL: "Artikülasyon",
   HOMEWORK_MATERIAL:  "Ev Ödevi",
+  SESSION_SUMMARY:    "Oturum Özeti",
 };
 
 function resolveToolType(toolType: string | null): string {
@@ -174,6 +177,23 @@ const HW_DURATION_OPTIONS = [
   { value: "20 dakika", label: "20 dk" },
 ];
 
+// ── Oturum Özeti filtre seçenekleri ──────────────────────────────────────────
+const SS_SESSION_TYPE_OPTIONS = [
+  { value: "all",            label: "Tümü" },
+  { value: "individual",     label: "Bireysel" },
+  { value: "group",          label: "Grup" },
+  { value: "assessment",     label: "Değerlendirme" },
+  { value: "parent_meeting", label: "Veli Görüşmesi" },
+];
+
+const SS_PERFORMANCE_OPTIONS = [
+  { value: "all",           label: "Tümü" },
+  { value: "above_target",  label: "Beklenenin Üstünde" },
+  { value: "on_target",     label: "Hedefle Uyumlu" },
+  { value: "progressing",   label: "Gelişim Gösteriyor" },
+  { value: "needs_support", label: "Ek Destek Gerekiyor" },
+];
+
 const SELECT_CLS =
   "rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#023435]/30 cursor-pointer";
 
@@ -288,6 +308,9 @@ export default function CardsPage() {
   const [filterHwArea,     setFilterHwArea]     = useState("all");
   const [filterHwMaterial, setFilterHwMaterial] = useState("all");
   const [filterHwDuration, setFilterHwDuration] = useState("all");
+  // Filtreler — oturum özeti
+  const [filterSsType,        setFilterSsType]        = useState("all");
+  const [filterSsPerformance, setFilterSsPerformance] = useState("all");
 
   useEffect(() => {
     Promise.all([
@@ -339,7 +362,9 @@ export default function CardsPage() {
     filterTheme !== "all" ||
     filterHwArea !== "all" ||
     filterHwMaterial !== "all" ||
-    filterHwDuration !== "all";
+    filterHwDuration !== "all" ||
+    filterSsType !== "all" ||
+    filterSsPerformance !== "all";
 
   function clearFilters() {
     setFilterStudent("");
@@ -356,6 +381,8 @@ export default function CardsPage() {
     setFilterHwArea("all");
     setFilterHwMaterial("all");
     setFilterHwDuration("all");
+    setFilterSsType("all");
+    setFilterSsPerformance("all");
   }
 
   // goalId → curriculumId lookup
@@ -384,10 +411,11 @@ export default function CardsPage() {
     if (filterToolType !== "all") {
       list = list.filter((c) => {
         const tt = resolveToolType(c.toolType);
-        if (filterToolType === "learning")     return tt === "LEARNING_CARD";
-        if (filterToolType === "social_story") return tt === "SOCIAL_STORY";
-        if (filterToolType === "articulation") return tt === "ARTICULATION_DRILL";
-        if (filterToolType === "homework")     return tt === "HOMEWORK_MATERIAL";
+        if (filterToolType === "learning")        return tt === "LEARNING_CARD";
+        if (filterToolType === "social_story")   return tt === "SOCIAL_STORY";
+        if (filterToolType === "articulation")   return tt === "ARTICULATION_DRILL";
+        if (filterToolType === "homework")       return tt === "HOMEWORK_MATERIAL";
+        if (filterToolType === "session_summary") return tt === "SESSION_SUMMARY";
         return true;
       });
     }
@@ -449,6 +477,16 @@ export default function CardsPage() {
       }
     }
 
+    // Oturum özeti filtreleri
+    if (filterToolType === "session_summary") {
+      if (filterSsType !== "all") {
+        list = list.filter((c) => (c.content?.sessionType as string | undefined) === filterSsType);
+      }
+      if (filterSsPerformance !== "all") {
+        list = list.filter((c) => (c.content?.overallPerformance as string | undefined) === filterSsPerformance);
+      }
+    }
+
     // Artikülasyon filtreleri
     if (filterToolType === "articulation") {
       if (filterSounds.length > 0) {
@@ -487,6 +525,7 @@ export default function CardsPage() {
     filterSituation, filterEnvironment, filterStoryLength,
     filterSounds, filterLevel, filterTheme,
     filterHwArea, filterHwMaterial, filterHwDuration,
+    filterSsType, filterSsPerformance,
     sortBy,
   ]);
 
@@ -624,6 +663,19 @@ export default function CardsPage() {
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Uzunluk</span>
                     <PillGroup options={STORY_LENGTH_OPTIONS} value={filterStoryLength} onChange={setFilterStoryLength} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
+                  </div>
+                </div>
+              )}
+
+              {filterToolType === "session_summary" && (
+                <div className="border-t border-zinc-100 pt-3 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tür</span>
+                    <PillGroup options={SS_SESSION_TYPE_OPTIONS} value={filterSsType} onChange={setFilterSsType} activeClass="border-purple-400 bg-purple-50 text-purple-700" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Sonuç</span>
+                    <PillGroup options={SS_PERFORMANCE_OPTIONS} value={filterSsPerformance} onChange={setFilterSsPerformance} activeClass="border-purple-400 bg-purple-50 text-purple-700" />
                   </div>
                 </div>
               )}

@@ -9,6 +9,7 @@ import { AssignStudentsModal } from "@/components/cards/AssignStudentsModal";
 import { SocialStoryView, type SocialStoryContent } from "@/components/cards/SocialStoryView";
 import { ArticulationView, type ArticulationContent } from "@/components/cards/ArticulationView";
 import { HomeworkView, type HomeworkContent } from "@/components/cards/HomeworkView";
+import { SessionSummaryView, type SessionSummaryContent } from "@/components/cards/SessionSummaryView";
 import type { GeneratedCard } from "@/lib/prompts";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,7 @@ const TOOL_TYPE_BADGE: Record<string, { label: string; cls: string }> = {
   SOCIAL_STORY:       { label: "Sosyal Hikaye",       cls: "bg-[#023435]/10 text-[#023435] border-[#023435]/20" },
   ARTICULATION_DRILL: { label: "Artikülasyon",        cls: "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20" },
   HOMEWORK_MATERIAL:  { label: "Ev Ödevi Materyali",  cls: "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30" },
+  SESSION_SUMMARY:    { label: "Oturum Özeti",        cls: "bg-purple-50 text-purple-700 border-purple-200" },
 };
 
 async function downloadSocialStoryPDF(card: CardRecord) {
@@ -197,6 +199,190 @@ async function downloadArticulationPDF(card: CardRecord) {
   URL.revokeObjectURL(url);
 }
 
+async function downloadSessionSummaryFullPDF(card: CardRecord) {
+  const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
+  Font.register({
+    family: "NotoSans",
+    fonts: [
+      { src: `${window.location.origin}/fonts/NotoSans-Regular.ttf`, fontWeight: "normal" },
+      { src: `${window.location.origin}/fonts/NotoSans-Bold.ttf`,    fontWeight: "bold" },
+    ],
+  });
+
+  const summary = card.content as unknown as SessionSummaryContent;
+  const goals   = Array.isArray(summary.goalPerformance) ? summary.goalPerformance : [];
+  const today   = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+
+  function parseP(acc: string | number): number {
+    if (typeof acc === "number") return Math.min(100, Math.max(0, acc));
+    const m = String(acc).match(/\d+/);
+    return m ? Math.min(100, Math.max(0, parseInt(m[0]))) : 0;
+  }
+  function barClr(pct: number): string {
+    if (pct >= 81) return "#16a34a";
+    if (pct >= 61) return "#ca8a04";
+    if (pct >= 31) return "#FE703A";
+    return "#ef4444";
+  }
+
+  const S = StyleSheet.create({
+    page:      { fontFamily: "NotoSans", fontSize: 10, color: "#18181b", padding: 44, paddingBottom: 70 },
+    title:     { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 18, color: "#023435", marginBottom: 6 },
+    infoRow:   { flexDirection: "row", flexWrap: "wrap", marginBottom: 16, borderBottomWidth: 1, borderBottomColor: "#e4e4e7", paddingBottom: 10 },
+    infoBadge: { fontSize: 8, color: "#52525b", backgroundColor: "#f4f4f5", borderRadius: 99, paddingHorizontal: 8, paddingVertical: 3, marginRight: 6, marginBottom: 4 },
+    secHdr:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, color: "#71717a", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 },
+    goalCard:  { borderWidth: 1, borderColor: "#e4e4e7", borderRadius: 4, padding: 10, marginBottom: 8 },
+    goalTitle: { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 10, color: "#18181b", marginBottom: 6 },
+    barBg:     { height: 5, backgroundColor: "#f4f4f5", borderRadius: 3, marginBottom: 6 },
+    cueBadge:  { fontSize: 8, color: "#52525b", backgroundColor: "#f4f4f5", borderRadius: 99, paddingHorizontal: 6, paddingVertical: 2, alignSelf: "flex-start", marginBottom: 6 },
+    bodyText:  { fontSize: 9, lineHeight: 1.6, color: "#3f3f46" },
+    recRow:    { flexDirection: "row", marginTop: 4 },
+    recBullet: { fontSize: 8, color: "#a1a1aa", marginRight: 4, marginTop: 1 },
+    recText:   { flex: 1, fontSize: 8, color: "#71717a", lineHeight: 1.5 },
+    box:       { borderRadius: 4, padding: 10, marginBottom: 10 },
+    boxTitle:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, marginBottom: 4 },
+    boxText:   { fontSize: 9, lineHeight: 1.6 },
+    footer:    { position: "absolute", bottom: 28, left: 44, right: 44, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: "#e4e4e7", paddingTop: 6 },
+    footerTxt: { fontSize: 8, color: "#a1a1aa" },
+  });
+
+  const Doc = () => (
+    <Document title={summary.title ?? card.title} author="LudenLab">
+      <Page size="A4" style={S.page}>
+        <Text style={S.title}>{summary.title ?? card.title}</Text>
+        <View style={S.infoRow}>
+          {card.student?.name ? <Text style={S.infoBadge}>Öğrenci: {card.student.name}</Text> : null}
+          {summary.sessionInfo?.date     ? <Text style={S.infoBadge}>{summary.sessionInfo.date}</Text> : null}
+          {summary.sessionInfo?.duration ? <Text style={S.infoBadge}>{summary.sessionInfo.duration}</Text> : null}
+          {summary.sessionInfo?.type     ? <Text style={S.infoBadge}>{summary.sessionInfo.type}</Text> : null}
+        </View>
+        {goals.length > 0 ? (
+          <View style={{ marginBottom: 14 }}>
+            <Text style={S.secHdr}>Çalışılan Hedefler</Text>
+            {goals.map((g, i) => {
+              const pct = parseP(g.accuracy);
+              return (
+                <View key={i} style={S.goalCard}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <Text style={[S.goalTitle, { flex: 1, marginRight: 8 }]}>{g.goal}</Text>
+                    <Text style={{ fontSize: 9, fontFamily: "NotoSans", fontWeight: "bold", color: barClr(pct) }}>{g.accuracy}</Text>
+                  </View>
+                  <View style={S.barBg}>
+                    <View style={{ height: 5, borderRadius: 3, width: `${pct}%`, backgroundColor: barClr(pct) }} />
+                  </View>
+                  {g.cueLevel ? <Text style={S.cueBadge}>{g.cueLevel}</Text> : null}
+                  {g.analysis ? <Text style={S.bodyText}>{g.analysis}</Text> : null}
+                  {g.recommendation ? (
+                    <View style={S.recRow}>
+                      <Text style={S.recBullet}>›</Text>
+                      <Text style={S.recText}>{g.recommendation}</Text>
+                    </View>
+                  ) : null}
+                </View>
+              );
+            })}
+          </View>
+        ) : null}
+        {summary.overallAssessment ? (
+          <View style={[S.box, { backgroundColor: "#f0f9ff", borderWidth: 1, borderColor: "#bae6fd" }]}>
+            <Text style={[S.boxTitle, { color: "#0369a1" }]}>Genel Değerlendirme</Text>
+            <Text style={[S.boxText, { color: "#0c4a6e" }]}>{summary.overallAssessment}</Text>
+          </View>
+        ) : null}
+        {summary.behaviorNotes ? (
+          <View style={[S.box, { backgroundColor: "#f9fafb", borderWidth: 1, borderColor: "#e4e4e7" }]}>
+            <Text style={[S.boxTitle, { color: "#374151" }]}>Davranış ve Katılım</Text>
+            <Text style={[S.boxText, { color: "#4b5563" }]}>{summary.behaviorNotes}</Text>
+          </View>
+        ) : null}
+        {summary.nextSessionPlan ? (
+          <View style={[S.box, { backgroundColor: "#f0fdf4", borderWidth: 1, borderColor: "#bbf7d0", borderLeftWidth: 3, borderLeftColor: "#16a34a" }]}>
+            <Text style={[S.boxTitle, { color: "#15803d" }]}>Sonraki Oturum Planı</Text>
+            <Text style={[S.boxText, { color: "#166534" }]}>{summary.nextSessionPlan}</Text>
+          </View>
+        ) : null}
+        {summary.parentNote ? (
+          <View style={[S.box, { backgroundColor: "#f0fdf4", borderWidth: 2, borderColor: "#86efac" }]}>
+            <Text style={[S.boxTitle, { color: "#15803d" }]}>Veliye İletilecek Not</Text>
+            <Text style={[S.boxText, { color: "#166534" }]}>{summary.parentNote}</Text>
+          </View>
+        ) : null}
+        {summary.expertNotes ? (
+          <View style={[S.box, { backgroundColor: "#fffbeb", borderWidth: 1, borderColor: "#fde68a" }]}>
+            <Text style={[S.boxTitle, { color: "#92400e" }]}>Uzman Notları (Gizli)</Text>
+            <Text style={[S.boxText, { color: "#78350f" }]}>{summary.expertNotes}</Text>
+          </View>
+        ) : null}
+        <View style={S.footer} fixed>
+          <Text style={S.footerTxt}>LudenLab — ludenlab.com</Text>
+          <Text style={S.footerTxt}>{today}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+
+  const blob = await pdf(<Doc />).toBlob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `${card.title.replace(/\s+/g, "_")}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function downloadSessionSummaryParentPDF(card: CardRecord) {
+  const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
+  Font.register({
+    family: "NotoSans",
+    fonts: [
+      { src: `${window.location.origin}/fonts/NotoSans-Regular.ttf`, fontWeight: "normal" },
+      { src: `${window.location.origin}/fonts/NotoSans-Bold.ttf`,    fontWeight: "bold" },
+    ],
+  });
+
+  const summary = card.content as unknown as SessionSummaryContent;
+  const today   = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+
+  const S = StyleSheet.create({
+    page:    { fontFamily: "NotoSans", fontSize: 11, color: "#18181b", padding: 56, paddingBottom: 70 },
+    header:  { marginBottom: 24, borderBottomWidth: 2, borderBottomColor: "#023435", paddingBottom: 16 },
+    brand:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 10, color: "#023435", marginBottom: 4 },
+    h1:      { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 18, color: "#023435", marginBottom: 4 },
+    sub:     { fontSize: 10, color: "#52525b" },
+    body:    { fontSize: 11, lineHeight: 1.8, color: "#27272a" },
+    footer:  { position: "absolute", bottom: 28, left: 56, right: 56, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: "#e4e4e7", paddingTop: 6 },
+    footTxt: { fontSize: 8, color: "#a1a1aa" },
+  });
+
+  const Doc = () => (
+    <Document title="Veli Notu" author="LudenLab">
+      <Page size="A4" style={S.page}>
+        <View style={S.header}>
+          <Text style={S.brand}>LudenLab</Text>
+          <Text style={S.h1}>Veli Bilgilendirme Notu</Text>
+          <Text style={S.sub}>
+            {card.student?.name ? `Öğrenci: ${card.student.name}  ·  ` : ""}
+            {summary.sessionInfo?.date ?? today}
+          </Text>
+        </View>
+        <Text style={S.body}>{summary.parentNote ?? ""}</Text>
+        <View style={S.footer} fixed>
+          <Text style={S.footTxt}>LudenLab — ludenlab.com</Text>
+          <Text style={S.footTxt}>{today}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+
+  const blob = await pdf(<Doc />).toBlob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `Veli_Notu_${(card.student?.name ?? "ogrenci").replace(/\s+/g, "_")}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 async function downloadHomeworkPDFFromCard(card: CardRecord) {
   const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
 
@@ -342,6 +528,7 @@ export default function CardDetailPage({
   const [assignedCount, setAssignedCount] = useState(0);
   const [showAssign, setShowAssign]   = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [downloadingParent, setDownloadingParent] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -374,6 +561,8 @@ export default function CardDetailPage({
         await downloadArticulationPDF(card);
       } else if (tt === "HOMEWORK_MATERIAL") {
         await downloadHomeworkPDFFromCard(card);
+      } else if (tt === "SESSION_SUMMARY") {
+        await downloadSessionSummaryFullPDF(card);
       } else {
         // LEARNING_CARD — mevcut CardPreview PDF'i kullanılır (aşağıda buton var)
         return;
@@ -384,6 +573,21 @@ export default function CardDetailPage({
       toast.error("PDF oluşturulamadı", { id: loadingToast });
     } finally {
       setDownloading(false);
+    }
+  }
+
+  async function handleDownloadParentPDF() {
+    if (!card) return;
+    setDownloadingParent(true);
+    const loadingToast = toast.loading("Veli notu hazırlanıyor…");
+    try {
+      await downloadSessionSummaryParentPDF(card);
+      toast.success("Veli notu indirildi", { id: loadingToast });
+    } catch (err) {
+      console.error("[PDF] hata:", err);
+      toast.error("PDF oluşturulamadı", { id: loadingToast });
+    } finally {
+      setDownloadingParent(false);
     }
   }
 
@@ -473,6 +677,8 @@ export default function CardDetailPage({
             <ArticulationView drill={card.content as unknown as ArticulationContent} />
           ) : toolType === "HOMEWORK_MATERIAL" ? (
             <HomeworkView hw={card.content as unknown as HomeworkContent} />
+          ) : toolType === "SESSION_SUMMARY" ? (
+            <SessionSummaryView summary={card.content as unknown as SessionSummaryContent} />
           ) : (
             (() => {
               const raw = card.content;
@@ -503,7 +709,7 @@ export default function CardDetailPage({
             {card.student && ` · ${card.student.name}`}
           </p>
           <div className="flex items-center gap-2">
-            {/* PDF butonu — LEARNING_CARD CardPreview içinde zaten mevcut; diğerleri için burada göster */}
+            {/* PDF butonları */}
             {(toolType === "SOCIAL_STORY" || toolType === "ARTICULATION_DRILL" || toolType === "HOMEWORK_MATERIAL") && (
               <button
                 onClick={handleDownloadPDF}
@@ -512,6 +718,24 @@ export default function CardDetailPage({
               >
                 {downloading ? "Hazırlanıyor…" : "PDF İndir"}
               </button>
+            )}
+            {toolType === "SESSION_SUMMARY" && (
+              <>
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={downloading || downloadingParent}
+                  className="flex items-center gap-1.5 rounded-lg bg-[#FE703A] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors disabled:opacity-60"
+                >
+                  {downloading ? "Hazırlanıyor…" : "Tam Rapor PDF"}
+                </button>
+                <button
+                  onClick={handleDownloadParentPDF}
+                  disabled={downloading || downloadingParent}
+                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] hover:bg-[#023435]/10 transition-colors disabled:opacity-60"
+                >
+                  {downloadingParent ? "Hazırlanıyor…" : "Veli Notu PDF"}
+                </button>
+              </>
             )}
             <button
               onClick={() => setShowAssign(true)}

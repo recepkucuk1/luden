@@ -37,7 +37,7 @@ const SECTIONS: ToolSection[] = [
     items: [
       { title: "Haftalık Çalışma Planı", href: "/tools/weekly-plan", desc: "Öğrenci bazlı haftalık ders planı", active: false },
       { title: "Hedef Takip Tablosu", href: "/tools/goal-tracker", desc: "BEP hedeflerini görselleştirin", active: false },
-      { title: "Oturum Özeti", href: "/tools/session-summary", desc: "Ders sonrası yapılandırılmış not", active: false },
+      { title: "Oturum Özeti", href: "/tools/session-summary", desc: "Ders sonrası yapılandırılmış not", active: true },
     ],
   },
   {

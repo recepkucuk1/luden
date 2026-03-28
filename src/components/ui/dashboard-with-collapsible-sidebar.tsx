@@ -19,14 +19,16 @@ import {
   FileText,
   Mic,
   ClipboardList,
+  NotebookPen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TOOLS_SUB = [
-  { title: "Öğrenme Kartı", href: "/generate",              Icon: BookOpen      },
-  { title: "Sosyal Hikaye",  href: "/tools/social-story",   Icon: FileText      },
-  { title: "Artikülasyon",   href: "/tools/articulation",   Icon: Mic           },
-  { title: "Ev Ödevi",       href: "/tools/homework",        Icon: ClipboardList },
+  { title: "Öğrenme Kartı", href: "/generate",                Icon: BookOpen      },
+  { title: "Sosyal Hikaye",  href: "/tools/social-story",     Icon: FileText      },
+  { title: "Artikülasyon",   href: "/tools/articulation",     Icon: Mic           },
+  { title: "Ev Ödevi",       href: "/tools/homework",          Icon: ClipboardList },
+  { title: "Oturum Özeti",   href: "/tools/session-summary",  Icon: NotebookPen   },
 ];
 
 export const Sidebar = () => {
