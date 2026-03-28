@@ -153,6 +153,8 @@ async function downloadPhonationPDF(activity: PhonationActivityContent, studentN
       { src: `${window.location.origin}/fonts/NotoSans-Bold.ttf`,    fontWeight: "bold" },
     ],
   });
+  // Disable hyphenation so Turkish words are never broken mid-syllable
+  Font.registerHyphenationCallback((word) => [word]);
 
   const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
   const sounds = Array.isArray(activity.targetSounds) ? activity.targetSounds : [];
@@ -165,153 +167,189 @@ async function downloadPhonationPDF(activity: PhonationActivityContent, studentN
     sound_maze:     "Ses Labirenti",
   };
 
+  // A4 content width = 595 - 44*2 = 507pt. Row inner padding 8*2 = 16pt → cell area = 491pt.
+  // Column widths: # = 40 (~8%), Kelime = flex:1 (~62%), Kare Türü / sağ sütun = 145 (~30%)
+  const COL_NUM  = 40;
+  const COL_TYPE = 145;
+
   const S = StyleSheet.create({
-    page:      { fontFamily: "NotoSans", fontSize: 10, color: "#18181b", padding: 44, paddingBottom: 70 },
-    title:     { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 18, color: "#023435", marginBottom: 6 },
-    infoRow:   { flexDirection: "row", flexWrap: "wrap", marginBottom: 16, borderBottomWidth: 1, borderBottomColor: "#e4e4e7", paddingBottom: 10 },
-    badge:     { fontSize: 8, color: "#52525b", backgroundColor: "#f4f4f5", borderRadius: 99, paddingHorizontal: 8, paddingVertical: 3, marginRight: 6, marginBottom: 4 },
-    sectionHdr:{ fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, color: "#71717a", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 },
-    tableHdr:  { flexDirection: "row", backgroundColor: "#f4f4f5", paddingVertical: 6, paddingHorizontal: 8, marginBottom: 2 },
-    hdrNum:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#a1a1aa", width: 24 },
-    hdrCell:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#71717a", flex: 1 },
-    row:       { flexDirection: "row", paddingVertical: 5, paddingHorizontal: 8, borderBottomWidth: 1, borderBottomColor: "#f4f4f5" },
-    rowNum:    { fontSize: 9, color: "#a1a1aa", width: 24 },
-    rowCell:   { fontSize: 9, color: "#18181b", flex: 1 },
-    gridWrap:  { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 12 },
-    gridCell:  { width: "18%", borderWidth: 1, borderColor: "#e4e4e7", borderRadius: 4, padding: 6, alignItems: "center", justifyContent: "center", minHeight: 40 },
-    gridTxt:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, textAlign: "center" },
-    chainRow:  { flexDirection: "row", alignItems: "center", marginBottom: 4 },
-    chainNum:  { fontSize: 8, color: "#a1a1aa", width: 18 },
-    chainWord: { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 10, color: "#6d28d9" },
-    chainConn: { fontSize: 8, color: "#8b5cf6", marginLeft: 8 },
-    box:       { borderRadius: 4, padding: 10, marginBottom: 8, marginTop: 14 },
-    boxTitle:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, marginBottom: 4 },
-    boxText:   { fontSize: 9, lineHeight: 1.6 },
-    footer:    { position: "absolute", bottom: 28, left: 44, right: 44, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: "#e4e4e7", paddingTop: 6 },
-    footerTxt: { fontSize: 8, color: "#a1a1aa" },
+    page:     { fontFamily: "NotoSans", fontSize: 10, color: "#18181b", padding: 44, paddingBottom: 70 },
+    title:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 18, color: "#023435", marginBottom: 6 },
+    infoRow:  { flexDirection: "row", flexWrap: "wrap", marginBottom: 16, borderBottomWidth: 1, borderBottomColor: "#e4e4e7", paddingBottom: 10 },
+    badge:    { fontSize: 8, color: "#52525b", backgroundColor: "#f4f4f5", borderRadius: 99, paddingHorizontal: 8, paddingVertical: 3, marginRight: 6, marginBottom: 4 },
+    secHdr:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, color: "#71717a", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 },
+    // Table
+    tblWrap:  { borderWidth: 1, borderColor: "#e4e4e7", borderRadius: 4, marginBottom: 12, overflow: "hidden" },
+    tHdr:     { flexDirection: "row", backgroundColor: "#f4f4f5", paddingVertical: 6, paddingHorizontal: 8 },
+    thNum:    { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#a1a1aa", width: COL_NUM },
+    thCell:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#71717a", flex: 1 },
+    thType:   { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8, color: "#71717a", width: COL_TYPE },
+    tRow:     { flexDirection: "row", paddingVertical: 5, paddingHorizontal: 8, borderTopWidth: 1, borderTopColor: "#f4f4f5", alignItems: "flex-start" },
+    tdNum:    { fontSize: 9, color: "#a1a1aa", width: COL_NUM, paddingTop: 1 },
+    tdCell:   { fontSize: 9, color: "#18181b", flex: 1 },
+    tdType:   { width: COL_TYPE },
+    // Type badge inside tdType
+    typeBadge:{ borderRadius: 3, paddingHorizontal: 5, paddingVertical: 2, alignSelf: "flex-start" },
+    typeTxt:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 8 },
+    // Info/note boxes
+    box:      { borderRadius: 4, padding: 10, marginBottom: 10, borderWidth: 1 },
+    boxTitle: { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, marginBottom: 3 },
+    boxText:  { fontSize: 9, lineHeight: 1.6 },
+    footer:   { position: "absolute", bottom: 28, left: 44, right: 44, flexDirection: "row", justifyContent: "space-between", borderTopWidth: 1, borderTopColor: "#e4e4e7", paddingTop: 6 },
+    footTxt:  { fontSize: 8, color: "#a1a1aa" },
   });
 
+  // ── shared helper: two-column table (# | text | right) ──────────────────────
+  const Table = ({
+    hdrLeft, hdrRight, rows,
+  }: {
+    hdrLeft: string;
+    hdrRight: string;
+    rows: { num: number | string; left: string; rightLabel: string; rightBg: string; rightColor: string }[];
+  }) => (
+    <View style={S.tblWrap}>
+      <View style={S.tHdr}>
+        <Text style={S.thNum}>#</Text>
+        <Text style={S.thCell}>{hdrLeft}</Text>
+        <Text style={S.thType}>{hdrRight}</Text>
+      </View>
+      {rows.map((r, i) => (
+        <View key={i} style={[S.tRow, { backgroundColor: i % 2 === 1 ? "#fafafa" : "#fff" }]}>
+          <Text style={S.tdNum}>{r.num}</Text>
+          <Text style={S.tdCell}>{r.left}</Text>
+          <View style={S.tdType}>
+            <View style={[S.typeBadge, { backgroundColor: r.rightBg }]}>
+              <Text style={[S.typeTxt, { color: r.rightColor }]}>{r.rightLabel}</Text>
+            </View>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+
   const renderContent = () => {
+    // ── SES AVI ────────────────────────────────────────────────────────────────
     if (activity.activityType === "sound_hunt") {
       const objects = Array.isArray(activity.objects) ? activity.objects : [];
+      const tableRows = objects.map((obj, i) => ({
+        num: i + 1,
+        left: obj.name,
+        rightLabel: obj.hasTargetSound ? "Evet ✓" : "Hayır",
+        rightBg:    obj.hasTargetSound ? "#dcfce7" : "#f4f4f5",
+        rightColor: obj.hasTargetSound ? "#166534" : "#6b7280",
+      }));
       return (
         <View>
           {activity.scene ? (
-            <View style={[S.box, { backgroundColor: "#f0f9ff", borderWidth: 1, borderColor: "#bae6fd" }]}>
+            <View style={[S.box, { backgroundColor: "#f0f9ff", borderColor: "#bae6fd" }]}>
               <Text style={[S.boxTitle, { color: "#0369a1" }]}>Sahne</Text>
               <Text style={[S.boxText, { color: "#0c4a6e" }]}>{activity.scene}</Text>
             </View>
           ) : null}
-          <Text style={S.sectionHdr}>Nesneler ({objects.length})</Text>
-          <View style={S.gridWrap}>
-            {objects.map((obj, i) => (
-              <View key={i} style={S.gridCell}>
-                <Text style={S.gridTxt}>{obj.name}</Text>
-              </View>
-            ))}
-          </View>
-          <View style={[S.box, { backgroundColor: "#f0f9ff", borderWidth: 1, borderColor: "#bae6fd" }]}>
-            <Text style={[S.boxTitle, { color: "#0369a1" }]}>Cevap Anahtarı — Hedef Sesli Nesneler</Text>
-            <Text style={[S.boxText, { color: "#0c4a6e" }]}>
-              {objects.filter((o) => o.hasTargetSound).map((o) => o.name).join(" · ")}
-            </Text>
-          </View>
+          <Text style={S.secHdr}>Nesneler ({objects.length})</Text>
+          <Table hdrLeft="Nesne" hdrRight="Hedef Ses?" rows={tableRows} />
         </View>
       );
     }
 
+    // ── TOMBALA ────────────────────────────────────────────────────────────────
     if (activity.activityType === "bingo") {
-      const grid = activity.grid;
+      const grid  = activity.grid;
       if (!grid) return null;
       const cells = Array.isArray(grid.cells) ? grid.cells : [];
-      const cellWidth = Math.floor(100 / grid.cols);
+      // Group cells into rows of grid.cols
+      const rows: (typeof cells)[] = [];
+      for (let r = 0; r < grid.rows; r++) {
+        rows.push(cells.slice(r * grid.cols, (r + 1) * grid.cols));
+      }
+      // Cell width: fit grid.cols into 507pt, no gap between
+      const cellW = Math.floor(507 / grid.cols) - 2; // subtract border
       return (
         <View>
-          <Text style={S.sectionHdr}>Tombala Kartı — {grid.rows}×{grid.cols}</Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 3, marginBottom: 10 }}>
-            {cells.map((cell, i) => (
-              <View
-                key={i}
-                style={{
-                  width: `${cellWidth - 1}%`,
-                  borderWidth: 2,
-                  borderColor: "#f59e0b",
-                  borderRadius: 4,
-                  padding: 6,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  minHeight: 44,
-                  backgroundColor: "#fffbeb",
-                }}
-              >
-                <Text style={{ fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, textAlign: "center", color: "#92400e" }}>
-                  {cell.word}
-                </Text>
-              </View>
-            ))}
-          </View>
+          <Text style={S.secHdr}>Tombala Kartı — {grid.rows}×{grid.cols}</Text>
+          {rows.map((rowCells, ri) => (
+            <View key={ri} style={{ flexDirection: "row", marginBottom: 2 }}>
+              {rowCells.map((cell, ci) => (
+                <View
+                  key={ci}
+                  style={{
+                    width: cellW,
+                    marginRight: ci < rowCells.length - 1 ? 2 : 0,
+                    borderWidth: 2,
+                    borderColor: "#f59e0b",
+                    borderRadius: 3,
+                    paddingVertical: 8,
+                    paddingHorizontal: 4,
+                    backgroundColor: "#fffbeb",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ fontFamily: "NotoSans", fontWeight: "bold", fontSize: 9, textAlign: "center", color: "#92400e" }}>
+                    {cell.word}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ))}
         </View>
       );
     }
 
+    // ── YILAN MERDİVEN ─────────────────────────────────────────────────────────
     if (activity.activityType === "snakes_ladders") {
       const grid = activity.grid;
       if (!grid) return null;
       const cells = Array.isArray(grid.cells) ? grid.cells : [];
+      const total = cells.length;
+      const tableRows = cells.map((cell) => {
+        const isFinish = cell.position === total;
+        if (cell.isLadder) return { num: cell.position, left: cell.word, rightLabel: "↑ Merdiven", rightBg: "#16a34a", rightColor: "#fff" };
+        if (cell.isSnake)  return { num: cell.position, left: cell.word, rightLabel: "↓ Yılan",   rightBg: "#dc2626", rightColor: "#fff" };
+        if (isFinish)      return { num: cell.position, left: cell.word, rightLabel: "Bitis",      rightBg: "#f59e0b", rightColor: "#fff" };
+        return                    { num: cell.position, left: cell.word, rightLabel: "Normal",     rightBg: "transparent", rightColor: "#a1a1aa" };
+      });
       return (
         <View>
-          <Text style={S.sectionHdr}>Oyun Tahtası ({cells.length} kare)</Text>
-          <View style={S.tableHdr}>
-            <Text style={S.hdrNum}>#</Text>
-            <Text style={S.hdrCell}>Kelime</Text>
-            <Text style={[S.hdrCell, { flex: 0, width: 80 }]}>Kare Türü</Text>
-          </View>
-          {cells.map((cell, i) => (
-            <View key={i} style={[S.row, { backgroundColor: i % 2 === 1 ? "#fafafa" : "#fff" }]}>
-              <Text style={S.rowNum}>{cell.position}</Text>
-              <Text style={S.rowCell}>{cell.word}</Text>
-              <Text style={[S.rowCell, { flex: 0, width: 80, color: cell.isLadder ? "#16a34a" : cell.isSnake ? "#dc2626" : "#a1a1aa" }]}>
-                {cell.isLadder ? "↑ Merdiven" : cell.isSnake ? "↓ Yılan" : "Normal"}
-              </Text>
-            </View>
-          ))}
+          <Text style={S.secHdr}>Oyun Tahtası ({total} kare)</Text>
+          <Table hdrLeft="Kelime" hdrRight="Kare Türü" rows={tableRows} />
         </View>
       );
     }
 
+    // ── KELİME ZİNCİRİ ─────────────────────────────────────────────────────────
     if (activity.activityType === "word_chain") {
       const chain = Array.isArray(activity.wordChain) ? activity.wordChain : [];
+      const tableRows = chain.map((item) => ({
+        num: item.order,
+        left: item.word,
+        rightLabel: item.connection ?? "",
+        rightBg: "transparent",
+        rightColor: "#6b7280",
+      }));
       return (
         <View>
-          <Text style={S.sectionHdr}>Kelime Zinciri ({chain.length} kelime)</Text>
-          {chain.map((item, i) => (
-            <View key={i} style={S.chainRow}>
-              <Text style={S.chainNum}>{item.order}.</Text>
-              <Text style={S.chainWord}>{item.word}</Text>
-              {item.connection ? <Text style={S.chainConn}>{item.connection}</Text> : null}
-            </View>
-          ))}
+          <Text style={S.secHdr}>Kelime Zinciri ({chain.length} kelime)</Text>
+          <Table hdrLeft="Kelime" hdrRight="Bağlantı" rows={tableRows} />
         </View>
       );
     }
 
+    // ── SES LABİRENTİ ──────────────────────────────────────────────────────────
     if (activity.activityType === "sound_maze") {
       const grid = activity.grid;
       if (!grid) return null;
       const cells = Array.isArray(grid.cells) ? grid.cells : [];
-      const correct = cells.filter((c) => c.hasTargetSound);
-      const wrong   = cells.filter((c) => !c.hasTargetSound);
+      const tableRows = cells.map((cell, i) => ({
+        num: i === 0 ? "GİRİŞ" : i === cells.length - 1 ? "ÇIKIŞ" : cell.position ?? i + 1,
+        left: cell.word,
+        rightLabel: cell.hasTargetSound ? "✓ Doğru Yol" : "✗ Yanlış",
+        rightBg:    cell.hasTargetSound ? "#dcfce7" : "#fee2e2",
+        rightColor: cell.hasTargetSound ? "#166534" : "#991b1b",
+      }));
       return (
         <View>
-          <Text style={S.sectionHdr}>Labirent ({cells.length} kelime)</Text>
-          <View style={[S.box, { backgroundColor: "#f0fdf4", borderWidth: 1, borderColor: "#86efac" }]}>
-            <Text style={[S.boxTitle, { color: "#166534" }]}>✓ Doğru Yol — Hedef Sesli Kelimeler</Text>
-            <Text style={[S.boxText, { color: "#14532d" }]}>{correct.map((c) => c.word).join(" → ")}</Text>
-          </View>
-          <View style={[S.box, { backgroundColor: "#fef2f2", borderWidth: 1, borderColor: "#fca5a5" }]}>
-            <Text style={[S.boxTitle, { color: "#991b1b" }]}>✗ Yanlış Yollar</Text>
-            <Text style={[S.boxText, { color: "#7f1d1d" }]}>{wrong.map((c) => c.word).join(" · ")}</Text>
-          </View>
+          <Text style={S.secHdr}>Ses Labirenti ({cells.length} kelime)</Text>
+          <Table hdrLeft="Kelime" hdrRight="Doğru Yol?" rows={tableRows} />
         </View>
       );
     }
@@ -356,8 +394,8 @@ async function downloadPhonationPDF(activity: PhonationActivityContent, studentN
         ) : null}
 
         <View style={S.footer} fixed>
-          <Text style={S.footerTxt}>LudenLab — ludenlab.com</Text>
-          <Text style={S.footerTxt}>{today}</Text>
+          <Text style={S.footTxt}>LudenLab — ludenlab.com</Text>
+          <Text style={S.footTxt}>{today}</Text>
         </View>
       </Page>
     </Document>
