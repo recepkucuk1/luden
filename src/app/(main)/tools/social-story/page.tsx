@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Lightbulb, Home, RefreshCw, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
+import { Switch } from "@/components/ui/switch";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -310,26 +311,16 @@ export default function SocialStoryPage() {
               </div>
 
               {/* Görsel destek */}
-              <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5">
-                <div>
+              <div className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5">
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-zinc-700">Görsel Destek Açıklamaları</p>
                   <p className="text-[10px] text-zinc-400">Her cümle için görsel sahne notu ekle</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setVisualSupport((v) => !v)}
-                  className={cn(
-                    "relative h-5 w-9 rounded-full transition-colors duration-200 focus:outline-none",
-                    visualSupport ? "bg-[#023435]" : "bg-zinc-300"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform duration-200",
-                      visualSupport ? "translate-x-4" : "translate-x-0.5"
-                    )}
-                  />
-                </button>
+                <Switch
+                  checked={visualSupport}
+                  onCheckedChange={setVisualSupport}
+                  className="shrink-0 data-[state=checked]:bg-[#023435]"
+                />
               </div>
 
               {/* Submit */}
