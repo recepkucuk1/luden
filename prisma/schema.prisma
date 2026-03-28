@@ -68,6 +68,12 @@ model Therapist {
   planType     PlanType @default(FREE)
   suspended    Boolean  @default(false)
   lastLogin    DateTime?
+  avatarUrl       String?  @db.Text
+  institution     String?
+  phone           String?
+  experienceYears String?
+  certifications  String?  @db.Text
+  preferences     Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

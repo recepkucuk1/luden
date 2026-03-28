@@ -3,6 +3,22 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logError } from "@/lib/utils";
 
+const PROFILE_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  specialty: true,
+  avatarUrl: true,
+  institution: true,
+  phone: true,
+  experienceYears: true,
+  certifications: true,
+  preferences: true,
+  credits: true,
+  planType: true,
+  createdAt: true,
+};
+
 export async function GET() {
   try {
     const session = await auth();
@@ -12,7 +28,7 @@ export async function GET() {
 
     const therapist = await prisma.therapist.findUnique({
       where: { id: session.user.id },
-      select: { id: true, name: true, email: true, specialty: true },
+      select: PROFILE_SELECT,
     });
 
     if (!therapist) {
@@ -34,7 +50,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, specialty } = body;
+    const { name, specialty, institution, phone, experienceYears, certifications } = body;
 
     if (!name?.trim()) {
       return NextResponse.json({ error: "Ad Soyad zorunludur." }, { status: 400 });
@@ -42,8 +58,15 @@ export async function PUT(request: NextRequest) {
 
     const therapist = await prisma.therapist.update({
       where: { id: session.user.id },
-      data: { name: name.trim(), specialty: Array.isArray(specialty) ? specialty : [] },
-      select: { id: true, name: true, email: true, specialty: true },
+      data: {
+        name: name.trim(),
+        specialty: Array.isArray(specialty) ? specialty : [],
+        institution: institution?.trim() || null,
+        phone: phone?.trim() || null,
+        experienceYears: experienceYears || null,
+        certifications: certifications?.trim() || null,
+      },
+      select: PROFILE_SELECT,
     });
 
     return NextResponse.json({ therapist });
