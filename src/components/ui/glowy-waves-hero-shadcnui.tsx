@@ -172,7 +172,7 @@ export function GlowyWavesHero() {
 
   return (
     <section
-      className="relative isolate flex min-h-screen w-full items-center justify-center overflow-hidden"
+      className="relative isolate flex min-h-[75vh] w-full items-center justify-center overflow-hidden"
       style={{ backgroundColor: "#023435" }}
       role="region"
       aria-label="Hero bölümü"
@@ -183,12 +183,13 @@ export function GlowyWavesHero() {
         aria-hidden="true"
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center px-6 py-32 text-center md:px-8">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col md:flex-row items-center gap-12 px-6 py-10 md:py-14 md:px-8">
+        {/* Left — Text + CTA */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="w-full"
+          className="flex-1 text-center md:text-left"
         >
           <motion.div
             variants={itemVariants}
@@ -210,7 +211,7 @@ export function GlowyWavesHero() {
 
           <motion.p
             variants={itemVariants}
-            className="mx-auto mb-10 max-w-xl text-lg text-white/70 leading-relaxed"
+            className="mx-auto md:mx-0 mb-10 max-w-xl text-lg text-white/70 leading-relaxed"
           >
             Saniyeler içinde kişiselleştirilmiş öğrenme materyalleri üretin,
             öğrencilerinizi takip edin.
@@ -218,7 +219,7 @@ export function GlowyWavesHero() {
 
           <motion.div
             variants={itemVariants}
-            className="flex flex-col items-center justify-center gap-3 sm:flex-row"
+            className="flex flex-col items-center md:items-start justify-center gap-3 sm:flex-row"
           >
             <Link
               href="/register"
@@ -232,10 +233,87 @@ export function GlowyWavesHero() {
             </Link>
             <a
               href="#features"
-              className="w-full rounded-xl border border-white/30 px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 sm:w-auto"
+              className="w-full rounded-xl border border-white/30 px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10 sm:w-auto text-center"
             >
               Nasıl Çalışır?
             </a>
+          </motion.div>
+        </motion.div>
+
+        {/* Right — Floating Product Mockup */}
+        <motion.div
+          initial={{ opacity: 0, x: 40, y: 20 }}
+          animate={{ opacity: 1, x: 0, y: 0 }}
+          transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+          className="hidden md:block flex-1 max-w-md w-full"
+        >
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="relative"
+          >
+            {/* Glass card */}
+            <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl p-6 shadow-2xl shadow-black/30">
+              {/* Card header */}
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-[#FE703A] flex items-center justify-center">
+                    <Sparkles className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-white">Öğrenme Kartı</p>
+                    <p className="text-[10px] text-white/40">AI tarafından üretildi</p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-emerald-500/20 border border-emerald-400/30 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+                  ✓ Hazır
+                </span>
+              </div>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {[
+                  { label: "Dil · Söz Dönemi", color: "bg-[#107996]/20 text-[#5dd4f0]" },
+                  { label: "3-6 yaş", color: "bg-[#FE703A]/20 text-[#FE703A]" },
+                  { label: "Başlangıç", color: "bg-white/10 text-white/70" },
+                ].map((tag) => (
+                  <span key={tag.label} className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${tag.color}`}>
+                    {tag.label}
+                  </span>
+                ))}
+              </div>
+
+              {/* Card content preview */}
+              <div className="rounded-xl bg-white/5 border border-white/10 p-4 mb-4">
+                <h4 className="text-sm font-bold text-white mb-2">Nesne Adlandırma Oyunu</h4>
+                <p className="text-[11px] text-white/50 leading-relaxed mb-3">
+                  Günlük yaşam nesnelerini adlandırma ve sözcük dağarcığını genişletme çalışması.
+                </p>
+                <div className="space-y-1.5">
+                  {["Nesneleri göster", "\"Bu ne?\" diye sor", "Model ol"].map((step, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#FE703A]/30 text-[8px] font-bold text-[#FE703A]">
+                        {i + 1}
+                      </span>
+                      <span className="text-[10px] text-white/40">{step}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Bottom actions */}
+              <div className="flex items-center gap-2">
+                <div className="flex-1 rounded-lg bg-[#FE703A] py-2 text-center text-[11px] font-semibold text-white">
+                  PDF İndir
+                </div>
+                <div className="flex-1 rounded-lg bg-white/10 border border-white/15 py-2 text-center text-[11px] font-medium text-white/70">
+                  Düzenle
+                </div>
+              </div>
+            </div>
+
+            {/* Decorative glow behind card */}
+            <div className="absolute -inset-4 -z-10 rounded-3xl bg-[#FE703A]/10 blur-2xl" />
           </motion.div>
         </motion.div>
       </div>

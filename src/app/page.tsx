@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -17,6 +17,7 @@ import {
   IconBuilding,
 } from "@tabler/icons-react";
 import { FeaturesSectionWithHoverEffects } from "@/components/ui/feature-section-with-hover-effects";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 
 // ─── FAQ Accordion ────────────────────────────────────────────────────────────
 const FAQ_ITEMS = [
@@ -45,32 +46,51 @@ const FAQ_ITEMS = [
 function FaqAccordion() {
   const [open, setOpen] = useState<number | null>(null);
   return (
-    <div className="divide-y divide-[#F4B2A6]/30 rounded-2xl border border-[#F4B2A6]/30 bg-white overflow-hidden">
+    <div className="divide-y divide-[#F4B2A6]/30 rounded-2xl border border-[#F4B2A6]/30 bg-white overflow-hidden shadow-sm">
       {FAQ_ITEMS.map((item, i) => (
         <div key={i}>
           <button
             onClick={() => setOpen(open === i ? null : i)}
-            className="flex w-full items-center justify-between px-6 py-5 text-left text-sm font-medium text-zinc-900 hover:bg-[#F4B2A6]/10 transition-colors"
+            className={cn(
+              "flex w-full items-center justify-between px-6 py-5 text-left text-sm font-medium transition-colors",
+              open === i ? "text-[#023435] bg-[#F4B2A6]/5" : "text-zinc-900 hover:bg-[#F4B2A6]/10"
+            )}
           >
-            <span>{item.q}</span>
-            <svg
-              className={cn(
-                "h-4 w-4 text-zinc-400 transition-transform duration-200 shrink-0 ml-4",
-                open === i && "rotate-180"
-              )}
+            <span className="flex items-center gap-3">
+              <span className={cn(
+                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-colors duration-300",
+                open === i ? "bg-[#FE703A] text-white" : "bg-[#F4B2A6]/20 text-[#023435]/40"
+              )}>{i + 1}</span>
+              {item.q}
+            </span>
+            <motion.svg
+              animate={{ rotate: open === i ? 180 : 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="h-4 w-4 text-zinc-400 shrink-0 ml-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
               strokeWidth={2}
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
+            </motion.svg>
           </button>
-          {open === i && (
-            <div className="px-6 pb-5 text-sm text-zinc-500 leading-relaxed">
-              {item.a}
-            </div>
-          )}
+          <AnimatePresence initial={false}>
+            {open === i && (
+              <motion.div
+                key={`faq-${i}`}
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <div className="px-6 pb-5 pl-[3.25rem] text-sm text-zinc-500 leading-relaxed">
+                  {item.a}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       ))}
     </div>
@@ -281,88 +301,160 @@ function HowSlide4() {
 }
 
 const HOW_SLIDES = [
-  { title: "Parametreleri seç",   desc: "Alan, yaş grubu, tanı ve müfredat hedefini belirle",     Panel: HowSlide1 },
-  { title: "Kartı incele",        desc: "Yapay zeka MEB müfredatına uygun kart üretti",            Panel: HowSlide2 },
-  { title: "Uzman notlarını gör", desc: "Uzman önerileri, genelleme ve veli notları eklendi",      Panel: HowSlide3 },
-  { title: "PDF olarak indir",    desc: "Yazdırılabilir PDF — Pro plan ile indirilebilir",         Panel: HowSlide4 },
+  { title: "Parametreleri seç",   desc: "Alan, yaş grubu, tanı ve müfredat hedefini belirle",     Panel: HowSlide1, icon: "⚙️" },
+  { title: "Kartı incele",        desc: "Yapay zeka MEB müfredatına uygun kart üretti",            Panel: HowSlide2, icon: "🃏" },
+  { title: "Uzman notlarını gör", desc: "Uzman önerileri, genelleme ve veli notları eklendi",      Panel: HowSlide3, icon: "📋" },
+  { title: "PDF olarak indir",    desc: "Yazdırılabilir PDF — Pro plan ile indirilebilir",         Panel: HowSlide4, icon: "📄" },
 ];
 
 function HowItWorksCarousel() {
   const [active, setActive] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [paused, setPaused] = useState(false);
   const count = HOW_SLIDES.length;
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
   useEffect(() => {
     if (paused) return;
-    const id = setInterval(() => setActive((p) => (p + 1) % count), 4000);
+    const id = setInterval(() => {
+      setDirection(1);
+      setActive((p) => (p + 1) % count);
+    }, 4000);
     return () => clearInterval(id);
   }, [paused, count]);
 
-  const { title, desc, Panel } = HOW_SLIDES[active];
+  const goTo = (i: number) => {
+    setDirection(i > active ? 1 : -1);
+    setActive(i);
+  };
+
+  const slideVariants = {
+    enter: (d: number) => ({ x: d > 0 ? 60 : -60, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (d: number) => ({ x: d > 0 ? -60 : 60, opacity: 0 }),
+  };
+
+  const { Panel } = HOW_SLIDES[active];
 
   return (
-    <section className="py-20 px-6" style={{ background: "#f8fafa" }}>
+    <section ref={sectionRef} className="py-20 px-6" style={{ background: "#f8fafa" }}>
       <div className="mx-auto max-w-5xl">
-        <div className="text-center mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
           <p className="text-xs font-bold uppercase tracking-widest text-[#FE703A] mb-3">NASIL ÇALIŞIR</p>
           <h2 className="text-2xl font-bold text-[#023435] mb-3">Saniyeler içinde kişiselleştirilmiş kart</h2>
           <p className="text-sm text-[rgba(2,52,53,0.5)]">Alan, yaş grubu ve hedefi seçin — yapay zeka gerisini halleder</p>
-        </div>
+        </motion.div>
 
-        <div
-          className="relative bg-white rounded-2xl border border-[rgba(2,52,53,0.1)] shadow-sm overflow-hidden"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
-          {/* Progress bar */}
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-[rgba(2,52,53,0.06)]">
-            <div
-              className="h-full bg-[#FE703A] transition-all duration-300"
-              style={{ width: `${((active + 1) / count) * 100}%` }}
-            />
+        <div className="flex gap-6">
+          {/* Left — Step indicators */}
+          <div className="hidden md:flex flex-col gap-2 pt-4 shrink-0 w-48">
+            {HOW_SLIDES.map((slide, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                className={cn(
+                  "flex items-start gap-3 rounded-xl px-3 py-3 text-left transition-all duration-300",
+                  i === active
+                    ? "bg-white shadow-sm border border-[rgba(2,52,53,0.1)]"
+                    : "hover:bg-white/60"
+                )}
+              >
+                <span className={cn(
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-colors duration-300",
+                  i === active
+                    ? "bg-[#FE703A] text-white"
+                    : "bg-[rgba(2,52,53,0.08)] text-[#023435]/40"
+                )}>{i + 1}</span>
+                <div>
+                  <p className={cn(
+                    "text-xs font-semibold transition-colors duration-300",
+                    i === active ? "text-[#023435]" : "text-[#023435]/50"
+                  )}>{slide.title}</p>
+                  <p className={cn(
+                    "text-[11px] mt-0.5 leading-snug transition-colors duration-300",
+                    i === active ? "text-[rgba(2,52,53,0.55)]" : "text-[rgba(2,52,53,0.3)]"
+                  )}>{slide.desc}</p>
+                </div>
+              </button>
+            ))}
           </div>
 
-          {/* Slide — sabit yükseklik, içerik üstten hizalı */}
-          <div className="px-7 pt-8 pb-4 md:px-10 md:pt-10 h-[480px] flex flex-col justify-start overflow-y-auto">
-            <Panel />
-          </div>
-
-          {/* Bottom bar */}
-          <div className="flex items-end justify-between gap-4 px-7 pb-6 md:px-10 md:pb-8">
-            <div>
-              <p className="text-sm font-semibold text-[#023435]">{title}</p>
-              <p className="text-xs text-[rgba(2,52,53,0.45)] mt-0.5">{desc}</p>
+          {/* Right — Slide panel */}
+          <div
+            className="relative flex-1 bg-white rounded-2xl border border-[rgba(2,52,53,0.1)] shadow-sm overflow-hidden"
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+          >
+            {/* Progress bar */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[rgba(2,52,53,0.06)] z-10">
+              <motion.div
+                className="h-full bg-[#FE703A]"
+                animate={{ width: `${((active + 1) / count) * 100}%` }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              />
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => setActive((a) => (a - 1 + count) % count)}
-                className="h-8 w-8 rounded-[9px] bg-white border border-[rgba(2,52,53,0.2)] flex items-center justify-center text-[#023435]/50 hover:bg-[#023435] hover:text-white hover:border-[#023435] transition-colors"
-                aria-label="Önceki"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              {HOW_SLIDES.map((_, i) => (
+
+            {/* Animated slide */}
+            <div className="px-7 pt-8 pb-4 md:px-10 md:pt-10 min-h-[420px] md:min-h-[480px] flex flex-col justify-start overflow-y-auto relative">
+              <AnimatePresence mode="wait" custom={direction}>
+                <motion.div
+                  key={active}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.35, ease: "easeInOut" }}
+                >
+                  <Panel />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Bottom bar — mobile nav */}
+            <div className="flex items-end justify-between gap-4 px-7 pb-6 md:px-10 md:pb-8">
+              <div className="md:hidden">
+                <p className="text-sm font-semibold text-[#023435]">{HOW_SLIDES[active].title}</p>
+                <p className="text-xs text-[rgba(2,52,53,0.45)] mt-0.5">{HOW_SLIDES[active].desc}</p>
+              </div>
+              <div className="hidden md:block" />
+              <div className="flex items-center gap-2 shrink-0">
                 <button
-                  key={i}
-                  onClick={() => setActive(i)}
-                  className={cn(
-                    "h-2 rounded-full transition-all duration-300",
-                    i === active ? "w-6 bg-[#FE703A]" : "w-2 bg-[rgba(2,52,53,0.2)] hover:bg-[rgba(2,52,53,0.4)]"
-                  )}
-                  aria-label={`Slayt ${i + 1}`}
-                />
-              ))}
-              <button
-                onClick={() => setActive((a) => (a + 1) % count)}
-                className="h-8 w-8 rounded-[9px] bg-white border border-[rgba(2,52,53,0.2)] flex items-center justify-center text-[#023435]/50 hover:bg-[#023435] hover:text-white hover:border-[#023435] transition-colors"
-                aria-label="Sonraki"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+                  onClick={() => { setDirection(-1); setActive((a) => (a - 1 + count) % count); }}
+                  className="h-8 w-8 rounded-[9px] bg-white border border-[rgba(2,52,53,0.2)] flex items-center justify-center text-[#023435]/50 hover:bg-[#023435] hover:text-white hover:border-[#023435] transition-colors"
+                  aria-label="Önceki"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                {HOW_SLIDES.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => goTo(i)}
+                    className={cn(
+                      "h-2 rounded-full transition-all duration-300",
+                      i === active ? "w-6 bg-[#FE703A]" : "w-2 bg-[rgba(2,52,53,0.2)] hover:bg-[rgba(2,52,53,0.4)]"
+                    )}
+                    aria-label={`Slayt ${i + 1}`}
+                  />
+                ))}
+                <button
+                  onClick={() => { setDirection(1); setActive((a) => (a + 1) % count); }}
+                  className="h-8 w-8 rounded-[9px] bg-white border border-[rgba(2,52,53,0.2)] flex items-center justify-center text-[#023435]/50 hover:bg-[#023435] hover:text-white hover:border-[#023435] transition-colors"
+                  aria-label="Sonraki"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -405,6 +497,107 @@ const FEATURES = [
     soon: true,
   },
 ];
+
+// ─── Features Section (Bento Grid) ───────────────────────────────────────────
+function FeaturesSection() {
+  const ref = useRef<HTMLElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <section ref={ref} id="features" className="bg-white py-20 px-6">
+      <div className="mx-auto max-w-5xl">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-14"
+        >
+          <p className="text-xs font-bold uppercase tracking-widest text-[#FE703A] mb-3">ÖZELLİKLER</p>
+          <h2 className="text-2xl font-bold text-zinc-900 mb-3">Her şey tek platformda</h2>
+          <p className="text-sm text-zinc-500">Terapistlerin ihtiyaç duyduğu tüm araçlar, basit ve hızlı.</p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {FEATURES.map((feature, i) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              className={cn(
+                "group relative rounded-2xl border border-zinc-100 bg-white p-6 transition-all duration-300 hover:shadow-lg hover:shadow-[#FE703A]/5 hover:border-[#FE703A]/20",
+                // First two cards span wider on large screens
+                i < 2 && "lg:col-span-1",
+              )}
+            >
+              {/* Glow effect on hover */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#FE703A]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+              <div className="relative z-10">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#FE703A]/10 text-[#FE703A] group-hover:bg-[#FE703A] group-hover:text-white transition-colors duration-300">
+                  {feature.icon}
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="font-bold text-zinc-900">{feature.title}</h3>
+                  {feature.soon && (
+                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500">
+                      Yakında
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-zinc-500 leading-relaxed">{feature.desc}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── FAQ Section ──────────────────────────────────────────────────────────────
+function FaqSection() {
+  const ref = useRef<HTMLElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  return (
+    <section ref={ref} id="faq" className="px-6 py-20 bg-[#F4B2A6]/10">
+      <div className="mx-auto max-w-2xl">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-10"
+        >
+          <p className="text-xs font-bold uppercase tracking-widest text-[#FE703A] mb-3">SSS</p>
+          <h2 className="text-2xl font-bold text-zinc-900 mb-3">Sık sorulan sorular</h2>
+          <p className="text-sm text-zinc-500">Aklınızdaki soruların cevabı burada.</p>
+        </motion.div>
+        <FaqAccordion />
+
+        {/* CTA below FAQ */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-10 rounded-2xl bg-white border border-[#F4B2A6]/30 p-6 text-center shadow-sm"
+        >
+          <p className="text-sm font-medium text-zinc-700 mb-1">Sorunuzu bulamadınız mı?</p>
+          <p className="text-xs text-zinc-400 mb-4">Bize yazın, en kısa sürede yanıt verelim.</p>
+          <a
+            href="mailto:merhaba@ludenlab.com"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#023435] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#023435]/90 transition-colors"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Bize Yazın
+          </a>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
 
 // ─── Pricing ──────────────────────────────────────────────────────────────────
 const CREDIT_NOTE = "Her öğrenme kartı veya eğitim profili 20 kredi harcar. Krediler dönem başında yüklenir.";
@@ -483,10 +676,85 @@ const PLANS: PricingPlan[] = [
 ];
 
 // ─── Landing Page ─────────────────────────────────────────────────────────────
+// ─── Social Proof Band ────────────────────────────────────────────────────────
+function CountUp({ target, suffix = "" }: { target: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (!isInView) return;
+    const duration = 1800;
+    const steps = 40;
+    const increment = target / steps;
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, duration / steps);
+    return () => clearInterval(timer);
+  }, [isInView, target]);
+
+  return <span ref={ref}>{count.toLocaleString("tr-TR")}{suffix}</span>;
+}
+
+function SocialProofBand() {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+
+  const stats = [
+    { value: 500, suffix: "+", label: "Aktif Uzman" },
+    { value: 12000, suffix: "+", label: "Üretilen Kart" },
+    { value: 98, suffix: "%", label: "Memnuniyet" },
+    { value: 50, suffix: "+", label: "Klinik" },
+  ];
+
+  return (
+    <section ref={ref} className="relative bg-[#023435] border-t border-white/5">
+      <div className="mx-auto max-w-5xl px-6 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, staggerChildren: 0.1 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center"
+        >
+          {stats.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="flex flex-col items-center"
+            >
+              <span className="text-2xl md:text-3xl font-bold text-white">
+                <CountUp target={stat.value} suffix={stat.suffix} />
+              </span>
+              <span className="text-xs text-white/50 mt-1 font-medium">{stat.label}</span>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Landing Page ─────────────────────────────────────────────────────────────
 export default function LandingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const NAV_LINKS = [
+    { href: "#features", label: "Özellikler" },
+    { href: "#pricing", label: "Fiyatlandırma" },
+    { href: "#faq", label: "SSS" },
+  ];
 
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
@@ -512,8 +780,8 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white text-zinc-900">
       {/* ── Header ── */}
       <header className={cn(
-        "sticky top-0 z-40 px-6 py-3 transition-colors duration-300 bg-[#023435]",
-        scrolled && "shadow-lg"
+        "sticky top-0 z-40 px-6 transition-all duration-300 bg-[#023435]",
+        scrolled ? "py-2 shadow-lg shadow-black/20" : "py-3"
       )}>
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
           <Link href="/" className="shrink-0">
@@ -522,14 +790,28 @@ export default function LandingPage() {
               alt="LudenLab"
               width={200}
               height={72}
-              className="h-16 w-auto brightness-0 invert"
+              className={cn("w-auto brightness-0 invert transition-all duration-300", scrolled ? "h-12" : "h-16")}
               priority
             />
           </Link>
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-1">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+
           <div className="flex items-center gap-2">
             <Link
               href="/login"
-              className="rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-colors"
+              className="hidden sm:inline-flex rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-colors"
             >
               Giriş Yap
             </Link>
@@ -539,26 +821,67 @@ export default function LandingPage() {
             >
               Ücretsiz Başla
             </Link>
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden flex items-center justify-center h-9 w-9 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              aria-label="Menü"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                {mobileMenuOpen
+                  ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                }
+              </svg>
+            </button>
           </div>
         </div>
+
+        {/* Mobile dropdown */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="md:hidden overflow-hidden"
+            >
+              <nav className="flex flex-col gap-1 pt-3 pb-2 border-t border-white/10 mt-3">
+                {NAV_LINKS.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="sm:hidden rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                >
+                  Giriş Yap
+                </Link>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* ── Hero ── */}
       <GlowyWavesHero />
 
+      {/* ── Social Proof ── */}
+      <SocialProofBand />
+
       {/* ── How It Works ── */}
       <HowItWorksCarousel />
 
       {/* ── Features ── */}
-      <section id="features" className="bg-white">
-        <div className="mx-auto max-w-5xl px-6 pt-20">
-          <div className="text-center mb-0">
-            <h2 className="text-2xl font-bold text-zinc-900 mb-3">Her şey tek platformda</h2>
-            <p className="text-sm text-zinc-500">Terapistlerin ihtiyaç duyduğu tüm araçlar, basit ve hızlı.</p>
-          </div>
-        </div>
-        <FeaturesSectionWithHoverEffects features={FEATURES} />
-      </section>
+      <FeaturesSection />
 
       {/* ── Pricing ── */}
       <section id="pricing" className="bg-zinc-50">
@@ -566,15 +889,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section id="faq" className="px-6 py-20 bg-[#F4B2A6]/10">
-        <div className="mx-auto max-w-2xl">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-zinc-900 mb-3">Sık sorulan sorular</h2>
-            <p className="text-sm text-zinc-500">Aklınızdaki soruların cevabı burada.</p>
-          </div>
-          <FaqAccordion />
-        </div>
-      </section>
+      <FaqSection />
 
       {/* ── Footer ── */}
       <footer className="bg-[#023435] px-6 py-12">
