@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, Filter } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,7 +31,8 @@ interface UserRow {
   lastLogin:     string | null;
   createdAt:     string;
   subscriptions: Subscription[];
-  _count:        { students: number; cards: number };
+  _count:        { students: number; cards: number; lessons: number };
+  cardStats?:    Record<string, number>;
 }
 
 interface PlanCount {
@@ -60,6 +62,18 @@ const PLAN_INFO: Record<PlanType, { students: string; credits: string }> = {
 
 const PLANS: PlanType[] = ["FREE", "PRO", "ADVANCED", "ENTERPRISE"];
 const CREDIT_PRESETS    = [50, 100, 500, 1000, 2000];
+
+const TOOL_LABELS: Record<string, string> = {
+  LEARNING_CARD: "Öğrenme Kartı",
+  SOCIAL_STORY: "Sosyal Hikaye",
+  ARTICULATION_DRILL: "Artikülasyon Alıştırması",
+  HOMEWORK_MATERIAL: "Ev Ödevi Materyali",
+  WEEKLY_PLAN: "Haftalık Plan",
+  SESSION_SUMMARY: "Seans Özeti",
+  MATCHING_GAME: "Eşleştirme Oyunu",
+  PHONATION_ACTIVITY: "Fonasyon Aktivitesi",
+  COMMUNICATION_BOARD: "İletişim Panosu",
+};
 
 function fmtDate(str: string | null | undefined) {
   if (!str) return "—";
@@ -389,6 +403,9 @@ function ActionDropdown({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
+type SortKey = "name" | "planType" | "credits" | "currentPeriodEnd" | "students" | "lastLogin" | "createdAt" | "cards" | "lessons";
+type SortDir = "asc" | "desc";
+
 export default function AdminUsersPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -396,8 +413,21 @@ export default function AdminUsersPage() {
   const [users,      setUsers]      = useState<UserRow[]>([]);
   const [planCounts, setPlanCounts] = useState<PlanCount[]>([]);
   const [loading,    setLoading]    = useState(true);
-  const [search,     setSearch]     = useState("");
+  
+  // Filters & Search
+  const [search,       setSearch]       = useState("");
+  const [filterPlan,   setFilterPlan]   = useState<PlanType | "ALL">("ALL");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | "ADMIN" | "SUSPENDED">("ALL");
 
+  // Sorting
+  const [sortKey, setSortKey] = useState<SortKey>("createdAt");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  // Pagination
+  const [page,    setPage]    = useState(1);
+  const [perPage, setPerPage] = useState(20);
+
+  // Modal State
   const [manageUser, setManageUser] = useState<UserRow | null>(null);
   const [confirmDel, setConfirmDel] = useState<string | null>(null);
   const [deleting,   setDeleting]   = useState(false);
@@ -422,7 +452,6 @@ export default function AdminUsersPage() {
 
   function updateUser(id: string, patch: Partial<UserRow>) {
     setUsers((prev) => prev.map((u) => u.id === id ? { ...u, ...patch } : u));
-    // manageUser'ı da güncelle
     setManageUser((prev) => prev?.id === id ? { ...prev, ...patch } : prev);
   }
 
@@ -455,172 +484,437 @@ export default function AdminUsersPage() {
     setConfirmDel(null);
   }
 
-  const filtered = users.filter((u) =>
-    !search ||
-    u.name.toLowerCase().includes(search.toLowerCase()) ||
-    u.email.toLowerCase().includes(search.toLowerCase())
-  );
+  // 1. Dizeye Filtre Uygula
+  const filteredUsers = useMemo(() => {
+    let result = [...users];
+
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter((u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
+    }
+
+    if (filterPlan !== "ALL") {
+      result = result.filter((u) => u.planType === filterPlan);
+    }
+
+    if (filterStatus === "ADMIN") {
+      result = result.filter((u) => u.role === "admin");
+    } else if (filterStatus === "SUSPENDED") {
+      result = result.filter((u) => u.suspended);
+    }
+
+    return result;
+  }, [users, search, filterPlan, filterStatus]);
+
+  // 2. Sırala
+  const sortedUsers = useMemo(() => {
+    return filteredUsers.sort((a, b) => {
+      let valA: any = a[sortKey as keyof UserRow];
+      let valB: any = b[sortKey as keyof UserRow];
+
+      if (sortKey === "students") {
+        valA = a._count.students;
+        valB = b._count.students;
+      } else if (sortKey === "cards") {
+        valA = a._count.cards;
+        valB = b._count.cards;
+      } else if (sortKey === "lessons") {
+        valA = a._count.lessons || 0;
+        valB = b._count.lessons || 0;
+      } else if (sortKey === "currentPeriodEnd") {
+        valA = activeSub(a)?.currentPeriodEnd || "0000-00-00";
+        valB = activeSub(b)?.currentPeriodEnd || "0000-00-00";
+        if (a.role === "admin") valA = "9999-99-99"; // push admins to top/bottom
+        if (b.role === "admin") valB = "9999-99-99";
+      }
+
+      if (valA === null) valA = "";
+      if (valB === null) valB = "";
+
+      if (valA < valB) return sortDir === "asc" ? -1 : 1;
+      if (valA > valB) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filteredUsers, sortKey, sortDir]);
+
+  // 3. Sayfalama
+  const totalItems = sortedUsers.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / perPage));
+  const currentPage = Math.min(page, totalPages);
+  
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * perPage;
+    return sortedUsers.slice(start, start + perPage);
+  }, [sortedUsers, currentPage, perPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, filterPlan, filterStatus, perPage]);
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("desc"); // Defaults to descending when switching keys
+    }
+  };
+
+  const SortIcon = ({ columnKey }: { columnKey: SortKey }) => {
+    if (sortKey !== columnKey) return <ChevronsUpDown className="ml-1 h-3 w-3 opacity-30" />;
+    return sortDir === "asc" 
+      ? <ChevronUp className="ml-1 h-3 w-3 text-[#FE703A]" /> 
+      : <ChevronDown className="ml-1 h-3 w-3 text-[#FE703A]" />;
+  };
 
   if (loading || status === "loading") {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="h-8 w-8 rounded-full border-2 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
+      <div className="flex items-center justify-center min-h-[60vh] w-full">
+        <div className="h-10 w-10 rounded-full border-2 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 space-y-6">
+    <div 
+      className="min-h-full flex-1 w-full flex flex-col relative overflow-y-auto custom-scrollbar bg-[#F0F4F4]"
+      style={{ background: "linear-gradient(135deg, #f0f7f7 0%, #e8f4f4 50%, #f5fafa 100%)" }}
+    >
+      {/* Decorative Orbs */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#107996]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#FE703A]/5 rounded-full blur-[150px] translate-x-1/2 translate-y-1/2 pointer-events-none" />
 
-      {/* ── Header ── */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Üye Yönetimi</h1>
-          <p className="mt-1 text-sm text-zinc-500">{users.length} kullanıcı kayıtlı</p>
-        </div>
-        <a
-          href="/admin"
-          className="rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
-        >
-          ← Admin Panel
-        </a>
-      </div>
-
-      {/* ── Özet kartlar ── */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {[
-          { label: "Toplam Kullanıcı", value: users.length,          color: "border-l-[#023435]", textColor: "text-[#023435]"  },
-          { label: "Free",             value: planCount("FREE"),      color: "border-l-zinc-400",  textColor: "text-zinc-600"   },
-          { label: "Pro",              value: planCount("PRO"),       color: "border-l-[#107996]", textColor: "text-[#107996]"  },
-          { label: "Advanced",         value: planCount("ADVANCED"),  color: "border-l-[#FE703A]", textColor: "text-[#FE703A]"  },
-        ].map((card) => (
-          <div key={card.label} className={cn("rounded-xl border border-zinc-200 bg-white p-5 border-l-4", card.color)}>
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">{card.label}</p>
-            <p className={cn("mt-1 text-3xl font-bold", card.textColor)}>{card.value}</p>
+      <div className="mx-auto w-full max-w-[1400px] px-6 py-8 pb-12 relative z-10 flex-1 flex flex-col space-y-8">
+        {/* ── Header ── */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold text-[#023435] tracking-tight">Gelişmiş Yönetim</h1>
+            <p className="mt-1 text-sm text-[#023435]/60">Sistemdeki tüm kayıtlı {users.length} terapist ve kullanıcıyı yönetin.</p>
           </div>
-        ))}
-      </div>
-
-      {/* ── Tablo ── */}
-      <div className="rounded-xl border border-zinc-200 bg-white overflow-hidden">
-        <div className="flex items-center justify-between gap-4 border-b border-zinc-100 px-6 py-4">
-          <h2 className="text-sm font-semibold text-zinc-800">Kullanıcılar</h2>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Ad veya email ara..."
-            className="w-60 rounded-xl border border-zinc-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#023435]/20"
-          />
+          <a
+            href="/admin"
+            className="rounded-xl border border-white/60 bg-white/40 shadow-sm backdrop-blur-md px-5 py-2.5 text-sm font-bold text-[#023435] hover:bg-white/80 hover:-translate-y-0.5 transition-all"
+          >
+            ← Admin Panele Dön
+          </a>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-zinc-100 bg-zinc-50">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Ad / Email</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Plan</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Kredi</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Üyelik Bitiş</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Öğrenci</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-400 uppercase tracking-wide">Son Giriş</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {filtered.map((u) => {
-                const sub = activeSub(u);
-                return (
-                  <tr
-                    key={u.id}
-                    className={cn("transition-colors", u.suspended ? "bg-red-50/50" : "hover:bg-zinc-50")}
+        {/* ── Özet kartlar ── */}
+        <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+          {[
+            { label: "Toplam Kullanıcı", value: users.length,          color: "border-l-[#023435]", textColor: "text-[#023435]"  },
+            { label: "Free",             value: planCount("FREE"),      color: "border-l-zinc-400",  textColor: "text-zinc-600"   },
+            { label: "Pro",              value: planCount("PRO"),       color: "border-l-[#107996]", textColor: "text-[#107996]"  },
+            { label: "Advanced",         value: planCount("ADVANCED"),  color: "border-l-[#FE703A]", textColor: "text-[#FE703A]"  },
+          ].map((card) => (
+            <div key={card.label} className={cn("rounded-[20px] border border-white/60 bg-white/40 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-md p-5 border-l-4 transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)]", card.color)}>
+              <p className="text-xs font-bold uppercase tracking-wide text-[#023435]/50">{card.label}</p>
+              <p className={cn("mt-1.5 text-3xl font-extrabold", card.textColor)}>{card.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* ── FİLTRELEME & ARAMA ÇUBUĞU ── */}
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 rounded-[20px] border border-white/60 bg-white/60 shadow-sm backdrop-blur-md p-4">
+          <div className="relative w-full lg:max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#023435]/40" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="İsim veya email ile arayın..."
+              className="w-full rounded-xl border border-white/40 bg-white/60 pl-10 pr-4 py-2 text-sm text-[#023435] placeholder:text-[#023435]/40 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 focus:bg-white transition-all shadow-inner"
+            />
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-[#023435]/40" />
+              <select
+                value={filterPlan}
+                onChange={(e) => setFilterPlan(e.target.value as any)}
+                className="rounded-xl border border-white/40 bg-white/60 px-3 py-2 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 appearance-none font-medium cursor-pointer"
+              >
+                <option value="ALL">Tüm Planlar</option>
+                <option value="FREE">Free</option>
+                <option value="PRO">Pro</option>
+                <option value="ADVANCED">Advanced</option>
+                <option value="ENTERPRISE">Enterprise</option>
+              </select>
+            </div>
+            
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as any)}
+              className="rounded-xl border border-white/40 bg-white/60 px-3 py-2 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 appearance-none font-medium cursor-pointer"
+            >
+              <option value="ALL">Tüm Durumlar</option>
+              <option value="ADMIN">Sadece Adminler</option>
+              <option value="SUSPENDED">Askıya Alınanlar</option>
+            </select>
+            
+            <select
+              value={perPage}
+              onChange={(e) => setPerPage(Number(e.target.value))}
+              className="rounded-xl border border-white/40 bg-white/60 px-3 py-2 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 appearance-none font-medium cursor-pointer"
+            >
+              <option value={10}>10 Göster</option>
+              <option value={20}>20 Göster</option>
+              <option value={50}>50 Göster</option>
+              <option value={100}>100 Göster</option>
+            </select>
+          </div>
+        </div>
+
+        {/* ── Tablo Alanı ── */}
+        <div className="rounded-[24px] border border-white/80 bg-white/70 shadow-[0_8px_32px_rgba(2,52,53,0.04)] backdrop-blur-xl overflow-hidden flex flex-col">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#023435]/5 bg-white/40">
+                  <th 
+                    className="text-left px-5 py-4 text-xs font-bold text-[#023435]/60 uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    onClick={() => toggleSort("name")}
                   >
-                    {/* Ad / Email */}
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium text-zinc-800">{u.name}</span>
-                        {u.role === "admin" && (
-                          <span className="rounded-full bg-[#023435] px-1.5 py-0.5 text-[10px] font-bold text-white">Admin</span>
-                        )}
-                        {u.suspended && (
-                          <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-600">Askıda</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-zinc-400 mt-0.5">{u.email}</p>
-                    </td>
-
-                    {/* Plan */}
-                    <td className="px-4 py-3.5">
-                      <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-semibold", PLAN_BADGE[u.planType])}>
-                        {PLAN_LABEL[u.planType]}
-                      </span>
-                      {sub && (
-                        <p className="text-[10px] text-zinc-400 mt-0.5">
-                          {sub.billingCycle === "MONTHLY" ? "Aylık" : "Yıllık"}
-                        </p>
-                      )}
-                    </td>
-
-                    {/* Kredi */}
-                    <td className="px-4 py-3.5">
-                      <span className="font-semibold text-zinc-800">{u.credits.toLocaleString("tr-TR")}</span>
-                    </td>
-
-                    {/* Üyelik Bitiş */}
-                    <td className="px-4 py-3.5 text-xs text-zinc-500 whitespace-nowrap">
-                      {sub ? fmtDate(sub.currentPeriodEnd) : "—"}
-                    </td>
-
-                    {/* Öğrenci */}
-                    <td className="px-4 py-3.5 text-center">
-                      <span className="font-semibold text-zinc-700">{u._count.students}</span>
-                      {u.studentLimit !== -1 && (
-                        <span className="text-zinc-400 text-xs"> / {u.studentLimit}</span>
-                      )}
-                    </td>
-
-                    {/* Son Giriş */}
-                    <td className="px-4 py-3.5 text-xs text-zinc-500 whitespace-nowrap">
-                      {fmtDate(u.lastLogin)}
-                    </td>
-
-                    {/* İşlemler */}
-                    <td className="px-4 py-3.5">
-                      {confirmDel === u.id ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => setConfirmDel(null)} className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors">İptal</button>
-                          <button
-                            onClick={() => handleDelete(u.id)}
-                            disabled={deleting}
-                            className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
-                          >
-                            {deleting ? "Siliniyor…" : "Onayla"}
-                          </button>
+                    <div className="flex items-center">Ad / Email <SortIcon columnKey="name" /></div>
+                  </th>
+                  <th 
+                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    onClick={() => toggleSort("planType")}
+                  >
+                    <div className="flex items-center">Plan <SortIcon columnKey="planType" /></div>
+                  </th>
+                  <th 
+                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    onClick={() => toggleSort("credits")}
+                  >
+                    <div className="flex items-center">Kredi <SortIcon columnKey="credits" /></div>
+                  </th>
+                  <th 
+                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    onClick={() => toggleSort("currentPeriodEnd")}
+                  >
+                    <div className="flex items-center">Üyelik Bitiş <SortIcon columnKey="currentPeriodEnd" /></div>
+                  </th>
+                  <th 
+                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    onClick={() => toggleSort("cards")}
+                  >
+                    <div className="flex items-center justify-center">Materyal <SortIcon columnKey="cards" /></div>
+                  </th>
+                  <th 
+                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    onClick={() => toggleSort("students")}
+                  >
+                    <div className="flex items-center justify-center">Öğrenci <SortIcon columnKey="students" /></div>
+                  </th>
+                  <th 
+                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    onClick={() => toggleSort("lessons")}
+                  >
+                    <div className="flex items-center justify-center">Randevu <SortIcon columnKey="lessons" /></div>
+                  </th>
+                  <th 
+                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    onClick={() => toggleSort("lastLogin")}
+                  >
+                    <div className="flex items-center">Son Giriş <SortIcon columnKey="lastLogin" /></div>
+                  </th>
+                  <th className="px-4 py-4" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#023435]/5 bg-white/20">
+                {paginatedUsers.map((u) => {
+                  const sub = activeSub(u);
+                  return (
+                    <tr
+                      key={u.id}
+                      className={cn("transition-all duration-200 group", u.suspended ? "bg-red-50/50 hover:bg-red-50/80" : "hover:bg-white/60")}
+                    >
+                      {/* Ad / Email */}
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-[#023435]">{u.name}</span>
+                          {u.role === "admin" && (
+                            <span className="rounded-md bg-[#023435] px-2 py-0.5 text-[10px] font-extrabold tracking-wider text-white shadow-sm">ADMIN</span>
+                          )}
+                          {u.suspended && (
+                            <span className="rounded-md bg-red-100 border border-red-200 px-2 py-0.5 text-[10px] font-extrabold tracking-wider text-red-600 shadow-sm">ASKIDA</span>
+                          )}
                         </div>
-                      ) : (
-                        <ActionDropdown
-                          user={u}
-                          currentUserId={session!.user!.id!}
-                          onManage={() => setManageUser(u)}
-                          onToggleRole={() => handleToggleRole(u)}
-                          onToggleSuspend={() => handleToggleSuspend(u)}
-                          onDelete={() => setConfirmDel(u.id)}
-                        />
-                      )}
+                        <p className="text-xs text-[#023435]/50 mt-1 font-medium">{u.email}</p>
+                      </td>
+
+                      {/* Plan */}
+                      <td className="px-4 py-4">
+                        <span className={cn("rounded-lg border px-3 py-1 text-[11px] font-extrabold tracking-wide uppercase", PLAN_BADGE[u.planType])}>
+                          {PLAN_LABEL[u.planType]}
+                        </span>
+                        {sub && (
+                          <p className="text-[10px] text-[#023435]/40 mt-1.5 font-bold uppercase tracking-wider">
+                            {sub.billingCycle === "MONTHLY" ? "AYLIK" : "YILLIK"}
+                          </p>
+                        )}
+                      </td>
+
+                      {/* Kredi */}
+                      <td className="px-4 py-4">
+                        <span className="font-extrabold text-[#023435] tabular-nums bg-white/60 border border-white px-2 py-1 rounded-md shadow-sm drop-shadow-sm">
+                          {u.credits.toLocaleString("tr-TR")}
+                        </span>
+                      </td>
+
+                      {/* Üyelik Bitiş */}
+                      <td className="px-4 py-4 text-[13px] font-medium text-[#023435]/70 whitespace-nowrap tabular-nums">
+                        {sub ? fmtDate(sub.currentPeriodEnd) : "—"}
+                      </td>
+
+                      {/* Materyal */}
+                      <td className="px-4 py-4 text-center">
+                        <div className="group/tooltip relative inline-block cursor-help">
+                          <span className="font-extrabold text-[#023435] tabular-nums bg-[#107996]/10 px-2 py-1 rounded-md border border-[#107996]/20 transition-all group-hover/tooltip:bg-[#107996]/20">
+                            {u._count.cards}
+                          </span>
+                          {/* Tooltip Popup */}
+                          <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 opacity-0 transition-all duration-200 group-hover/tooltip:opacity-100 group-hover/tooltip:-translate-y-1">
+                            <div className="min-w-[200px] overflow-hidden rounded-xl border border-white/60 bg-white/80 p-3 shadow-xl backdrop-blur-xl">
+                              <p className="mb-2 text-[10px] font-extrabold uppercase tracking-widest text-[#023435]/50 border-b border-[#023435]/10 pb-1">
+                                Kategori Dağılımı
+                              </p>
+                              {Object.keys(u.cardStats || {}).length === 0 ? (
+                                <p className="text-xs font-medium text-[#023435]/60">Henüz materyal üretilmedi</p>
+                              ) : (
+                                <ul className="space-y-1.5 flex flex-col items-start w-full">
+                                  {Object.entries(u.cardStats || {})
+                                    .sort((a,b) => b[1] - a[1]) // highest first
+                                    .map(([toolType, count]) => (
+                                    <li key={toolType} className="flex items-center justify-between w-full text-xs gap-3">
+                                      <span className="font-medium text-[#023435]/70 whitespace-nowrap">
+                                        {TOOL_LABELS[toolType] || toolType}
+                                      </span>
+                                      <span className="font-extrabold text-[#107996] tabular-nums bg-[#107996]/10 px-1.5 rounded">
+                                        {count}
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Öğrenci */}
+                      <td className="px-4 py-4 text-center">
+                        <span className="font-extrabold text-[#023435] tabular-nums">{u._count.students}</span>
+                        {u.studentLimit !== -1 && (
+                          <span className="text-[#023435]/40 text-xs font-bold"> / {u.studentLimit}</span>
+                        )}
+                      </td>
+
+                      {/* Randevu */}
+                      <td className="px-4 py-4 text-center">
+                        <span className="font-extrabold text-[#FE703A] tabular-nums bg-[#FE703A]/10 px-2 py-1 rounded-md border border-[#FE703A]/20">
+                          {u._count.lessons || 0}
+                        </span>
+                      </td>
+
+                      {/* Son Giriş */}
+                      <td className="px-4 py-4 text-[13px] font-medium text-[#023435]/70 whitespace-nowrap tabular-nums">
+                        {fmtDate(u.lastLogin)}
+                      </td>
+
+                      {/* İşlemler */}
+                      <td className="px-4 py-4">
+                        {confirmDel === u.id ? (
+                          <div className="flex items-center justify-end gap-2 animate-in fade-in slide-in-from-right-4">
+                            <button onClick={() => setConfirmDel(null)} className="text-xs font-bold text-[#023435]/40 hover:text-[#023435] transition-colors bg-white/50 px-3 py-1.5 rounded-lg border border-white">İptal</button>
+                            <button
+                              onClick={() => handleDelete(u.id)}
+                              disabled={deleting}
+                              className="rounded-lg bg-red-500 border border-red-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-red-600 disabled:opacity-50 transition-all"
+                            >
+                              {deleting ? "Siliniyor..." : "Sil Onayla"}
+                            </button>
+                          </div>
+                        ) : (
+                          <ActionDropdown
+                            user={u}
+                            currentUserId={session!.user!.id!}
+                            onManage={() => setManageUser(u)}
+                            onToggleRole={() => handleToggleRole(u)}
+                            onToggleSuspend={() => handleToggleSuspend(u)}
+                            onDelete={() => setConfirmDel(u.id)}
+                          />
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+
+                {paginatedUsers.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="py-16 text-center text-sm font-medium text-[#023435]/40 bg-white/30 backdrop-blur-sm">
+                      {search || filterPlan !== "ALL" || filterStatus !== "ALL" 
+                        ? "Girilen filtrelere uygun kullanıcı bulunamadı." 
+                        : "Henüz kayıtlı kullanıcı yok."}
                     </td>
                   </tr>
-                );
-              })}
+                )}
+              </tbody>
+            </table>
+          </div>
 
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-sm text-zinc-400">
-                    {search ? "Arama sonucu bulunamadı" : "Henüz kayıtlı kullanıcı yok"}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          {/* ── PAGINATION CONTROLS ── */}
+          {totalPages > 1 && (
+            <div className="bg-white/40 border-t border-[#023435]/5 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-sm font-medium text-[#023435]/60">
+                Toplam <span className="font-extrabold text-[#023435]">{totalItems}</span> kayıt · Sayfa {currentPage} / {totalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-xl border border-white/60 bg-white/60 text-[#023435] hover:bg-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                    // Simple logic to show a few pages around current page
+                    let pageNum = currentPage - 2 + i;
+                    if (currentPage <= 3) pageNum = i + 1;
+                    else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                    
+                    if (pageNum < 1 || pageNum > totalPages) return null;
+
+                    return (
+                       <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={cn(
+                          "w-9 h-9 rounded-xl text-sm font-bold transition-all border shadow-sm",
+                          currentPage === pageNum 
+                            ? "bg-[#023435] text-white border-[#023435]" 
+                            : "bg-white/60 text-[#023435] border-white/60 hover:bg-white"
+                        )}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  })}
+                </div>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-xl border border-white/60 bg-white/60 text-[#023435] hover:bg-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

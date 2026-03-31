@@ -20,7 +20,7 @@ export async function GET() {
     return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
   }
 
-  const [users, planCounts] = await Promise.all([
+  const [users, planCounts, cardGroups] = await Promise.all([
     prisma.therapist.findMany({
       orderBy: { createdAt: "asc" },
       select: {
@@ -35,7 +35,7 @@ export async function GET() {
         suspended: true,
         lastLogin: true,
         createdAt: true,
-        _count: { select: { students: true, cards: true } },
+        _count: { select: { students: true, cards: true, lessons: true } },
         subscriptions: {
           where: { status: "ACTIVE" },
           orderBy: { createdAt: "desc" },
@@ -48,9 +48,23 @@ export async function GET() {
       by: ["planType"],
       _count: { _all: true },
     }),
+    prisma.card.groupBy({
+      by: ["therapistId", "toolType"],
+      _count: { _all: true },
+    })
   ]);
 
-  return NextResponse.json({ users, planCounts });
+  const mergedUsers = users.map((u) => {
+    const stats: Record<string, number> = {};
+    cardGroups
+      .filter((g) => g.therapistId === u.id)
+      .forEach((g) => {
+        stats[g.toolType] = g._count._all;
+      });
+    return { ...u, cardStats: stats };
+  });
+
+  return NextResponse.json({ users: mergedUsers, planCounts });
 }
 
 export async function DELETE(request: NextRequest) {
