@@ -15,6 +15,7 @@ import {
   DIFFICULTY_LABEL,
   AGE_LABEL,
 } from "@/lib/constants";
+import { Filter } from "lucide-react";
 
 interface CardItem {
   id: string;
@@ -374,6 +375,7 @@ export default function CardsPage() {
   const [swipeOpenId, setSwipeOpenId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deletingCardId, setDeletingCardId] = useState<string | null>(null);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Filtreler — ortak
   const [filterToolType,   setFilterToolType]   = useState<ToolTypeFilter>("all");
@@ -415,7 +417,7 @@ export default function CardsPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/cards?page=1&limit=20").then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch("/api/cards?page=1&limit=1000").then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
       fetch("/api/curriculum").then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
     ]).then(([cData, curData]) => {
       setCards(cData.cards ?? []);
@@ -429,7 +431,7 @@ export default function CardsPage() {
     const nextPage = page + 1;
     setLoadingMore(true);
     try {
-      const res = await fetch(`/api/cards?page=${nextPage}&limit=20`);
+      const res = await fetch(`/api/cards?page=${nextPage}&limit=1000`);
       const data = await res.json();
       setCards((prev) => [...prev, ...(data.cards ?? [])]);
       setHasMore(data.hasMore ?? false);
@@ -727,97 +729,142 @@ export default function CardsPage() {
   }
 
   return (
-    <>
-      <div className="border-b border-zinc-100 bg-white px-6 py-2.5">
-        <div className="mx-auto max-w-5xl flex items-center justify-between">
-          <h1 className="text-sm font-semibold text-zinc-700">Kart Kütüphanesi</h1>
-          <Link href="/generate"><Button size="sm">✨ Kart Üret</Button></Link>
+    <div className="min-h-full flex-1 w-full flex flex-col relative bg-[#F0F4F4] overflow-x-hidden custom-scrollbar" style={{ background: "linear-gradient(135deg, #f0f7f7 0%, #e8f4f4 50%, #f5fafa 100%)" }}>
+      {/* Dekoratif Işıklar (Orbs) */}
+      <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-[#107996]/10 rounded-full blur-[120px] pointer-events-none translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-1/4 left-0 w-[500px] h-[500px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none -translate-x-1/2 translate-y-1/2" />
+
+      {/* Header */}
+      <div className="sticky top-0 z-20 border-b border-white/60 bg-white/70 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.03)] px-6 py-4 transition-all">
+        <div className="mx-auto max-w-6xl flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-extrabold text-[#023435] tracking-tight">Kütüphane</h1>
+            <p className="mt-0.5 text-xs text-[#023435]/60 font-medium">{cards.length} materyal kayıtlı</p>
+          </div>
+          <Link href="/generate">
+            <Button className="bg-[#FE703A] hover:bg-[#FE703A]/90 text-white font-bold tracking-wide shadow-md shadow-[#FE703A]/20 transition-all hover:-translate-y-0.5 rounded-xl px-5 h-10">
+              ✨ Yeni Üret
+            </Button>
+          </Link>
         </div>
       </div>
 
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 overflow-x-hidden">
+      <main className="mx-auto max-w-6xl w-full px-4 sm:px-6 py-8 relative z-10 flex-1">
         {cards.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-20 text-center">
-            <div className="text-4xl mb-3">🗂️</div>
-            <p className="text-sm font-medium text-zinc-500 mb-1">Henüz kart oluşturulmadı</p>
-            <p className="text-xs text-zinc-400 mb-4">Öğrencileriniz için kart üretmeye başlayın.</p>
-            <Link href="/generate"><Button size="sm">✨ Kart Üret</Button></Link>
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 bg-white/40 shadow-sm backdrop-blur-md py-20 text-center">
+            <div className="text-5xl mb-4 opacity-80">🗂️</div>
+            <p className="text-lg font-bold text-[#023435] mb-1">Henüz materyal üretilmedi</p>
+            <p className="text-sm font-medium text-[#023435]/50 mb-6">Öğrencileriniz için harika materyaller üretmeye başlayın.</p>
+            <Link href="/generate">
+              <Button className="bg-[#107996] hover:bg-[#107996]/90 text-white font-bold tracking-wide shadow-md shadow-[#107996]/20 transition-all hover:-translate-y-0.5 rounded-xl px-6 h-11 text-sm">
+                ✨ Materyal Üret
+              </Button>
+            </Link>
           </div>
         ) : (
           <>
-            {/* ── Araç Türü Filtresi ── */}
-            <div className="mb-3 flex flex-wrap gap-1.5">
-              {TOOL_TYPE_OPTIONS.map((o) => (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => setFilterToolType(o.value)}
-                  className={cn(
-                    "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                    filterToolType === o.value
-                      ? "bg-[#023435] text-white border-[#023435]"
-                      : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
-                  )}
-                >
-                  {o.label}
-                </button>
-              ))}
+            {/* ── İhtişamlı Yatay Menü (Araç Türü) ── */}
+            <div className="mb-6 overflow-x-auto pb-2 custom-scrollbar">
+              <div className="flex gap-2 w-max p-1 bg-white/40 backdrop-blur-md border border-white/60 rounded-full shadow-inner">
+                {TOOL_TYPE_OPTIONS.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => setFilterToolType(o.value)}
+                    className={cn(
+                      "rounded-full px-5 py-2 text-xs font-bold transition-all whitespace-nowrap",
+                      filterToolType === o.value
+                        ? "bg-[#023435] text-white shadow-md shadow-[#023435]/20"
+                        : "bg-transparent text-[#023435]/60 hover:text-[#023435] hover:bg-white/60"
+                    )}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* ── Filtre Paneli ── */}
-            <div className="mb-6 space-y-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-
-              {/* Ortak: Öğrenci */}
-              {uniqueStudents.length > 0 && (
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Öğrenci</span>
-                  <select
-                    value={filterStudent}
-                    onChange={(e) => setFilterStudent(e.target.value)}
-                    className={cn(SELECT_CLS, filterStudent !== "" && "border-[#023435] bg-[#023435]/5 text-[#023435]")}
-                  >
-                    <option value="">Tüm öğrenciler</option>
-                    {uniqueStudents.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Ortak: Yaş Grubu */}
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Yaş</span>
-                <PillGroup
-                  options={AGE_OPTIONS}
-                  value={filterAgeGroup}
-                  onChange={setFilterAgeGroup}
-                  activeClass="border-purple-400 bg-purple-50 text-purple-700"
-                />
+            {/* ── Gelişmiş Filtre Toggle ── */}
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <button
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/50 border border-white/60 text-[#023435] text-sm font-bold shadow-sm hover:bg-white hover:-translate-y-0.5 transition-all w-max"
+              >
+                <Filter className="w-4 h-4 text-[#FE703A]" />
+                {showAdvancedFilters ? "Seçenekleri Gizle" : "Gelişmiş Seçenekler"}
+                {hasActiveFilters && !showAdvancedFilters && (
+                  <span className="flex h-2 w-2 rounded-full bg-[#FE703A] animate-pulse relative -top-1 -right-0.5" />
+                )}
+              </button>
+              
+              <div className="flex items-center gap-2">
+                {hasActiveFilters && (
+                  <button onClick={clearFilters} className="text-xs font-bold text-red-500/70 hover:text-red-500 transition-colors w-max mr-2 px-2">
+                    Temizle
+                  </button>
+                )}
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortBy)}
+                  className="rounded-xl border border-white/80 bg-white/50 backdrop-blur-md shadow-sm px-4 py-2 text-sm font-bold text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#FE703A]/50 transition-all cursor-pointer"
+                >
+                  {SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value} className="text-sm font-medium">{o.label}</option>
+                  ))}
+                </select>
               </div>
+            </div>
 
-              {/* Araç türüne özel filtreler */}
-              {filterToolType === "learning" && (
-                <div className="border-t border-zinc-100 pt-3 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Kategori</span>
-                    <PillGroup options={CATEGORY_OPTIONS} value={filterCategory} onChange={setFilterCategory} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
+            {/* ── Filtre Paneli (Akordeon Mantığı) ── */}
+            {showAdvancedFilters && (
+              <div className="animate-in fade-in slide-in-from-top-2 mb-6 space-y-4 rounded-3xl border border-white/80 bg-white/60 shadow-[0_8px_32px_rgba(2,52,53,0.04)] backdrop-blur-xl p-5 md:p-6 transition-all">
+
+                {/* Ortak: Öğrenci ve Yaş Grubu (Eğer hem öğrenci hem yaş yoksa da sorun değil, esnek yapı) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-[#023435]/5">
+                  {uniqueStudents.length > 0 && (
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Öğrenci Seçimi</span>
+                      <select
+                        value={filterStudent}
+                        onChange={(e) => setFilterStudent(e.target.value)}
+                        className="rounded-xl border border-white/60 bg-white/80 px-3 py-2 text-sm text-[#023435] font-semibold focus:outline-none focus:ring-2 focus:ring-[#107996]/30 shadow-sm cursor-pointer"
+                      >
+                        <option value="">Tüm Öğrenciler</option>
+                        {uniqueStudents.map((s) => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Hedef Yaş Grubu</span>
+                    <PillGroup
+                      options={AGE_OPTIONS}
+                      value={filterAgeGroup}
+                      onChange={setFilterAgeGroup}
+                      activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]"
+                    />
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Zorluk</span>
-                    <PillGroup options={DIFFICULTY_OPTIONS} value={filterDifficulty} onChange={setFilterDifficulty} activeClass="border-amber-400 bg-amber-50 text-amber-700" />
+                </div>
+
+              {/* Araç türüne özel filtreler - Minimalist dizilim */}
+              {filterToolType === "learning" && (
+                <div className="pt-2 space-y-4">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Kategori & Zorluk</span>
+                    <div className="flex flex-wrap gap-4">
+                      <PillGroup options={CATEGORY_OPTIONS} value={filterCategory} onChange={setFilterCategory} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435]" />
+                      <div className="w-px bg-[#023435]/10" />
+                      <PillGroup options={DIFFICULTY_OPTIONS} value={filterDifficulty} onChange={setFilterDifficulty} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" />
+                    </div>
                   </div>
                   {curricula.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Modül</span>
-                      <select
-                        value={filterCurriculum}
-                        onChange={(e) => setFilterCurriculum(e.target.value)}
-                        className={cn(SELECT_CLS, filterCurriculum !== "" && "border-teal-400 bg-teal-50 text-teal-700")}
-                      >
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Bağlı Modül</span>
+                      <select value={filterCurriculum} onChange={(e) => setFilterCurriculum(e.target.value)} className="rounded-xl border border-white/60 bg-white/80 px-3 py-2 text-sm text-[#023435] font-semibold max-w-sm">
                         <option value="">Tüm modüller</option>
-                        {curricula.map((c) => (
-                          <option key={c.id} value={c.id}>{c.title}</option>
-                        ))}
+                        {curricula.map((c) => (<option key={c.id} value={c.id}>{c.title}</option>))}
                       </select>
                     </div>
                   )}
@@ -825,146 +872,66 @@ export default function CardsPage() {
               )}
 
               {filterToolType === "social_story" && (
-                <div className="border-t border-zinc-100 pt-3 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Durum</span>
-                    <PillGroup options={SITUATION_OPTIONS} value={filterSituation} onChange={setFilterSituation} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Ortam</span>
-                    <PillGroup options={ENVIRONMENT_OPTIONS} value={filterEnvironment} onChange={setFilterEnvironment} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Uzunluk</span>
-                    <PillGroup options={STORY_LENGTH_OPTIONS} value={filterStoryLength} onChange={setFilterStoryLength} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
-                  </div>
+                <div className="pt-2 space-y-4">
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Durum</span><PillGroup options={SITUATION_OPTIONS} value={filterSituation} onChange={setFilterSituation} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Ortam</span><PillGroup options={ENVIRONMENT_OPTIONS} value={filterEnvironment} onChange={setFilterEnvironment} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Uzunluk</span><PillGroup options={STORY_LENGTH_OPTIONS} value={filterStoryLength} onChange={setFilterStoryLength} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
               {filterToolType === "session_summary" && (
-                <div className="border-t border-zinc-100 pt-3 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tür</span>
-                    <PillGroup options={SS_SESSION_TYPE_OPTIONS} value={filterSsType} onChange={setFilterSsType} activeClass="border-purple-400 bg-purple-50 text-purple-700" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Sonuç</span>
-                    <PillGroup options={SS_PERFORMANCE_OPTIONS} value={filterSsPerformance} onChange={setFilterSsPerformance} activeClass="border-purple-400 bg-purple-50 text-purple-700" />
-                  </div>
+                <div className="pt-2 space-y-4">
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Oturum Türü</span><PillGroup options={SS_SESSION_TYPE_OPTIONS} value={filterSsType} onChange={setFilterSsType} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Gelişim Sonucu</span><PillGroup options={SS_PERFORMANCE_OPTIONS} value={filterSsPerformance} onChange={setFilterSsPerformance} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
               {filterToolType === "phonation" && (
-                <div className="border-t border-zinc-100 pt-3 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tür</span>
-                    <PillGroup options={PA_ACTIVITY_TYPE_OPTIONS} value={filterPaType} onChange={setFilterPaType} activeClass="border-green-400 bg-green-50 text-green-700" />
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0 mt-1.5">Hedef Ses</span>
-                    <MultiPillGroup options={PA_SOUND_OPTIONS} values={filterPaSounds} onChange={setFilterPaSounds} activeClass="border-green-400 bg-green-50 text-green-700" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Zorluk</span>
-                    <PillGroup options={PA_DIFFICULTY_OPTIONS} value={filterPaDifficulty} onChange={setFilterPaDifficulty} activeClass="border-green-400 bg-green-50 text-green-700" />
-                  </div>
+                <div className="pt-2 space-y-4">
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Aktivite Türü</span><PillGroup options={PA_ACTIVITY_TYPE_OPTIONS} value={filterPaType} onChange={setFilterPaType} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Hedef Sesler (Çoklu Seçim)</span><MultiPillGroup options={PA_SOUND_OPTIONS} values={filterPaSounds} onChange={setFilterPaSounds} activeClass="border-amber-400 bg-amber-50 text-amber-700" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Zorluk Derecesi</span><PillGroup options={PA_DIFFICULTY_OPTIONS} value={filterPaDifficulty} onChange={setFilterPaDifficulty} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
               {filterToolType === "matching_game" && (
-                <div className="border-t border-zinc-100 pt-3 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tür</span>
-                    <PillGroup options={MG_MATCH_TYPE_OPTIONS} value={filterMgMatchType} onChange={setFilterMgMatchType} activeClass="border-[#107996] bg-[#107996]/10 text-[#107996]" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Zorluk</span>
-                    <PillGroup options={MG_DIFFICULTY_OPTIONS} value={filterMgDifficulty} onChange={setFilterMgDifficulty} activeClass="border-[#107996] bg-[#107996]/10 text-[#107996]" />
-                  </div>
+                <div className="pt-2 space-y-4">
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Eşleştirme Modeli</span><PillGroup options={MG_MATCH_TYPE_OPTIONS} value={filterMgMatchType} onChange={setFilterMgMatchType} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Zorluk</span><PillGroup options={MG_DIFFICULTY_OPTIONS} value={filterMgDifficulty} onChange={setFilterMgDifficulty} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
               {filterToolType === "comm_board" && (
-                <div className="border-t border-zinc-100 pt-3 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tür</span>
-                    <PillGroup options={CB_BOARD_TYPE_OPTIONS} value={filterCbBoardType} onChange={setFilterCbBoardType} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Düzen</span>
-                    <PillGroup options={CB_LAYOUT_OPTIONS} value={filterCbLayout} onChange={setFilterCbLayout} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Sembol</span>
-                    <PillGroup options={CB_SYMBOL_COUNT_OPTIONS} value={filterCbSymbolCount} onChange={setFilterCbSymbolCount} activeClass="border-[#023435] bg-[#023435]/5 text-[#023435]" />
-                  </div>
+                <div className="pt-2 space-y-4">
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Pano Konsepti</span><PillGroup options={CB_BOARD_TYPE_OPTIONS} value={filterCbBoardType} onChange={setFilterCbBoardType} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Düzen</span><PillGroup options={CB_LAYOUT_OPTIONS} value={filterCbLayout} onChange={setFilterCbLayout} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Eleman Sayısı</span><PillGroup options={CB_SYMBOL_COUNT_OPTIONS} value={filterCbSymbolCount} onChange={setFilterCbSymbolCount} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
               {filterToolType === "weekly_plan" && (
-                <div className="border-t border-zinc-100 pt-3 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Ders Sayısı</span>
-                    <PillGroup options={WP_SESSIONS_OPTIONS} value={filterWpSessions} onChange={setFilterWpSessions} activeClass="border-amber-400 bg-amber-50 text-amber-700" />
-                  </div>
+                <div className="pt-2 space-y-4">
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Yoğunluk</span><PillGroup options={WP_SESSIONS_OPTIONS} value={filterWpSessions} onChange={setFilterWpSessions} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
                 </div>
               )}
 
               {filterToolType === "articulation" && (
-                <div className="border-t border-zinc-100 pt-3 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0 mt-1.5">Hedef Ses</span>
-                    <MultiPillGroup options={SOUND_OPTIONS} values={filterSounds} onChange={setFilterSounds} activeClass="border-[#FE703A] bg-[#FE703A]/10 text-[#FE703A]" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Seviye</span>
-                    <PillGroup options={ARTICULATON_LEVEL_OPTIONS} value={filterLevel} onChange={setFilterLevel} activeClass="border-[#FE703A] bg-[#FE703A]/10 text-[#FE703A]" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tema</span>
-                    <PillGroup options={THEME_OPTIONS} value={filterTheme} onChange={setFilterTheme} activeClass="border-[#FE703A] bg-[#FE703A]/10 text-[#FE703A]" />
-                  </div>
+                <div className="pt-2 space-y-4">
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Hedef Sesler</span><MultiPillGroup options={SOUND_OPTIONS} values={filterSounds} onChange={setFilterSounds} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Seviye</span><PillGroup options={ARTICULATON_LEVEL_OPTIONS} value={filterLevel} onChange={setFilterLevel} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Tema</span><PillGroup options={THEME_OPTIONS} value={filterTheme} onChange={setFilterTheme} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
               {filterToolType === "homework" && (
-                <div className="border-t border-zinc-100 pt-3 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Alan</span>
-                    <PillGroup options={HW_AREA_OPTIONS} value={filterHwArea} onChange={setFilterHwArea} activeClass="border-[#F4AE10] bg-[#F4AE10]/10 text-amber-800" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Tür</span>
-                    <PillGroup options={HW_MATERIAL_OPTIONS} value={filterHwMaterial} onChange={setFilterHwMaterial} activeClass="border-[#F4AE10] bg-[#F4AE10]/10 text-amber-800" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-zinc-400 w-16 shrink-0">Süre</span>
-                    <PillGroup options={HW_DURATION_OPTIONS} value={filterHwDuration} onChange={setFilterHwDuration} activeClass="border-[#F4AE10] bg-[#F4AE10]/10 text-amber-800" />
-                  </div>
+                <div className="pt-2 space-y-4">
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Odak Alanı</span><PillGroup options={HW_AREA_OPTIONS} value={filterHwArea} onChange={setFilterHwArea} activeClass="border-purple-400 bg-purple-50 text-purple-700" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Materyal Tipi</span><PillGroup options={HW_MATERIAL_OPTIONS} value={filterHwMaterial} onChange={setFilterHwMaterial} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Beklenen Süre</span><PillGroup options={HW_DURATION_OPTIONS} value={filterHwDuration} onChange={setFilterHwDuration} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
-
-              {/* Sıralama + Filtreleri Temizle */}
-              <div className="flex items-center justify-end gap-2 pt-1 border-t border-zinc-100">
-                {hasActiveFilters && (
-                  <button
-                    onClick={clearFilters}
-                    className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors underline-offset-2 hover:underline"
-                  >
-                    Filtreleri Temizle
-                  </button>
-                )}
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortBy)}
-                  className={cn(SELECT_CLS, sortBy !== "newest" && "border-[#023435] bg-[#023435]/5 text-[#023435]")}
-                >
-                  {SORT_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-              </div>
             </div>
+            )}
 
             {/* ── Sonuç sayısı ── */}
             <p className="text-xs text-zinc-400 mb-4">
@@ -983,10 +950,10 @@ export default function CardsPage() {
                       <p className="text-sm text-zinc-500 mb-3">
                         Henüz {opt?.label} üretmediniz.
                       </p>
-                      {opt?.href && (
+                    {opt?.href && (
                         <a
                           href={opt.href}
-                          className="rounded-lg bg-[#FE703A] px-4 py-2 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors"
+                          className="rounded-xl mt-2 bg-[#FE703A] px-6 py-2.5 text-sm font-bold text-white shadow hover:bg-[#FE703A]/90 transition-transform hover:-translate-y-0.5"
                         >
                           Üretmeye Başla
                         </a>
@@ -995,15 +962,15 @@ export default function CardsPage() {
                   );
                 })() : (
                   <>
-                    <p className="text-sm text-zinc-500 mb-2">Bu filtrelere uyan kart bulunamadı.</p>
-                    <button onClick={clearFilters} className="text-xs text-[#FE703A] hover:underline">
-                      Filtreleri temizle
+                    <p className="text-sm font-bold text-[#023435]/60 mb-3">Bu filtrelere uyan materyal bulunamadı.</p>
+                    <button onClick={clearFilters} className="text-xs font-bold text-[#FE703A] border border-[#FE703A]/30 px-3 py-1.5 rounded-lg hover:bg-[#FE703A]/10 transition-colors">
+                      Filtreleri Temizle
                     </button>
                   </>
                 )}
               </div>
             ) : (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {filtered.map((card) => (
                   <SwipeableCard
                     key={card.id}
@@ -1014,17 +981,19 @@ export default function CardsPage() {
                     onDeletePress={() => { setSwipeOpenId(null); setConfirmDeleteId(card.id); }}
                   >
                   <div
-                    className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden flex flex-col min-h-[168px]"
+                    className="group relative rounded-3xl border border-white/80 bg-white/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 overflow-hidden flex flex-col min-h-[180px]"
                   >
-                    {/* Hover delete button — desktop only (hidden on touch via opacity) */}
+                    <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/60 to-transparent pointer-events-none rounded-tr-3xl" />
+                    
+                    {/* Hover delete button */}
                     <button
                       onClick={(e) => { e.preventDefault(); setConfirmDeleteId(card.id); }}
-                      className="absolute top-3 right-3 z-10 rounded-lg px-2 py-1 text-xs text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                      className="absolute top-4 right-4 z-10 rounded-lg px-2 py-1 text-xs font-bold text-[#023435]/30 hover:text-red-600 hover:bg-red-50 focus:opacity-100 transition-all opacity-0 group-hover:opacity-100"
                     >
                       Sil
                     </button>
-                    <Link href={`/cards/${card.id}`} className="block p-4 flex-1">
-                      <div className="flex flex-wrap gap-1.5 mb-2 pr-8">
+                    <Link href={`/cards/${card.id}`} className="block p-5 flex-1 relative z-10">
+                      <div className="flex flex-wrap gap-1.5 mb-3 pr-8">
                         {/* Araç türü badge */}
                         {(() => {
                           const tt = resolveToolType(card.toolType);
@@ -1032,41 +1001,41 @@ export default function CardsPage() {
                           const label    = TOOL_TYPE_BADGE_LABEL[tt];
                           if (!label) return null;
                           return (
-                            <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-semibold", badgeCls)}>
+                            <span className={cn("rounded-md border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest", badgeCls)}>
                               {label}
                             </span>
                           );
                         })()}
                         {WORK_AREA_LABEL[card.category] && (
-                          <Badge className={WORK_AREA_COLOR[card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                          <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[card.category] ?? "border-zinc-200 text-zinc-600")}>
                             {WORK_AREA_LABEL[card.category]}
-                          </Badge>
+                          </span>
                         )}
-                        <Badge className={DIFFICULTY_COLOR[card.difficulty] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                        <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", DIFFICULTY_COLOR[card.difficulty] ?? "border-zinc-200 text-zinc-600")}>
                           {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
-                        </Badge>
-                        <Badge className="bg-zinc-100 text-zinc-600" style={{ fontSize: "10px" }}>
+                        </span>
+                        <span className="rounded-md border border-zinc-200/60 bg-white px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 uppercase tracking-widest">
                           {AGE_LABEL[card.ageGroup] ?? card.ageGroup}
-                        </Badge>
+                        </span>
                       </div>
-                      <h3 className="font-semibold text-zinc-900 text-sm mb-1 line-clamp-2">{card.title}</h3>
-                      <div className="mt-2 space-y-0.5">
+                      <h3 className="font-extrabold text-[#023435] text-[15px] mb-2 line-clamp-2 leading-snug">{card.title}</h3>
+                      <div className="space-y-1">
                         {card.student && (
-                          <p className="text-xs text-zinc-400">Kim için: {card.student.name}</p>
+                          <p className="text-xs font-semibold text-[#107996]">Atanan: {card.student.name}</p>
                         )}
-                        <p className="text-xs text-zinc-400">
-                          {card._count.assignments > 0
-                            ? `${card._count.assignments} öğrenciye atandı`
-                            : "Henüz atanmadı"}
-                        </p>
+                        {card._count.assignments > 0 && (
+                          <p className="text-[11px] font-semibold text-[#023435]/50 uppercase tracking-widest">
+                            {card._count.assignments} öğrenciye atandı
+                          </p>
+                        )}
                       </div>
                     </Link>
-                    <div className="px-4 pb-4">
+                    <div className="px-5 pb-5 relative z-10">
                       <button
                         onClick={() => setAssigningCard(card)}
-                        className="w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 transition-colors"
+                        className="w-full rounded-xl border border-[#023435]/10 bg-white/50 px-3 py-2 text-xs font-bold text-[#023435] shadow-sm hover:bg-[#023435] hover:border-[#023435] hover:text-white transition-all transform hover:scale-[1.02]"
                       >
-                        Öğrenciye Ata
+                        Öğrenci Düzenle
                       </button>
                     </div>
                   </div>
@@ -1118,6 +1087,6 @@ export default function CardsPage() {
           onSaved={(count) => handleSaved(assigningCard.id, count)}
         />
       )}
-    </>
+    </div>
   );
 }
