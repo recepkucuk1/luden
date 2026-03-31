@@ -66,6 +66,7 @@ export async function GET(request: NextRequest) {
       orderBy: [{ date: "asc" }, { startTime: "asc" }],
       include: {
         student: { select: { id: true, name: true, workArea: true } },
+        exceptions: true,
       },
       ...(upcoming ? { take: 5 } : {}),
     });
@@ -99,6 +100,21 @@ export async function POST(request: NextRequest) {
     });
     if (!student) {
       return NextResponse.json({ error: "Öğrenci bulunamadı" }, { status: 404 });
+    }
+
+    // Check for overlapping lessons on the same day
+    const overlappingLesson = await prisma.lesson.findFirst({
+      where: {
+        therapistId: session.user.id,
+        date: new Date(date),
+        status: { not: "CANCELLED" },
+        startTime: { lt: endTime },
+        endTime: { gt: startTime }
+      }
+    });
+
+    if (overlappingLesson) {
+      return NextResponse.json({ error: "Bu saat aralığında başka bir dersiniz bulunuyor." }, { status: 409 });
     }
 
     const lesson = await prisma.lesson.create({

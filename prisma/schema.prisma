@@ -53,46 +53,46 @@ enum ToolType {
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model Therapist {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  password  String
-  specialty String[] // ["speech", "language", "hearing"]
-  role      String   @default("user") // "user" | "admin"
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  name               String
+  password           String
+  specialty          String[] // ["speech", "language", "hearing"]
+  role               String    @default("user") // "user" | "admin"
   emailVerified      Boolean   @default(false)
   emailVerifyToken   String?   @unique
   emailVerifyExpires DateTime?
-  credits      Int      @default(40)
-  studentLimit Int      @default(2)
-  pdfEnabled   Boolean  @default(false)
-  planType     PlanType @default(FREE)
-  suspended    Boolean  @default(false)
-  lastLogin    DateTime?
-  avatarUrl       String?  @db.Text
-  institution     String?
-  phone           String?
-  experienceYears String?
-  certifications  String?  @db.Text
-  preferences     Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  credits            Int       @default(40)
+  studentLimit       Int       @default(2)
+  pdfEnabled         Boolean   @default(false)
+  planType           PlanType  @default(FREE)
+  suspended          Boolean   @default(false)
+  lastLogin          DateTime?
+  avatarUrl          String?   @db.Text
+  institution        String?
+  phone              String?
+  experienceYears    String?
+  certifications     String?   @db.Text
+  preferences        Json?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  students           Student[]
-  cards              Card[]
-  progress           StudentProgress[]
-  subscriptions      Subscription[]
-  creditTxns         CreditTransaction[]
-  lessons            Lesson[]
+  students            Student[]
+  cards               Card[]
+  progress            StudentProgress[]
+  subscriptions       Subscription[]
+  creditTxns          CreditTransaction[]
+  lessons             Lesson[]
   passwordResetTokens PasswordResetToken[]
 }
 
 model Plan {
   id           String   @id @default(cuid())
   type         PlanType @unique
-  studentLimit Int      // -1 = sınırsız
-  creditAmount Int      // dönem başı yüklenen kredi
-  monthlyPrice Int      // kuruş cinsinden (37900 = 379 TL)
-  yearlyPrice  Int      // kuruş cinsinden
+  studentLimit Int // -1 = sınırsız
+  creditAmount Int // dönem başı yüklenen kredi
+  monthlyPrice Int // kuruş cinsinden (37900 = 379 TL)
+  yearlyPrice  Int // kuruş cinsinden
   pdfEnabled   Boolean
   createdAt    DateTime @default(now())
 
@@ -139,7 +139,7 @@ model Student {
   updatedAt     DateTime  @updatedAt
 
   therapistId String
-  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  therapist   Therapist         @relation(fields: [therapistId], references: [id], onDelete: Cascade)
   cards       Card[]
   assignments CardAssignment[]
   progress    StudentProgress[]
@@ -154,8 +154,8 @@ model Card {
   content    Json
   toolType   ToolType @default(LEARNING_CARD)
   category   String   @default("generator") // "speech" | "language" | "hearing" | "generator"
-  difficulty String   // "easy" | "medium" | "hard"
-  ageGroup   String   // "3-6" | "7-12" | "13-18" | "adult"
+  difficulty String // "easy" | "medium" | "hard"
+  ageGroup   String // "3-6" | "7-12" | "13-18" | "adult"
   prompt     String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -199,8 +199,8 @@ model Curriculum {
 
 model CurriculumGoal {
   id         String  @id @default(cuid())
-  code       String  // "1.0", "1.1", "2.0"
-  title      String  // "Konuşma sırasında nefes kontrolünü sağlar"
+  code       String // "1.0", "1.1", "2.0"
+  title      String // "Konuşma sırasında nefes kontrolünü sağlar"
   isMainGoal Boolean // true = ana hedef (1.0), false = alt hedef (1.1)
 
   curriculumId String
@@ -215,25 +215,42 @@ model Lesson {
   studentId    String
   title        String
   date         DateTime
-  startTime    String       // "09:00"
-  endTime      String       // "10:00"
+  startTime    String // "09:00"
+  endTime      String // "10:00"
   note         String?
   isRecurring  Boolean      @default(false)
-  recurringDay Int?         // 0=Pazar, 1=Pazartesi ... 6=Cumartesi
+  recurringDay Int? // 0=Pazar, 1=Pazartesi ... 6=Cumartesi
   status       LessonStatus @default(PLANNED)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  therapist Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
-  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  therapist  Therapist         @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  student    Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  exceptions LessonException[]
 
   @@index([therapistId])
   @@index([date])
 }
 
+model LessonException {
+  id           String        @id @default(cuid())
+  lessonId     String
+  originalDate DateTime
+  title        String?
+  startTime    String?
+  endTime      String?
+  status       LessonStatus?
+  note         String?
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@index([originalDate])
+}
+
 model StudentProgress {
   id        String   @id @default(cuid())
-  status    String   // "not_started" | "in_progress" | "completed"
+  status    String // "not_started" | "in_progress" | "completed"
   notes     String?
   updatedAt DateTime @updatedAt
 
