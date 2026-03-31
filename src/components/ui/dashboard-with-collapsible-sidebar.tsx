@@ -23,6 +23,20 @@ export const Sidebar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch("/api/profile")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.therapist?.avatarUrl) {
+            setAvatarUrl(data.therapist.avatarUrl);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [session?.user?.id]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -78,7 +92,7 @@ export const Sidebar = () => {
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <TitleSection open={open} userName={session?.user?.name || "Kullanıcı"} userImage={session?.user?.image} />
+        <TitleSection open={open} userName={session?.user?.name || "Kullanıcı"} userImage={avatarUrl || session?.user?.image} />
 
         <div className="space-y-1 mb-8 overflow-y-auto max-h-[calc(100vh-250px)] no-scrollbar">
           {navItems.map((item) => (
