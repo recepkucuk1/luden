@@ -159,7 +159,7 @@ function collectLessonDates(lessons: Lesson[], year: number, month: number): Dat
 // ─── 24-saat TimeSelect ───────────────────────────────────────────────────────
 
 const HOURS   = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
-const MINUTES = ["00", "15", "30", "45"];
+const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
 
 function TimeSelect({ value, onChange, inputCls }: {
   value: string;
