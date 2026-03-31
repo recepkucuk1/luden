@@ -908,7 +908,7 @@ export default function CalendarPage() {
     try {
       const query = view === "month"
         ? `month=${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`
-        : `week=${weekStart.toISOString().slice(0, 10)}`;
+        : `week=${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
       const res  = await fetch(`/api/lessons?${query}`);
       const data = await res.json();
       setLessons(data.lessons ?? []);
