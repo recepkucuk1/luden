@@ -270,53 +270,65 @@ export default function StudentDetailPage({
   }
 
   return (
-    <>
-      {/* Breadcrumb */}
-      <div className="border-b border-zinc-100 bg-white px-6 py-2.5">
-        <div className="mx-auto max-w-5xl flex items-center gap-2 text-sm">
-          <Link href="/students" className="text-zinc-400 hover:text-zinc-600 transition-colors">
-            Öğrenciler
-          </Link>
-          <span className="text-zinc-300">/</span>
-          <span className="text-zinc-700 font-medium">{student.name}</span>
+    <div className="min-h-full flex-1 w-full flex flex-col relative bg-[#F0F4F4] overflow-x-hidden custom-scrollbar" style={{ background: "linear-gradient(135deg, #f0f7f7 0%, #e8f4f4 50%, #f5fafa 100%)" }}>
+      {/* Dekoratif Işıklar (Orbs) */}
+      <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-[#107996]/10 rounded-full blur-[120px] pointer-events-none translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-1/4 left-0 w-[500px] h-[500px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none -translate-x-1/2 translate-y-1/2" />
+
+      {/* Breadcrumb - Sticky */}
+      <div className="sticky top-0 z-30 border-b border-white/60 bg-white/70 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.03)] px-6 py-3 transition-all">
+        <div className="mx-auto max-w-5xl flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm font-bold">
+            <Link href="/students" className="text-[#023435]/50 hover:text-[#023435] transition-colors">
+              Öğrenciler
+            </Link>
+            <span className="text-[#023435]/30">/</span>
+            <span className="text-[#023435] tracking-tight">{student.name}</span>
+          </div>
+
+          {/* Quick Actions in Header */}
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            <Button size="sm" variant="outline" onClick={() => setShowDeleteConfirm(true)} className="rounded-xl border-white bg-white/50 text-red-600 hover:bg-red-50 hover:border-red-200 hover:text-red-700 shadow-sm transition-all h-8 text-xs font-bold px-3">
+              Sil
+            </Button>
+            <Button size="sm" variant="outline" onClick={openEdit} className="rounded-xl border-white bg-white/50 text-[#023435]/60 hover:bg-white hover:text-[#023435] shadow-sm transition-all h-8 text-xs font-bold px-3">
+              Düzenle
+            </Button>
+            <Link
+              href={`/generate?studentId=${student.id}&studentName=${encodeURIComponent(student.name)}&workArea=${student.workArea}${student.birthDate ? `&birthDate=${encodeURIComponent(student.birthDate)}` : ""}`}
+            >
+              <Button size="sm" className="bg-[#FE703A] hover:bg-[#FE703A]/90 text-white font-bold tracking-wide shadow-md shadow-[#FE703A]/20 transition-all hover:-translate-y-0.5 rounded-xl h-8 px-4 text-xs">
+                ✨ Kart Üret
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 space-y-6 overflow-x-hidden">
-        {/* Öğrenci Bilgileri */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#023435]/10 text-[#023435] font-bold text-xl">
+      <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 py-8 relative z-10 flex-1 space-y-6">
+        {/* Öğrenci Bilgileri (Kutu) */}
+        <div className="rounded-3xl border border-white/80 bg-white/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 h-32 w-32 bg-gradient-to-bl from-white/60 to-transparent pointer-events-none rounded-tr-3xl" />
+          
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 relative z-10">
+            <div className="flex items-center gap-5 min-w-0">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#023435]/10 to-[#107996]/10 text-[#023435] font-extrabold text-2xl shadow-sm border border-white">
                 {student.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h1 className="text-xl font-bold text-zinc-900">{student.name}</h1>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <Badge className={WORK_AREA_COLOR[student.workArea] ?? "bg-zinc-100 text-zinc-600"}>
+                <h1 className="text-2xl font-extrabold text-[#023435] tracking-tight">{student.name}</h1>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[student.workArea] ?? "border-zinc-200 text-zinc-600")}>
                     {WORK_AREA_LABEL[student.workArea] ?? student.workArea}
-                  </Badge>
+                  </span>
                   {student.birthDate && (
-                    <span className="text-sm text-zinc-500">{calcAge(student.birthDate)}</span>
+                    <span className="rounded-md border border-zinc-200/60 bg-white px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 uppercase tracking-widest">{calcAge(student.birthDate)}</span>
                   )}
                   {student.diagnosis && (
-                    <span className="text-sm text-zinc-500">· {student.diagnosis}</span>
+                    <span className="truncate rounded-md border border-[#107996]/20 bg-[#107996]/5 px-2 py-0.5 text-[10px] font-extrabold text-[#107996] uppercase tracking-widest">{student.diagnosis}</span>
                   )}
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap sm:shrink-0">
-              <Button size="sm" variant="outline" onClick={() => setShowDeleteConfirm(true)} className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700">
-                Sil
-              </Button>
-              <Button size="sm" variant="outline" onClick={openEdit}>
-                Düzenle
-              </Button>
-              <Link
-                href={`/generate?studentId=${student.id}&studentName=${encodeURIComponent(student.name)}&workArea=${student.workArea}${student.birthDate ? `&birthDate=${encodeURIComponent(student.birthDate)}` : ""}`}
-              >
-                <Button size="sm">✨ Kart Üret</Button>
-              </Link>
             </div>
           </div>
 
@@ -464,7 +476,7 @@ export default function StudentDetailPage({
         )}
 
         {/* Sekme Bar */}
-        <div className="flex gap-1 border-b border-zinc-200">
+        <div className="flex gap-2 border-b border-[#023435]/10 mt-2 px-1">
           {([
             { key: "cards", label: "Kartlar", count: student.cards.length + student.assignments.length },
             { key: "progress", label: "İlerleme", count: null },
@@ -474,15 +486,15 @@ export default function StudentDetailPage({
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                "px-4 pb-3 text-xs font-medium transition-all",
+                "px-5 py-3 text-[13px] font-extrabold uppercase tracking-wide transition-all translate-y-[1px]",
                 activeTab === tab.key
-                  ? "font-semibold text-[#023435] border-b-2 border-[#FE703A]"
-                  : "text-zinc-500 hover:text-zinc-700"
+                  ? "text-[#023435] border-b-[3px] border-[#FE703A]"
+                  : "text-[#023435]/40 hover:text-[#023435] border-b-[3px] border-transparent"
               )}
             >
               {tab.label}
               {tab.count !== null && (
-                <span className="ml-1.5 text-zinc-400">{tab.count}</span>
+                <span className={cn("ml-2 rounded-full px-2 py-0.5 text-[10px]", activeTab === tab.key ? "bg-[#FE703A]/10 text-[#FE703A]" : "bg-[#023435]/5 text-[#023435]/40")}>{tab.count}</span>
               )}
             </button>
           ))}
@@ -592,19 +604,19 @@ export default function StudentDetailPage({
 
         {/* Bu öğrenci için üretilen kartlar */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-zinc-900">
-              Bu öğrenci için üretilen kartlar
-              <span className="ml-2 text-sm font-normal text-zinc-400">({student.cards.length})</span>
+          <div className="flex items-center justify-between mb-4 mt-2">
+            <h2 className="text-xl font-extrabold text-[#023435] tracking-tight">
+              Öğrenciye Özel Üretilenler
+              <span className="ml-3 text-sm font-semibold text-[#023435]/40">({student.cards.length})</span>
             </h2>
           </div>
 
           {student.cards.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-16 text-center">
-              <div className="text-4xl mb-3">🗂️</div>
-              <p className="text-sm font-medium text-zinc-500 mb-1">Henüz kart üretilmedi</p>
-              <p className="text-xs text-zinc-400 mb-4">
-                Bu öğrenci için öğrenme kartı oluşturmak için &quot;Kart Üret&quot; butonuna tıkla.
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 bg-white/40 shadow-sm backdrop-blur-md py-16 text-center relative z-10">
+              <div className="text-4xl mb-4 opacity-80">🗂️</div>
+              <p className="text-lg font-bold text-[#023435] mb-1">Henüz özel kart üretilmedi</p>
+              <p className="text-sm font-medium text-[#023435]/50 mb-4">
+                Bu öğrenci için yapay zeka destekli gelişim kartı hazırlamak çok kolay.
               </p>
               <Link
                 href={`/generate?studentId=${student.id}&studentName=${encodeURIComponent(student.name)}&workArea=${student.workArea}${student.birthDate ? `&birthDate=${encodeURIComponent(student.birthDate)}` : ""}`}
@@ -613,7 +625,7 @@ export default function StudentDetailPage({
               </Link>
             </div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {student.cards.map((card) => (
                 <SwipeableCard
                   key={card.id}
@@ -624,59 +636,60 @@ export default function StudentDetailPage({
                   onDeletePress={() => { setSwipeOpenId(null); setConfirmCardId(card.id); }}
                 >
                 <div
-                  className="group relative rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden"
+                  className="group relative rounded-3xl border border-white/80 bg-white/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 overflow-hidden flex flex-col h-full"
                 >
-                  <Link href={`/cards/${card.id}`} className="block p-4">
-                    <div className="flex flex-wrap gap-1.5 mb-2 pr-8">
-                      <Badge className={WORK_AREA_COLOR[card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                  <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/60 to-transparent pointer-events-none rounded-tr-3xl" />
+                  <Link href={`/cards/${card.id}`} className="block p-5 flex-1 relative z-10 flex flex-col">
+                    <div className="flex flex-wrap gap-1.5 mb-3 pr-8">
+                      <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[card.category] ?? "border-zinc-200 text-zinc-600")}>
                         {WORK_AREA_LABEL[card.category] ?? card.category}
-                      </Badge>
-                      <Badge className={DIFFICULTY_COLOR[card.difficulty] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                      </span>
+                      <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", DIFFICULTY_COLOR[card.difficulty] ?? "border-zinc-200 text-zinc-600")}>
                         {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
-                      </Badge>
-                      <Badge className="bg-zinc-100 text-zinc-600" style={{ fontSize: "10px" }}>
+                      </span>
+                      <span className="rounded-md border border-zinc-200/60 bg-white px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 uppercase tracking-widest">
                         {card.ageGroup}
-                      </Badge>
+                      </span>
                     </div>
-                    <h3 className="font-semibold text-zinc-900 text-sm mb-1">{card.title}</h3>
+                    <h3 className="font-extrabold text-[#023435] text-[15px] mb-2 line-clamp-2 leading-snug">{card.title}</h3>
                     {(card.content as GeneratedCard).objective && (
-                      <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
+                      <p className="text-[12px] font-medium text-[#023435]/60 mb-2 line-clamp-2">
                         {(card.content as GeneratedCard).objective}
                       </p>
                     )}
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-xs text-zinc-400">
+                    <div className="mt-auto pt-3 border-t border-[#023435]/5 flex items-center justify-between">
+                      <p className="text-[10px] font-bold text-[#023435]/40 uppercase tracking-widest">
                         {new Date(card.createdAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" })}
                       </p>
-                      <span className="text-xs text-[#FE703A] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        Detay →
+                      <span className="text-xs text-[#FE703A] font-bold group-hover:translate-x-1 transition-transform">
+                        Aç →
                       </span>
                     </div>
                   </Link>
 
                   <button
                     onClick={() => setConfirmCardId(card.id)}
-                    className="absolute top-3 right-3 rounded-lg px-2 py-1 text-xs text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+                    className="absolute top-4 right-4 rounded-full bg-white/90 shadow-sm border border-white p-2 text-[#023435]/40 hover:text-red-600 hover:bg-red-50 transition-all hover:scale-110 opacity-0 group-hover:opacity-100 z-20"
                   >
-                    Sil
+                    ✕
                   </button>
 
                   {confirmCardId === card.id && (
-                    <div className="absolute inset-0 rounded-2xl bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center gap-3 p-4">
-                      <p className="text-sm font-medium text-zinc-700 text-center">
+                    <div className="absolute inset-0 rounded-3xl bg-white/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 p-5 z-30">
+                      <p className="text-sm font-bold text-[#023435] text-center">
                         Bu kartı silmek istediğinize emin misiniz?
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 w-full mt-2">
                         <button
                           onClick={() => setConfirmCardId(null)}
-                          className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs text-zinc-600 hover:bg-zinc-50 transition-colors"
+                          className="flex-1 rounded-xl border border-[#023435]/10 bg-white px-3 py-2.5 text-xs font-bold text-[#023435]/60 hover:bg-[#023435]/5 transition-colors"
                         >
                           İptal
                         </button>
                         <button
                           onClick={() => deleteCard(card.id)}
                           disabled={deletingCardId === card.id}
-                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs text-white hover:bg-red-700 disabled:opacity-60 transition-colors"
+                          className="flex-1 rounded-xl bg-red-600 px-3 py-2.5 text-xs font-bold text-white shadow-md hover:bg-red-700 disabled:opacity-60 transition-colors"
                         >
                           {deletingCardId === card.id ? "Siliniyor…" : "Evet, Sil"}
                         </button>
@@ -691,50 +704,59 @@ export default function StudentDetailPage({
         </div>
 
         {/* Atanan kartlar */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-zinc-900">
-              Atanan kartlar
-              <span className="ml-2 text-sm font-normal text-zinc-400">({student.assignments.length})</span>
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-extrabold text-[#023435] tracking-tight">
+              Kütüphaneden Atananlar
+              <span className="ml-3 text-sm font-semibold text-[#023435]/40">({student.assignments.length})</span>
             </h2>
           </div>
 
           {student.assignments.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-12 text-center">
-              <div className="text-3xl mb-2">📋</div>
-              <p className="text-sm font-medium text-zinc-500 mb-1">Henüz kart atanmadı</p>
-              <p className="text-xs text-zinc-400">
-                Kart kütüphanesinden bu öğrenciye kart atayabilirsiniz.
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 bg-white/40 shadow-sm backdrop-blur-md py-16 text-center relative z-10">
+              <div className="text-4xl mb-4 opacity-80">📋</div>
+              <p className="text-lg font-bold text-[#023435] mb-1">Henüz kart atanmadı</p>
+              <p className="text-sm font-medium text-[#023435]/50">
+                Kart kütüphanesinden bu öğrenciye materyal atayabilirsiniz.
               </p>
             </div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {student.assignments.map((assignment) => (
                 <div
                   key={assignment.id}
-                  className="group rounded-2xl border border-zinc-200 bg-white shadow-sm hover:border-[#FE703A]/40 hover:shadow-md transition-all overflow-hidden"
+                  className="group relative rounded-3xl border border-white/80 bg-white/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 overflow-hidden flex flex-col h-full"
                 >
-                  <Link href={`/cards/${assignment.card.id}`} className="block p-4 pb-2">
-                    <div className="flex flex-wrap gap-1.5 mb-2 pr-8">
-                      <Badge className={WORK_AREA_COLOR[assignment.card.category] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                  <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/60 to-transparent pointer-events-none rounded-tr-3xl" />
+                  <Link href={`/cards/${assignment.card.id}`} className="block p-5 pb-3 flex-1 relative z-10 flex flex-col">
+                    <div className="flex flex-wrap gap-1.5 mb-3 pr-8">
+                      <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[assignment.card.category] ?? "border-zinc-200 text-zinc-600")}>
                         {WORK_AREA_LABEL[assignment.card.category] ?? assignment.card.category}
-                      </Badge>
-                      <Badge className={DIFFICULTY_COLOR[assignment.card.difficulty] ?? "bg-zinc-100 text-zinc-600"} style={{ fontSize: "10px" }}>
+                      </span>
+                      <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", DIFFICULTY_COLOR[assignment.card.difficulty] ?? "border-zinc-200 text-zinc-600")}>
                         {DIFFICULTY_LABEL[assignment.card.difficulty] ?? assignment.card.difficulty}
-                      </Badge>
-                      <Badge className="bg-zinc-100 text-zinc-600" style={{ fontSize: "10px" }}>
+                      </span>
+                      <span className="rounded-md border border-zinc-200/60 bg-white px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 uppercase tracking-widest">
                         {assignment.card.ageGroup}
-                      </Badge>
+                      </span>
                     </div>
-                    <h3 className="font-semibold text-zinc-900 text-sm mb-1">{assignment.card.title}</h3>
-                    <p className="text-xs text-zinc-400 mt-1">
-                      {new Date(assignment.assignedAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                    <h3 className="font-extrabold text-[#023435] text-[15px] mb-2 line-clamp-2 leading-snug">{assignment.card.title}</h3>
+                    <p className="mt-auto pt-3 border-t border-[#023435]/5 text-[10px] font-bold text-[#023435]/40 uppercase tracking-widest">
+                      Atanma: {new Date(assignment.assignedAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" })}
                     </p>
                   </Link>
                   {/* Durum Seçici */}
-                  <div className="px-4 pb-3 pt-1">
-                    <div className="flex items-center gap-1.5">
-                      {(["not_started", "in_progress", "completed"] as const).map((s) => (
+                  <div className="px-5 pb-5 relative z-10 pt-2 border-t border-dashed border-[#023435]/10 mt-2">
+                    <p className="text-[9px] font-extrabold text-[#023435]/50 uppercase tracking-wider mb-2 text-center">GELİŞİM DURUMU</p>
+                    <div className="flex bg-white/50 p-1 rounded-xl border border-white/60 shadow-inner">
+                      {(["not_started", "in_progress", "completed"] as const).map((s) => {
+                        const isColorSelected = assignment.status === s;
+                        let activeStyles = "";
+                        if (isColorSelected && s === "not_started") activeStyles = "bg-zinc-100 text-zinc-700 shadow-sm border-zinc-200";
+                        if (isColorSelected && s === "in_progress") activeStyles = "bg-[#FE703A]/10 text-[#FE703A] shadow-sm border-[#FE703A]/20";
+                        if (isColorSelected && s === "completed")   activeStyles = "bg-[#107996]/10 text-[#107996] shadow-sm border-[#107996]/20";
+
+                        return (
                         <button
                           key={s}
                           onClick={async () => {
@@ -759,7 +781,7 @@ export default function StudentDetailPage({
                                 }
                               );
                               if (!res.ok) throw new Error();
-                              toast.success(`Durum: ${CARD_STATUS_LABEL[s]}`);
+                              toast.success(`Durum Güncellendi: ${CARD_STATUS_LABEL[s]}`);
                             } catch {
                               setStudent((p) =>
                                 p
@@ -775,15 +797,15 @@ export default function StudentDetailPage({
                             }
                           }}
                           className={cn(
-                            "flex-1 rounded-lg px-2 py-1.5 text-[11px] font-medium transition-all border",
-                            assignment.status === s
-                              ? CARD_STATUS_COLOR[s] + " border-current/20"
-                              : "border-zinc-200 bg-white text-zinc-400 hover:text-zinc-600 hover:border-zinc-300"
+                            "flex-1 rounded-lg px-2 py-2 text-[9px] font-extrabold uppercase tracking-wider transition-all border border-transparent mx-0.5",
+                            isColorSelected
+                              ? activeStyles
+                              : "bg-transparent text-[#023435]/40 hover:text-[#023435]/70 hover:bg-white/40"
                           )}
                         >
                           {CARD_STATUS_LABEL[s]}
                         </button>
-                      ))}
+                      )})}
                     </div>
                   </div>
                 </div>
@@ -794,6 +816,6 @@ export default function StudentDetailPage({
 
         </>}
       </main>
-    </>
+    </div>
   );
 }
