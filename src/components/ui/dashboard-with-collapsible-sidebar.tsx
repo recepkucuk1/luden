@@ -9,7 +9,7 @@ import {
   CalendarDays,
   Layers,
   Wand2,
-  ChevronDown,
+
   ChevronsRight,
   Settings,
   LogOut,
@@ -78,7 +78,7 @@ export const Sidebar = () => {
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
       >
-        <TitleSection open={open} userName={session?.user?.name || "Kullanıcı"} />
+        <TitleSection open={open} userName={session?.user?.name || "Kullanıcı"} userImage={session?.user?.image} />
 
         <div className="space-y-1 mb-8 overflow-y-auto max-h-[calc(100vh-250px)] no-scrollbar">
           {navItems.map((item) => (
@@ -178,7 +178,7 @@ const Option = ({ Icon, title, href, currentPath, open, notifs }: OptionProps) =
   );
 };
 
-const TitleSection = ({ open, userName }: { open: boolean; userName: string }) => {
+const TitleSection = ({ open, userName, userImage }: { open: boolean; userName: string; userImage?: string | null }) => {
   return (
     <div className="mb-6 border-b border-gray-200 dark:border-gray-800 pb-4 pt-2 md:pt-0">
       <Link
@@ -186,7 +186,11 @@ const TitleSection = ({ open, userName }: { open: boolean; userName: string }) =
         className="flex items-center justify-between rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
       >
         <div className="flex items-center gap-3">
-          <Logo />
+          {userImage ? (
+            <img src={userImage} alt={userName} className="size-10 rounded-xl object-cover shadow-sm bg-gray-100" />
+          ) : (
+            <Logo />
+          )}
           {open && (
             <div className={cn("transition-opacity duration-200", open ? "opacity-100" : "opacity-0")}>
               <div className="flex items-center gap-2">
@@ -200,7 +204,6 @@ const TitleSection = ({ open, userName }: { open: boolean; userName: string }) =
             </div>
           )}
         </div>
-        {open && <ChevronDown className="h-4 w-4 text-gray-400 dark:text-gray-500 shrink-0" />}
       </Link>
     </div>
   );

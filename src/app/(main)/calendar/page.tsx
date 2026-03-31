@@ -66,7 +66,7 @@ const RECURRING_DAYS = [
 
 const START_HOUR  = 8;
 const END_HOUR    = 20;
-const HOUR_HEIGHT = 64;
+const HOUR_HEIGHT = 48;
 
 const STATUS_PILL: Record<LessonStatus, string> = {
   PLANNED:   "bg-[rgba(16,121,150,0.12)] text-[#107996] border-[#107996]/25",
