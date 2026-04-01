@@ -9,23 +9,27 @@ function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
+  const email = searchParams.get("email");
 
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  // If there's no token, show the "check your inbox" pending screen
+  const [status, setStatus] = useState<"pending" | "loading" | "success" | "error">(
+    token ? "loading" : "pending"
+  );
   const [message, setMessage] = useState("");
-  const [resendEmail, setResendEmail] = useState("");
+  const [resendEmail, setResendEmail] = useState(email ?? "");
   const [resendSent, setResendSent] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
 
   async function handleResend() {
-    const email = emailInputRef.current?.value ?? resendEmail;
-    if (!email) return;
+    const addr = emailInputRef.current?.value ?? resendEmail;
+    if (!addr) return;
     setResendLoading(true);
     try {
       await fetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: addr }),
       });
       setResendSent(true);
     } finally {
@@ -34,18 +38,14 @@ function VerifyEmailContent() {
   }
 
   useEffect(() => {
-    if (!token) {
-      setStatus("error");
-      setMessage("Doğrulama token'ı bulunamadı.");
-      return;
-    }
+    if (!token) return;
 
     fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.success) {
           setStatus("success");
-          setTimeout(() => router.push("/login"), 3000);
+          setTimeout(() => router.push("/login?verified=1"), 2500);
         } else {
           setStatus("error");
           setMessage(data.error ?? "Doğrulama başarısız oldu.");
@@ -64,6 +64,44 @@ function VerifyEmailContent() {
           <Image src="/logo.svg" alt="Luden" width={100} height={36} className="h-8 w-auto mx-auto" />
         </Link>
 
+        {/* PENDING — shown after register, before clicking email link */}
+        {status === "pending" && (
+          <>
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#023435]/8 mx-auto mb-4 text-2xl">
+              ✉️
+            </div>
+            <h1 className="text-lg font-bold text-zinc-900 mb-2">Email adresinizi doğrulayın</h1>
+            <p className="text-sm text-zinc-500 mb-5 leading-relaxed">
+              {email ? (
+                <><strong className="text-zinc-700">{email}</strong> adresine bir doğrulama linki gönderdik.</>
+              ) : (
+                "Email adresinize bir doğrulama linki gönderdik."
+              )}{" "}
+              Linke tıklayarak hesabınızı aktifleştirin.
+            </p>
+            <p className="text-xs text-zinc-400 mb-5">Link 1 saat süreyle geçerlidir.</p>
+
+            {resendSent ? (
+              <p className="text-sm text-green-600 font-medium mb-4">✓ Yeni link gönderildi!</p>
+            ) : (
+              <button
+                onClick={handleResend}
+                disabled={resendLoading}
+                className="text-sm text-[#023435]/60 hover:text-[#023435] underline underline-offset-2 transition-colors disabled:opacity-40"
+              >
+                {resendLoading ? "Gönderiliyor…" : "Linki tekrar gönder"}
+              </button>
+            )}
+
+            <div className="mt-6 pt-4 border-t border-zinc-100">
+              <Link href="/login" className="text-xs text-zinc-400 hover:text-zinc-600">
+                Giriş sayfasına dön
+              </Link>
+            </div>
+          </>
+        )}
+
+        {/* LOADING — verifying token */}
         {status === "loading" && (
           <>
             <div className="h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin mx-auto mb-4" />
@@ -71,6 +109,7 @@ function VerifyEmailContent() {
           </>
         )}
 
+        {/* SUCCESS */}
         {status === "success" && (
           <>
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 mx-auto mb-4">
@@ -89,6 +128,7 @@ function VerifyEmailContent() {
           </>
         )}
 
+        {/* ERROR */}
         {status === "error" && (
           <>
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100 mx-auto mb-4">
