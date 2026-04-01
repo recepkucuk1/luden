@@ -18,7 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           const therapist = await prisma.therapist.findUnique({
             where: { email: credentials.email as string },
-            select: { id: true, email: true, name: true, password: true, role: true, suspended: true },
+            select: { id: true, email: true, name: true, password: true, role: true, suspended: true, emailVerified: true },
           });
 
           if (!therapist) return null;
@@ -29,6 +29,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           );
 
           if (!isValid) return null;
+
+          if (!therapist.emailVerified) return null;
 
           if (therapist.suspended) return null;
 

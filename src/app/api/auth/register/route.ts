@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse, getClientIp } from "@/lib/rateLimit";
 import { registerBodySchema, zodError } from "@/lib/validation";
 import { logError } from "@/lib/utils";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,15 +47,32 @@ export async function POST(request: NextRequest) {
     }
 
     const hashed = await bcrypt.hash(password, 12);
+    const emailVerifyToken = crypto.randomUUID();
+    const emailVerifyExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 saat
 
     await prisma.$transaction(async (tx) => {
       const newTherapist = await tx.therapist.create({
-        data: { name, email, password: hashed, specialty: [], emailVerified: true },
+        data: {
+          name,
+          email,
+          password: hashed,
+          specialty: [],
+          emailVerified: false,
+          emailVerifyToken,
+          emailVerifyExpires,
+        },
       });
       await tx.creditTransaction.create({
         data: { therapistId: newTherapist.id, amount: 40, type: "EARN", description: "Kayıt bonusu" },
       });
     });
+
+    // Email gönderimi transaction dışında — başarısız olsa da kayıt geçerli
+    try {
+      await sendVerificationEmail(email, emailVerifyToken);
+    } catch (emailErr) {
+      logError("POST /api/auth/register — sendVerificationEmail", emailErr);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

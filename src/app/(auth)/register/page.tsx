@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
@@ -65,14 +64,8 @@ export default function RegisterPage() {
       return;
     }
 
-    // Kayıt başarılı — otomatik giriş yap
-    const result = await signIn("credentials", { email, password, redirect: false });
-    if (result?.error) {
-      setError("Kayıt başarılı ancak giriş yapılamadı. Lütfen giriş sayfasına gidin.");
-      setLoading(false);
-      return;
-    }
-    router.push("/dashboard");
+    // Kayıt başarılı — email doğrulama sayfasına yönlendir
+    router.push(`/verify-email?email=${encodeURIComponent(email)}`);
   }
 
   const isAnyPasswordVisible = (password.length > 0 && showPassword) || (passwordConfirm.length > 0 && showPasswordConfirm);
