@@ -87,15 +87,15 @@ function HomeContent() {
 
   return (
     <div
-      className="h-[calc(100vh-4rem)] md:h-[calc(100vh-0px)] w-full flex flex-col relative overflow-hidden"
+      className="w-full flex flex-col relative md:h-[calc(100vh-0px)] md:overflow-hidden"
       style={{ background: "linear-gradient(135deg, #f0f7f7 0%, #e8f4f4 50%, #f5fafa 100%)" }}
     >
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
-    <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6 h-full flex flex-col">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] flex-1 min-h-0">
+    <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:h-full flex flex-col">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] md:flex-1 md:min-h-0">
         {/* Sol: Form */}
-        <div className="flex flex-col h-full min-h-0">
+        <div className="flex flex-col md:h-full md:min-h-0">
           <div className="mb-4 shrink-0 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/70 px-4 py-3 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-extrabold text-[#023435] tracking-tight">Öğrenme Kartı Oluştur</h2>
@@ -110,7 +110,7 @@ function HomeContent() {
             </div>
             <p className="text-sm text-[#023435]/60 mt-0.5">Parametreleri seç, AI öğrenme kartını üretsin.</p>
           </div>
-          <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] flex-1 overflow-y-auto no-scrollbar">
+          <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
             <CardGeneratorForm
               key={formKey}
               onCardGenerated={handleCardGenerated}
@@ -124,7 +124,7 @@ function HomeContent() {
         </div>
 
         {/* Sağ: Önizleme */}
-        <div className="flex flex-col h-full min-h-0">
+        <div className="flex flex-col md:h-full md:min-h-0">
           <div className="mb-4 shrink-0 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/70 px-4 py-3 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
             <h2 className="text-lg font-extrabold text-[#023435] tracking-tight">Kart Önizleme</h2>
             <p className="text-sm text-[#023435]/60 mt-0.5">
@@ -132,7 +132,7 @@ function HomeContent() {
             </p>
           </div>
 
-          <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col min-h-0">
+          <div className="overflow-y-auto no-scrollbar flex flex-col md:flex-1 md:min-h-0">
             {loading ? (
               <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
                 <div className="text-center space-y-4 px-8">
@@ -141,8 +141,8 @@ function HomeContent() {
                 </div>
               </div>
             ) : card ? (
-              <div className="flex flex-col min-h-0 gap-4 flex-1">
-                <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar flex-1">
+              <div className="flex flex-col gap-4 md:flex-1 md:min-h-0">
+                <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar min-h-[500px] md:flex-1 md:min-h-0">
                   <CardPreview card={card} />
                 </div>
                 {/* Sonraki adım CTA'ları */}

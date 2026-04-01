@@ -185,12 +185,12 @@ export default function SocialStoryPage() {
 
   return (
     <div
-      className="h-[calc(100vh-0px)] w-full flex flex-col relative overflow-hidden"
+      className="w-full flex flex-col relative md:h-[calc(100vh-0px)] md:overflow-hidden"
       style={{ background: "linear-gradient(135deg, #f0f7f7 0%, #e8f4f4 50%, #f5fafa 100%)" }}
     >
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
-    <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 h-full flex flex-col">
+    <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:h-full flex flex-col">
       {/* Header */}
       <div className="mb-5 shrink-0 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/70 px-5 py-4 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
         <Link
@@ -206,10 +206,10 @@ export default function SocialStoryPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] flex-1 min-h-0">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] md:flex-1 md:min-h-0">
         {/* ── Sol: Form ── */}
-        <div className="flex flex-col min-h-0">
-          <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar flex-1">
+        <div className="flex flex-col md:min-h-0">
+          <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
             <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
 
               {/* Öğrenci seçimi */}
@@ -344,8 +344,8 @@ export default function SocialStoryPage() {
         </div>
 
         {/* ── Sağ: Sonuç ── */}
-        <div className="flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col min-h-0">
+        <div className="flex flex-col md:min-h-0">
+          <div className="overflow-y-auto no-scrollbar flex flex-col md:flex-1 md:min-h-0">
             {loading ? (
               <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
                 <div className="text-center space-y-4 px-8">
@@ -354,9 +354,9 @@ export default function SocialStoryPage() {
                 </div>
               </div>
             ) : story ? (
-              <div className="flex flex-col gap-4 flex-1 min-h-0">
+              <div className="flex flex-col gap-4 md:flex-1 md:min-h-0">
                 {/* Hikaye kartı */}
-                <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar flex-1">
+                <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
                   {/* Başlık */}
                   <h2 className="text-lg font-bold text-[#023435] mb-5">{story.title}</h2>
 
