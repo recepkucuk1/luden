@@ -1,8 +1,8 @@
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = process.env.EMAIL_FROM ?? "Luden <onboarding@resend.dev>";
-const BASE_URL = process.env.NEXTAUTH_URL ?? "https://luden-8737.vercel.app";
+const FROM = process.env.EMAIL_FROM ?? "Luden <info@ludenlab.com>";
+const BASE_URL = process.env.NEXTAUTH_URL ?? "https://ludenlab.com";
 
 function verificationEmailHtml(verifyUrl: string): string {
   return `<!DOCTYPE html>
