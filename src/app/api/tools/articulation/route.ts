@@ -135,7 +135,7 @@ ${theme && theme !== "none" ? `- Tema: ${theme}` : "- Tema: Karışık (tema yok
 Bu öğrenci için uygun artikülasyon alıştırma materyali üret.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-opus-4-6",
+      model: "claude-sonnet-4-6",
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userPrompt }],

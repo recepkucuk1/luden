@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
 Bu parametrelere uygun iletişim panosu üret. Tam olarak ${symbolCount} hücre oluştur.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-opus-4-6",
+      model: "claude-sonnet-4-6",
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userPrompt }],
