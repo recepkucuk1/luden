@@ -450,30 +450,32 @@ export default function CommBoardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <div className="mx-auto max-w-3xl px-6 py-10">
+    <div className="min-h-screen relative" style={{ background: "linear-gradient(135deg, #f0f7f7 0%, #e8f4f4 50%, #f5fafa 100%)" }}>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
+      <div className="relative z-10 mx-auto max-w-3xl px-6 py-10">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/tools" className="mb-4 inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-700 transition-colors">
+          <Link href="/tools" className="mb-4 inline-flex items-center gap-1.5 text-sm text-[#023435]/50 hover:text-[#023435] transition-colors">
             <ArrowLeft className="h-4 w-4" /> Araçlara Dön
           </Link>
           <h1 className="text-2xl font-bold text-[#023435]">İletişim Panosu Üretici</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-[#023435]/60">
             Alternatif ve destekleyici iletişim için kişiselleştirilmiş görsel iletişim panoları üretin.
           </p>
         </div>
 
         {/* Form */}
         {!board && (
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm space-y-6">
+          <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] space-y-6">
 
             {/* Student */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-zinc-700">Öğrenci (isteğe bağlı)</label>
+              <label className="text-sm font-bold text-[#023435]/70">Öğrenci (isteğe bağlı)</label>
               <select
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
-                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#023435]/30"
+                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
               >
                 <option value="">— Öğrenci seçin —</option>
                 {students.map((s) => (
@@ -481,7 +483,7 @@ export default function CommBoardPage() {
                 ))}
               </select>
               {selectedStudent && (
-                <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3 flex items-center gap-3">
+                <div className="rounded-xl border border-white/70 bg-white/50 backdrop-blur-sm p-3 flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-[#023435]/10 text-[#023435] flex items-center justify-center font-bold text-xs shrink-0">
                     {selectedStudent.name.charAt(0)}
                   </div>
@@ -497,7 +499,7 @@ export default function CommBoardPage() {
 
             {/* Board type */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-zinc-700">Pano Türü</label>
+              <label className="text-sm font-bold text-[#023435]/70">Pano Türü</label>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {BOARD_TYPE_OPTIONS.map((opt) => (
                   <button
@@ -526,14 +528,14 @@ export default function CommBoardPage() {
                   value={customCategory}
                   onChange={(e) => setCustomCategory(e.target.value)}
                   placeholder="Kategori adını yazın (örn: Spor aktiviteleri)"
-                  className="mt-2 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#023435]/30"
+                  className="mt-2 w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
                 />
               )}
             </div>
 
             {/* Symbol count */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-zinc-700">Sembol Sayısı</label>
+              <label className="text-sm font-bold text-[#023435]/70">Sembol Sayısı</label>
               <div className="flex gap-2 flex-wrap">
                 {SYMBOL_COUNT_OPTIONS.map((opt) => (
                   <button
@@ -555,7 +557,7 @@ export default function CommBoardPage() {
 
             {/* Layout */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-zinc-700">Düzen</label>
+              <label className="text-sm font-bold text-[#023435]/70">Düzen</label>
               <div className="flex gap-2">
                 {([["grid", "Grid", "Satır ve sütun"], ["strip", "Satır", "Tek yatay şerit"]] as const).map(([v, l, d]) => (
                   <button
@@ -577,7 +579,7 @@ export default function CommBoardPage() {
 
             {/* Text mode */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-zinc-700">Metin Dili</label>
+              <label className="text-sm font-bold text-[#023435]/70">Metin Dili</label>
               <div className="flex gap-2">
                 {([["word_only", "Sadece kelime", "Su"], ["word_sentence", "Kelime + cümle", "Su istiyorum"]] as const).map(([v, l, ex]) => (
                   <button
@@ -598,9 +600,9 @@ export default function CommBoardPage() {
             </div>
 
             {/* Color coding toggle */}
-            <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+            <div className="flex items-center justify-between rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-4 py-3">
               <div>
-                <p className="text-sm font-semibold text-zinc-700">Fitzgerald Renk Kodlaması</p>
+                <p className="text-sm font-bold text-[#023435]/70">Fitzgerald Renk Kodlaması</p>
                 <p className="text-xs text-zinc-400 mt-0.5">İsim=Sarı · Fiil=Yeşil · Sıfat=Mavi · Sosyal=Pembe · Soru=Turuncu</p>
               </div>
               <button
@@ -625,7 +627,7 @@ export default function CommBoardPage() {
             </div>
 
             {generating && (
-              <div className="rounded-xl border border-zinc-100 bg-zinc-50 py-4">
+              <div className="rounded-xl border border-white/70 bg-white/50 backdrop-blur-sm py-4">
                 <LoadingMessages />
               </div>
             )}
@@ -683,3 +685,4 @@ export default function CommBoardPage() {
     </div>
   );
 }
+

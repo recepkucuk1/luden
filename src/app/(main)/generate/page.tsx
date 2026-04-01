@@ -86,25 +86,31 @@ function HomeContent() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6 h-[calc(100vh-4rem)] md:h-[calc(100vh-0px)] flex flex-col">
+    <div
+      className="h-[calc(100vh-4rem)] md:h-[calc(100vh-0px)] w-full flex flex-col relative overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #f0f7f7 0%, #e8f4f4 50%, #f5fafa 100%)" }}
+    >
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
+    <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6 h-full flex flex-col">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] flex-1 min-h-0">
         {/* Sol: Form */}
         <div className="flex flex-col h-full min-h-0">
-          <div className="mb-4 shrink-0">
+          <div className="mb-4 shrink-0 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/70 px-4 py-3 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-zinc-900">Öğrenme Kartı Oluştur</h2>
+              <h2 className="text-lg font-extrabold text-[#023435] tracking-tight">Öğrenme Kartı Oluştur</h2>
               {studentName && (
                 <Link
                   href="/students"
-                  className="text-xs text-zinc-400 hover:text-zinc-600 underline"
+                  className="text-xs text-[#023435]/50 hover:text-[#023435] underline"
                 >
                   öğrencilere dön
                 </Link>
               )}
             </div>
-            <p className="text-sm text-zinc-500">Parametreleri seç, AI öğrenme kartını üretsin.</p>
+            <p className="text-sm text-[#023435]/60 mt-0.5">Parametreleri seç, AI öğrenme kartını üretsin.</p>
           </div>
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm flex-1 overflow-y-auto no-scrollbar">
+          <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] flex-1 overflow-y-auto no-scrollbar">
             <CardGeneratorForm
               key={formKey}
               onCardGenerated={handleCardGenerated}
@@ -119,16 +125,16 @@ function HomeContent() {
 
         {/* Sağ: Önizleme */}
         <div className="flex flex-col h-full min-h-0">
-          <div className="mb-4 shrink-0">
-            <h2 className="text-lg font-semibold text-zinc-900">Kart Önizleme</h2>
-            <p className="text-sm text-zinc-500">
+          <div className="mb-4 shrink-0 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/70 px-4 py-3 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
+            <h2 className="text-lg font-extrabold text-[#023435] tracking-tight">Kart Önizleme</h2>
+            <p className="text-sm text-[#023435]/60 mt-0.5">
               {card ? "Üretilen öğrenme kartı aşağıda görüntüleniyor." : "Kart üretildiğinde burada görünecek."}
             </p>
           </div>
 
           <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col min-h-0">
             {loading ? (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-zinc-200 bg-white shadow-sm">
+              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
                 <div className="text-center space-y-4 px-8">
                   <div className="mx-auto h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
                   <LoadingMessages />
@@ -136,11 +142,11 @@ function HomeContent() {
               </div>
             ) : card ? (
               <div className="flex flex-col min-h-0 gap-4 flex-1">
-                <div className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm overflow-y-auto no-scrollbar flex-1">
+                <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar flex-1">
                   <CardPreview card={card} />
                 </div>
                 {/* Sonraki adım CTA'ları */}
-                <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm shrink-0">
+                <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)] shrink-0">
                   <p className="text-xs font-semibold text-zinc-400 mb-3">Sonraki adım</p>
                   <div className="flex flex-wrap gap-2">
                     <Link
@@ -167,7 +173,7 @@ function HomeContent() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white">
+              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-[#023435]/15 bg-white/40 backdrop-blur-xl">
                 <div className="text-center space-y-2 px-8">
                   <div className="text-4xl">🗂️</div>
                   <p className="text-sm font-medium text-zinc-500">Henüz kart üretilmedi</p>
@@ -189,6 +195,7 @@ function HomeContent() {
         />
       )}
     </main>
+  </div>
   );
 }
 
