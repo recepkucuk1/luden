@@ -135,151 +135,21 @@ function MockDropdown({ label, value, highlight }: { label: string; value: strin
   );
 }
 
-// Slayt 1 — Parametre seçimi
-function HowSlide1() {
-  return (
-    <div className="grid md:grid-cols-2 gap-5">
-      <div className="space-y-3">
-        <MockDropdown label="Çalışma alanı" value="Dil — Söz Dönemi" highlight />
-        <MockDropdown label="Yaş grubu" value="3-6 yaş" highlight />
-        <MockDropdown label="Zorluk" value="Başlangıç" />
-        <MockDropdown label="Tanı türü" value="Dil Gelişim Gecikmesi" />
-      </div>
-      <div className="flex flex-col gap-4">
-        <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">
-            Seçilen müfredat hedefi
-          </p>
-          <div className="space-y-2.5">
-            {[
-              { code: "2.2.1", title: "Dili anlar (tek sözcük → cümle düzeyi)", active: false },
-              { code: "2.2.3", title: "Sözcük dağarcığını genişletir", active: true },
-            ].map((g) => (
-              <div key={g.code} className="flex items-start gap-2.5">
-                <span className={cn(
-                  "shrink-0 mt-0.5 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold",
-                  g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]"
-                )}>✓</span>
-                <span className="text-xs text-[rgba(2,52,53,0.65)]">
-                  <span className="font-semibold text-[#023435]">{g.code}</span>
-                  <span className="ml-1.5">{g.title}</span>
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <Link
-          href="/register"
-          className="block w-full rounded-[9px] bg-[#FE703A] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors"
-        >
-          ✦ Öğrenme Kartı Üret
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-// Slayt 2 — Üretilen kart
-function HowSlide2() {
-  return (
-    <div className="space-y-4 max-w-2xl">
-      <div className="flex flex-wrap gap-2">
-        <CarouselTag color="blue">Dil · Söz Dönemi</CarouselTag>
-        <CarouselTag color="orange">3-6 yaş</CarouselTag>
-        <CarouselTag color="green">Başlangıç</CarouselTag>
-        <CarouselTag color="yellow">Dil Gelişim Gecikmesi</CarouselTag>
-        <span className="inline-flex items-center rounded-full bg-[rgba(16,121,150,0.08)] border border-[#107996]/20 px-2.5 py-0.5 text-[11px] font-semibold text-[#107996]">
-          Hedef 2.2.3
-        </span>
-      </div>
-      <h3 className="text-lg font-bold text-[#023435]">Nesne Adlandırma Oyunu</h3>
-      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">
-        Uzman, günlük yaşamda sık kullanılan 5-8 nesneyi (kaşık, top, ayakkabı, kitap vb.) teker teker gösterir. Öğrenci her nesneyi adlandırmaya çalışır. Bilmediği nesnelerde uzman sözcüğü söyler, öğrenci tekrar eder.
-      </p>
-      <div className="space-y-2">
-        {[
-          "Masaya 5 nesne koy, öğrencinin dikkatini çek",
-          "Her nesneyi göstererek \"Bu ne?\" diye sor",
-          "Yanıt 3 saniye içinde gelmezse model ol",
-          "Tüm nesneler tamamlanınca tekrar sıra yap",
-        ].map((step, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-[11px] font-bold text-white">
-              {i + 1}
-            </span>
-            <span className="text-sm text-[rgba(2,52,53,0.7)] pt-0.5">{step}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// Slayt 3 — Uzman notları
-function HowSlide3() {
-  return (
-    <div className="space-y-4 max-w-2xl">
-      <div
-        className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]"
-      >
-        <p className="text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">
-          Öğrencinin doğal ortamındaki nesnelerle başlayın — tanıdık nesneler daha hızlı dil kazanımı sağlar.
-          Sözel ödül yerine öğrencinin kendi başarısını fark etmesine alan açın: &ldquo;Bak, söyledin!&rdquo; gibi
-          içsel motivasyonu destekleyen geri bildirimler kullanın.
-        </p>
-        <p className="text-[11px] text-[rgba(2,52,53,0.4)] mt-2">Hedef 2.2.3 — Sözcük dağarcığını genişletir</p>
-      </div>
-      <div className="border-t border-[rgba(2,52,53,0.08)]" />
-      <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
-        <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME ÖNERİSİ</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">
-          Etkinliği aile ortamına taşımak için veliye aynı nesne listesini verin. Ev rutinleri sırasında
-          (kahvaltı, banyo) aynı sözcükleri tekrar ettirmeleri sözcük yerleşimini 3-4 kat hızlandırır.
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <CarouselTag color="green">İçsel motivasyon</CarouselTag>
-        <CarouselTag color="blue">Oyun temelli</CarouselTag>
-        <CarouselTag color="yellow">Genelleme odaklı</CarouselTag>
-        <CarouselTag color="orange">Veli katılımı</CarouselTag>
-      </div>
-    </div>
-  );
-}
-
-// Slayt 4 — PDF çıktısı
-function HowSlide4() {
+function MockPdfCard({ header, tags, rows, cta }: {
+  header: string;
+  tags: React.ReactNode;
+  rows: { label: string; title?: string; body: string }[];
+  cta: string;
+}) {
   return (
     <div className="max-w-xl mx-auto rounded-xl border border-[rgba(2,52,53,0.12)] bg-white shadow-sm overflow-hidden">
       <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.08)] px-5 py-3">
         <span className="font-bold text-[#023435]">Luden<span className="text-[#FE703A]">Lab</span></span>
-        <span className="text-xs text-[rgba(2,52,53,0.4)]">Luden Özel Keşif · Mart 2026</span>
+        <span className="text-xs text-[rgba(2,52,53,0.4)]">{header}</span>
       </div>
-      <div className="flex flex-wrap gap-1.5 px-5 py-3 border-b border-[rgba(2,52,53,0.06)]">
-        <CarouselTag color="blue">Dil · Söz Dönemi</CarouselTag>
-        <CarouselTag color="orange">3-6 yaş</CarouselTag>
-        <CarouselTag color="green">Başlangıç</CarouselTag>
-        <span className="inline-flex items-center rounded-full bg-[rgba(16,121,150,0.08)] border border-[#107996]/20 px-2.5 py-0.5 text-[11px] font-semibold text-[#107996]">
-          Hedef 2.2.3
-        </span>
-      </div>
+      <div className="flex flex-wrap gap-1.5 px-5 py-3 border-b border-[rgba(2,52,53,0.06)]">{tags}</div>
       <div className="px-5 py-4 space-y-3">
-        {[
-          {
-            label: "ETKİNLİK",
-            title: "Nesne Adlandırma Oyunu",
-            body: "Günlük yaşam nesnelerini adlandırma ve sözcük dağarcığını genişletme çalışması",
-          },
-          {
-            label: "UYGULAMA",
-            body: "5 nesne masaya koy → \"Bu ne?\" sor → 3 sn içinde yanıt gelmezse model ol → tüm nesneler bitince tekrar sıra yap",
-          },
-          {
-            label: "UZMAN NOTU",
-            body: "Tanıdık nesnelerle başlayın. İçsel motivasyonu destekleyen geri bildirimler kullanın. Veliye nesne listesini verin.",
-          },
-        ].map((s) => (
+        {rows.map((s) => (
           <div key={s.label}>
             <p className="text-[10px] font-bold uppercase tracking-wider text-[#023435]/40 mb-1">{s.label}</p>
             {s.title && <p className="text-sm font-semibold text-[#023435] mb-0.5">{s.title}</p>}
@@ -288,7 +158,7 @@ function HowSlide4() {
         ))}
       </div>
       <div className="flex items-center justify-between border-t border-[rgba(2,52,53,0.08)] px-5 py-3">
-        <span className="text-[11px] text-[rgba(2,52,53,0.4)]">MEB Talim Terbiye Kurulu müfredatına uygundur</span>
+        <span className="text-[11px] text-[rgba(2,52,53,0.4)]">{cta}</span>
         <span className="flex items-center gap-1.5 text-xs font-semibold text-[#107996]">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -300,20 +170,567 @@ function HowSlide4() {
   );
 }
 
-const HOW_SLIDES = [
-  { title: "Parametreleri seç",   desc: "Alan, yaş grubu, tanı ve müfredat hedefini belirle",     Panel: HowSlide1, icon: "⚙️" },
-  { title: "Kartı incele",        desc: "Yapay zeka MEB müfredatına uygun kart üretti",            Panel: HowSlide2, icon: "🃏" },
-  { title: "Uzman notlarını gör", desc: "Uzman önerileri, genelleme ve veli notları eklendi",      Panel: HowSlide3, icon: "📋" },
-  { title: "PDF olarak indir",    desc: "Yazdırılabilir PDF — Pro plan ile indirilebilir",         Panel: HowSlide4, icon: "📄" },
+// ── ÖĞRENME KARTI slides ──────────────────────────────────────────────────────
+function KartSlide1() {
+  return (
+    <div className="grid md:grid-cols-2 gap-5">
+      <div className="space-y-3">
+        <MockDropdown label="Çalışma alanı" value="Dil — Söz Dönemi" highlight />
+        <MockDropdown label="Yaş grubu" value="3-6 yaş" highlight />
+        <MockDropdown label="Zorluk" value="Başlangıç" />
+        <MockDropdown label="Tanı türü" value="Dil Gelişim Gecikmesi" />
+      </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Seçilen müfredat hedefi</p>
+          <div className="space-y-2.5">
+            {[
+              { code: "2.2.1", title: "Dili anlar (tek sözcük → cümle düzeyi)", active: false },
+              { code: "2.2.3", title: "Sözcük dağarcığını genişletir", active: true },
+            ].map((g) => (
+              <div key={g.code} className="flex items-start gap-2.5">
+                <span className={cn("shrink-0 mt-0.5 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]")}>✓</span>
+                <span className="text-xs text-[rgba(2,52,53,0.65)]"><span className="font-semibold text-[#023435]">{g.code}</span><span className="ml-1.5">{g.title}</span></span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <Link href="/register" className="block w-full rounded-[9px] bg-[#FE703A] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors">
+          ✦ Öğrenme Kartı Üret
+        </Link>
+      </div>
+    </div>
+  );
+}
+function KartSlide2() {
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <div className="flex flex-wrap gap-2">
+        <CarouselTag color="blue">Dil · Söz Dönemi</CarouselTag>
+        <CarouselTag color="orange">3-6 yaş</CarouselTag>
+        <CarouselTag color="green">Başlangıç</CarouselTag>
+        <CarouselTag color="yellow">Dil Gelişim Gecikmesi</CarouselTag>
+        <span className="inline-flex items-center rounded-full bg-[rgba(16,121,150,0.08)] border border-[#107996]/20 px-2.5 py-0.5 text-[11px] font-semibold text-[#107996]">Hedef 2.2.3</span>
+      </div>
+      <h3 className="text-lg font-bold text-[#023435]">Nesne Adlandırma Oyunu</h3>
+      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Uzman, günlük yaşamda sık kullanılan 5-8 nesneyi teker teker gösterir. Öğrenci her nesneyi adlandırmaya çalışır. Bilmediği nesnelerde uzman sözcüğü söyler, öğrenci tekrar eder.</p>
+      <div className="space-y-2">
+        {["Masaya 5 nesne koy, öğrencinin dikkatini çek","Her nesneyi göstererek \"Bu ne?\" diye sor","Yanıt 3 saniye içinde gelmezse model ol","Tüm nesneler tamamlanınca tekrar sıra yap"].map((step, i) => (
+          <div key={i} className="flex items-start gap-3">
+            <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-[11px] font-bold text-white">{i + 1}</span>
+            <span className="text-sm text-[rgba(2,52,53,0.7)] pt-0.5">{step}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+function KartSlide3() {
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Öğrencinin doğal ortamındaki nesnelerle başlayın — tanıdık nesneler daha hızlı dil kazanımı sağlar. Sözel ödül yerine içsel motivasyonu destekleyen geri bildirimler kullanın.</p>
+        <p className="text-[11px] text-[rgba(2,52,53,0.4)] mt-2">Hedef 2.2.3 — Sözcük dağarcığını genişletir</p>
+      </div>
+      <div className="border-t border-[rgba(2,52,53,0.08)]" />
+      <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME ÖNERİSİ</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veliye aynı nesne listesini verin. Ev rutinleri sırasında (kahvaltı, banyo) aynı sözcükleri tekrar ettirmeleri sözcük yerleşimini 3-4 kat hızlandırır.</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <CarouselTag color="green">İçsel motivasyon</CarouselTag>
+        <CarouselTag color="blue">Oyun temelli</CarouselTag>
+        <CarouselTag color="yellow">Genelleme odaklı</CarouselTag>
+        <CarouselTag color="orange">Veli katılımı</CarouselTag>
+      </div>
+    </div>
+  );
+}
+function KartSlide4() {
+  return (
+    <MockPdfCard
+      header="Luden Özel Keşif · Mart 2026"
+      tags={<><CarouselTag color="blue">Dil · Söz Dönemi</CarouselTag><CarouselTag color="orange">3-6 yaş</CarouselTag><CarouselTag color="green">Başlangıç</CarouselTag><span className="inline-flex items-center rounded-full bg-[rgba(16,121,150,0.08)] border border-[#107996]/20 px-2.5 py-0.5 text-[11px] font-semibold text-[#107996]">Hedef 2.2.3</span></>}
+      rows={[
+        { label: "ETKİNLİK", title: "Nesne Adlandırma Oyunu", body: "Günlük yaşam nesnelerini adlandırma ve sözcük dağarcığını genişletme çalışması" },
+        { label: "UYGULAMA", body: "5 nesne masaya koy → \"Bu ne?\" sor → 3 sn içinde yanıt gelmezse model ol → tüm nesneler bitince tekrar sıra yap" },
+        { label: "UZMAN NOTU", body: "Tanıdık nesnelerle başlayın. İçsel motivasyonu destekleyen geri bildirimler kullanın. Veliye nesne listesini verin." },
+      ]}
+      cta="MEB Talim Terbiye Kurulu müfredatına uygundur"
+    />
+  );
+}
+
+// ── ARTİKÜLASYON slides ───────────────────────────────────────────────────────
+function ArtSlide1() {
+  return (
+    <div className="grid md:grid-cols-2 gap-5">
+      <div className="space-y-3">
+        <MockDropdown label="Hedef fonem" value="/r/ — Akıcı ünsüz" highlight />
+        <MockDropdown label="Konum" value="Sözcük başı" highlight />
+        <MockDropdown label="Yaş grubu" value="6-9 yaş" />
+        <MockDropdown label="Zorluk seviyesi" value="Orta" />
+      </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Önerilen egzersiz türleri</p>
+          <div className="space-y-2.5">
+            {[
+              { label: "Yalıtılmış ses", active: true },
+              { label: "Hece tekrarı (ra, re, ri…)", active: true },
+              { label: "Sözcük düzeyinde", active: false },
+            ].map((g) => (
+              <div key={g.label} className="flex items-center gap-2.5">
+                <span className={cn("shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]/40")}>✓</span>
+                <span className={cn("text-xs", g.active ? "text-[#023435]" : "text-[rgba(2,52,53,0.4)]")}>{g.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <Link href="/register" className="block w-full rounded-[9px] bg-[#FE703A] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors">
+          ✦ Artikülasyon Kartı Üret
+        </Link>
+      </div>
+    </div>
+  );
+}
+function ArtSlide2() {
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <div className="flex flex-wrap gap-2">
+        <CarouselTag color="blue">/r/ — Akıcı ünsüz</CarouselTag>
+        <CarouselTag color="orange">Sözcük başı</CarouselTag>
+        <CarouselTag color="green">6-9 yaş · Orta</CarouselTag>
+      </div>
+      <h3 className="text-lg font-bold text-[#023435]">/r/ Sesi Hece Tekrar Çalışması</h3>
+      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Ayna önünde dil pozisyonu gösterilerek /r/ sesinin yalıtılmış üretimi pekiştirilir; ardından ra-re-ri-ro-ru hece zinciri oluşturulur.</p>
+      <div className="space-y-2">
+        {[
+          "Aynayı öğrencinin önüne koy, dil ucunun konumunu göster",
+          "Tek başına /r/ sesini model ol, 5 kez tekrarlat",
+          "\"Ra\" hecesiyle başla, ritimli şekilde ilerle",
+          "Doğru üretimleri hemen pekiştir, hatalarda dil pozisyonuna dön",
+        ].map((step, i) => (
+          <div key={i} className="flex items-start gap-3">
+            <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-[11px] font-bold text-white">{i + 1}</span>
+            <span className="text-sm text-[rgba(2,52,53,0.7)] pt-0.5">{step}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+function ArtSlide3() {
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Dil ucunu damağa değdirme egzersizini bağımsız yapabiliyorsa hece düzeyine geçin. Yorulma işareti görülürse seans süresini kısaltın; fazla tekrar kas gerginliğini artırır.</p>
+        <p className="text-[11px] text-[rgba(2,52,53,0.4)] mt-2">/r/ · Sözcük başı pozisyon çalışması</p>
+      </div>
+      <div className="border-t border-[rgba(2,52,53,0.08)]" />
+      <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME ÖNERİSİ</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Öğrenciye kısa bir sözcük listesi verin ("rüzgar, resim, renk"). Gün içinde bu sözcükleri bilinçli kullanmasını isteyin; aile de sessizce dinleyip geri bildirim versin.</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <CarouselTag color="green">Motor planlama</CarouselTag>
+        <CarouselTag color="blue">Ayna tekniği</CarouselTag>
+        <CarouselTag color="orange">Hece zinciri</CarouselTag>
+        <CarouselTag color="yellow">Ev genellemesi</CarouselTag>
+      </div>
+    </div>
+  );
+}
+function ArtSlide4() {
+  return (
+    <MockPdfCard
+      header="Artikülasyon Kartı · Mart 2026"
+      tags={<><CarouselTag color="blue">/r/ Akıcı ünsüz</CarouselTag><CarouselTag color="orange">Sözcük başı</CarouselTag><CarouselTag color="green">6-9 yaş</CarouselTag></>}
+      rows={[
+        { label: "HEDEF SES", title: "/r/ — Hece Tekrar Çalışması", body: "Yalıtılmış /r/ üretiminden ra/re/ri/ro/ru hece zincirine geçiş" },
+        { label: "UYGULAMA", body: "Ayna önünde dil pozisyonu göster → yalıtılmış ses × 5 → hece zinciri → doğru üretimleri anında pekiştir" },
+        { label: "VELİ NOTU", body: "Günlük 5 dakika \"rüzgar, resim, renk\" sözcüklerini bilinçli kullandırın. Seans dışı pratik kalıcılığı artırır." },
+      ]}
+      cta="MEB Talim Terbiye Kurulu müfredatına uygundur"
+    />
+  );
+}
+
+// ── EV ÖDEVİ slides ───────────────────────────────────────────────────────────
+function EvSlide1() {
+  return (
+    <div className="grid md:grid-cols-2 gap-5">
+      <div className="space-y-3">
+        <MockDropdown label="Aktivite türü" value="Sözcük Eşleştirme" highlight />
+        <MockDropdown label="Günlük süre" value="10 dakika" highlight />
+        <MockDropdown label="Zorluk" value="Başlangıç" />
+        <MockDropdown label="Hedef alan" value="Sözcük dağarcığı" />
+      </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Haftalık program</p>
+          <div className="space-y-1.5">
+            {["Pazartesi — Eşleştirme kartları","Çarşamba — Resim-sözcük oyunu","Cuma — Tekrar & değerlendirme"].map((d, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs text-[rgba(2,52,53,0.65)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#FE703A] shrink-0" />
+                {d}
+              </div>
+            ))}
+          </div>
+        </div>
+        <Link href="/register" className="block w-full rounded-[9px] bg-[#FE703A] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors">
+          ✦ Ev Ödevi Oluştur
+        </Link>
+      </div>
+    </div>
+  );
+}
+function EvSlide2() {
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <div className="flex flex-wrap gap-2">
+        <CarouselTag color="blue">Sözcük Eşleştirme</CarouselTag>
+        <CarouselTag color="orange">10 dk/gün</CarouselTag>
+        <CarouselTag color="green">Başlangıç</CarouselTag>
+      </div>
+      <h3 className="text-lg font-bold text-[#023435]">Resim-Sözcük Eşleştirme Ödevi</h3>
+      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">8 resim kartı ve yazılı sözcük etiketiyle eşleştirme yapılır. Öğrenci her resmi ilgili sözcükle eşleştirir, veli sonucu tabloya işler.</p>
+      <div className="space-y-2">
+        {[
+          "8 resim kartını ve sözcük etiketlerini masa üzerine karışık yay",
+          "Öğrenciden resimleri sözcükleriyle eşleştirmesini iste",
+          "Her doğru eşleştirme için sözlü pekiştireç ver",
+          "Sonuçları takip formuna işle, terapiste fotoğraf gönder",
+        ].map((step, i) => (
+          <div key={i} className="flex items-start gap-3">
+            <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-[11px] font-bold text-white">{i + 1}</span>
+            <span className="text-sm text-[rgba(2,52,53,0.7)] pt-0.5">{step}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+function EvSlide3() {
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">VELİ TALİMATI</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Etkinliği her gün aynı saatte yapın — rutin öğrenmeyi kolaylaştırır. Öğrenci hata yaparsa sözcüğü siz söyleyin, onu tekrar ettirin; olumsuz geri bildirimden kaçının.</p>
+      </div>
+      <div className="border-t border-[rgba(2,52,53,0.08)]" />
+      <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">TERAPİST NOTU</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veli takip formunu bir sonraki seansta getirsin. Hangi sözcüklerin güçlük çıkardığını görmek hedef güncellemesine yardımcı olur.</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <CarouselTag color="green">Aile katılımı</CarouselTag>
+        <CarouselTag color="blue">Günlük rutin</CarouselTag>
+        <CarouselTag color="orange">Takip formu</CarouselTag>
+        <CarouselTag color="yellow">Veli rehberi</CarouselTag>
+      </div>
+    </div>
+  );
+}
+function EvSlide4() {
+  return (
+    <MockPdfCard
+      header="Ev Ödevi · Mart 2026"
+      tags={<><CarouselTag color="blue">Sözcük Eşleştirme</CarouselTag><CarouselTag color="orange">10 dk/gün</CarouselTag><CarouselTag color="green">Başlangıç</CarouselTag></>}
+      rows={[
+        { label: "ETKİNLİK", title: "Resim-Sözcük Eşleştirme", body: "8 resim kartını sözcük etiketleriyle eşleştirme çalışması — Pzt / Çrş / Cum" },
+        { label: "VELİ TALİMATI", body: "Günde 10 dk, aynı saatte uygulayın. Hatada model olun, olumsuz geri bildirimden kaçının." },
+        { label: "TAKİP", body: "Her seanstan önce formu doldurun ve terapiste fotoğraf gönderin." },
+      ]}
+      cta="Veliye teslim edilmek üzere hazırlanmıştır"
+    />
+  );
+}
+
+// ── SESLETİM slides ───────────────────────────────────────────────────────────
+function SesSlide1() {
+  return (
+    <div className="grid md:grid-cols-2 gap-5">
+      <div className="space-y-3">
+        <MockDropdown label="Ses grubu" value="Rezonans — Nazal" highlight />
+        <MockDropdown label="Egzersiz türü" value="Nefes desteği" highlight />
+        <MockDropdown label="Yaş grubu" value="9-14 yaş" />
+        <MockDropdown label="Seviye" value="Orta" />
+      </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Seans hedefleri</p>
+          <div className="space-y-2.5">
+            {[
+              { label: "Diyafragma nefesi yerleştirme", active: true },
+              { label: "Rezonans farkındalığı", active: true },
+              { label: "Nazal / oral ayrımı", active: false },
+            ].map((g) => (
+              <div key={g.label} className="flex items-center gap-2.5">
+                <span className={cn("shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]/40")}>✓</span>
+                <span className={cn("text-xs", g.active ? "text-[#023435]" : "text-[rgba(2,52,53,0.4)]")}>{g.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <Link href="/register" className="block w-full rounded-[9px] bg-[#FE703A] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors">
+          ✦ Sesletim Kartı Üret
+        </Link>
+      </div>
+    </div>
+  );
+}
+function SesSlide2() {
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <div className="flex flex-wrap gap-2">
+        <CarouselTag color="blue">Rezonans · Nazal</CarouselTag>
+        <CarouselTag color="orange">Nefes desteği</CarouselTag>
+        <CarouselTag color="green">9-14 yaş · Orta</CarouselTag>
+      </div>
+      <h3 className="text-lg font-bold text-[#023435]">Diyafragma Nefesi + Rezonans Farkındalığı</h3>
+      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Derin diyafragma nefesi alışkanlığı yerleştirildikten sonra nazal titreşim farkındalığı "hmmm" tutma egzersizleriyle geliştirilir.</p>
+      <div className="space-y-2">
+        {[
+          "Sırt düz otur, bir el göğse, bir el karına koy",
+          "Burundan 4 say nefes al — karnın şişmeli, göğsün hareketsiz kalmalı",
+          "\"Hmmm\" sesi çıkararak 5 saniye tut, titreşimi hisset",
+          "Dudaklara dokunarak nazal rezonansı fark et",
+        ].map((step, i) => (
+          <div key={i} className="flex items-start gap-3">
+            <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-[11px] font-bold text-white">{i + 1}</span>
+            <span className="text-sm text-[rgba(2,52,53,0.7)] pt-0.5">{step}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+function SesSlide3() {
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Nefes egzersizlerini asla aç karnına yaptırmayın. Baş dönmesi olursa molaya geçin. Titreşim farkındalığını pekiştirmek için öğrencinin kendi alnına ya da elmacık kemiğine dokunmasını isteyin.</p>
+      </div>
+      <div className="border-t border-[rgba(2,52,53,0.08)]" />
+      <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Günlük 3 dakika sabah nefes rutini önerin. Öğrenci okul öncesi bu egzersizi yaparsa seans verimliliği belirgin biçimde artar.</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <CarouselTag color="green">Diyafragma</CarouselTag>
+        <CarouselTag color="blue">Rezonans</CarouselTag>
+        <CarouselTag color="orange">Farkındalık</CarouselTag>
+        <CarouselTag color="yellow">Sabah rutini</CarouselTag>
+      </div>
+    </div>
+  );
+}
+function SesSlide4() {
+  return (
+    <MockPdfCard
+      header="Sesletim Kartı · Mart 2026"
+      tags={<><CarouselTag color="blue">Rezonans · Nazal</CarouselTag><CarouselTag color="orange">Nefes desteği</CarouselTag><CarouselTag color="green">9-14 yaş</CarouselTag></>}
+      rows={[
+        { label: "EGZERSIZ", title: "Diyafragma Nefesi + Rezonans Farkındalığı", body: "Karna nefes → \"Hmmm\" 5 sn tut → titreşimi hisset" },
+        { label: "UYGULAMA", body: "Sırt düz otur → 4 sayı nefes al → Hmmm tut → dudak/elmacık temas kontrolü" },
+        { label: "UZMAN NOTU", body: "Aç karnına yaptırmayın. Baş dönmesinde molaya geçin. Sabah 3 dk rutin önerin." },
+      ]}
+      cta="Ses terapisti gözetiminde uygulanmalıdır"
+    />
+  );
+}
+
+// ── HEDEF TAKİP slides ────────────────────────────────────────────────────────
+function HedefSlide1() {
+  return (
+    <div className="grid md:grid-cols-2 gap-5">
+      <div className="space-y-3">
+        <MockDropdown label="Öğrenci" value="Ahmet Y. — 7 yaş" highlight />
+        <MockDropdown label="Hedef kodu" value="2.2.3 Sözcük dağarcığı" highlight />
+        <MockDropdown label="Dönem" value="2025-2026 / 2. Dönem" />
+        <MockDropdown label="Ölçüm birimi" value="% doğru yanıt" />
+      </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Başlangıç kriterleri</p>
+          <div className="space-y-1.5">
+            {["Başlangıç: %30 doğru yanıt","Kısa dönem hedef: %60","Uzun dönem hedef: %80"].map((d, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs text-[rgba(2,52,53,0.65)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#107996] shrink-0" />
+                {d}
+              </div>
+            ))}
+          </div>
+        </div>
+        <Link href="/register" className="block w-full rounded-[9px] bg-[#FE703A] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors">
+          ✦ Hedef Tablosu Oluştur
+        </Link>
+      </div>
+    </div>
+  );
+}
+function HedefSlide2() {
+  const rows = [
+    { tarih: "10 Mar", oran: 32, not: "Başlangıç ölçümü" },
+    { tarih: "17 Mar", oran: 45, not: "Nesne adlandırma" },
+    { tarih: "24 Mar", oran: 58, not: "Resim kartları" },
+    { tarih: "31 Mar", oran: 64, not: "Kısa dönem ✓" },
+  ];
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <div className="flex flex-wrap gap-2">
+        <CarouselTag color="blue">Ahmet Y.</CarouselTag>
+        <CarouselTag color="orange">Hedef 2.2.3</CarouselTag>
+        <CarouselTag color="green">2. Dönem</CarouselTag>
+      </div>
+      <h3 className="text-lg font-bold text-[#023435]">İlerleme Tablosu — Sözcük Dağarcığı</h3>
+      <div className="rounded-xl border border-[rgba(2,52,53,0.1)] overflow-hidden">
+        <div className="grid grid-cols-3 bg-[#f0f7f7] px-4 py-2 text-[11px] font-bold uppercase tracking-wide text-[rgba(2,52,53,0.45)]">
+          <span>Tarih</span><span>Doğru %</span><span>Not</span>
+        </div>
+        {rows.map((r) => (
+          <div key={r.tarih} className="grid grid-cols-3 px-4 py-2.5 text-xs text-[rgba(2,52,53,0.7)] border-t border-[rgba(2,52,53,0.06)] items-center">
+            <span className="font-medium text-[#023435]">{r.tarih}</span>
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 flex-1 rounded-full bg-[rgba(2,52,53,0.08)]">
+                <div className="h-full rounded-full bg-[#FE703A]" style={{ width: `${r.oran}%` }} />
+              </div>
+              <span className="font-semibold text-[#FE703A] shrink-0">{r.oran}%</span>
+            </div>
+            <span>{r.not}</span>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-[rgba(2,52,53,0.5)]">Kısa dönem hedef (%60) 3. haftada aşıldı. Uzun dönem hedef: %80.</p>
+    </div>
+  );
+}
+function HedefSlide3() {
+  return (
+    <div className="space-y-4 max-w-2xl">
+      <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">DÖNEM ANALİZİ</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Ahmet, 3 hafta içinde %30&rsquo;dan %64&rsquo;e ilerledi. Kısa dönem hedef aşıldı; uzun dönem hedef olan %80&rsquo;e ulaşmak için 2-3 seans daha gerekebilir. Nesne adlandırma aktiviteleri en yüksek kazanımı sağladı.</p>
+      </div>
+      <div className="border-t border-[rgba(2,52,53,0.08)]" />
+      <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">SONRAKİ ADIM ÖNERİSİ</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Sözcük dağarcığını cümle düzeyine taşımak için 3.1.1 hedefine geçiş planlanabilir. Ev ödevi frekansını haftada 3&rsquo;ten 5&rsquo;e çıkarmak ilerlemeyi hızlandırır.</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <CarouselTag color="green">%34 ilerleme</CarouselTag>
+        <CarouselTag color="blue">Hedef aşıldı</CarouselTag>
+        <CarouselTag color="orange">Geçiş önerisi</CarouselTag>
+        <CarouselTag color="yellow">3 hafta</CarouselTag>
+      </div>
+    </div>
+  );
+}
+function HedefSlide4() {
+  return (
+    <MockPdfCard
+      header="Dönem Raporu · Mart 2026"
+      tags={<><CarouselTag color="blue">Ahmet Y. · 7 yaş</CarouselTag><CarouselTag color="orange">Hedef 2.2.3</CarouselTag><CarouselTag color="green">2. Dönem</CarouselTag></>}
+      rows={[
+        { label: "HEDEF", title: "Sözcük Dağarcığını Genişletir (2.2.3)", body: "Başlangıç: %30 · Kısa dönem: %60 · Uzun dönem: %80" },
+        { label: "SONUÇ", body: "3 hafta içinde %64'e ulaşıldı. Kısa dönem hedef aşıldı. 2-3 seans içinde uzun dönem hedef beklenmektedir." },
+        { label: "ÖNERİ", body: "Hedef 3.1.1'e geçiş planlanabilir. Ev ödevi frekansı artırılması önerilir." },
+      ]}
+      cta="Veli ve okul dosyasına eklenebilir"
+    />
+  );
+}
+
+// ── TOOLS config ──────────────────────────────────────────────────────────────
+const TOOLS_CONFIG = [
+  {
+    id: "kart",
+    label: "Öğrenme Kartı",
+    icon: "🃏",
+    headline: "Saniyeler içinde kişiselleştirilmiş kart",
+    subtitle: "Alan, yaş grubu ve hedefi seçin — yapay zeka gerisini halleder",
+    slides: [
+      { title: "Parametreleri seç",   desc: "Alan, yaş grubu, tanı ve müfredat hedefini belirle", Panel: KartSlide1 },
+      { title: "Kartı incele",        desc: "Yapay zeka MEB müfredatına uygun kart üretti",        Panel: KartSlide2 },
+      { title: "Uzman notlarını gör", desc: "Uzman önerileri, genelleme ve veli notları eklendi",  Panel: KartSlide3 },
+      { title: "PDF olarak indir",    desc: "Yazdırılabilir PDF — Pro plan ile indirilebilir",     Panel: KartSlide4 },
+    ],
+  },
+  {
+    id: "artikulasyon",
+    label: "Artikülasyon",
+    icon: "🗣️",
+    headline: "Hedef foneme özel artikülasyon kartı",
+    subtitle: "Sesi, konumu ve yaş grubunu seçin — egzersiz protokolü hazır",
+    slides: [
+      { title: "Fonem & konum seç",   desc: "Hedef ses, pozisyon ve yaş grubunu belirle",        Panel: ArtSlide1 },
+      { title: "Egzersizi gör",       desc: "Adım adım artikülasyon protokolü oluşturuldu",       Panel: ArtSlide2 },
+      { title: "Uzman ipuçları",      desc: "Motor planlama notları ve genelleme önerileri",       Panel: ArtSlide3 },
+      { title: "PDF olarak indir",    desc: "Yazdırılabilir egzersiz kartı — Pro plan ile",        Panel: ArtSlide4 },
+    ],
+  },
+  {
+    id: "ev-odevi",
+    label: "Ev Ödevi",
+    icon: "📝",
+    headline: "Veliye teslim edilmeye hazır ev ödevi",
+    subtitle: "Aktivite türü ve hedefi seçin — veli rehberi otomatik oluşturulsun",
+    slides: [
+      { title: "Aktivite & süre seç", desc: "Ödev türünü, günlük süreyi ve hedef alanı belirle", Panel: EvSlide1 },
+      { title: "Ödevi incele",        desc: "Adım adım uygulama talimatları hazırlandı",          Panel: EvSlide2 },
+      { title: "Veli talimatları",    desc: "Veli rehberi ve terapist notları eklendi",            Panel: EvSlide3 },
+      { title: "PDF olarak indir",    desc: "Veliye teslim hazır ödev formu — Pro plan ile",      Panel: EvSlide4 },
+    ],
+  },
+  {
+    id: "sesletim",
+    label: "Sesletim",
+    icon: "🎵",
+    headline: "Nefes ve rezonans egzersiz kartı",
+    subtitle: "Ses grubunu ve egzersiz türünü seçin — protokol saniyeler içinde hazır",
+    slides: [
+      { title: "Ses & egzersiz seç",  desc: "Ses grubunu, egzersiz türünü ve seviyeyi belirle",  Panel: SesSlide1 },
+      { title: "Protokolü gör",       desc: "Adım adım sesletim egzersiz protokolü oluşturuldu", Panel: SesSlide2 },
+      { title: "Terapi ipuçları",     desc: "Uzman notları ve genelleme önerileri eklendi",       Panel: SesSlide3 },
+      { title: "PDF olarak indir",    desc: "Yazdırılabilir sesletim kartı — Pro plan ile",       Panel: SesSlide4 },
+    ],
+  },
+  {
+    id: "hedef",
+    label: "Hedef Takip",
+    icon: "📊",
+    headline: "Dönem boyunca hedef takip tablosu",
+    subtitle: "Öğrenci ve hedef kodunu seçin — ilerleme tablosu ve rapor hazır",
+    slides: [
+      { title: "Öğrenci & hedef seç", desc: "Öğrenci, hedef kodu ve dönem bilgisini gir",        Panel: HedefSlide1 },
+      { title: "Tabloyu gör",         desc: "İlerleme verileri tabloda görselleştirildi",         Panel: HedefSlide2 },
+      { title: "Analiz & öneriler",   desc: "Dönem analizi ve sonraki adım önerileri oluşturuldu",Panel: HedefSlide3 },
+      { title: "Rapor olarak indir",  desc: "Veli ve okul dosyasına eklenebilir rapor",           Panel: HedefSlide4 },
+    ],
+  },
 ];
 
 function HowItWorksCarousel() {
+  const [activeTool, setActiveTool] = useState(0);
   const [active, setActive] = useState(0);
   const [direction, setDirection] = useState(1);
   const [paused, setPaused] = useState(false);
-  const count = HOW_SLIDES.length;
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+
+  const currentTool = TOOLS_CONFIG[activeTool];
+  const slides = currentTool.slides;
+  const count = slides.length;
+
+  const switchTool = (i: number) => {
+    setActiveTool(i);
+    setActive(0);
+    setDirection(1);
+  };
 
   useEffect(() => {
     if (paused) return;
@@ -322,7 +739,7 @@ function HowItWorksCarousel() {
       setActive((p) => (p + 1) % count);
     }, 4000);
     return () => clearInterval(id);
-  }, [paused, count]);
+  }, [paused, count, activeTool]);
 
   const goTo = (i: number) => {
     setDirection(i > active ? 1 : -1);
@@ -335,7 +752,7 @@ function HowItWorksCarousel() {
     exit: (d: number) => ({ x: d > 0 ? -60 : 60, opacity: 0 }),
   };
 
-  const { Panel } = HOW_SLIDES[active];
+  const { Panel } = slides[active];
 
   return (
     <section ref={sectionRef} className="py-20 px-6" style={{ background: "#f8fafa" }}>
@@ -344,17 +761,63 @@ function HowItWorksCarousel() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
           <p className="text-xs font-bold uppercase tracking-widest text-[#FE703A] mb-3">NASIL ÇALIŞIR</p>
-          <h2 className="text-2xl font-bold text-[#023435] mb-3">Saniyeler içinde kişiselleştirilmiş kart</h2>
-          <p className="text-sm text-[rgba(2,52,53,0.5)]">Alan, yaş grubu ve hedefi seçin — yapay zeka gerisini halleder</p>
+          <AnimatePresence mode="wait">
+            <motion.h2
+              key={`h-${activeTool}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+              className="text-2xl font-bold text-[#023435] mb-2"
+            >
+              {currentTool.headline}
+            </motion.h2>
+          </AnimatePresence>
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={`p-${activeTool}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-sm text-[rgba(2,52,53,0.5)]"
+            >
+              {currentTool.subtitle}
+            </motion.p>
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Tool tab bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="mb-6 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar"
+        >
+          {TOOLS_CONFIG.map((tool, i) => (
+            <button
+              key={tool.id}
+              onClick={() => switchTool(i)}
+              className={cn(
+                "flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
+                i === activeTool
+                  ? "bg-[#023435] text-white shadow-sm"
+                  : "border border-[rgba(2,52,53,0.12)] bg-white text-[#023435]/60 hover:bg-white hover:text-[#023435] hover:border-[rgba(2,52,53,0.25)]"
+              )}
+            >
+              <span>{tool.icon}</span>
+              <span>{tool.label}</span>
+            </button>
+          ))}
         </motion.div>
 
         <div className="flex gap-6">
           {/* Left — Step indicators */}
           <div className="hidden md:flex flex-col gap-2 pt-4 shrink-0 w-48">
-            {HOW_SLIDES.map((slide, i) => (
+            {slides.map((slide, i) => (
               <button
                 key={i}
                 onClick={() => goTo(i)}
@@ -404,7 +867,7 @@ function HowItWorksCarousel() {
             <div className="px-7 pt-8 pb-4 md:px-10 md:pt-10 min-h-[420px] md:min-h-[480px] flex flex-col justify-start overflow-y-auto relative">
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
-                  key={active}
+                  key={`${activeTool}-${active}`}
                   custom={direction}
                   variants={slideVariants}
                   initial="enter"
@@ -420,8 +883,8 @@ function HowItWorksCarousel() {
             {/* Bottom bar — mobile nav */}
             <div className="flex items-end justify-between gap-4 px-7 pb-6 md:px-10 md:pb-8">
               <div className="md:hidden">
-                <p className="text-sm font-semibold text-[#023435]">{HOW_SLIDES[active].title}</p>
-                <p className="text-xs text-[rgba(2,52,53,0.45)] mt-0.5">{HOW_SLIDES[active].desc}</p>
+                <p className="text-sm font-semibold text-[#023435]">{slides[active].title}</p>
+                <p className="text-xs text-[rgba(2,52,53,0.45)] mt-0.5">{slides[active].desc}</p>
               </div>
               <div className="hidden md:block" />
               <div className="flex items-center gap-2 shrink-0">
@@ -434,7 +897,7 @@ function HowItWorksCarousel() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
-                {HOW_SLIDES.map((_, i) => (
+                {slides.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => goTo(i)}
