@@ -1035,7 +1035,7 @@ export default function CardsPage() {
                         onClick={() => setAssigningCard(card)}
                         className="w-full rounded-xl border border-[#023435]/10 bg-white/50 px-3 py-2 text-xs font-bold text-[#023435] shadow-sm hover:bg-[#023435] hover:border-[#023435] hover:text-white transition-all transform hover:scale-[1.02]"
                       >
-                        Öğrenci Düzenle
+                        Öğrenci Ata
                       </button>
                     </div>
                   </div>
