@@ -170,7 +170,10 @@ function SwipeableCardInner({
             : "none",
           willChange: "transform",
         }}
+        className="relative z-10"
       >
+        {/* Opaque white backdrop blocks the red delete button from bleeding through glassmorphic cards */}
+        <div className="absolute inset-0 bg-white -z-10" aria-hidden="true" />
         {children}
 
         {/* Invisible tap-to-close overlay when swiped open */}
