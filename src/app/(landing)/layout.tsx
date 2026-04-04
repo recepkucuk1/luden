@@ -20,6 +20,8 @@ const FOOTER_LINKS = [
   { href: "/delivery-return", label: "Teslimat ve İade" },
   { href: "/privacy", label: "Gizlilik Politikası" },
   { href: "/cookie-policy", label: "Çerez Politikası" },
+  { href: "/terms", label: "Kullanım Koşulları" },
+  { href: "/about", label: "Hakkımızda" },
 ];
 
 export default function LandingLayout({ children }: { children: React.ReactNode }) {
@@ -139,7 +141,7 @@ export default function LandingLayout({ children }: { children: React.ReactNode 
             {/* Orta: Linkler */}
             <div>
               <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">Platform</p>
-              <ul className="grid grid-rows-4 grid-flow-col gap-x-4 gap-y-2">
+              <ul className="grid grid-rows-5 grid-flow-col gap-x-4 gap-y-2">
                 {FOOTER_LINKS.map((l) => (
                   <li key={l.label}>
                     <a href={l.href} className="text-sm text-white/60 hover:text-white transition-colors">
@@ -155,9 +157,15 @@ export default function LandingLayout({ children }: { children: React.ReactNode 
               <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">İletişim</p>
               <a
                 href="mailto:info@ludenlab.com"
-                className="text-sm text-white/60 hover:text-white transition-colors block mb-4"
+                className="text-sm text-white/60 hover:text-white transition-colors block mb-2"
               >
                 info@ludenlab.com
+              </a>
+              <a
+                href="tel:+905308866782"
+                className="text-sm text-white/60 hover:text-white transition-colors block mb-4"
+              >
+                0530 886 67 82
               </a>
               <div className="flex items-center gap-3">
                 <a

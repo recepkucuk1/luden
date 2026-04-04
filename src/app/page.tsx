@@ -1386,7 +1386,7 @@ export default function LandingPage() {
             {/* Orta: Linkler */}
             <div>
               <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">Platform</p>
-              <ul className="grid grid-rows-4 grid-flow-col gap-x-4 gap-y-2">
+              <ul className="grid grid-rows-5 grid-flow-col gap-x-4 gap-y-2">
                 {[
                   { href: "/register", label: "Kayıt Ol" },
                   { href: "/login", label: "Giriş Yap" },
@@ -1396,6 +1396,8 @@ export default function LandingPage() {
                   { href: "/delivery-return", label: "Teslimat ve İade" },
                   { href: "/privacy", label: "Gizlilik Politikası" },
                   { href: "/cookie-policy", label: "Çerez Politikası" },
+                  { href: "/terms", label: "Kullanım Koşulları" },
+                  { href: "/about", label: "Hakkımızda" },
                 ].map((l) => (
                   <li key={l.label}>
                     <a
@@ -1413,10 +1415,16 @@ export default function LandingPage() {
             <div>
               <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">İletişim</p>
               <a
-                href="mailto:merhaba@ludenlab.com"
+                href="mailto:info@ludenlab.com"
+                className="text-sm text-white/60 hover:text-white transition-colors block mb-2"
+              >
+                info@ludenlab.com
+              </a>
+              <a
+                href="tel:+905308866782"
                 className="text-sm text-white/60 hover:text-white transition-colors block mb-4"
               >
-                merhaba@ludenlab.com
+                0530 886 67 82
               </a>
               <div className="flex items-center gap-3">
                 {/* Instagram */}
