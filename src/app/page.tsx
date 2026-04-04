@@ -1386,7 +1386,7 @@ export default function LandingPage() {
             {/* Orta: Linkler */}
             <div>
               <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">Platform</p>
-              <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <ul className="grid grid-rows-4 grid-flow-col gap-x-4 gap-y-2">
                 {[
                   { href: "/register", label: "Kayıt Ol" },
                   { href: "/login", label: "Giriş Yap" },
