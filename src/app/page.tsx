@@ -1388,13 +1388,13 @@ export default function LandingPage() {
               <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">Platform</p>
               <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
                 {[
+                  { href: "/register", label: "Kayıt Ol" },
+                  { href: "/login", label: "Giriş Yap" },
                   { href: "#features", label: "Özellikler" },
                   { href: "#pricing", label: "Fiyatlandırma" },
                   { href: "#faq", label: "SSS" },
-                  { href: "/login", label: "Giriş Yap" },
-                  { href: "/register", label: "Kayıt Ol" },
-                  { href: "/privacy", label: "Gizlilik Politikası" },
                   { href: "/delivery-return", label: "Teslimat ve İade" },
+                  { href: "/privacy", label: "Gizlilik Politikası" },
                 ].map((l) => (
                   <li key={l.label}>
                     <a
