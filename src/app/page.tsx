@@ -16,7 +16,6 @@ import {
   IconLock,
   IconBuilding,
 } from "@tabler/icons-react";
-import { FeaturesSectionWithHoverEffects } from "@/components/ui/feature-section-with-hover-effects";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 
 // ─── FAQ Accordion ────────────────────────────────────────────────────────────
@@ -1387,7 +1386,7 @@ export default function LandingPage() {
             {/* Orta: Linkler */}
             <div>
               <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">Platform</p>
-              <ul className="space-y-2">
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
                 {[
                   { href: "#features", label: "Özellikler" },
                   { href: "#pricing", label: "Fiyatlandırma" },
