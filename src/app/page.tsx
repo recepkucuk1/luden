@@ -1349,6 +1349,18 @@ export default function LandingPage() {
       {/* ── Pricing ── */}
       <section id="pricing" className="bg-zinc-50">
         <Pricing plans={PLANS} creditNote={CREDIT_NOTE} />
+        <div className="flex flex-col items-center gap-2 mt-8 pb-10">
+          <p className="text-sm text-[#023435]/50">
+            Tüm ödemeler iyzico güvencesiyle gerçekleştirilir.
+          </p>
+          <Image
+            src="/images/payment/logo_band_white.svg"
+            alt="iyzico ile Öde - Visa, Mastercard, Troy"
+            width={240}
+            height={20}
+            className="opacity-40 invert"
+          />
+        </div>
       </section>
 
       {/* ── FAQ ── */}
@@ -1382,6 +1394,8 @@ export default function LandingPage() {
                   { href: "#faq", label: "SSS" },
                   { href: "/login", label: "Giriş Yap" },
                   { href: "/register", label: "Kayıt Ol" },
+                  { href: "/privacy", label: "Gizlilik Politikası" },
+                  { href: "/delivery-return", label: "Teslimat ve İade" },
                 ].map((l) => (
                   <li key={l.label}>
                     <a
@@ -1433,7 +1447,17 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-white/40">
+          <div className="flex flex-col items-center gap-2 py-4 border-t border-white/10 mt-10">
+            <span className="text-xs text-white/40">Güvenli Ödeme</span>
+            <Image
+              src="/images/payment/logo_band_white.svg"
+              alt="iyzico ile Öde - Visa, Mastercard, Troy"
+              width={280}
+              height={24}
+              className="opacity-60 hover:opacity-100 transition-opacity"
+            />
+          </div>
+          <div className="pt-4 pb-2 text-center text-xs text-white/40">
             © {new Date().getFullYear()} LudenLab. Tüm hakları saklıdır.
           </div>
         </div>
