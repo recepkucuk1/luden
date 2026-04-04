@@ -58,7 +58,7 @@ export default function DeliveryReturnPage() {
           </h1>
           <div className="inline-block text-left bg-[#023435]/5 rounded-xl px-6 py-4 text-sm text-gray-600 space-y-1">
             <p><span className="font-medium text-[#023435]">Platform:</span> ludenlab.com</p>
-            <p><span className="font-medium text-[#023435]">İşletme:</span> Luden Özel Keşif Özel Eğitim ve Rehabilitasyon Merkezi</p>
+            <p><span className="font-medium text-[#023435]">İşletme:</span> Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti</p>
             <p><span className="font-medium text-[#023435]">E-posta:</span>{" "}
               <a href="mailto:info@ludenlab.com" className="text-[#FE703A] hover:underline">info@ludenlab.com</a>
             </p>
@@ -228,7 +228,7 @@ export default function DeliveryReturnPage() {
               <a href="mailto:info@ludenlab.com" className="text-[#FE703A] hover:underline">info@ludenlab.com</a>
             </span></p>
             <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435]">Kurum:</span>{" "}
-              Luden Özel Keşif Özel Eğitim ve Rehabilitasyon Merkezi</span></p>
+              Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti</span></p>
             <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435]">Adres:</span> İzmir, Türkiye</span></p>
           </div>
         </Section>
