@@ -58,7 +58,7 @@ export default function PrivacyPage() {
           </h1>
           <div className="inline-block text-left bg-[#023435]/5 rounded-xl px-6 py-4 text-sm text-gray-600 space-y-1">
             <p><span className="font-medium text-[#023435]">Platform:</span> ludenlab.com</p>
-            <p><span className="font-medium text-[#023435]">İşletme:</span> Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti</p>
+            <p><span className="font-medium text-[#023435]">İşletme:</span> Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti.</p>
             <p><span className="font-medium text-[#023435]">E-posta:</span>{" "}
               <a href="mailto:info@ludenlab.com" className="text-[#FE703A] hover:underline">info@ludenlab.com</a>
             </p>
@@ -72,7 +72,7 @@ export default function PrivacyPage() {
             İşbu Gizlilik Politikası, LudenLab dijital platformu (&ldquo;Platform&rdquo;) üzerinden sunulan yapay zeka destekli eğitim
             materyali üretim hizmetlerinin kullanımı sırasında toplanan, işlenen ve saklanan kişisel verilere ilişkin uygulamaları
             açıklamaktadır. 6698 sayılı Kişisel Verilerin Korunması Kanunu (&ldquo;KVKK&rdquo;) ve ilgili mevzuat hükümleri çerçevesinde
-            veri sorumlusu sıfatıyla hareket eden Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti olarak kişisel
+            veri sorumlusu sıfatıyla hareket eden Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti. olarak kişisel
             verilerinizin güvenliğine azami özen göstermekteyiz.
           </P>
         </Section>
@@ -224,7 +224,7 @@ export default function PrivacyPage() {
               <a href="mailto:info@ludenlab.com" className="text-[#FE703A] hover:underline">info@ludenlab.com</a>
             </span></p>
             <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435]">Kurum:</span>{" "}
-              Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti</span></p>
+              Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti.</span></p>
             <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435]">Adres:</span> İzmir, Türkiye</span></p>
           </div>
         </Section>

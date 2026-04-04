@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthSessionProvider } from "@/components/AuthSessionProvider";
+import { CookieBanner } from "@/components/cookie-banner";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] });
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${jakarta.variable} antialiased`}>
         <AuthSessionProvider>{children}</AuthSessionProvider>
         <Toaster position="bottom-right" duration={3000} richColors />
+        <CookieBanner />
       </body>
     </html>
   );

@@ -1395,6 +1395,7 @@ export default function LandingPage() {
                   { href: "#faq", label: "SSS" },
                   { href: "/delivery-return", label: "Teslimat ve İade" },
                   { href: "/privacy", label: "Gizlilik Politikası" },
+                  { href: "/cookie-policy", label: "Çerez Politikası" },
                 ].map((l) => (
                   <li key={l.label}>
                     <a
