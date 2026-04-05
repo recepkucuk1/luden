@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { anthropic } from "@/lib/anthropic";
+import { anthropic, MODEL } from "@/lib/anthropic";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 const SESSION_COST = 10;
@@ -148,7 +148,7 @@ ${nextSessionNotes ? `\nSonraki oturum için notlar: ${nextSessionNotes}` : ""}
 Yukarıdaki verilerle kapsamlı ve profesyonel bir oturum özeti oluştur.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+      model: MODEL,
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userPrompt }],

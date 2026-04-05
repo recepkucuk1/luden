@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { anthropic } from "@/lib/anthropic";
+import { anthropic, MODEL } from "@/lib/anthropic";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 const COST = 20;
@@ -207,7 +207,7 @@ ${extraNote ? `\nEk notlar: ${extraNote}` : ""}
 Bu parametrelere uygun haftalık çalışma planı oluştur. Tam olarak ${sessionsPerWeek} ders günü içersin.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+      model: MODEL,
       max_tokens: 6000,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userPrompt }],

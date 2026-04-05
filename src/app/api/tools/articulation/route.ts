@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { anthropic } from "@/lib/anthropic";
+import { anthropic, MODEL } from "@/lib/anthropic";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 const ARTICULATION_COST = 15;
@@ -135,7 +135,7 @@ ${theme && theme !== "none" ? `- Tema: ${theme}` : "- Tema: Karışık (tema yok
 Bu öğrenci için uygun artikülasyon alıştırma materyali üret.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
+      model: MODEL,
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userPrompt }],
