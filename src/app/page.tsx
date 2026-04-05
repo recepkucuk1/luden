@@ -174,9 +174,9 @@ function KartSlide1() {
   return (
     <div className="grid md:grid-cols-2 gap-5">
       <div className="space-y-3">
-        <MockDropdown label="Çalışma alanı" value="Dil — Söz Dönemi" highlight />
+        <MockDropdown label="Çalışma alanı" value="Dil — Söz Dönemi (2.2)" highlight />
         <MockDropdown label="Yaş grubu" value="3-6 yaş" highlight />
-        <MockDropdown label="Zorluk" value="Başlangıç" />
+        <MockDropdown label="Zorluk" value="Kolay (başlangıç seviyesi)" />
         <MockDropdown label="Tanı türü" value="Dil Gelişim Gecikmesi" />
       </div>
       <div className="flex flex-col gap-4">
@@ -184,7 +184,7 @@ function KartSlide1() {
           <p className="text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Seçilen müfredat hedefi</p>
           <div className="space-y-2.5">
             {[
-              { code: "2.2.1", title: "Dili anlar (tek sözcük → cümle düzeyi)", active: false },
+              { code: "2.2.1", title: "Dili anlar (tek sözcük → cümle düzeyi)", active: true },
               { code: "2.2.3", title: "Sözcük dağarcığını genişletir", active: true },
             ].map((g) => (
               <div key={g.code} className="flex items-start gap-2.5">
@@ -211,10 +211,10 @@ function KartSlide2() {
         <CarouselTag color="yellow">Dil Gelişim Gecikmesi</CarouselTag>
         <span className="inline-flex items-center rounded-full bg-[rgba(16,121,150,0.08)] border border-[#107996]/20 px-2.5 py-0.5 text-[11px] font-semibold text-[#107996]">Hedef 2.2.3</span>
       </div>
-      <h3 className="text-lg font-bold text-[#023435]">Nesne Adlandırma Oyunu</h3>
-      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Uzman, günlük yaşamda sık kullanılan 5-8 nesneyi teker teker gösterir. Öğrenci her nesneyi adlandırmaya çalışır. Bilmediği nesnelerde uzman sözcüğü söyler, öğrenci tekrar eder.</p>
+      <h3 className="text-lg font-bold text-[#023435]">Mutfak Keşfi — Sözcük Bulma Oyunu</h3>
+      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Uzman, mutfak ortamındaki gerçek nesneleri kullanarak öğrencinin aktif sözcük dağarcığını genişletir. Öğrenci nesneleri keşfeder, adlandırır ve işlevlerini kendi cümleleriyle anlatır.</p>
       <div className="space-y-2">
-        {["Masaya 5 nesne koy, öğrencinin dikkatini çek","Her nesneyi göstererek \"Bu ne?\" diye sor","Yanıt 3 saniye içinde gelmezse model ol","Tüm nesneler tamamlanınca tekrar sıra yap"].map((step, i) => (
+        {["Mutfaktan 6-8 tanıdık nesne seçin (bardak, kaşık, tabak, tencere, sünger, peçete)","Her nesneyi sırayla göstererek \"Bu ne? Ne işe yarıyor?\" diye sorun","Öğrenci bilmediğinde nesneyi tanımlayın, dokunmasını sağlayın ve adını 2 kez tekrarlayın","Tüm nesneleri masaya dizin, \"Yemeği karıştıran nesneyi göster\" gibi işlev soruları sorun"].map((step, i) => (
           <div key={i} className="flex items-start gap-3">
             <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-[11px] font-bold text-white">{i + 1}</span>
             <span className="text-sm text-[rgba(2,52,53,0.7)] pt-0.5">{step}</span>
@@ -229,18 +229,18 @@ function KartSlide3() {
     <div className="space-y-4 max-w-2xl">
       <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
         <p className="text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Öğrencinin doğal ortamındaki nesnelerle başlayın — tanıdık nesneler daha hızlı dil kazanımı sağlar. Sözel ödül yerine içsel motivasyonu destekleyen geri bildirimler kullanın.</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Tanıdık nesnelerle başlayın — ev ortamı en güçlü doğal bağlamdır. Öğrenci nesneye dokunabilmeli, koklayabilmeli; çoklu duyusal deneyim sözcük yerleşimini hızlandırır. &ldquo;Aferin&rdquo; yerine &ldquo;Bak, tencerenin ne işe yaradığını hatırladın!&rdquo; gibi süreci ön plana çıkaran geri bildirimler kullanın.</p>
         <p className="text-[11px] text-[rgba(2,52,53,0.4)] mt-2">Hedef 2.2.3 — Sözcük dağarcığını genişletir</p>
       </div>
       <div className="border-t border-[rgba(2,52,53,0.08)]" />
       <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
         <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME ÖNERİSİ</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veliye aynı nesne listesini verin. Ev rutinleri sırasında (kahvaltı, banyo) aynı sözcükleri tekrar ettirmeleri sözcük yerleşimini 3-4 kat hızlandırır.</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veliden akşam yemeği hazırlığı sırasında 3-4 nesneyi öğrenciye isimlendirmesini istemesini isteyin. Günlük rutine gömülü tekrar, haftalık 2 seans kadar etkili olabilir.</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <CarouselTag color="green">İçsel motivasyon</CarouselTag>
-        <CarouselTag color="blue">Oyun temelli</CarouselTag>
-        <CarouselTag color="yellow">Genelleme odaklı</CarouselTag>
+        <CarouselTag color="green">Çoklu duyusal</CarouselTag>
+        <CarouselTag color="blue">Doğal bağlam</CarouselTag>
+        <CarouselTag color="yellow">Günlük rutin</CarouselTag>
         <CarouselTag color="orange">Veli katılımı</CarouselTag>
       </div>
     </div>
@@ -249,12 +249,12 @@ function KartSlide3() {
 function KartSlide4() {
   return (
     <MockPdfCard
-      header="Luden Özel Keşif · Mart 2026"
+      header="Luden Özel Keşif · Nisan 2026"
       tags={<><CarouselTag color="blue">Dil · Söz Dönemi</CarouselTag><CarouselTag color="orange">3-6 yaş</CarouselTag><CarouselTag color="green">Başlangıç</CarouselTag><span className="inline-flex items-center rounded-full bg-[rgba(16,121,150,0.08)] border border-[#107996]/20 px-2.5 py-0.5 text-[11px] font-semibold text-[#107996]">Hedef 2.2.3</span></>}
       rows={[
-        { label: "ETKİNLİK", title: "Nesne Adlandırma Oyunu", body: "Günlük yaşam nesnelerini adlandırma ve sözcük dağarcığını genişletme çalışması" },
-        { label: "UYGULAMA", body: "5 nesne masaya koy → \"Bu ne?\" sor → 3 sn içinde yanıt gelmezse model ol → tüm nesneler bitince tekrar sıra yap" },
-        { label: "UZMAN NOTU", body: "Tanıdık nesnelerle başlayın. İçsel motivasyonu destekleyen geri bildirimler kullanın. Veliye nesne listesini verin." },
+        { label: "ETKİNLİK", title: "Mutfak Keşfi — Sözcük Bulma Oyunu", body: "Mutfak ortamında 6-8 nesne ile sözcük dağarcığı genişletme — dokunsal keşif ve işlev adlandırma" },
+        { label: "UYGULAMA", body: "Nesneleri sırayla göster → \"Bu ne? Ne işe yarıyor?\" sor → Bilmediğinde tanımla, dokundur, 2 kez tekrarlat → İşlev soruları sor" },
+        { label: "UZMAN NOTU", body: "Çoklu duyusal deneyim sağlayın. Süreci ön plana çıkaran geri bildirimler kullanın. Veliden günlük rutinde tekrar isteyin." },
       ]}
       cta="MEB Talim Terbiye Kurulu müfredatına uygundur"
     />
@@ -266,19 +266,19 @@ function ArtSlide1() {
   return (
     <div className="grid md:grid-cols-2 gap-5">
       <div className="space-y-3">
-        <MockDropdown label="Hedef fonem" value="/r/ — Akıcı ünsüz" highlight />
-        <MockDropdown label="Konum" value="Sözcük başı" highlight />
-        <MockDropdown label="Yaş grubu" value="6-9 yaş" />
-        <MockDropdown label="Zorluk seviyesi" value="Orta" />
+        <MockDropdown label="Hedef fonem" value="/s/ — Sürtünmeli ünsüz" highlight />
+        <MockDropdown label="Konum" value="Sözcük başı (initial)" highlight />
+        <MockDropdown label="Yaş grubu" value="7-12 yaş" />
+        <MockDropdown label="Zorluk seviyesi" value="Kelime Düzeyi" />
       </div>
       <div className="flex flex-col gap-4">
         <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Önerilen egzersiz türleri</p>
           <div className="space-y-2.5">
             {[
-              { label: "Yalıtılmış ses", active: true },
-              { label: "Hece tekrarı (ra, re, ri…)", active: true },
-              { label: "Sözcük düzeyinde", active: false },
+              { label: "Yalıtılmış ses tekrarı", active: true },
+              { label: "Hece düzeyi (sa, se, sı, so, su)", active: true },
+              { label: "Kelime düzeyi (10 sözcük)", active: true },
             ].map((g) => (
               <div key={g.label} className="flex items-center gap-2.5">
                 <span className={cn("shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]/40")}>✓</span>
@@ -298,18 +298,18 @@ function ArtSlide2() {
   return (
     <div className="space-y-4 max-w-2xl">
       <div className="flex flex-wrap gap-2">
-        <CarouselTag color="blue">/r/ — Akıcı ünsüz</CarouselTag>
+        <CarouselTag color="blue">/s/ — Sürtünmeli ünsüz</CarouselTag>
         <CarouselTag color="orange">Sözcük başı</CarouselTag>
-        <CarouselTag color="green">6-9 yaş · Orta</CarouselTag>
+        <CarouselTag color="green">7-12 yaş · Kelime düzeyi</CarouselTag>
       </div>
-      <h3 className="text-lg font-bold text-[#023435]">/r/ Sesi Hece Tekrar Çalışması</h3>
-      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Ayna önünde dil pozisyonu gösterilerek /r/ sesinin yalıtılmış üretimi pekiştirilir; ardından ra-re-ri-ro-ru hece zinciri oluşturulur.</p>
+      <h3 className="text-lg font-bold text-[#023435]">/s/ Sesi Kelime Çalışması — Sözcük Başı</h3>
+      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Hedef /s/ sesini sözcük başında doğru üretebilmek için 10 adet yaşa uygun Türkçe kelimeyle yapılandırılmış çalışma. Her kelime hece ayrımı ve örnek cümleyle birlikte sunulur.</p>
       <div className="space-y-2">
         {[
-          "Aynayı öğrencinin önüne koy, dil ucunun konumunu göster",
-          "Tek başına /r/ sesini model ol, 5 kez tekrarlat",
-          "\"Ra\" hecesiyle başla, ritimli şekilde ilerle",
-          "Doğru üretimleri hemen pekiştir, hatalarda dil pozisyonuna dön",
+          "Ayna karşısında /s/ sesinin ağız pozisyonunu gösterin: dil ucu alt dişlerin arkasında, hava ortadan çıkar",
+          "\"Sandal, sabun, süt, sepet, simit\" kelimelerini teker teker model olun, öğrenci tekrar etsin",
+          "Her kelimeyi cümle içinde kullanın: \"Denizde mavi bir sandal var\" — öğrenci cümleyi tekrar etsin",
+          "Zorlandığı kelimelerde heceye dönün: \"san-dal\" → tekrar birleştirin",
         ].map((step, i) => (
           <div key={i} className="flex items-start gap-3">
             <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-[11px] font-bold text-white">{i + 1}</span>
@@ -325,19 +325,19 @@ function ArtSlide3() {
     <div className="space-y-4 max-w-2xl">
       <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
         <p className="text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Dil ucunu damağa değdirme egzersizini bağımsız yapabiliyorsa hece düzeyine geçin. Yorulma işareti görülürse seans süresini kısaltın; fazla tekrar kas gerginliğini artırır.</p>
-        <p className="text-[11px] text-[rgba(2,52,53,0.4)] mt-2">/r/ · Sözcük başı pozisyon çalışması</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">/s/ sesinde dil ucu kontrolü kritiktir. Lateral kaçış (havanın yandan çıkması) varsa dil ortasından hava geçişini pekiştirin. Ayna kullanımı görsel geri bildirim sağlar. Her doğru üretimde &ldquo;Havanın ortadan çıkışını hissettin mi? Harika kontrol!&rdquo; gibi farkındalık temelli geri bildirimler verin.</p>
+        <p className="text-[11px] text-[rgba(2,52,53,0.4)] mt-2">/s/ · Sözcük başı pozisyon çalışması</p>
       </div>
       <div className="border-t border-[rgba(2,52,53,0.08)]" />
       <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
         <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME ÖNERİSİ</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Öğrenciye kısa bir sözcük listesi verin ("rüzgar, resim, renk"). Gün içinde bu sözcükleri bilinçli kullanmasını isteyin; aile de sessizce dinleyip geri bildirim versin.</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veliye 5 hedef kelime listesi verin (sabun, süt, simit, sandal, sepet). Öğrenci bu kelimeleri günlük konuşmada bilinçli kullanmaya çalışsın. Doğru üretimde velinin göz kontağı + gülümseme ile onaylaması yeterlidir.</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <CarouselTag color="green">Motor planlama</CarouselTag>
-        <CarouselTag color="blue">Ayna tekniği</CarouselTag>
-        <CarouselTag color="orange">Hece zinciri</CarouselTag>
-        <CarouselTag color="yellow">Ev genellemesi</CarouselTag>
+        <CarouselTag color="green">Dil ucu kontrolü</CarouselTag>
+        <CarouselTag color="blue">Görsel geri bildirim</CarouselTag>
+        <CarouselTag color="orange">Hece geçişi</CarouselTag>
+        <CarouselTag color="yellow">5 kelime listesi</CarouselTag>
       </div>
     </div>
   );
@@ -345,12 +345,12 @@ function ArtSlide3() {
 function ArtSlide4() {
   return (
     <MockPdfCard
-      header="Artikülasyon Kartı · Mart 2026"
-      tags={<><CarouselTag color="blue">/r/ Akıcı ünsüz</CarouselTag><CarouselTag color="orange">Sözcük başı</CarouselTag><CarouselTag color="green">6-9 yaş</CarouselTag></>}
+      header="Artikülasyon Kartı · Nisan 2026"
+      tags={<><CarouselTag color="blue">/s/ Sürtünmeli</CarouselTag><CarouselTag color="orange">Sözcük başı</CarouselTag><CarouselTag color="green">7-12 yaş</CarouselTag><CarouselTag color="yellow">Kelime düzeyi</CarouselTag></>}
       rows={[
-        { label: "HEDEF SES", title: "/r/ — Hece Tekrar Çalışması", body: "Yalıtılmış /r/ üretiminden ra/re/ri/ro/ru hece zincirine geçiş" },
-        { label: "UYGULAMA", body: "Ayna önünde dil pozisyonu göster → yalıtılmış ses × 5 → hece zinciri → doğru üretimleri anında pekiştir" },
-        { label: "VELİ NOTU", body: "Günlük 5 dakika \"rüzgar, resim, renk\" sözcüklerini bilinçli kullandırın. Seans dışı pratik kalıcılığı artırır." },
+        { label: "HEDEF SES", title: "/s/ — Kelime Düzeyi Çalışması", body: "10 hedef kelime: sandal, sabun, süt, sepet, simit, sarı, soba, silgi, sosis, su" },
+        { label: "UYGULAMA", body: "Ağız pozisyonu göster → kelime tekrarı → cümle içi kullanım → zorlanırsa heceye dön" },
+        { label: "VELİ NOTU", body: "Günlük 5 dk, 5 hedef kelimeyi konuşmada kullandırın. Doğru üretimde göz kontağı + gülümseme yeterli." },
       ]}
       cta="MEB Talim Terbiye Kurulu müfredatına uygundur"
     />
@@ -362,16 +362,16 @@ function EvSlide1() {
   return (
     <div className="grid md:grid-cols-2 gap-5">
       <div className="space-y-3">
-        <MockDropdown label="Aktivite türü" value="Sözcük Eşleştirme" highlight />
-        <MockDropdown label="Günlük süre" value="10 dakika" highlight />
-        <MockDropdown label="Zorluk" value="Başlangıç" />
-        <MockDropdown label="Hedef alan" value="Sözcük dağarcığı" />
+        <MockDropdown label="Aktivite türü" value="Günlük Konuşma Aktivitesi" highlight />
+        <MockDropdown label="Günlük süre" value="15 dakika" highlight />
+        <MockDropdown label="Zorluk" value="Temel (teknik terim yok)" />
+        <MockDropdown label="Hedef alan" value="Dil anlama ve üretme" />
       </div>
       <div className="flex flex-col gap-4">
         <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Haftalık program</p>
           <div className="space-y-1.5">
-            {["Pazartesi — Eşleştirme kartları","Çarşamba — Resim-sözcük oyunu","Cuma — Tekrar & değerlendirme"].map((d, i) => (
+            {["Pazartesi — Kahvaltı sırasında nesne adlandırma","Çarşamba — Park yürüyüşünde renk + nesne tanımlama","Cuma — Uyku öncesi resimli kitap anlatımı"].map((d, i) => (
               <div key={i} className="flex items-center gap-2 text-xs text-[rgba(2,52,53,0.65)]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#FE703A] shrink-0" />
                 {d}
@@ -390,18 +390,18 @@ function EvSlide2() {
   return (
     <div className="space-y-4 max-w-2xl">
       <div className="flex flex-wrap gap-2">
-        <CarouselTag color="blue">Sözcük Eşleştirme</CarouselTag>
-        <CarouselTag color="orange">10 dk/gün</CarouselTag>
-        <CarouselTag color="green">Başlangıç</CarouselTag>
+        <CarouselTag color="blue">Günlük Konuşma Aktivitesi</CarouselTag>
+        <CarouselTag color="orange">15 dk/gün</CarouselTag>
+        <CarouselTag color="green">Temel seviye</CarouselTag>
       </div>
-      <h3 className="text-lg font-bold text-[#023435]">Resim-Sözcük Eşleştirme Ödevi</h3>
-      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">8 resim kartı ve yazılı sözcük etiketiyle eşleştirme yapılır. Öğrenci her resmi ilgili sözcükle eşleştirir, veli sonucu tabloya işler.</p>
+      <h3 className="text-lg font-bold text-[#023435]">Kahvaltı Masasında Dil Oyunu</h3>
+      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Günlük kahvaltı rutinini fırsat olarak kullanarak öğrencinin hem nesne adlandırma hem de cümle kurma becerilerini doğal ortamda güçlendiren bir aktivite. Öğrenci nesneleri adlandırır, tercihlerini ifade eder ve basit isteklerde bulunur.</p>
       <div className="space-y-2">
         {[
-          "8 resim kartını ve sözcük etiketlerini masa üzerine karışık yay",
-          "Öğrenciden resimleri sözcükleriyle eşleştirmesini iste",
-          "Her doğru eşleştirme için sözlü pekiştireç ver",
-          "Sonuçları takip formuna işle, terapiste fotoğraf gönder",
+          "Kahvaltı masasındaki 5-6 nesneyi öğrencinin önüne koyun (çay bardağı, peynir, ekmek, bal, kaşık, tabak)",
+          "Her nesneyi göstererek \"Bu ne?\" sorusunu sorun, ardından \"Ne yapmak için kullanıyoruz?\" diye genişletin",
+          "\"Ne yemek istiyorsun?\" diyerek tercih cümlesi kurmayı teşvik edin: \"Ben peynir istiyorum\" gibi",
+          "Sonuçları gözlem formuna not edin: hangi sözcükleri bildi, hangilerinde yardım gerekti",
         ].map((step, i) => (
           <div key={i} className="flex items-start gap-3">
             <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-[11px] font-bold text-white">{i + 1}</span>
@@ -417,18 +417,18 @@ function EvSlide3() {
     <div className="space-y-4 max-w-2xl">
       <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
         <p className="text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">VELİ TALİMATI</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Etkinliği her gün aynı saatte yapın — rutin öğrenmeyi kolaylaştırır. Öğrenci hata yaparsa sözcüğü siz söyleyin, onu tekrar ettirin; olumsuz geri bildirimden kaçının.</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Aktiviteyi her sabah kahvaltıda uygulayın — aynı saatte yapılan çalışma rutin oluşturur ve öğrenmeyi kolaylaştırır. Öğrenci sözcüğü hatırlayamazsa 3 saniye bekleyin, ardından sözcüğün ilk hecesini verin (&ldquo;pey...&rdquo; gibi). Tam cümle kurabildiğinde &ldquo;Bak, ne güzel söyledin, peynir istediğini anlattın!&rdquo; gibi süreç odaklı geri bildirim verin.</p>
       </div>
       <div className="border-t border-[rgba(2,52,53,0.08)]" />
       <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
-        <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">TERAPİST NOTU</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veli takip formunu bir sonraki seansta getirsin. Hangi sözcüklerin güçlük çıkardığını görmek hedef güncellemesine yardımcı olur.</p>
+        <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">UZMAN NOTU</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veli gözlem formunu bir sonraki seansta getirsin. Öğrencinin spontan kullandığı sözcükler ile modelleme sonrası tekrar ettiği sözcükleri ayrı not etmesi hedef güncellemesinde çok işe yarar.</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <CarouselTag color="green">Aile katılımı</CarouselTag>
-        <CarouselTag color="blue">Günlük rutin</CarouselTag>
-        <CarouselTag color="orange">Takip formu</CarouselTag>
-        <CarouselTag color="yellow">Veli rehberi</CarouselTag>
+        <CarouselTag color="green">Doğal ortam</CarouselTag>
+        <CarouselTag color="blue">Kahvaltı rutini</CarouselTag>
+        <CarouselTag color="orange">Gözlem formu</CarouselTag>
+        <CarouselTag color="yellow">Süreç geri bildirimi</CarouselTag>
       </div>
     </div>
   );
@@ -436,12 +436,12 @@ function EvSlide3() {
 function EvSlide4() {
   return (
     <MockPdfCard
-      header="Ev Ödevi · Mart 2026"
-      tags={<><CarouselTag color="blue">Sözcük Eşleştirme</CarouselTag><CarouselTag color="orange">10 dk/gün</CarouselTag><CarouselTag color="green">Başlangıç</CarouselTag></>}
+      header="Ev Ödevi · Nisan 2026"
+      tags={<><CarouselTag color="blue">Günlük Konuşma</CarouselTag><CarouselTag color="orange">15 dk/gün</CarouselTag><CarouselTag color="green">Temel seviye</CarouselTag></>}
       rows={[
-        { label: "ETKİNLİK", title: "Resim-Sözcük Eşleştirme", body: "8 resim kartını sözcük etiketleriyle eşleştirme çalışması — Pzt / Çrş / Cum" },
-        { label: "VELİ TALİMATI", body: "Günde 10 dk, aynı saatte uygulayın. Hatada model olun, olumsuz geri bildirimden kaçının." },
-        { label: "TAKİP", body: "Her seanstan önce formu doldurun ve terapiste fotoğraf gönderin." },
+        { label: "ETKİNLİK", title: "Kahvaltı Masasında Dil Oyunu", body: "Günlük kahvaltı rutininde nesne adlandırma, tercih ifadesi ve basit istek cümlesi kurma çalışması" },
+        { label: "VELİ TALİMATI", body: "Her sabah kahvaltıda 15 dk uygulayın. Hatırlayamazsa ilk heceyi verin. Süreç odaklı geri bildirim kullanın." },
+        { label: "TAKİP", body: "Gözlem formuna hangi sözcükleri bildi/bilmedi yazın. Spontan ve model sonrası kullanımı ayrı not edin." },
       ]}
       cta="Veliye teslim edilmek üzere hazırlanmıştır"
     />
@@ -453,19 +453,19 @@ function SesSlide1() {
   return (
     <div className="grid md:grid-cols-2 gap-5">
       <div className="space-y-3">
-        <MockDropdown label="Ses grubu" value="Rezonans — Nazal" highlight />
-        <MockDropdown label="Egzersiz türü" value="Nefes desteği" highlight />
-        <MockDropdown label="Yaş grubu" value="9-14 yaş" />
-        <MockDropdown label="Seviye" value="Orta" />
+        <MockDropdown label="Ses grubu" value="Ses Avı (sound_hunt)" highlight />
+        <MockDropdown label="Egzersiz türü" value="/ş/ sesi — Çiftlik Teması" highlight />
+        <MockDropdown label="Yaş grubu" value="5-8 yaş" />
+        <MockDropdown label="Seviye" value="Kolay" />
       </div>
       <div className="flex flex-col gap-4">
         <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Seans hedefleri</p>
           <div className="space-y-2.5">
             {[
-              { label: "Diyafragma nefesi yerleştirme", active: true },
-              { label: "Rezonans farkındalığı", active: true },
-              { label: "Nazal / oral ayrımı", active: false },
+              { label: "Hedef sesi sahnede tanımlama", active: true },
+              { label: "Doğru/yanlış ses ayrımı yapma", active: true },
+              { label: "Sözcük düzeyinde üretim", active: false },
             ].map((g) => (
               <div key={g.label} className="flex items-center gap-2.5">
                 <span className={cn("shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]/40")}>✓</span>
@@ -485,18 +485,19 @@ function SesSlide2() {
   return (
     <div className="space-y-4 max-w-2xl">
       <div className="flex flex-wrap gap-2">
-        <CarouselTag color="blue">Rezonans · Nazal</CarouselTag>
-        <CarouselTag color="orange">Nefes desteği</CarouselTag>
-        <CarouselTag color="green">9-14 yaş · Orta</CarouselTag>
+        <CarouselTag color="blue">Ses Avı</CarouselTag>
+        <CarouselTag color="orange">/ş/ sesi</CarouselTag>
+        <CarouselTag color="green">Çiftlik teması</CarouselTag>
+        <CarouselTag color="yellow">5-8 yaş · Kolay</CarouselTag>
       </div>
-      <h3 className="text-lg font-bold text-[#023435]">Diyafragma Nefesi + Rezonans Farkındalığı</h3>
-      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Derin diyafragma nefesi alışkanlığı yerleştirildikten sonra nazal titreşim farkındalığı "hmmm" tutma egzersizleriyle geliştirilir.</p>
+      <h3 className="text-lg font-bold text-[#023435]">Çiftlikte /ş/ Avı — Ses Bulma Oyunu</h3>
+      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Çiftlik sahnesindeki nesneler arasında /ş/ sesi içerenleri bulma oyunu. Öğrenci resmi inceler, /ş/ sesli nesneleri işaretler ve her birini sesli olarak adlandırır.</p>
       <div className="space-y-2">
         {[
-          "Sırt düz otur, bir el göğse, bir el karına koy",
-          "Burundan 4 say nefes al — karnın şişmeli, göğsün hareketsiz kalmalı",
-          "\"Hmmm\" sesi çıkararak 5 saniye tut, titreşimi hisset",
-          "Dudaklara dokunarak nazal rezonansı fark et",
+          "Çiftlik sahnesini öğrencinin önüne koyun: \"Bakalım bu çiftlikte /ş/ sesi saklanan nesneler var mı?\"",
+          "Öğrenciden sahneyi incelemesini ve /ş/ sesi duyduğu nesneleri parmağıyla göstermesini isteyin",
+          "Her bulunan nesneyi birlikte söyleyin: \"Şapka! Evet, /ş/ sesi var. Peki kuş? Kuş'ta da var mı?\"",
+          "Bulunan nesneleri sayın: \"6 tanesini buldun! Bakalım kaçını cümle içinde söyleyebilirsin\"",
         ].map((step, i) => (
           <div key={i} className="flex items-start gap-3">
             <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-[11px] font-bold text-white">{i + 1}</span>
@@ -512,18 +513,18 @@ function SesSlide3() {
     <div className="space-y-4 max-w-2xl">
       <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
         <p className="text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Nefes egzersizlerini asla aç karnına yaptırmayın. Baş dönmesi olursa molaya geçin. Titreşim farkındalığını pekiştirmek için öğrencinin kendi alnına ya da elmacık kemiğine dokunmasını isteyin.</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Ses avı aktivitesinde öğrencinin kendi keşfetmesi kritiktir — cevabı söylemeyin, ipuçları verin. Yanlış cevaplarda &ldquo;Dinle: masa... /ş/ sesi var mı? Bir daha deneyelim&rdquo; gibi yönlendirin. Oyun bittiğinde bulunan nesnelerle kısa bir hikâye kurdurmak genellemeyi güçlendirir.</p>
       </div>
       <div className="border-t border-[rgba(2,52,53,0.08)]" />
       <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
         <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Günlük 3 dakika sabah nefes rutini önerin. Öğrenci okul öncesi bu egzersizi yaparsa seans verimliliği belirgin biçimde artar.</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veliden evde &ldquo;ses dedektifi&rdquo; oyunu oynamasını isteyin: çocuk evdeki nesnelerde /ş/ sesini arar. Banyoda şampuan, şişe; mutfakta kaşık, şeker gibi. Günlük 5 dakika doğal ortamda ses farkındalığı çalışması seans verimliliğini artırır.</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <CarouselTag color="green">Diyafragma</CarouselTag>
-        <CarouselTag color="blue">Rezonans</CarouselTag>
-        <CarouselTag color="orange">Farkındalık</CarouselTag>
-        <CarouselTag color="yellow">Sabah rutini</CarouselTag>
+        <CarouselTag color="green">Keşif odaklı</CarouselTag>
+        <CarouselTag color="blue">Ses farkındalığı</CarouselTag>
+        <CarouselTag color="orange">Oyun temelli</CarouselTag>
+        <CarouselTag color="yellow">Ev dedektifi</CarouselTag>
       </div>
     </div>
   );
@@ -531,14 +532,14 @@ function SesSlide3() {
 function SesSlide4() {
   return (
     <MockPdfCard
-      header="Sesletim Kartı · Mart 2026"
-      tags={<><CarouselTag color="blue">Rezonans · Nazal</CarouselTag><CarouselTag color="orange">Nefes desteği</CarouselTag><CarouselTag color="green">9-14 yaş</CarouselTag></>}
+      header="Sesletim Kartı · Nisan 2026"
+      tags={<><CarouselTag color="blue">Ses Avı</CarouselTag><CarouselTag color="orange">/ş/ sesi</CarouselTag><CarouselTag color="green">Çiftlik</CarouselTag><CarouselTag color="yellow">5-8 yaş</CarouselTag></>}
       rows={[
-        { label: "EGZERSIZ", title: "Diyafragma Nefesi + Rezonans Farkındalığı", body: "Karna nefes → \"Hmmm\" 5 sn tut → titreşimi hisset" },
-        { label: "UYGULAMA", body: "Sırt düz otur → 4 sayı nefes al → Hmmm tut → dudak/elmacık temas kontrolü" },
-        { label: "UZMAN NOTU", body: "Aç karnına yaptırmayın. Baş dönmesinde molaya geçin. Sabah 3 dk rutin önerin." },
+        { label: "EGZERSIZ", title: "Çiftlikte /ş/ Avı", body: "Çiftlik sahnesinde /ş/ sesi içeren nesneleri bulma: şapka, kuş, maşa, şişe, şeftali, çiş" },
+        { label: "UYGULAMA", body: "Sahneyi incele → /ş/ sesli nesneleri göster → birlikte söyle → bulunanlarla cümle kur" },
+        { label: "UZMAN NOTU", body: "Cevabı söylemeyin, keşfettirin. Yanlışta yönlendirin. Evde \"ses dedektifi\" oyunu önerin." },
       ]}
-      cta="Ses terapisti gözetiminde uygulanmalıdır"
+      cta="Konuşma ses bozukluğu çalışmalarında kullanılabilir"
     />
   );
 }
@@ -551,7 +552,7 @@ function HedefSlide1() {
         <MockDropdown label="Öğrenci" value="Ahmet Y. — 7 yaş" highlight />
         <MockDropdown label="Hedef kodu" value="2.2.3 Sözcük dağarcığı" highlight />
         <MockDropdown label="Dönem" value="2025-2026 / 2. Dönem" />
-        <MockDropdown label="Ölçüm birimi" value="% doğru yanıt" />
+        <MockDropdown label="Ölçüm birimi" value="% doğru yanıt (10 deneme üzerinden)" />
       </div>
       <div className="flex flex-col gap-4">
         <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
@@ -574,10 +575,10 @@ function HedefSlide1() {
 }
 function HedefSlide2() {
   const rows = [
-    { tarih: "10 Mar", oran: 32, not: "Başlangıç ölçümü" },
-    { tarih: "17 Mar", oran: 45, not: "Nesne adlandırma" },
-    { tarih: "24 Mar", oran: 58, not: "Resim kartları" },
-    { tarih: "31 Mar", oran: 64, not: "Kısa dönem ✓" },
+    { tarih: "4 Mar", oran: 30, not: "Başlangıç ölçümü — 3/10 doğru" },
+    { tarih: "11 Mar", oran: 40, not: "Nesne adlandırma başladı" },
+    { tarih: "18 Mar", oran: 55, not: "Mutfak temalı çalışma etkili" },
+    { tarih: "25 Mar", oran: 65, not: "Kısa dönem hedef aşıldı ✓" },
   ];
   return (
     <div className="space-y-4 max-w-2xl">
@@ -604,7 +605,7 @@ function HedefSlide2() {
           </div>
         ))}
       </div>
-      <p className="text-xs text-[rgba(2,52,53,0.5)]">Kısa dönem hedef (%60) 3. haftada aşıldı. Uzun dönem hedef: %80.</p>
+      <p className="text-xs text-[rgba(2,52,53,0.5)]">Kısa dönem hedef (%60) 4. haftada aşıldı. Uzun dönem hedef: %80.</p>
     </div>
   );
 }
@@ -613,18 +614,18 @@ function HedefSlide3() {
     <div className="space-y-4 max-w-2xl">
       <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
         <p className="text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">DÖNEM ANALİZİ</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Ahmet, 3 hafta içinde %30&rsquo;dan %64&rsquo;e ilerledi. Kısa dönem hedef aşıldı; uzun dönem hedef olan %80&rsquo;e ulaşmak için 2-3 seans daha gerekebilir. Nesne adlandırma aktiviteleri en yüksek kazanımı sağladı.</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Öğrenci 4 hafta içinde %30&rsquo;dan %65&rsquo;e ilerledi — haftalık ortalama %8.75 artış. Kısa dönem hedef olan %60 aşıldı. Mutfak temalı doğal ortam çalışmaları en yüksek ilerlemeyi sağladı (tek seansta %15 artış). Uzun dönem hedef %80 için tahmini 2 seans daha gerekli.</p>
       </div>
       <div className="border-t border-[rgba(2,52,53,0.08)]" />
       <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
         <p className="text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">SONRAKİ ADIM ÖNERİSİ</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Sözcük dağarcığını cümle düzeyine taşımak için 3.1.1 hedefine geçiş planlanabilir. Ev ödevi frekansını haftada 3&rsquo;ten 5&rsquo;e çıkarmak ilerlemeyi hızlandırır.</p>
+        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Sözcük dağarcığını cümle düzeyine taşımak için hedef 2.2.4&rsquo;e (basit cümleler kurar) geçiş planlanabilir. Ev ödevi frekansını haftada 3&rsquo;ten 5&rsquo;e çıkarmak ve doğal ortam çalışmalarını sürdürmek ilerleme hızını koruyacaktır.</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <CarouselTag color="green">%34 ilerleme</CarouselTag>
-        <CarouselTag color="blue">Hedef aşıldı</CarouselTag>
-        <CarouselTag color="orange">Geçiş önerisi</CarouselTag>
-        <CarouselTag color="yellow">3 hafta</CarouselTag>
+        <CarouselTag color="green">%35 ilerleme</CarouselTag>
+        <CarouselTag color="blue">4 hafta</CarouselTag>
+        <CarouselTag color="orange">Kısa hedef ✓</CarouselTag>
+        <CarouselTag color="yellow">Doğal ortam etkisi</CarouselTag>
       </div>
     </div>
   );
@@ -632,12 +633,12 @@ function HedefSlide3() {
 function HedefSlide4() {
   return (
     <MockPdfCard
-      header="Dönem Raporu · Mart 2026"
+      header="Dönem Raporu · Nisan 2026"
       tags={<><CarouselTag color="blue">Ahmet Y. · 7 yaş</CarouselTag><CarouselTag color="orange">Hedef 2.2.3</CarouselTag><CarouselTag color="green">2. Dönem</CarouselTag></>}
       rows={[
-        { label: "HEDEF", title: "Sözcük Dağarcığını Genişletir (2.2.3)", body: "Başlangıç: %30 · Kısa dönem: %60 · Uzun dönem: %80" },
-        { label: "SONUÇ", body: "3 hafta içinde %64'e ulaşıldı. Kısa dönem hedef aşıldı. 2-3 seans içinde uzun dönem hedef beklenmektedir." },
-        { label: "ÖNERİ", body: "Hedef 3.1.1'e geçiş planlanabilir. Ev ödevi frekansı artırılması önerilir." },
+        { label: "HEDEF", title: "Sözcük Dağarcığını Genişletir (2.2.3)", body: "Başlangıç: %30 (3/10) · Kısa dönem: %60 · Uzun dönem: %80 · Şu anki: %65" },
+        { label: "SONUÇ", body: "4 hafta, %35 ilerleme. Kısa dönem hedef aşıldı. Doğal ortam çalışmaları en etkili yöntem. Uzun dönem hedefe tahmini 2 seans." },
+        { label: "ÖNERİ", body: "Hedef 2.2.4'e (cümle kurma) geçiş planlanabilir. Ev ödevi sıklığı artırılmalı." },
       ]}
       cta="Veli ve okul dosyasına eklenebilir"
     />
@@ -681,7 +682,7 @@ const TOOLS_CONFIG = [
     slides: [
       { title: "Aktivite & süre seç", desc: "Ödev türünü, günlük süreyi ve hedef alanı belirle", Panel: EvSlide1 },
       { title: "Ödevi incele",        desc: "Adım adım uygulama talimatları hazırlandı",          Panel: EvSlide2 },
-      { title: "Veli talimatları",    desc: "Veli rehberi ve terapist notları eklendi",            Panel: EvSlide3 },
+      { title: "Veli talimatları",    desc: "Veli rehberi ve uzman notları eklendi",               Panel: EvSlide3 },
       { title: "PDF olarak indir",    desc: "Veliye teslim hazır ödev formu — Pro plan ile",      Panel: EvSlide4 },
     ],
   },
