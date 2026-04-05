@@ -44,3 +44,6 @@ next-env.d.ts
 
 # Müfredat kaynak PDF'leri (seed tamamlandı, repo'da gereksiz)
 src/app/api/curriculum/*.pdf
+
+# Claude Code local config
+.claude/
