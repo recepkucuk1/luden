@@ -2,6 +2,7 @@ import type { NextAuthConfig } from "next-auth";
 
 // Middleware'de çalışacak hafif config — Node.js modülü import etmez
 export const authConfig: NextAuthConfig = {
+  trustHost: true,
   pages: {
     signIn: "/login",
   },
