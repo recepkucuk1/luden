@@ -1048,7 +1048,7 @@ function FaqSection() {
           <p className="text-sm font-medium text-zinc-700 mb-1">Sorunuzu bulamadınız mı?</p>
           <p className="text-xs text-zinc-400 mb-4">Bize yazın, en kısa sürede yanıt verelim.</p>
           <a
-            href="mailto:merhaba@ludenlab.com"
+            href="mailto:info@ludenlab.com"
             className="inline-flex items-center gap-2 rounded-xl bg-[#023435] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#023435]/90 transition-colors"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1132,7 +1132,7 @@ const PLANS: PricingPlan[] = [
       "Öncelikli destek",
     ],
     buttonText: "İletişime Geç",
-    href: "mailto:merhaba@ludenlab.com",
+    href: "mailto:info@ludenlab.com",
     isPopular: false,
     customPriceLabel: "İletişim",
   },
