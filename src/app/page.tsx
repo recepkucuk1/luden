@@ -1253,7 +1253,7 @@ export default function LandingPage() {
               alt="LudenLab"
               width={200}
               height={72}
-              className={cn("w-auto brightness-0 invert transition-all duration-300", scrolled ? "h-12" : "h-16")}
+              className={cn("w-auto brightness-0 invert transition-all duration-300", scrolled ? "h-10 sm:h-12" : "h-12 sm:h-16")}
               priority
             />
           </Link>
@@ -1271,29 +1271,26 @@ export default function LandingPage() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Link
               href="/login"
-              className="hidden sm:inline-flex rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-colors"
+              className="rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
             >
               Giriş Yap
             </Link>
             <Link
               href="/register"
-              className="rounded-lg bg-[#FE703A] px-4 py-2 text-sm font-medium text-white hover:bg-[#FE703A]/90 transition-colors"
+              className="rounded-lg bg-[#FE703A] px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white hover:bg-[#FE703A]/90 transition-colors"
             >
               Ücretsiz Başla
-            </Link>
-            <Link href="/login" className="sm:hidden text-sm font-medium text-white/80 hover:text-white transition-colors">
-              Giriş Yap
             </Link>
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden flex items-center justify-center h-9 w-9 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              className="md:hidden flex items-center justify-center h-8 w-8 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
               aria-label="Menü"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 {mobileMenuOpen
                   ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -1324,13 +1321,6 @@ export default function LandingPage() {
                     {link.label}
                   </a>
                 ))}
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="sm:hidden rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  Giriş Yap
-                </Link>
               </nav>
             </motion.div>
           )}
