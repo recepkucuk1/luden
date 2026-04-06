@@ -1,8 +1,8 @@
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = process.env.EMAIL_FROM ?? "Luden <info@ludenlab.com>";
-const BASE_URL = process.env.NEXTAUTH_URL ?? "https://ludenlab.com";
+const FROM = process.env.EMAIL_FROM ?? "LudenLab <noreply@ludenlab.com>";
+const BASE_URL = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "https://ludenlab.com";
 
 function verificationEmailHtml(verifyUrl: string): string {
   return `<!DOCTYPE html>
@@ -19,14 +19,14 @@ function verificationEmailHtml(verifyUrl: string): string {
         <table width="100%" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
           <tr>
             <td style="background:#023435;padding:28px 40px;text-align:center;">
-              <span style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">Luden</span>
+              <span style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">LudenLab</span>
             </td>
           </tr>
           <tr>
             <td style="padding:40px 40px 32px;">
               <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;color:#0f172a;">Email adresinizi doğrulayın</h1>
               <p style="margin:0 0 24px;font-size:15px;color:#64748b;line-height:1.6;">
-                Luden hesabınızı aktifleştirmek için aşağıdaki butona tıklayın.
+                LudenLab hesabınızı aktifleştirmek için aşağıdaki butona tıklayın.
                 Bu link <strong>1 saat</strong> süreyle geçerlidir.
               </p>
               <table cellpadding="0" cellspacing="0" style="margin:0 0 32px;">
@@ -74,7 +74,7 @@ function passwordResetEmailHtml(resetUrl: string): string {
         <table width="100%" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
           <tr>
             <td style="background:#023435;padding:28px 40px;text-align:center;">
-              <span style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">Luden</span>
+              <span style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">LudenLab</span>
             </td>
           </tr>
           <tr>
@@ -134,7 +134,7 @@ export async function sendVerificationEmail(email: string, token: string): Promi
   const { data, error } = await resend.emails.send({
     from: FROM,
     to: email,
-    subject: "Luden - Email Adresinizi Doğrulayın",
+    subject: "LudenLab — Email Adresinizi Doğrulayın",
     html: verificationEmailHtml(verifyUrl),
   });
 

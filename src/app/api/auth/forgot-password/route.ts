@@ -30,15 +30,12 @@ export async function POST(request: NextRequest) {
       data: { token: tokenHash, userId: therapist.id, expiresAt },
     });
 
-    const resetUrl = `${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/reset-password/${token}`;
+    const resetUrl = `${process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/reset-password/${token}`;
 
     try {
       await sendPasswordResetEmail(email, resetUrl);
     } catch (emailErr) {
       console.error("[forgot-password] Email gönderilemedi:", emailErr);
-      if (process.env.NODE_ENV !== "production") {
-        console.log(`[forgot-password] Sıfırlama linki (manuel): ${resetUrl}`);
-      }
     }
 
     return NextResponse.json({ success: true });

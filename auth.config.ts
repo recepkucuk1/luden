@@ -11,7 +11,7 @@ export const authConfig: NextAuthConfig = {
       const isLoggedIn = !!auth?.user;
       const path = nextUrl.pathname;
 
-      const isAuthPage = path.startsWith("/login") || path.startsWith("/register");
+      const isAuthPage = path.startsWith("/login") || path.startsWith("/register") || path.startsWith("/forgot-password") || path.startsWith("/reset-password");
       const isApiAuth = path.startsWith("/api/auth");
       const isPublic = path === "/" || path.startsWith("/verify-email") || path.startsWith("/privacy") || path.startsWith("/delivery-return") || path.startsWith("/cookie-policy") || path.startsWith("/terms") || path.startsWith("/about");
 
