@@ -59,7 +59,7 @@ export default function ResetPasswordPage({
     <div className="flex min-h-screen items-center justify-center bg-white p-8">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <Image src="/logo.svg" alt="Luden" width={120} height={44} className="h-8 w-auto mx-auto mb-6" />
+          <Image src="/logo.svg" alt="LudenLab" width={200} height={72} className="h-16 w-auto mx-auto mb-6" />
           <h1 className="text-2xl font-bold text-zinc-900">Yeni Şifre Belirle</h1>
           <p className="mt-1 text-sm text-zinc-500">En az 8 karakter kullanın.</p>
         </div>

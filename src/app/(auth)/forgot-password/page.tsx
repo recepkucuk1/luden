@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-white p-8">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <Image src="/logo.svg" alt="Luden" width={120} height={44} className="h-8 w-auto mx-auto mb-6" />
+          <Image src="/logo.svg" alt="LudenLab" width={200} height={72} className="h-16 w-auto mx-auto mb-6" />
           {!sent ? (
             <>
               <h1 className="text-2xl font-bold text-zinc-900">Şifremi Unuttum</h1>
