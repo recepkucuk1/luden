@@ -1284,6 +1284,9 @@ export default function LandingPage() {
             >
               Ücretsiz Başla
             </Link>
+            <Link href="/login" className="sm:hidden text-sm font-medium text-white/80 hover:text-white transition-colors">
+              Giriş Yap
+            </Link>
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
