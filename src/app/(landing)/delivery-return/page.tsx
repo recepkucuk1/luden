@@ -125,7 +125,7 @@ export default function DeliveryReturnPage() {
               </thead>
               <tbody className="divide-y divide-[#023435]/10">
                 {[
-                  ["Aylık Fiyat", "Ücretsiz", "379 TL", "1.499 TL", "İletişim"],
+                  ["Aylık Fiyat", "Ücretsiz", "449 TL", "1.999 TL", "İletişim"],
                   ["Kredi", "40", "2.000", "10.000", "Özel"],
                   ["Öğrenci Limiti", "2", "200", "Sınırsız", "Özel"],
                   ["PDF İndirme", "Hayır", "Evet", "Evet", "Evet"],

@@ -1019,8 +1019,8 @@ const PLANS: PricingPlan[] = [
   },
   {
     name: "Pro",
-    price: 379,
-    yearlyPrice: 3865.80,
+    price: 449,
+    yearlyPrice: 4579.80,
     period: "ay",
     yearlyPeriod: "yıl",
     description: "Bireysel terapistler için",
@@ -1037,8 +1037,8 @@ const PLANS: PricingPlan[] = [
   },
   {
     name: "Advanced",
-    price: 1499,
-    yearlyPrice: 15289.80,
+    price: 1999,
+    yearlyPrice: 20389.80,
     period: "ay",
     yearlyPeriod: "yıl",
     description: "Yoğun çalışan uzmanlar için",

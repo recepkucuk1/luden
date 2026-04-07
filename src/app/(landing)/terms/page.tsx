@@ -126,8 +126,8 @@ export default function TermsPage() {
                 <tbody className="divide-y divide-[#023435]/10">
                   {[
                     ["Free", "Ücretsiz", "40", "2"],
-                    ["Pro", "379 TL/ay", "2.000", "200 + PDF indirme"],
-                    ["Advanced", "1.499 TL/ay", "10.000", "Sınırsız + PDF indirme"],
+                    ["Pro", "449 TL/ay", "2.000", "200 + PDF indirme"],
+                    ["Advanced", "1.999 TL/ay", "10.000", "Sınırsız + PDF indirme"],
                     ["Enterprise", "Özel fiyatlandırma", "Özel", "Özel"],
                   ].map(([plan, price, credit, student], i) => (
                     <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-[#023435]/[0.02]"}>
