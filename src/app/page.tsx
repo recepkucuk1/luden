@@ -755,7 +755,7 @@ function HowItWorksCarousel() {
   const { Panel } = slides[active];
 
   return (
-    <section ref={sectionRef} className="py-20 px-6" style={{ background: "#f8fafa" }}>
+    <section ref={sectionRef} id="features" className="py-20 px-6" style={{ background: "#f8fafa" }}>
       <div className="mx-auto max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -790,11 +790,29 @@ function HowItWorksCarousel() {
           </AnimatePresence>
         </motion.div>
 
+        {/* Feature pills */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="flex flex-wrap justify-center gap-2 mb-8"
+        >
+          {FEATURE_PILLS.map((pill) => (
+            <span
+              key={pill.label}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(2,52,53,0.12)] bg-white px-3 py-1.5 text-xs font-medium text-[#023435]/70"
+            >
+              <span className="text-[#FE703A]">{pill.icon}</span>
+              {pill.label}
+            </span>
+          ))}
+        </motion.div>
+
         {/* Tool tab bar */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.15 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           className="mb-6 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar"
         >
           {TOOLS_CONFIG.map((tool, i) => (
@@ -926,97 +944,16 @@ function HowItWorksCarousel() {
   );
 }
 
-// ─── Features ─────────────────────────────────────────────────────────────────
-const FEATURES = [
-  {
-    icon: <IconSparkles size={24} />,
-    title: "AI Destekli Kart Üretimi",
-    desc: "Claude AI ile saniyeler içinde öğrenciye özel, pedagojik açıdan zengin öğrenme kartları oluşturun.",
-  },
-  {
-    icon: <IconUsers size={24} />,
-    title: "Öğrenci Yönetimi",
-    desc: "Tüm öğrencilerinizi tek yerden takip edin. Profil, tanı, yaş ve çalışma alanı bilgilerini kaydedin.",
-  },
-  {
-    icon: <IconFileDownload size={24} />,
-    title: "PDF İndirme",
-    desc: "Oluşturduğunuz kartları profesyonel PDF formatında indirin, yazdırın ve seanslarınızda kullanın.",
-  },
-  {
-    icon: <IconTarget size={24} />,
-    title: "Kişiselleştirilebilir İçerik",
-    desc: "Kategori, zorluk seviyesi ve yaş grubuna göre özelleştirilmiş kartlar üretin.",
-  },
-  {
-    icon: <IconLock size={24} />,
-    title: "Güvenli ve Özel",
-    desc: "Verileriniz şifreli bağlantılar üzerinden aktarılır. Öğrenci bilgileri yalnızca size aittir.",
-  },
-  {
-    icon: <IconBuilding size={24} />,
-    title: "Çoklu Uzman Desteği",
-    desc: "Kliniğinizdeki tüm terapistlerin ortak platform üzerinden çalışmasını sağlayın.",
-    soon: true,
-  },
+// ─── Feature pills (shown inside HowItWorks section) ─────────────────────────
+const FEATURE_PILLS = [
+  { icon: <IconSparkles size={13} />, label: "AI destekli üretim" },
+  { icon: <IconUsers size={13} />, label: "Öğrenci yönetimi" },
+  { icon: <IconFileDownload size={13} />, label: "PDF indirme" },
+  { icon: <IconTarget size={13} />, label: "MEB müfredatı uyumlu" },
+  { icon: <IconLock size={13} />, label: "Güvenli & özel" },
+  { icon: <IconBuilding size={13} />, label: "Çoklu uzman desteği" },
 ];
 
-// ─── Features Section (Bento Grid) ───────────────────────────────────────────
-function FeaturesSection() {
-  const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
-
-  return (
-    <section ref={ref} id="features" className="bg-white py-20 px-6">
-      <div className="mx-auto max-w-5xl">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-14"
-        >
-          <p className="text-xs font-bold uppercase tracking-widest text-[#FE703A] mb-3">ÖZELLİKLER</p>
-          <h2 className="text-2xl font-bold text-zinc-900 mb-3">Her şey tek platformda</h2>
-          <p className="text-sm text-zinc-500">Terapistlerin ihtiyaç duyduğu tüm araçlar, basit ve hızlı.</p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEATURES.map((feature, i) => (
-            <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className={cn(
-                "group relative rounded-2xl border border-zinc-100 bg-white p-6 transition-all duration-300 hover:shadow-lg hover:shadow-[#FE703A]/5 hover:border-[#FE703A]/20",
-                // First two cards span wider on large screens
-                i < 2 && "lg:col-span-1",
-              )}
-            >
-              {/* Glow effect on hover */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#FE703A]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-
-              <div className="relative z-10">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#FE703A]/10 text-[#FE703A] group-hover:bg-[#FE703A] group-hover:text-white transition-colors duration-300">
-                  {feature.icon}
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="font-bold text-zinc-900">{feature.title}</h3>
-                  {feature.soon && (
-                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500">
-                      Yakında
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-zinc-500 leading-relaxed">{feature.desc}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 // ─── FAQ Section ──────────────────────────────────────────────────────────────
 function FaqSection() {
@@ -1336,8 +1273,6 @@ export default function LandingPage() {
       {/* ── How It Works ── */}
       <HowItWorksCarousel />
 
-      {/* ── Features ── */}
-      <FeaturesSection />
 
       {/* ── Pricing ── */}
       <section id="pricing" className="bg-zinc-50">
