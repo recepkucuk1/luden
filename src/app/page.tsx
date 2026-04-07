@@ -14,7 +14,6 @@ import {
   IconFileDownload,
   IconTarget,
   IconLock,
-  IconBuilding,
 } from "@tabler/icons-react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 
@@ -951,7 +950,6 @@ const FEATURE_PILLS = [
   { icon: <IconFileDownload size={13} />, label: "PDF indirme" },
   { icon: <IconTarget size={13} />, label: "MEB müfredatı uyumlu" },
   { icon: <IconLock size={13} />, label: "Güvenli & özel" },
-  { icon: <IconBuilding size={13} />, label: "Çoklu uzman desteği" },
 ];
 
 
