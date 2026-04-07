@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logError } from "@/lib/utils";
+
+const profileUpdateSchema = z.object({
+  name: z.string().min(2).max(100).trim(),
+  specialty: z.array(z.string().max(50)).max(10).optional(),
+  institution: z.string().max(200).trim().nullable().optional(),
+  phone: z.string().max(20).trim().nullable().optional(),
+  experienceYears: z.number().int().min(0).max(80).nullable().optional(),
+  certifications: z.string().max(2000).trim().nullable().optional(),
+});
 
 const PROFILE_SELECT = {
   id: true,
@@ -49,22 +59,21 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { name, specialty, institution, phone, experienceYears, certifications } = body;
-
-    if (!name?.trim()) {
-      return NextResponse.json({ error: "Ad Soyad zorunludur." }, { status: 400 });
+    const parsed = profileUpdateSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Geçersiz istek" }, { status: 400 });
     }
+    const { name, specialty, institution, phone, experienceYears, certifications } = parsed.data;
 
     const therapist = await prisma.therapist.update({
       where: { id: session.user.id },
       data: {
-        name: name.trim(),
-        specialty: Array.isArray(specialty) ? specialty : [],
-        institution: institution?.trim() || null,
-        phone: phone?.trim() || null,
-        experienceYears: experienceYears || null,
-        certifications: certifications?.trim() || null,
+        name,
+        specialty: specialty ?? [],
+        institution: institution || null,
+        phone: phone || null,
+        experienceYears: experienceYears ?? null,
+        certifications: certifications || null,
       },
       select: PROFILE_SELECT,
     });

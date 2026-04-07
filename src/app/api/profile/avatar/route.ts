@@ -13,8 +13,9 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { dataUrl } = body as { dataUrl: string };
 
-    if (!dataUrl || !dataUrl.startsWith("data:image/")) {
-      return NextResponse.json({ error: "Geçersiz görsel formatı" }, { status: 400 });
+    const ALLOWED_MIME = ["data:image/png;", "data:image/jpeg;", "data:image/webp;", "data:image/jpg;"];
+    if (!dataUrl || !ALLOWED_MIME.some((m) => dataUrl.startsWith(m))) {
+      return NextResponse.json({ error: "Sadece PNG, JPEG ve WebP formatları desteklenir" }, { status: 400 });
     }
 
     // Rough size check: base64 string length / 1.33 ≈ bytes

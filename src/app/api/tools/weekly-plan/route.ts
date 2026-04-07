@@ -97,6 +97,15 @@ function getDayDates(weekStart: string, count: number): { name: string; date: st
   return result;
 }
 
+function extractJson(text: string): Record<string, unknown> {
+  const jsonMatch =
+    text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/) ??
+    text.match(/(\{[\s\S]*\})/);
+  if (!jsonMatch) throw new Error("Claude yanıtından JSON çıkarılamadı");
+  try { return JSON.parse(jsonMatch[1] ?? jsonMatch[0]); }
+  catch { throw new Error("JSON parse hatası"); }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
@@ -111,7 +120,7 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message ?? "Geçersiz istek" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const { studentId, weekStart, sessionsPerWeek, sessionDuration, focusAreas, planApproach, extraNote } = parsed.data;
@@ -123,11 +132,10 @@ export async function POST(request: NextRequest) {
     if (!therapist || therapist.credits < COST) {
       return NextResponse.json(
         { error: `Yetersiz kredi. Mevcut: ${therapist?.credits ?? 0}, Gerekli: ${COST}` },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
-    // Fetch student + last 5 cards + last session summary
     const student = await prisma.student.findFirst({
       where: { id: studentId, therapistId: session.user.id },
       select: { id: true, name: true, birthDate: true, workArea: true, diagnosis: true, curriculumIds: true },
@@ -136,30 +144,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Öğrenci bulunamadı" }, { status: 404 });
     }
 
-    // Last 5 cards
-    const recentCards = await prisma.card.findMany({
-      where: { studentId: student.id, therapistId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: { title: true, toolType: true, createdAt: true },
-    });
+    // Context queries in parallel
+    const [recentCards, lastSummary, curricula] = await Promise.all([
+      prisma.card.findMany({
+        where: { studentId: student.id, therapistId: session.user.id },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: { title: true, toolType: true, createdAt: true },
+      }),
+      prisma.card.findFirst({
+        where: { studentId: student.id, therapistId: session.user.id, toolType: "SESSION_SUMMARY" },
+        orderBy: { createdAt: "desc" },
+        select: { content: true, createdAt: true },
+      }),
+      student.curriculumIds.length > 0
+        ? prisma.curriculum.findMany({
+            where: { id: { in: student.curriculumIds } },
+            select: { title: true },
+          })
+        : Promise.resolve([]),
+    ]);
 
-    // Last session summary
-    const lastSummary = await prisma.card.findFirst({
-      where: { studentId: student.id, therapistId: session.user.id, toolType: "SESSION_SUMMARY" },
-      orderBy: { createdAt: "desc" },
-      select: { content: true, createdAt: true },
-    });
-
-    // Curriculum titles for assigned IDs
-    let curriculumTitles: string[] = [];
-    if (student.curriculumIds.length > 0) {
-      const curricula = await prisma.curriculum.findMany({
-        where: { id: { in: student.curriculumIds } },
-        select: { title: true },
-      });
-      curriculumTitles = curricula.map((c) => c.title);
-    }
+    const curriculumTitles = curricula.map((c) => c.title);
 
     let ageText = "";
     let ageGroup = "7-12";
@@ -216,19 +222,8 @@ Bu parametrelere uygun haftalık çalışma planı oluştur. Tam olarak ${sessio
     const rawContent = message.content[0];
     if (rawContent.type !== "text") throw new Error("Beklenmeyen içerik tipi");
 
-    const jsonMatch =
-      rawContent.text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/) ??
-      rawContent.text.match(/(\{[\s\S]*\})/);
-    if (!jsonMatch) throw new Error("Claude yanıtından JSON çıkarılamadı");
+    const planContent = extractJson(rawContent.text);
 
-    let planContent: Record<string, unknown>;
-    try {
-      planContent = JSON.parse(jsonMatch[1] ?? jsonMatch[0]);
-    } catch {
-      throw new Error("JSON parse hatası");
-    }
-
-    // Persist metadata
     planContent.weekStart       = weekStart;
     planContent.sessionsPerWeek = sessionsPerWeek;
     planContent.sessionDuration = sessionDuration;

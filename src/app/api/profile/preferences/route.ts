@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logError } from "@/lib/utils";
+
+const preferencesSchema = z.object({
+  preferences: z.record(z.unknown()).refine(
+    (val) => JSON.stringify(val).length <= 10_000,
+    "Tercihler verisi çok büyük"
+  ),
+});
 
 export async function PUT(request: NextRequest) {
   try {
@@ -10,12 +18,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { preferences } = body;
-
-    if (!preferences || typeof preferences !== "object") {
-      return NextResponse.json({ error: "Geçersiz tercihler" }, { status: 400 });
+    const parsed = preferencesSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Geçersiz tercihler" }, { status: 400 });
     }
+    const { preferences } = parsed.data;
 
     await prisma.therapist.update({
       where: { id: session.user.id },

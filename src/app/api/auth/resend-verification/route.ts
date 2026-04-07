@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse, getClientIp } from "@/lib/rateLimit";
 import { sendVerificationEmail } from "@/lib/email";
@@ -25,15 +26,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    const verifyToken = crypto.randomUUID();
+    const plainToken = crypto.randomUUID();
+    const tokenHash = crypto.createHash("sha256").update(plainToken).digest("hex");
     const verifyExpires = new Date(Date.now() + 60 * 60 * 1000);
 
     await prisma.therapist.update({
       where: { id: therapist.id },
-      data: { emailVerifyToken: verifyToken, emailVerifyExpires: verifyExpires },
+      data: { emailVerifyToken: tokenHash, emailVerifyExpires: verifyExpires },
     });
 
-    await sendVerificationEmail(email, verifyToken);
+    await sendVerificationEmail(email, plainToken);
 
     return NextResponse.json({ success: true });
   } catch (error) {

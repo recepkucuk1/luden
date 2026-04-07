@@ -1,20 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
-import { anthropic, MODEL } from "@/lib/anthropic";
-import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
-import { CREDIT_COSTS } from "@/lib/plans";
-
-const SOCIAL_STORY_COST = 20;
-
-const bodySchema = z.object({
-  studentId:      z.string().min(1),
-  situation:      z.string().min(1).max(200),
-  environment:    z.enum(["Okul", "Ev", "Park", "Market", "Hastane", "Rehabilitasyon merkezi"]),
-  length:         z.enum(["short", "medium", "long"]),
-  visualSupport:  z.boolean(),
-});
+import { createToolHandler } from "@/lib/toolHandler";
 
 const LENGTH_LABEL: Record<string, string> = {
   short:  "Kısa (3-5 cümle)",
@@ -54,141 +39,41 @@ Yanıtını SADECE JSON formatında ver, başka hiçbir şey yazma:
   "homeGuidance": "Veli için kısa rehber (evde nasıl kullanılacağı)"
 }`;
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
-    }
+export const POST = createToolHandler({
+  rateLimitKey: "social-story",
+  bodySchema: z.object({
+    studentId:     z.string().min(1),
+    situation:     z.string().min(1).max(200),
+    environment:   z.enum(["Okul", "Ev", "Park", "Market", "Hastane", "Rehabilitasyon merkezi"]),
+    length:        z.enum(["short", "medium", "long"]),
+    visualSupport: z.boolean(),
+  }),
+  cost: 20,
+  systemPrompt: SYSTEM_PROMPT,
+  toolType: "SOCIAL_STORY",
+  category: "generator",
+  creditDescription: "Sosyal hikaye üretimi",
+  responseKey: "story",
+  fallbackTitle: "Sosyal Hikaye",
 
-    const { allowed, retryAfter } = rateLimit(`social-story:${session.user.id}`, 2);
-    if (!allowed) return rateLimitResponse(retryAfter);
-
-    const parsed = bodySchema.safeParse(await request.json());
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Geçersiz istek" },
-        { status: 400 }
-      );
-    }
-    const { studentId, situation, environment, length, visualSupport } = parsed.data;
-
-    // Öğrenci bu terapiste ait mi?
-    const student = await prisma.student.findFirst({
-      where: { id: studentId, therapistId: session.user.id },
-      select: { id: true, name: true, birthDate: true, workArea: true, diagnosis: true },
-    });
-    if (!student) {
-      return NextResponse.json({ error: "Öğrenci bulunamadı" }, { status: 403 });
-    }
-
-    // Kredi kontrolü
-    const therapist = await prisma.therapist.findUnique({
-      where: { id: session.user.id },
-      select: { credits: true },
-    });
-    if (!therapist || therapist.credits < SOCIAL_STORY_COST) {
-      return NextResponse.json(
-        { error: `Yetersiz kredi. Mevcut: ${therapist?.credits ?? 0}, Gerekli: ${SOCIAL_STORY_COST}` },
-        { status: 403 }
-      );
-    }
-
-    // Yaş hesapla
-    let ageText = "";
-    if (student.birthDate) {
-      const birth = new Date(student.birthDate);
-      const now = new Date();
-      const years = now.getFullYear() - birth.getFullYear();
-      ageText = `${years} yaşında`;
-    }
-
-    const userPrompt = `Öğrenci bilgileri:
-- Ad: ${student.name}${ageText ? `, ${ageText}` : ""}
-- Çalışma alanı: ${student.workArea}
-${student.diagnosis ? `- Tanı: ${student.diagnosis}` : ""}
+  buildUserPrompt(data, student, ageText) {
+    return `Öğrenci bilgileri:
+- Ad: ${student!.name}${ageText ? `, ${ageText}` : ""}
+- Çalışma alanı: ${student!.workArea}
+${student!.diagnosis ? `- Tanı: ${student!.diagnosis}` : ""}
 
 Sosyal hikaye parametreleri:
-- Durum: ${situation}
-- Ortam: ${environment}
-- Hikaye uzunluğu: ${LENGTH_LABEL[length]}
-- Görsel destek açıklamaları: ${visualSupport ? "Evet, her cümle için kısa görsel sahne açıklaması ekle" : "Hayır"}
+- Durum: ${data.situation}
+- Ortam: ${data.environment}
+- Hikaye uzunluğu: ${LENGTH_LABEL[data.length]}
+- Görsel destek açıklamaları: ${data.visualSupport ? "Evet, her cümle için kısa görsel sahne açıklaması ekle" : "Hayır"}
 
 Bu öğrenci için uygun bir sosyal hikaye yaz.`;
+  },
 
-    const message = await anthropic.messages.create({
-      model: MODEL,
-      max_tokens: 4096,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userPrompt }],
-    });
-
-    const rawContent = message.content[0];
-    if (rawContent.type !== "text") {
-      throw new Error("Beklenmeyen içerik tipi");
-    }
-
-    const jsonMatch =
-      rawContent.text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/) ??
-      rawContent.text.match(/(\{[\s\S]*\})/);
-
-    if (!jsonMatch) throw new Error("Claude yanıtından JSON çıkarılamadı");
-
-    let storyContent: Record<string, unknown>;
-    try {
-      storyContent = JSON.parse(jsonMatch[1] ?? jsonMatch[0]);
-    } catch {
-      throw new Error("JSON parse hatası");
-    }
-
-    // Filtreleme için metadata'yı content'e ekle
-    storyContent.situation   = situation;
-    storyContent.environment = environment;
-    storyContent.length      = length;
-
-    // Kaydet + kredi düş (atomik)
-    const dbCard = await prisma.$transaction(async (tx) => {
-      const fresh = await tx.therapist.findUnique({
-        where: { id: session.user.id },
-        select: { credits: true },
-      });
-      if (!fresh || fresh.credits < SOCIAL_STORY_COST) throw new Error("INSUFFICIENT_CREDITS");
-
-      const created = await tx.card.create({
-        data: {
-          title: (storyContent.title as string) ?? "Sosyal Hikaye",
-          content: storyContent as Parameters<typeof prisma.card.create>[0]["data"]["content"],
-          toolType: "SOCIAL_STORY",
-          category:   "generator",
-          difficulty: "medium",
-          ageGroup:   "3-6",
-          therapistId: session.user.id,
-          studentId:   studentId,
-        },
-      });
-
-      await tx.therapist.update({
-        where: { id: session.user.id },
-        data: { credits: { decrement: SOCIAL_STORY_COST } },
-      });
-      await tx.creditTransaction.create({
-        data: {
-          therapistId: session.user.id,
-          amount:      SOCIAL_STORY_COST,
-          type:        "SPEND",
-          description: "Sosyal hikaye üretimi",
-        },
-      });
-
-      return created;
-    });
-
-    return NextResponse.json({ success: true, story: storyContent, cardId: dbCard.id });
-  } catch (error) {
-    if (error instanceof Error && error.message === "INSUFFICIENT_CREDITS") {
-      return NextResponse.json({ error: "Yetersiz kredi." }, { status: 403 });
-    }
-    console.error("[/api/tools/social-story] HATA:", error);
-    return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
-  }
-}
+  enrichContent(content, data) {
+    content.situation   = data.situation;
+    content.environment = data.environment;
+    content.length      = data.length;
+  },
+});

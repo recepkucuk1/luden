@@ -1,20 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
-import { anthropic, MODEL } from "@/lib/anthropic";
-import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
-
-const ARTICULATION_COST = 15;
-
-const bodySchema = z.object({
-  studentId:   z.string().min(1),
-  targetSounds: z.array(z.string()).min(1, "En az bir hedef ses seçin"),
-  positions:   z.array(z.enum(["initial", "medial", "final"])).min(1),
-  level:       z.enum(["isolated", "syllable", "word", "sentence", "contextual"]),
-  itemCount:   z.number().int().min(5).max(30),
-  theme:       z.string().optional(),
-});
+import { createToolHandler } from "@/lib/toolHandler";
 
 const LEVEL_LABEL: Record<string, string> = {
   isolated:   "İzole Ses",
@@ -71,137 +56,42 @@ Yanıtını SADECE JSON formatında ver, başka hiçbir şey yazma:
   "homeGuidance": "Evde tekrar için veli rehberi"
 }`;
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
-    }
+export const POST = createToolHandler({
+  rateLimitKey: "articulation",
+  bodySchema: z.object({
+    studentId:    z.string().min(1),
+    targetSounds: z.array(z.string()).min(1, "En az bir hedef ses seçin"),
+    positions:    z.array(z.enum(["initial", "medial", "final"])).min(1),
+    level:        z.enum(["isolated", "syllable", "word", "sentence", "contextual"]),
+    itemCount:    z.number().int().min(5).max(30),
+    theme:        z.string().optional(),
+  }),
+  cost: 15,
+  systemPrompt: SYSTEM_PROMPT,
+  toolType: "ARTICULATION_DRILL",
+  category: "generator",
+  creditDescription: "Artikülasyon alıştırması üretimi",
+  responseKey: "drill",
+  fallbackTitle: "Artikülasyon Alıştırması",
 
-    const { allowed, retryAfter } = rateLimit(`articulation:${session.user.id}`, 2);
-    if (!allowed) return rateLimitResponse(retryAfter);
-
-    const parsed = bodySchema.safeParse(await request.json());
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Geçersiz istek" },
-        { status: 400 }
-      );
-    }
-    const { studentId, targetSounds, positions, level, itemCount, theme } = parsed.data;
-
-    // IDOR kontrolü
-    const student = await prisma.student.findFirst({
-      where: { id: studentId, therapistId: session.user.id },
-      select: { id: true, name: true, birthDate: true, workArea: true, diagnosis: true },
-    });
-    if (!student) {
-      return NextResponse.json({ error: "Öğrenci bulunamadı" }, { status: 403 });
-    }
-
-    // Kredi kontrolü
-    const therapist = await prisma.therapist.findUnique({
-      where: { id: session.user.id },
-      select: { credits: true },
-    });
-    if (!therapist || therapist.credits < ARTICULATION_COST) {
-      return NextResponse.json(
-        { error: `Yetersiz kredi. Mevcut: ${therapist?.credits ?? 0}, Gerekli: ${ARTICULATION_COST}` },
-        { status: 403 }
-      );
-    }
-
-    // Yaş hesapla
-    let ageText = "";
-    if (student.birthDate) {
-      const birth = new Date(student.birthDate);
-      const years = new Date().getFullYear() - birth.getFullYear();
-      ageText = `${years} yaşında`;
-    }
-
-    const positionLabels = positions.map((p) => POSITION_LABEL[p]).join(", ");
-    const userPrompt = `Öğrenci bilgileri:
-- Ad: ${student.name}${ageText ? `, ${ageText}` : ""}
-- Çalışma alanı: ${student.workArea}
-${student.diagnosis ? `- Tanı: ${student.diagnosis}` : ""}
+  buildUserPrompt(data, student, ageText) {
+    const positionLabels = data.positions.map((p: string) => POSITION_LABEL[p]).join(", ");
+    return `Öğrenci bilgileri:
+- Ad: ${student!.name}${ageText ? `, ${ageText}` : ""}
+- Çalışma alanı: ${student!.workArea}
+${student!.diagnosis ? `- Tanı: ${student!.diagnosis}` : ""}
 
 Alıştırma parametreleri:
-- Hedef ses(ler): ${targetSounds.join(", ")}
+- Hedef ses(ler): ${data.targetSounds.join(", ")}
 - Ses pozisyonu: ${positionLabels}
-- Alıştırma seviyesi: ${LEVEL_LABEL[level]}
-- Kelime/öğe sayısı: ${itemCount}
-${theme && theme !== "none" ? `- Tema: ${theme}` : "- Tema: Karışık (tema yok)"}
+- Alıştırma seviyesi: ${LEVEL_LABEL[data.level]}
+- Kelime/öğe sayısı: ${data.itemCount}
+${data.theme && data.theme !== "none" ? `- Tema: ${data.theme}` : "- Tema: Karışık (tema yok)"}
 
 Bu öğrenci için uygun artikülasyon alıştırma materyali üret.`;
+  },
 
-    const message = await anthropic.messages.create({
-      model: MODEL,
-      max_tokens: 4096,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userPrompt }],
-    });
-
-    const rawContent = message.content[0];
-    if (rawContent.type !== "text") throw new Error("Beklenmeyen içerik tipi");
-
-    const jsonMatch =
-      rawContent.text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/) ??
-      rawContent.text.match(/(\{[\s\S]*\})/);
-    if (!jsonMatch) throw new Error("Claude yanıtından JSON çıkarılamadı");
-
-    let drillContent: Record<string, unknown>;
-    try {
-      drillContent = JSON.parse(jsonMatch[1] ?? jsonMatch[0]);
-    } catch {
-      throw new Error("JSON parse hatası");
-    }
-
-    // Filtreleme için tema metadata'sını content'e ekle
-    if (theme && theme !== "none") drillContent.theme = theme;
-
-    // Kaydet + kredi düş (atomik)
-    const dbCard = await prisma.$transaction(async (tx) => {
-      const fresh = await tx.therapist.findUnique({
-        where: { id: session.user.id },
-        select: { credits: true },
-      });
-      if (!fresh || fresh.credits < ARTICULATION_COST) throw new Error("INSUFFICIENT_CREDITS");
-
-      const created = await tx.card.create({
-        data: {
-          title:       (drillContent.title as string) ?? "Artikülasyon Alıştırması",
-          content:     drillContent as Parameters<typeof prisma.card.create>[0]["data"]["content"],
-          toolType:    "ARTICULATION_DRILL",
-          category:    "generator",
-          difficulty:  "medium",
-          ageGroup:    "3-6",
-          therapistId: session.user.id,
-          studentId:   studentId,
-        },
-      });
-
-      await tx.therapist.update({
-        where: { id: session.user.id },
-        data: { credits: { decrement: ARTICULATION_COST } },
-      });
-      await tx.creditTransaction.create({
-        data: {
-          therapistId: session.user.id,
-          amount:      ARTICULATION_COST,
-          type:        "SPEND",
-          description: "Artikülasyon alıştırması üretimi",
-        },
-      });
-
-      return created;
-    });
-
-    return NextResponse.json({ success: true, drill: drillContent, cardId: dbCard.id });
-  } catch (error) {
-    if (error instanceof Error && error.message === "INSUFFICIENT_CREDITS") {
-      return NextResponse.json({ error: "Yetersiz kredi." }, { status: 403 });
-    }
-    console.error("[/api/tools/articulation] HATA:", error);
-    return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
-  }
-}
+  enrichContent(content, data) {
+    if (data.theme && data.theme !== "none") content.theme = data.theme;
+  },
+});

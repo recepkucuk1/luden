@@ -1,12 +1,7 @@
 import { prisma } from "@/lib/db";
 import { anthropic, MODEL } from "@/lib/anthropic";
 import { stripHtmlTags } from "@/lib/validation";
-
-const WORK_AREA_LABEL: Record<string, string> = {
-  speech: "Konuşma",
-  language: "Dil",
-  hearing: "İşitme",
-};
+import { WORK_AREA_LABEL } from "@/lib/constants";
 
 function calcAge(birthDate: Date): number {
   return Math.floor(

@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logError } from "@/lib/utils";
+import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { z } from "zod";
 
 const spendSchema = z.object({
-  amount: z.number().int().positive(),
-  description: z.string().min(1),
+  amount: z.number().int().positive().max(1000),
+  description: z.string().min(1).max(200),
 });
 
 export async function POST(request: NextRequest) {
@@ -15,6 +16,9 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
     }
+
+    const { allowed, retryAfter } = rateLimit(`credits-spend:${session.user.id}`, 10);
+    if (!allowed) return rateLimitResponse(retryAfter);
 
     const parsed = spendSchema.safeParse(await request.json());
     if (!parsed.success) {

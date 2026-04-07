@@ -65,14 +65,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       if (token?.id) session.user.id = token.id as string;
-      // token.role varsa kullan (JWT cache) — yoksa DB'den çek
-      if (token?.role) {
-        session.user.role = token.role as string;
-      } else if (token?.id) {
+      // Her istekte DB'den güncel role ve suspended durumunu çek
+      if (token?.id) {
         const therapist = await prisma.therapist.findUnique({
           where: { id: token.id as string },
-          select: { role: true },
+          select: { role: true, suspended: true },
         });
+        if (therapist?.suspended) {
+          // Askıya alınan kullanıcının oturumunu geçersiz kıl
+          session.user.id = "";
+          session.user.role = "user";
+          return session;
+        }
         session.user.role = therapist?.role ?? "user";
       } else {
         session.user.role = "user";

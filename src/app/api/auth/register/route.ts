@@ -47,7 +47,8 @@ export async function POST(request: NextRequest) {
     }
 
     const hashed = await bcrypt.hash(password, 12);
-    const emailVerifyToken = crypto.randomUUID();
+    const plainToken = crypto.randomUUID();
+    const emailVerifyToken = crypto.createHash("sha256").update(plainToken).digest("hex");
     const emailVerifyExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 saat
 
     await prisma.$transaction(async (tx) => {
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     // Email gönderimi transaction dışında — başarısız olsa da kayıt geçerli
     try {
-      await sendVerificationEmail(email, emailVerifyToken);
+      await sendVerificationEmail(email, plainToken);
     } catch (emailErr) {
       logError("POST /api/auth/register — sendVerificationEmail", emailErr);
     }

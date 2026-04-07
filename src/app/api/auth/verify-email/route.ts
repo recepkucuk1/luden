@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { logError } from "@/lib/utils";
 
@@ -9,8 +10,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Geçersiz token." }, { status: 400 });
     }
 
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
     const therapist = await prisma.therapist.findUnique({
-      where: { emailVerifyToken: token },
+      where: { emailVerifyToken: tokenHash },
       select: { id: true, emailVerified: true, emailVerifyExpires: true },
     });
 
