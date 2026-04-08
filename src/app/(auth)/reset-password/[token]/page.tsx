@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
+import { AnimatedAuthPanel } from "@/components/auth/AnimatedAuthPanel";
 
 export default function ResetPasswordPage({
   params,
@@ -23,6 +24,7 @@ export default function ResetPasswordPage({
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -55,84 +57,103 @@ export default function ResetPasswordPage({
     }
   }
 
+  const isAnyPasswordVisible = (password.length > 0 && showPassword) || (passwordConfirm.length > 0 && showPasswordConfirm);
+  const combinedPasswordLength = password.length > 0 ? password.length : passwordConfirm.length;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white p-8">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <Image src="/logo.svg" alt="LudenLab" width={200} height={72} className="h-16 w-auto mx-auto mb-6" />
-          <h1 className="text-2xl font-bold text-zinc-900">Yeni Şifre Belirle</h1>
-          <p className="mt-1 text-sm text-zinc-500">En az 8 karakter kullanın.</p>
+    <div className="min-h-screen grid lg:grid-cols-2">
+      {/* Left Content Section */}
+      <AnimatedAuthPanel isTyping={isTyping} showPassword={isAnyPasswordVisible} passwordLength={combinedPasswordLength} />
+
+      {/* Right Content Section */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-white text-zinc-900">
+        <div className="w-full max-w-sm">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-8">
+            <Image src="/logo.svg" alt="LudenLab" width={200} height={72} className="h-14 w-auto mx-auto" />
+          </div>
+
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-zinc-900">Yeni Şifre Belirle</h1>
+            <p className="mt-1 text-sm text-zinc-500">En az 8 karakter kullanın.</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-sm font-medium">Yeni Şifre</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="En az 8 karakter"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setIsTyping(true)}
+                  onBlur={() => setIsTyping(false)}
+                  required
+                  minLength={8}
+                  autoFocus
+                  disabled={loading}
+                  autoComplete="new-password"
+                  className="h-10 pr-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900 disabled:opacity-60"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="passwordConfirm" className="text-sm font-medium">Şifre Tekrar</Label>
+              <div className="relative">
+                <Input
+                  id="passwordConfirm"
+                  type={showPasswordConfirm ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={passwordConfirm}
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
+                  onFocus={() => setIsTyping(true)}
+                  onBlur={() => setIsTyping(false)}
+                  required
+                  disabled={loading}
+                  autoComplete="new-password"
+                  className="h-10 pr-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900 disabled:opacity-60"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
+                >
+                  {showPasswordConfirm ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-10 bg-[#023435] hover:bg-[#023435]/90 text-white"
+            >
+              {loading ? "Güncelleniyor…" : "Şifreyi Güncelle"}
+            </Button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-zinc-500">
+            <Link href="/login" className="font-medium text-[#FE703A] hover:underline">
+              ← Giriş sayfasına dön
+            </Link>
+          </p>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="password" className="text-sm font-medium">Yeni Şifre</Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="En az 8 karakter"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                autoFocus
-                autoComplete="new-password"
-                className="h-10 pr-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
-              >
-                {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="passwordConfirm" className="text-sm font-medium">Şifre Tekrar</Label>
-            <div className="relative">
-              <Input
-                id="passwordConfirm"
-                type={showPasswordConfirm ? "text" : "password"}
-                placeholder="••••••••"
-                value={passwordConfirm}
-                onChange={(e) => setPasswordConfirm(e.target.value)}
-                required
-                autoComplete="new-password"
-                className="h-10 pr-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
-              >
-                {showPasswordConfirm ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-              </button>
-            </div>
-          </div>
-
-          {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
-              {error}
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full h-10 bg-[#023435] hover:bg-[#023435]/90 text-white"
-          >
-            {loading ? "Güncelleniyor…" : "Şifreyi Güncelle"}
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-zinc-500">
-          <Link href="/login" className="font-medium text-[#FE703A] hover:underline">
-            ← Giriş sayfasına dön
-          </Link>
-        </p>
       </div>
     </div>
   );

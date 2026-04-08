@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse, getClientIp } from "@/lib/rateLimit";
+import { logError } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,9 +27,15 @@ export async function POST(request: NextRequest) {
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
     const resetToken = await prisma.passwordResetToken.findUnique({ where: { token: tokenHash } });
 
-    if (!resetToken || resetToken.expiresAt < new Date()) {
+    if (!resetToken) {
       return NextResponse.json(
-        { error: "Bu link geçersiz veya süresi dolmuş. Lütfen tekrar şifre sıfırlama isteği gönderin." },
+        { error: "Bu link geçersiz. Lütfen tekrar şifre sıfırlama isteği gönderin." },
+        { status: 400 }
+      );
+    }
+    if (resetToken.expiresAt < new Date()) {
+      return NextResponse.json(
+        { error: "Bu linkin süresi dolmuş. Lütfen yeni bir sıfırlama isteği gönderin." },
         { status: 400 }
       );
     }
@@ -45,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[reset-password]", error);
+    logError("[reset-password]", error);
     return NextResponse.json({ error: "Bir hata oluştu, tekrar deneyin." }, { status: 500 });
   }
 }

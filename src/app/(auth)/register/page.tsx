@@ -164,6 +164,7 @@ export default function RegisterPage() {
                   onFocus={() => setIsTyping(true)}
                   onBlur={() => setIsTyping(false)}
                   required
+                  minLength={8}
                   autoComplete="new-password"
                   className="h-10 pr-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
                 />

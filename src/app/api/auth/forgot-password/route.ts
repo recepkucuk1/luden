@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse, getClientIp } from "@/lib/rateLimit";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { logError } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,12 +36,12 @@ export async function POST(request: NextRequest) {
     try {
       await sendPasswordResetEmail(email, resetUrl);
     } catch (emailErr) {
-      console.error("[forgot-password] Email gönderilemedi:", emailErr);
+      logError("[forgot-password] Email gönderilemedi", emailErr);
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[forgot-password] Beklenmeyen hata:", error);
+    logError("[forgot-password] Beklenmeyen hata", error);
     return NextResponse.json({ error: "Bir hata oluştu, tekrar deneyin." }, { status: 500 });
   }
 }
