@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { logError } from "@/lib/utils";
 
 const preferencesSchema = z.object({
-  preferences: z.record(z.unknown()).refine(
+  preferences: z.record(z.string(), z.unknown()).refine(
     (val) => JSON.stringify(val).length <= 10_000,
     "Tercihler verisi çok büyük"
   ),
@@ -26,7 +27,7 @@ export async function PUT(request: NextRequest) {
 
     await prisma.therapist.update({
       where: { id: session.user.id },
-      data: { preferences },
+      data: { preferences: preferences as Prisma.InputJsonValue },
     });
 
     return NextResponse.json({ ok: true });

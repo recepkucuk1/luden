@@ -9,7 +9,7 @@ const profileUpdateSchema = z.object({
   specialty: z.array(z.string().max(50)).max(10).optional(),
   institution: z.string().max(200).trim().nullable().optional(),
   phone: z.string().max(20).trim().nullable().optional(),
-  experienceYears: z.number().int().min(0).max(80).nullable().optional(),
+  experienceYears: z.string().max(20).trim().nullable().optional(),
   certifications: z.string().max(2000).trim().nullable().optional(),
 });
 
@@ -72,7 +72,7 @@ export async function PUT(request: NextRequest) {
         specialty: specialty ?? [],
         institution: institution || null,
         phone: phone || null,
-        experienceYears: experienceYears ?? null,
+        experienceYears: experienceYears || null,
         certifications: certifications || null,
       },
       select: PROFILE_SELECT,

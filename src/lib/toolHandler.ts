@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { ToolType } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { anthropic, MODEL } from "@/lib/anthropic";
@@ -23,7 +24,7 @@ export interface ToolConfig<T extends z.ZodTypeAny> {
   /** System prompt for Claude */
   systemPrompt: string;
   /** Tool type stored in Card.toolType */
-  toolType: string;
+  toolType: ToolType;
   /** Default card category */
   category: string;
   /** Default difficulty */
