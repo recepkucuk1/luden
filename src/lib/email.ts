@@ -1,8 +1,9 @@
 import { Resend } from "resend";
+import { logError } from "@/lib/utils";
+import { getBaseUrl } from "@/lib/baseUrl";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.EMAIL_FROM ?? "LudenLab <noreply@ludenlab.com>";
-const BASE_URL = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "https://ludenlab.com";
 
 function emailTemplate(opts: {
   title: string;
@@ -86,13 +87,13 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string): P
   });
 
   if (error) {
-    console.error("[email] sendPasswordResetEmail error:", JSON.stringify(error));
+    logError("[email] sendPasswordResetEmail", error);
     throw new Error(`Email gönderilemedi: ${error.message}`);
   }
 }
 
 export async function sendVerificationEmail(email: string, token: string): Promise<void> {
-  const verifyUrl = `${BASE_URL}/verify-email?token=${token}`;
+  const verifyUrl = `${getBaseUrl()}/verify-email?token=${token}`;
 
   const html = emailTemplate({
     title: "Email Doğrulama",
@@ -112,7 +113,7 @@ export async function sendVerificationEmail(email: string, token: string): Promi
   });
 
   if (error) {
-    console.error("[email] Resend error:", JSON.stringify(error));
+    logError("[email] sendVerificationEmail", error);
     throw new Error(`Email gönderilemedi: ${error.message}`);
   }
 }

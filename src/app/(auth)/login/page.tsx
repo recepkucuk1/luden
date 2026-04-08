@@ -11,6 +11,13 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { AnimatedAuthPanel } from "@/components/auth/AnimatedAuthPanel";
 
+type LoginErrorCode =
+  | "INVALID_CREDENTIALS"
+  | "RATE_LIMIT"
+  | "EMAIL_NOT_VERIFIED"
+  | "SUSPENDED"
+  | "UNKNOWN";
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -21,13 +28,12 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<LoginErrorCode | null>(null);
   const [loading, setLoading] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null);
+    setErrorCode(null);
     setLoading(true);
 
     const result = await signIn("credentials", {
@@ -37,18 +43,29 @@ function LoginForm() {
     });
 
     if (result?.error) {
-      setError("Email veya şifre hatalı. Yeni kayıt yaptıysanız email doğrulama linkini kontrol edin.");
+      const code = (result.code ?? "").toUpperCase();
+      if (code === "RATE_LIMIT" || code === "EMAIL_NOT_VERIFIED" || code === "SUSPENDED" || code === "INVALID_CREDENTIALS") {
+        setErrorCode(code);
+      } else {
+        setErrorCode("UNKNOWN");
+      }
       setLoading(false);
-    } else {
-      router.push("/dashboard");
-      router.refresh();
+      return;
     }
+
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left Content Section */}
-      <AnimatedAuthPanel isTyping={isTyping} showPassword={showPassword} passwordLength={password.length} />
+      <AnimatedAuthPanel
+        showPassword={showPassword}
+        passwordLength={password.length}
+        heading="Tekrar hoş geldin"
+        subheading="Öğrencilerine ait çalışmalara ve raporlara bir adım uzaktasın."
+      />
 
       {/* Right Login Section */}
       <div className="flex-1 flex items-center justify-center p-8 bg-white text-zinc-900">
@@ -75,8 +92,6 @@ function LoginForm() {
                 value={email}
                 autoComplete="email"
                 onChange={(e) => setEmail(e.target.value)}
-                onFocus={() => setIsTyping(true)}
-                onBlur={() => setIsTyping(false)}
                 required
                 className="h-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
               />
@@ -96,8 +111,6 @@ function LoginForm() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setIsTyping(true)}
-                  onBlur={() => setIsTyping(false)}
                   required
                   autoComplete="current-password"
                   className="h-10 pr-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
@@ -128,15 +141,45 @@ function LoginForm() {
               </div>
             )}
 
-            {error && (
+            {errorCode === "INVALID_CREDENTIALS" && (
               <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
-                {error}
+                Email veya şifre hatalı.
               </div>
             )}
 
-            <Button 
-              type="submit" 
-              className="w-full h-10 bg-[#023435] hover:bg-[#023435]/90 text-white" 
+            {errorCode === "RATE_LIMIT" && (
+              <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
+                Çok fazla başarısız deneme. Lütfen 15 dakika sonra tekrar deneyin.
+              </div>
+            )}
+
+            {errorCode === "EMAIL_NOT_VERIFIED" && (
+              <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
+                Email adresiniz henüz doğrulanmamış.{" "}
+                <Link
+                  href={`/verify-email${email ? `?email=${encodeURIComponent(email)}` : ""}`}
+                  className="font-medium underline underline-offset-2 hover:text-amber-900"
+                >
+                  Doğrulama linkini tekrar gönder
+                </Link>
+              </div>
+            )}
+
+            {errorCode === "SUSPENDED" && (
+              <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
+                Hesabınız askıya alınmış. Destek ekibiyle iletişime geçin.
+              </div>
+            )}
+
+            {errorCode === "UNKNOWN" && (
+              <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
+                Bir hata oluştu. Lütfen tekrar deneyin.
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full h-10 bg-[#023435] hover:bg-[#023435]/90 text-white"
               disabled={loading}
             >
               {loading ? "Giriş yapılıyor…" : "Giriş Yap"}

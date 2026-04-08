@@ -19,7 +19,28 @@ export const cardStatusSchema = z.enum([
 ]);
 
 export const nameSchema = z.string().min(2).max(100).trim();
-export const emailSchema = z.string().email();
+export const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email("Geçersiz email adresi");
+export const passwordSchema = z
+  .string()
+  .min(8, "Şifre en az 8 karakter olmalıdır")
+  .max(128, "Şifre en fazla 128 karakter olabilir");
+
+export const forgotPasswordBodySchema = z.object({
+  email: emailSchema,
+});
+
+export const resetPasswordBodySchema = z.object({
+  token: z.string().min(1, "Geçersiz token"),
+  password: passwordSchema,
+});
+
+export const resendVerificationBodySchema = z.object({
+  email: emailSchema,
+});
 
 // ─── Request body schemas ────────────────────────────────────────────────────
 
@@ -55,7 +76,7 @@ export const progressUpdatesSchema = z.array(progressUpdateItemSchema).min(1);
 export const registerBodySchema = z.object({
   name: nameSchema,
   email: emailSchema,
-  password: z.string().min(8).max(100),
+  password: passwordSchema,
 });
 
 // ─── Utility ─────────────────────────────────────────────────────────────────

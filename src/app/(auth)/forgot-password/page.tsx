@@ -13,7 +13,11 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
+
+  function handleTryAnotherEmail() {
+    setSent(false);
+    setError(null);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,7 +46,12 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left Content Section */}
-      <AnimatedAuthPanel isTyping={isTyping} showPassword={false} passwordLength={0} />
+      <AnimatedAuthPanel
+        showPassword={false}
+        passwordLength={0}
+        heading="Şifreni mi unuttun?"
+        subheading="Endişelenme, email adresine güvenli bir sıfırlama linki gönderelim."
+      />
 
       {/* Right Content Section */}
       <div className="flex-1 flex items-center justify-center p-8 bg-white text-zinc-900">
@@ -78,7 +87,7 @@ export default function ForgotPasswordPage() {
             )}
           </div>
 
-          {!sent && (
+          {!sent ? (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="email" className="text-sm font-medium">Email</Label>
@@ -88,10 +97,9 @@ export default function ForgotPasswordPage() {
                   placeholder="ad@klinik.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => setIsTyping(true)}
-                  onBlur={() => setIsTyping(false)}
                   required
                   autoFocus
+                  autoComplete="email"
                   className="h-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
                 />
               </div>
@@ -110,6 +118,14 @@ export default function ForgotPasswordPage() {
                 {loading ? "Gönderiliyor…" : "Sıfırlama Linki Gönder"}
               </Button>
             </form>
+          ) : (
+            <button
+              type="button"
+              onClick={handleTryAnotherEmail}
+              className="w-full h-10 rounded-md border border-zinc-200 bg-white text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+            >
+              Farklı bir email dene
+            </button>
           )}
 
           <p className="mt-6 text-center text-sm text-zinc-500">

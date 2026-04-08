@@ -143,14 +143,29 @@ const EyeBall = ({
 };
 
 interface AnimatedAuthPanelProps {
-  isTyping: boolean;
+  /**
+   * @deprecated Artık yok sayılıyor. Typing durumu document.activeElement ile
+   * kendiliğinden takip ediliyor. Geriye dönük uyumluluk için tutuluyor.
+   */
+  isTyping?: boolean;
   showPassword: boolean;
   passwordLength: number;
+  heading?: string;
+  subheading?: string;
 }
 
-export function AnimatedAuthPanel({ isTyping, showPassword, passwordLength }: AnimatedAuthPanelProps) {
+const DEFAULT_HEADING = "Uzmanlar için akıllı platform";
+const DEFAULT_SUBHEADING = "Öğrenci takibi, müfredat planlama ve kişiselleştirilmiş öğrenme kartları — hepsi tek platformda.";
+
+export function AnimatedAuthPanel({
+  showPassword,
+  passwordLength,
+  heading = DEFAULT_HEADING,
+  subheading = DEFAULT_SUBHEADING,
+}: AnimatedAuthPanelProps) {
   const [mouseX, setMouseX] = useState<number>(0);
   const [mouseY, setMouseY] = useState<number>(0);
+  const [isTyping, setIsTyping] = useState(false);
   const [isPurpleBlinking, setIsPurpleBlinking] = useState(false);
   const [isBlackBlinking, setIsBlackBlinking] = useState(false);
   const [isLookingAtEachOther, setIsLookingAtEachOther] = useState(false);
@@ -169,6 +184,22 @@ export function AnimatedAuthPanel({ isTyping, showPassword, passwordLength }: An
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  // Document-level focus tracking — input'tan input'a geçerken flicker olmasın
+  useEffect(() => {
+    const checkFocus = () => {
+      const el = document.activeElement;
+      const isInput = el?.tagName === "INPUT" || el?.tagName === "TEXTAREA";
+      setIsTyping(!!isInput);
+    };
+    document.addEventListener("focusin", checkFocus);
+    document.addEventListener("focusout", checkFocus);
+    checkFocus();
+    return () => {
+      document.removeEventListener("focusin", checkFocus);
+      document.removeEventListener("focusout", checkFocus);
+    };
   }, []);
 
   // Blinking effect for purple character
@@ -297,9 +328,9 @@ export function AnimatedAuthPanel({ isTyping, showPassword, passwordLength }: An
         </div>
 
         <div className="mt-8">
-          <h2 className="text-3xl font-bold text-[#692137] mb-4">Uzmanlar için akıllı platform</h2>
+          <h2 className="text-3xl font-bold text-[#692137] mb-4">{heading}</h2>
           <p className="text-[#692137]/80 text-sm leading-relaxed mb-8 max-w-sm">
-            Öğrenci takibi, müfredat planlama ve kişiselleştirilmiş öğrenme kartları — hepsi tek platformda.
+            {subheading}
           </p>
           <div className="flex gap-2">
             <div className="h-2 w-12 rounded-full bg-[#F4B2A6]" />

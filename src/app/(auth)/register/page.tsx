@@ -8,27 +8,33 @@ import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Check, X } from "lucide-react";
 import { AnimatedAuthPanel } from "@/components/auth/AnimatedAuthPanel";
+import { PasswordStrengthBar } from "@/components/auth/PasswordStrengthBar";
 
 const isDev = process.env.NODE_ENV === "development";
 
 export default function RegisterPage() {
   const router = useRouter();
   const captchaRef = useRef<HCaptcha>(null);
-  
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
+
+  // Real-time password match
+  const passwordsMismatch =
+    passwordConfirm.length > 0 && password !== passwordConfirm;
+  const passwordsMatch =
+    passwordConfirm.length > 0 && password.length > 0 && password === passwordConfirm;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -74,7 +80,12 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left Content Section */}
-      <AnimatedAuthPanel isTyping={isTyping} showPassword={isAnyPasswordVisible} passwordLength={combinedPasswordLength} />
+      <AnimatedAuthPanel
+        showPassword={isAnyPasswordVisible}
+        passwordLength={combinedPasswordLength}
+        heading="Aramıza katıl"
+        subheading="Ücretsiz hesap oluştur, öğrenci takibi ve kişiselleştirilmiş materyaller üretmeye başla."
+      />
 
       {/* Right Content Section */}
       <div className="flex-1 flex items-center justify-center p-8 bg-white text-zinc-900">
@@ -99,8 +110,6 @@ export default function RegisterPage() {
                 placeholder="Dr. Ayşe Yılmaz"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                onFocus={() => setIsTyping(true)}
-                onBlur={() => setIsTyping(false)}
                 required
                 autoComplete="name"
                 className="h-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
@@ -116,8 +125,6 @@ export default function RegisterPage() {
                 placeholder="ad@klinik.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                onFocus={() => setIsTyping(true)}
-                onBlur={() => setIsTyping(false)}
                 required
                 autoComplete="email"
                 className="h-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
@@ -134,8 +141,6 @@ export default function RegisterPage() {
                   placeholder="En az 8 karakter"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setIsTyping(true)}
-                  onBlur={() => setIsTyping(false)}
                   required
                   minLength={8}
                   autoComplete="new-password"
@@ -149,6 +154,7 @@ export default function RegisterPage() {
                   {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                 </button>
               </div>
+              <PasswordStrengthBar password={password} />
             </div>
 
             <div className="space-y-1.5">
@@ -161,8 +167,6 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   value={passwordConfirm}
                   onChange={(e) => setPasswordConfirm(e.target.value)}
-                  onFocus={() => setIsTyping(true)}
-                  onBlur={() => setIsTyping(false)}
                   required
                   minLength={8}
                   autoComplete="new-password"
@@ -176,6 +180,16 @@ export default function RegisterPage() {
                   {showPasswordConfirm ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                 </button>
               </div>
+              {passwordsMismatch && (
+                <p className="flex items-center gap-1 text-xs text-red-600">
+                  <X className="size-3" /> Şifreler eşleşmiyor
+                </p>
+              )}
+              {passwordsMatch && (
+                <p className="flex items-center gap-1 text-xs text-green-600">
+                  <Check className="size-3" /> Şifreler eşleşiyor
+                </p>
+              )}
             </div>
 
             {!isDev && (

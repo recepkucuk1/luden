@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const hashed = await bcrypt.hash(password, 12);
     const plainToken = crypto.randomUUID();
     const emailVerifyToken = crypto.createHash("sha256").update(plainToken).digest("hex");
-    const emailVerifyExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 saat
+    const emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 saat
 
     await prisma.$transaction(async (tx) => {
       const newTherapist = await tx.therapist.create({

@@ -62,6 +62,8 @@ model Therapist {
   emailVerified      Boolean   @default(false)
   emailVerifyToken   String?   @unique
   emailVerifyExpires DateTime?
+  autoLoginToken     String?   @unique
+  autoLoginExpires   DateTime?
   credits            Int       @default(40)
   studentLimit       Int       @default(2)
   pdfEnabled         Boolean   @default(false)

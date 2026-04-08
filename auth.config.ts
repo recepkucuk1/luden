@@ -1,5 +1,24 @@
 import type { NextAuthConfig } from "next-auth";
 
+// Auth sayfaları — giriş yapmışsa dashboard'a yönlendir
+const AUTH_PAGES = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+];
+
+// Public path'ler — kimlik doğrulama gerektirmez
+const PUBLIC_PATHS = [
+  "/",
+  "/verify-email",
+  "/privacy",
+  "/delivery-return",
+  "/cookie-policy",
+  "/terms",
+  "/about",
+];
+
 // Middleware'de çalışacak hafif config — Node.js modülü import etmez
 export const authConfig: NextAuthConfig = {
   trustHost: true,
@@ -11,9 +30,9 @@ export const authConfig: NextAuthConfig = {
       const isLoggedIn = !!auth?.user;
       const path = nextUrl.pathname;
 
-      const isAuthPage = path.startsWith("/login") || path.startsWith("/register") || path.startsWith("/forgot-password") || path.startsWith("/reset-password");
+      const isAuthPage = AUTH_PAGES.some((p) => path.startsWith(p));
       const isApiAuth = path.startsWith("/api/auth");
-      const isPublic = path === "/" || path.startsWith("/verify-email") || path.startsWith("/privacy") || path.startsWith("/delivery-return") || path.startsWith("/cookie-policy") || path.startsWith("/terms") || path.startsWith("/about");
+      const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
 
       if (isApiAuth) return true;
       if (isPublic) return true;

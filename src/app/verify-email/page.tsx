@@ -1,38 +1,44 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Check, X, Mail } from "lucide-react";
+import { AnimatedAuthPanel } from "@/components/auth/AnimatedAuthPanel";
+
+type Status = "pending" | "loading" | "success" | "error" | "signing-in";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
-  const email = searchParams.get("email");
+  const emailFromUrl = searchParams.get("email");
 
-  // If there's no token, show the "check your inbox" pending screen
-  const [status, setStatus] = useState<"pending" | "loading" | "success" | "error">(
-    token ? "loading" : "pending"
-  );
+  // Token yoksa pending (inbox kontrol ekranı); token varsa doğrulama başlat
+  const [status, setStatus] = useState<Status>(token ? "loading" : "pending");
   const [message, setMessage] = useState("");
-  const [resendEmail, setResendEmail] = useState(email ?? "");
+  const [resendEmail, setResendEmail] = useState(emailFromUrl ?? "");
   const [resendSent, setResendSent] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
-  const emailInputRef = useRef<HTMLInputElement>(null);
-
   const [resendError, setResendError] = useState<string | null>(null);
 
+  // URL'den email geldiyse input'u kitle — kayıt sonrası doğru adres
+  const emailLocked = Boolean(emailFromUrl);
+
   async function handleResend() {
-    const addr = emailInputRef.current?.value ?? resendEmail;
-    if (!addr) return;
+    if (!resendEmail) return;
     setResendLoading(true);
     setResendError(null);
     try {
       const res = await fetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: addr }),
+        body: JSON.stringify({ email: resendEmail }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -50,138 +56,235 @@ function VerifyEmailContent() {
   useEffect(() => {
     if (!token) return;
 
-    fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success) {
-          setStatus("success");
-          setTimeout(() => router.push("/login?verified=1"), 2500);
-        } else {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+
+        if (cancelled) return;
+
+        if (!data.success) {
           setStatus("error");
           setMessage(data.error ?? "Doğrulama başarısız oldu.");
+          return;
         }
-      })
-      .catch(() => {
-        setStatus("error");
-        setMessage("Bir hata oluştu. Lütfen tekrar deneyin.");
-      });
+
+        // Daha önce doğrulanmış — auto-login token yok, sadece login'e yönlendir
+        if (data.alreadyVerified) {
+          setStatus("success");
+          return;
+        }
+
+        // Auto-login token geldiyse doğrudan giriş yap
+        if (data.autoLoginToken) {
+          setStatus("signing-in");
+          const result = await signIn("credentials", {
+            autoLoginToken: data.autoLoginToken,
+            redirect: false,
+          });
+
+          if (cancelled) return;
+
+          if (result?.error) {
+            // Auto-login başarısız — yine de verify başarılı, manuel login'e yönlendir
+            setStatus("success");
+            return;
+          }
+
+          router.push("/dashboard");
+          router.refresh();
+          return;
+        }
+
+        setStatus("success");
+      } catch {
+        if (!cancelled) {
+          setStatus("error");
+          setMessage("Bir hata oluştu. Lütfen tekrar deneyin.");
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [token, router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white border border-zinc-200 shadow-sm p-8 text-center">
-        <Link href="/" className="inline-block mb-6">
-          <Image src="/logo.svg" alt="Luden" width={100} height={36} className="h-8 w-auto mx-auto" />
-        </Link>
+    <div className="min-h-screen grid lg:grid-cols-2">
+      {/* Left Content Section */}
+      <AnimatedAuthPanel
+        showPassword={false}
+        passwordLength={0}
+        heading="Son bir adım kaldı"
+        subheading="Email adresini doğrulayıp hesabını aktifleştirelim."
+      />
 
-        {/* PENDING — shown after register, before clicking email link */}
-        {status === "pending" && (
-          <>
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#023435]/8 mx-auto mb-4 text-2xl">
-              ✉️
-            </div>
-            <h1 className="text-lg font-bold text-zinc-900 mb-2">Email adresinizi doğrulayın</h1>
-            <p className="text-sm text-zinc-500 mb-5 leading-relaxed">
-              {email ? (
-                <><strong className="text-zinc-700">{email}</strong> adresine bir doğrulama linki gönderdik.</>
-              ) : (
-                "Email adresinize bir doğrulama linki gönderdik."
-              )}{" "}
-              Linke tıklayarak hesabınızı aktifleştirin.
-            </p>
-            <p className="text-xs text-zinc-400 mb-5">Link 1 saat süreyle geçerlidir.</p>
+      {/* Right Content Section */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-white text-zinc-900">
+        <div className="w-full max-w-sm">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-8">
+            <Image src="/logo.svg" alt="Luden" width={200} height={72} className="h-14 w-auto mx-auto" />
+          </div>
 
-            {resendSent ? (
-              <p className="text-sm text-green-600 font-medium mb-4">✓ Yeni link gönderildi!</p>
-            ) : (
-              <>
-                {resendError && (
-                  <p className="text-sm text-red-600 mb-2">{resendError}</p>
+          {/* PENDING — kayıt sonrası inbox kontrol ekranı */}
+          {status === "pending" && (
+            <div className="text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#023435]/10 mx-auto mb-4">
+                <Mail className="h-7 w-7 text-[#023435]" />
+              </div>
+              <h1 className="text-xl font-bold text-zinc-900 mb-2">Email adresini doğrula</h1>
+              <p className="text-sm text-zinc-500 mb-2 leading-relaxed">
+                {emailFromUrl ? (
+                  <>
+                    <strong className="text-zinc-700">{emailFromUrl}</strong> adresine bir doğrulama linki gönderdik.
+                  </>
+                ) : (
+                  "Email adresine bir doğrulama linki gönderdik."
+                )}{" "}
+                Linke tıklayarak hesabını aktifleştir.
+              </p>
+              <p className="text-xs text-zinc-400 mb-6">Link 24 saat süreyle geçerlidir.</p>
+
+              {/* Resend form */}
+              <div className="space-y-3 text-left">
+                <div className="space-y-1.5">
+                  <Label htmlFor="resendEmail" className="text-sm font-medium">Email</Label>
+                  <Input
+                    id="resendEmail"
+                    type="email"
+                    placeholder="ad@klinik.com"
+                    value={resendEmail}
+                    onChange={(e) => setResendEmail(e.target.value)}
+                    readOnly={emailLocked}
+                    className={`h-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900 ${
+                      emailLocked ? "bg-zinc-50 cursor-not-allowed" : ""
+                    }`}
+                  />
+                </div>
+
+                {resendSent ? (
+                  <p className="flex items-center justify-center gap-1 text-sm text-green-600 font-medium">
+                    <Check className="size-4" /> Yeni link gönderildi
+                  </p>
+                ) : (
+                  <>
+                    {resendError && (
+                      <p className="text-sm text-red-600 text-center">{resendError}</p>
+                    )}
+                    <Button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={resendLoading || !resendEmail}
+                      className="w-full h-10 bg-[#023435] hover:bg-[#023435]/90 text-white"
+                    >
+                      {resendLoading ? "Gönderiliyor…" : "Linki tekrar gönder"}
+                    </Button>
+                  </>
                 )}
-                <button
-                  onClick={handleResend}
-                  disabled={resendLoading}
-                  className="text-sm text-[#023435]/60 hover:text-[#023435] underline underline-offset-2 transition-colors disabled:opacity-40"
-                >
-                  {resendLoading ? "Gönderiliyor…" : "Linki tekrar gönder"}
-                </button>
-              </>
-            )}
+              </div>
 
-            <div className="mt-6 pt-4 border-t border-zinc-100">
-              <Link href="/login" className="text-xs text-zinc-400 hover:text-zinc-600">
-                Giriş sayfasına dön
+              <p className="mt-6 text-xs text-zinc-400">
+                Email gelmezse spam klasörünü kontrol edin.
+              </p>
+              <p className="mt-4 text-sm text-zinc-500">
+                <Link href="/login" className="font-medium text-[#FE703A] hover:underline">
+                  ← Giriş sayfasına dön
+                </Link>
+              </p>
+            </div>
+          )}
+
+          {/* LOADING — doğrulama başlatıldı */}
+          {status === "loading" && (
+            <div className="text-center py-12">
+              <div className="h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin mx-auto mb-4" />
+              <p className="text-sm font-medium text-zinc-600">Email doğrulanıyor…</p>
+            </div>
+          )}
+
+          {/* SIGNING-IN — verify ok, auto-login çalışıyor */}
+          {status === "signing-in" && (
+            <div className="text-center py-12">
+              <div className="h-10 w-10 rounded-full border-4 border-[#023435]/20 border-t-[#023435] animate-spin mx-auto mb-4" />
+              <p className="text-sm font-medium text-zinc-600">Giriş yapılıyor…</p>
+              <p className="mt-1 text-xs text-zinc-400">Seni yönlendiriyoruz.</p>
+            </div>
+          )}
+
+          {/* SUCCESS — auto-login olmadı/başarısız, manuel login'e yönlendir */}
+          {status === "success" && (
+            <div className="text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 mx-auto mb-4">
+                <Check className="h-7 w-7 text-green-600" />
+              </div>
+              <h1 className="text-xl font-bold text-zinc-900 mb-2">Email doğrulandı!</h1>
+              <p className="text-sm text-zinc-500 mb-6">
+                Hesabın aktif. Artık giriş yapabilirsin.
+              </p>
+              <Link
+                href="/login?verified=1"
+                className="inline-block rounded-xl bg-[#FE703A] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors"
+              >
+                Giriş Yap
               </Link>
             </div>
-          </>
-        )}
+          )}
 
-        {/* LOADING — verifying token */}
-        {status === "loading" && (
-          <>
-            <div className="h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin mx-auto mb-4" />
-            <p className="text-sm font-medium text-zinc-600">Email doğrulanıyor…</p>
-          </>
-        )}
-
-        {/* SUCCESS */}
-        {status === "success" && (
-          <>
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 mx-auto mb-4">
-              <svg className="h-7 w-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h1 className="text-lg font-bold text-zinc-900 mb-2">Email Doğrulandı!</h1>
-            <p className="text-sm text-zinc-500 mb-6">Artık giriş yapabilirsiniz. Yönlendiriliyorsunuz…</p>
-            <Link
-              href="/login"
-              className="inline-block rounded-xl bg-[#FE703A] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors"
-            >
-              Giriş Yap
-            </Link>
-          </>
-        )}
-
-        {/* ERROR */}
-        {status === "error" && (
-          <>
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100 mx-auto mb-4">
-              <svg className="h-7 w-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </div>
-            <h1 className="text-lg font-bold text-zinc-900 mb-2">Doğrulama Başarısız</h1>
-            <p className="text-sm text-zinc-500 mb-5">{message}</p>
-            {resendSent ? (
-              <p className="text-sm text-green-600 font-medium mb-4">✓ Doğrulama emaili gönderildi!</p>
-            ) : (
-              <div className="space-y-2 mb-4">
-                <input
-                  ref={emailInputRef}
-                  type="email"
-                  placeholder="Email adresiniz"
-                  value={resendEmail}
-                  onChange={(e) => setResendEmail(e.target.value)}
-                  className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023435]/30"
-                />
-                {resendError && (
-                  <p className="text-sm text-red-600">{resendError}</p>
-                )}
-                <button
-                  onClick={handleResend}
-                  disabled={resendLoading}
-                  className="w-full rounded-xl bg-[#FE703A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-60 transition-colors"
-                >
-                  {resendLoading ? "Gönderiliyor…" : "Yeni Doğrulama Emaili Gönder"}
-                </button>
+          {/* ERROR — token geçersiz/süresi dolmuş */}
+          {status === "error" && (
+            <div className="text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100 mx-auto mb-4">
+                <X className="h-7 w-7 text-red-600" />
               </div>
-            )}
-            <Link href="/login" className="text-xs text-zinc-400 hover:text-zinc-600">
-              Giriş sayfasına dön
-            </Link>
-          </>
-        )}
+              <h1 className="text-xl font-bold text-zinc-900 mb-2">Doğrulama başarısız</h1>
+              <p className="text-sm text-zinc-500 mb-6">{message}</p>
+
+              {resendSent ? (
+                <p className="flex items-center justify-center gap-1 text-sm text-green-600 font-medium mb-4">
+                  <Check className="size-4" /> Yeni doğrulama emaili gönderildi
+                </p>
+              ) : (
+                <div className="space-y-3 text-left mb-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="resendEmailError" className="text-sm font-medium">Email</Label>
+                    <Input
+                      id="resendEmailError"
+                      type="email"
+                      placeholder="ad@klinik.com"
+                      value={resendEmail}
+                      onChange={(e) => setResendEmail(e.target.value)}
+                      readOnly={emailLocked}
+                      className={`h-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900 ${
+                        emailLocked ? "bg-zinc-50 cursor-not-allowed" : ""
+                      }`}
+                    />
+                  </div>
+                  {resendError && (
+                    <p className="text-sm text-red-600">{resendError}</p>
+                  )}
+                  <Button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendLoading || !resendEmail}
+                    className="w-full h-10 bg-[#FE703A] hover:bg-[#FE703A]/90 text-white"
+                  >
+                    {resendLoading ? "Gönderiliyor…" : "Yeni doğrulama emaili gönder"}
+                  </Button>
+                </div>
+              )}
+
+              <p className="text-sm text-zinc-500">
+                <Link href="/login" className="font-medium text-zinc-400 hover:text-zinc-600">
+                  ← Giriş sayfasına dön
+                </Link>
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

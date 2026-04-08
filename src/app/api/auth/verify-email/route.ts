@@ -3,6 +3,9 @@ import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { logError } from "@/lib/utils";
 
+// Auto-login token 5 dakika geçerli — verify sonrası hemen kullanılır
+const AUTO_LOGIN_TTL_MS = 5 * 60 * 1000;
+
 export async function GET(request: NextRequest) {
   try {
     const token = request.nextUrl.searchParams.get("token");
@@ -25,7 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (therapist.emailVerified) {
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, alreadyVerified: true });
     }
 
     if (therapist.emailVerifyExpires && therapist.emailVerifyExpires < new Date()) {
@@ -35,12 +38,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Auto-login için tek kullanımlık token üret
+    const autoLoginPlainToken = crypto.randomBytes(32).toString("hex");
+    const autoLoginHash = crypto
+      .createHash("sha256")
+      .update(autoLoginPlainToken)
+      .digest("hex");
+    const autoLoginExpires = new Date(Date.now() + AUTO_LOGIN_TTL_MS);
+
     await prisma.therapist.update({
       where: { id: therapist.id },
-      data: { emailVerified: true, emailVerifyToken: null, emailVerifyExpires: null },
+      data: {
+        emailVerified: true,
+        emailVerifyToken: null,
+        emailVerifyExpires: null,
+        autoLoginToken: autoLoginHash,
+        autoLoginExpires,
+      },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, autoLoginToken: autoLoginPlainToken });
   } catch (error) {
     logError("GET /api/auth/verify-email", error);
     return NextResponse.json({ error: "Doğrulama sırasında hata oluştu." }, { status: 500 });
