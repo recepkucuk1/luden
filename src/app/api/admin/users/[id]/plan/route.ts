@@ -1,33 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
 import { z } from "zod";
-
-const PLAN_DEFAULTS = {
-  FREE:       { studentLimit: 2,   pdfEnabled: false },
-  PRO:        { studentLimit: 200, pdfEnabled: true  },
-  ADVANCED:   { studentLimit: -1,  pdfEnabled: true  },
-  ENTERPRISE: { studentLimit: -1,  pdfEnabled: true  },
-} as const;
+import { prisma } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth-helpers";
+import { recordAudit } from "@/lib/audit";
+import { getClientIp } from "@/lib/rateLimit";
+import { PLAN_CONFIG } from "@/lib/plans";
+import { logError } from "@/lib/utils";
 
 const schema = z.object({
   planType:     z.enum(["FREE", "PRO", "ADVANCED", "ENTERPRISE"]),
   billingCycle: z.enum(["MONTHLY", "YEARLY"]).default("YEARLY"),
 });
 
-async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user?.id) return null;
-  const t = await prisma.therapist.findUnique({ where: { id: session.user.id }, select: { role: true } });
-  return t?.role === "admin" ? session : null;
-}
-
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
+  const gate = await requireAdmin();
+  if (gate instanceof NextResponse) return gate;
+  const { session } = gate;
 
   try {
     const { id } = await params;
@@ -35,42 +26,85 @@ export async function PUT(
     if (!parsed.success) return NextResponse.json({ error: "Geçersiz istek" }, { status: 400 });
 
     const { planType, billingCycle } = parsed.data;
-    const defaults = PLAN_DEFAULTS[planType];
-    const plan = await prisma.plan.findFirst({ where: { type: planType } });
+    const config = PLAN_CONFIG[planType];
 
-    const updated = await prisma.therapist.update({
-      where: { id },
-      data: { planType, studentLimit: defaults.studentLimit, pdfEnabled: defaults.pdfEnabled },
-      select: { id: true, planType: true, studentLimit: true, pdfEnabled: true },
-    });
+    const [plan, currentTherapist] = await Promise.all([
+      prisma.plan.findFirst({ where: { type: planType } }),
+      prisma.therapist.findUnique({
+        where: { id },
+        select: { planType: true, studentLimit: true, pdfEnabled: true },
+      }),
+    ]);
 
-    if (plan) {
-      const periodEnd = new Date();
-      if (billingCycle === "YEARLY") {
-        periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-      } else {
-        periodEnd.setMonth(periodEnd.getMonth() + 1);
-      }
+    if (!plan) {
+      return NextResponse.json(
+        { error: "Plan kataloğunda bu tür yok — seed.ts çalıştırıldı mı?" },
+        { status: 500 },
+      );
+    }
+    if (!currentTherapist) {
+      return NextResponse.json({ error: "Kullanıcı bulunamadı" }, { status: 404 });
+    }
 
-      const existing = await prisma.subscription.findFirst({
+    const periodEnd = new Date();
+    if (billingCycle === "YEARLY") {
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    } else {
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+    }
+
+    // Therapist + Subscription + audit tek transaction içinde — yarım güncelleme
+    // sonucu tutarsız bir kullanıcı durumu ya da eksik denetim kaydı kalmasın.
+    const updated = await prisma.$transaction(async (tx) => {
+      const therapist = await tx.therapist.update({
+        where: { id },
+        data: {
+          planType,
+          studentLimit: config.studentLimit,
+          pdfEnabled:   config.pdfEnabled,
+        },
+        select: { id: true, planType: true, studentLimit: true, pdfEnabled: true },
+      });
+
+      const existing = await tx.subscription.findFirst({
         where: { therapistId: id, status: "ACTIVE" },
+        select: { id: true },
       });
 
       if (existing) {
-        await prisma.subscription.update({
+        await tx.subscription.update({
           where: { id: existing.id },
           data: { planId: plan.id, status: "ACTIVE", billingCycle, currentPeriodEnd: periodEnd },
         });
       } else {
-        await prisma.subscription.create({
+        await tx.subscription.create({
           data: { therapistId: id, planId: plan.id, status: "ACTIVE", billingCycle, currentPeriodEnd: periodEnd },
         });
       }
-    }
+
+      await recordAudit(
+        {
+          actorId:    session.user.id,
+          action:     "plan.update",
+          targetType: "therapist",
+          targetId:   id,
+          diff:       {
+            from: currentTherapist.planType,
+            to:   planType,
+            billingCycle,
+            currentPeriodEnd: periodEnd.toISOString(),
+          },
+          ip: getClientIp(request.headers),
+        },
+        tx,
+      );
+
+      return therapist;
+    });
 
     return NextResponse.json({ user: updated });
   } catch (error) {
-    console.error("[admin/plan]", error);
+    logError("admin/plan", error);
     return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
   }
 }

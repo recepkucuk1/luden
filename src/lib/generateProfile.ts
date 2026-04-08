@@ -66,11 +66,18 @@ Yanıtını tam olarak aşağıdaki yapıda, başka hiçbir şey eklemeden ver:
 [Ebeveynlerin evde uygulayabileceği pratik öneriler]`;
 }
 
-export async function generateStudentProfile(studentId: string): Promise<void> {
+/**
+ * Generates an AI-authored student profile text via Claude.
+ *
+ * Returns the sanitized text to the caller. Persistence is left to the route
+ * so it can be coupled atomically with credit deduction.
+ *
+ * Throws if the student doesn't exist or Claude returns an unexpected shape.
+ */
+export async function generateStudentProfile(studentId: string): Promise<string> {
   const student = await prisma.student.findUnique({ where: { id: studentId } });
   if (!student) {
-    console.error(`[generateProfile] Öğrenci bulunamadı: ${studentId}`);
-    return;
+    throw new Error(`Öğrenci bulunamadı: ${studentId}`);
   }
 
   let moduleNames: string[] = [];
@@ -101,8 +108,5 @@ export async function generateStudentProfile(studentId: string): Promise<void> {
   const raw = message.content[0];
   if (raw.type !== "text") throw new Error(`Beklenmeyen yanıt tipi: ${raw.type}`);
 
-  await prisma.student.update({
-    where: { id: studentId },
-    data: { aiProfile: stripHtmlTags(raw.text) },
-  });
+  return stripHtmlTags(raw.text);
 }

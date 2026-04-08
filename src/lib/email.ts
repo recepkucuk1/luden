@@ -2,7 +2,14 @@ import { Resend } from "resend";
 import { logError } from "@/lib/utils";
 import { getBaseUrl } from "@/lib/baseUrl";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy-initialize so build-time page data collection (where env vars may be
+// absent) doesn't crash. Build only imports the module; actual sends only
+// happen at runtime where RESEND_API_KEY is set.
+let resendClient: Resend | null = null;
+function getResend(): Resend {
+  if (!resendClient) resendClient = new Resend(process.env.RESEND_API_KEY);
+  return resendClient;
+}
 const FROM = process.env.EMAIL_FROM ?? "LudenLab <noreply@ludenlab.com>";
 
 function emailTemplate(opts: {
@@ -79,7 +86,7 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string): P
     footer: "Bu talebi siz yapmadıysanız bu emaili dikkate almayın.",
   });
 
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM,
     to: email,
     subject: "Şifre Sıfırlama Talebi — LudenLab",
@@ -105,7 +112,7 @@ export async function sendVerificationEmail(email: string, token: string): Promi
     footer: "Bu emaili siz talep etmediyseniz görmezden gelebilirsiniz.",
   });
 
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM,
     to: email,
     subject: "LudenLab — Email Adresinizi Doğrulayın",

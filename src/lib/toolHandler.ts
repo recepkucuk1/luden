@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { anthropic, MODEL } from "@/lib/anthropic";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { extractJson } from "@/lib/utils";
 
 type StudentSelect = {
   id: string;
@@ -85,19 +86,6 @@ function defaultAgeGroupFromYears(years: number | null): string {
   if (years <= 12) return "7-12";
   if (years <= 18) return "13-18";
   return "adult";
-}
-
-function extractJson(text: string): Record<string, unknown> {
-  const jsonMatch =
-    text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/) ??
-    text.match(/(\{[\s\S]*\})/);
-  if (!jsonMatch) throw new Error("Claude yanıtından JSON çıkarılamadı");
-
-  try {
-    return JSON.parse(jsonMatch[1] ?? jsonMatch[0]);
-  } catch {
-    throw new Error("JSON parse hatası");
-  }
 }
 
 export function createToolHandler<T extends z.ZodTypeAny>(config: ToolConfig<T>) {

@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-
-async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user?.id) return null;
-  const t = await prisma.therapist.findUnique({ where: { id: session.user.id }, select: { role: true } });
-  return t?.role === "admin" ? session : null;
-}
+import { requireAdmin } from "@/lib/auth-helpers";
+import { recordAudit } from "@/lib/audit";
+import { getClientIp } from "@/lib/rateLimit";
+import { logError } from "@/lib/utils";
 
 export async function PATCH(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
+  const gate = await requireAdmin();
+  if (gate instanceof NextResponse) return gate;
+  const { session } = gate;
 
   try {
     const { id } = await params;
@@ -26,15 +23,31 @@ export async function PATCH(
     const current = await prisma.therapist.findUnique({ where: { id }, select: { suspended: true } });
     if (!current) return NextResponse.json({ error: "Kullanıcı bulunamadı" }, { status: 404 });
 
-    const updated = await prisma.therapist.update({
-      where: { id },
-      data: { suspended: !current.suspended },
-      select: { id: true, suspended: true },
+    const nextSuspended = !current.suspended;
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const therapist = await tx.therapist.update({
+        where: { id },
+        data: { suspended: nextSuspended },
+        select: { id: true, suspended: true },
+      });
+      await recordAudit(
+        {
+          actorId:    session.user.id,
+          action:     nextSuspended ? "user.suspend" : "user.unsuspend",
+          targetType: "therapist",
+          targetId:   id,
+          diff:       { from: current.suspended, to: nextSuspended },
+          ip:         getClientIp(request.headers),
+        },
+        tx,
+      );
+      return therapist;
     });
 
     return NextResponse.json({ user: updated });
   } catch (error) {
-    console.error("[admin/suspend]", error);
+    logError("admin/suspend", error);
     return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
   }
 }

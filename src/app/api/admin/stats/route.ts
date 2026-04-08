@@ -1,20 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth-helpers";
+import { logError } from "@/lib/utils";
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 });
-  }
-
-  const therapist = await prisma.therapist.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-  if (therapist?.role !== "admin") {
-    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
-  }
+  const gate = await requireAdmin();
+  if (gate instanceof NextResponse) return gate;
 
   try {
     const [totalUsers, totalStudents, totalCards] = await Promise.all([
@@ -24,7 +15,7 @@ export async function GET() {
     ]);
     return NextResponse.json({ totalUsers, totalStudents, totalCards });
   } catch (error) {
-    console.error("[admin/stats]", error);
+    logError("admin/stats", error);
     return NextResponse.json({ error: "Bir hata oluştu" }, { status: 500 });
   }
 }

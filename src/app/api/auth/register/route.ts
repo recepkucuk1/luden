@@ -6,6 +6,8 @@ import { rateLimit, rateLimitResponse, getClientIp } from "@/lib/rateLimit";
 import { registerBodySchema, zodError } from "@/lib/validation";
 import { logError } from "@/lib/utils";
 import { sendVerificationEmail } from "@/lib/email";
+import { grantCredits } from "@/lib/credits";
+import { INITIAL_FREE_CREDITS } from "@/lib/plans";
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,16 +43,29 @@ export async function POST(request: NextRequest) {
     }
     const { name, email, password } = parsed.data;
 
-    const existing = await prisma.therapist.findUnique({ where: { email } });
-    if (existing) {
-      return NextResponse.json({ error: "Bu email adresi zaten kayıtlı." }, { status: 400 });
-    }
-
+    // Zamanlama sızıntısını önlemek için bcrypt'i var-olmayan kullanıcı yolundan
+    // bağımsız olarak her istek için çalıştır. Bu enumeration'a karşı savunma sağlar.
     const hashed = await bcrypt.hash(password, 12);
+
+    const existing = await prisma.therapist.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    // Enumeration koruması: hesap zaten varsa sessizce başarı dön. Kullanıcı
+    // hatırlamıyorsa /api/auth/resend-verification veya /forgot-password akışlarını
+    // kullanabilir.
+    if (existing) {
+      return NextResponse.json({ success: true });
+    }
     const plainToken = crypto.randomUUID();
     const emailVerifyToken = crypto.createHash("sha256").update(plainToken).digest("hex");
     const emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 saat
 
+    // Kayıt + kayıt bonusu kredileri tek transaction içinde.
+    // grantCredits() hem Therapist.credits'i artırır hem de matching
+    // CreditTransaction(EARN) kaydını oluşturur — ledger ile bakiye her zaman
+    // senkron. Schema default'u 0 olduğu için kredi yalnızca bu yoldan gelir.
     await prisma.$transaction(async (tx) => {
       const newTherapist = await tx.therapist.create({
         data: {
@@ -62,10 +77,14 @@ export async function POST(request: NextRequest) {
           emailVerifyToken,
           emailVerifyExpires,
         },
+        select: { id: true },
       });
-      await tx.creditTransaction.create({
-        data: { therapistId: newTherapist.id, amount: 40, type: "EARN", description: "Kayıt bonusu" },
-      });
+      await grantCredits(
+        newTherapist.id,
+        INITIAL_FREE_CREDITS,
+        "Kayıt bonusu",
+        tx,
+      );
     });
 
     // Email gönderimi transaction dışında — başarısız olsa da kayıt geçerli

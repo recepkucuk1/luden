@@ -1,24 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
-
-async function requireAdmin() {
-  const session = await auth();
-  if (!session?.user?.id) return null;
-  const therapist = await prisma.therapist.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-  if (therapist?.role !== "admin") return null;
-  return session;
-}
+import { requireAdmin } from "@/lib/auth-helpers";
 
 export async function GET() {
-  const session = await requireAdmin();
-  if (!session) {
-    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
-  }
+  const gate = await requireAdmin();
+  if (gate instanceof NextResponse) return gate;
 
   const [users, planCounts, cardGroups] = await Promise.all([
     prisma.therapist.findMany({
@@ -68,10 +55,9 @@ export async function GET() {
 }
 
 export async function DELETE(request: NextRequest) {
-  const session = await requireAdmin();
-  if (!session) {
-    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
-  }
+  const gate = await requireAdmin();
+  if (gate instanceof NextResponse) return gate;
+  const { session } = gate;
 
   const { allowed, retryAfter } = rateLimit(`admin:users:delete:${session.user.id}`, 5);
   if (!allowed) return rateLimitResponse(retryAfter);

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { CREDIT_COSTS } from "@/lib/plans";
+import type { Prisma } from "@prisma/client";
 
 /**
  * Non-atomic credit check (no deduction). Use as a fast pre-flight before expensive operations.
@@ -28,15 +29,22 @@ const DESCRIPTIONS: Record<CreditCostKey, string> = {
 /**
  * Atomically deducts credits from a therapist account.
  * Returns { ok: true } on success, { ok: false, credits: number } if insufficient.
+ *
+ * When passed a transaction client (`tx`), the deduction joins that transaction
+ * instead of starting a new one — required when an outer flow needs to roll
+ * back the whole operation on failure (e.g. AI generation).
  */
 export async function deductCredits(
   therapistId: string,
-  type: CreditCostKey
+  type: CreditCostKey,
+  tx?: Prisma.TransactionClient,
 ): Promise<{ ok: true } | { ok: false; credits: number }> {
   const cost = CREDIT_COSTS[type];
 
-  return prisma.$transaction(async (tx) => {
-    const therapist = await tx.therapist.findUnique({
+  const run = async (
+    client: Prisma.TransactionClient,
+  ): Promise<{ ok: true } | { ok: false; credits: number }> => {
+    const therapist = await client.therapist.findUnique({
       where: { id: therapistId },
       select: { credits: true },
     });
@@ -45,12 +53,12 @@ export async function deductCredits(
       return { ok: false as const, credits: therapist?.credits ?? 0 };
     }
 
-    await tx.therapist.update({
+    await client.therapist.update({
       where: { id: therapistId },
       data: { credits: { decrement: cost } },
     });
 
-    await tx.creditTransaction.create({
+    await client.creditTransaction.create({
       data: {
         therapistId,
         amount: cost,
@@ -60,5 +68,49 @@ export async function deductCredits(
     });
 
     return { ok: true as const };
-  });
+  };
+
+  if (tx) return run(tx);
+  return prisma.$transaction(run);
+}
+
+/**
+ * Atomically grants credits to a therapist account.
+ * Used by admin credit top-ups, signup bonuses and (soon) iyzico payment
+ * webhooks. Always creates a matching `CreditTransaction(EARN)` entry so the
+ * ledger stays in sync with `Therapist.credits`.
+ *
+ * When passed a transaction client, the grant joins that transaction — so
+ * callers can couple the grant to other side-effects (e.g. creating a
+ * Subscription row on successful payment) and roll everything back together.
+ */
+export async function grantCredits(
+  therapistId: string,
+  amount: number,
+  description: string,
+  tx?: Prisma.TransactionClient,
+): Promise<{ newBalance: number }> {
+  if (!Number.isInteger(amount) || amount <= 0) {
+    throw new Error("grantCredits: amount must be a positive integer");
+  }
+
+  const run = async (client: Prisma.TransactionClient): Promise<{ newBalance: number }> => {
+    const updated = await client.therapist.update({
+      where: { id: therapistId },
+      data: { credits: { increment: amount } },
+      select: { credits: true },
+    });
+    await client.creditTransaction.create({
+      data: {
+        therapistId,
+        amount,
+        type: "EARN",
+        description,
+      },
+    });
+    return { newBalance: updated.credits };
+  };
+
+  if (tx) return run(tx);
+  return prisma.$transaction(run);
 }

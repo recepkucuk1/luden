@@ -64,7 +64,7 @@ model Therapist {
   emailVerifyExpires DateTime?
   autoLoginToken     String?   @unique
   autoLoginExpires   DateTime?
-  credits            Int       @default(40)
+  credits            Int       @default(0)
   studentLimit       Int       @default(2)
   pdfEnabled         Boolean   @default(false)
   planType           PlanType  @default(FREE)
@@ -278,4 +278,40 @@ model PasswordResetToken {
   createdAt DateTime @default(now())
 
   user Therapist @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Denetim kaydı — admin eylemleri ve hassas değişiklikler için değiştirilmez
+// trail. Ödeme uyuşmazlıklarında ve regülasyon sorgularında kritik.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String? // null = sistem (webhook, scheduled job, vb.)
+  action     String // "plan.update" | "credits.grant" | "user.suspend" | "role.change" | "subscription.create" | ...
+  targetType String // "therapist" | "subscription" | "credit" | ...
+  targetId   String
+  diff       Json? // önceki → yeni değerler (opsiyonel, hassas alanlar hariç)
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+// Ödeme sağlayıcı webhook idempotency kaydı. Aynı externalId'li webhook
+// tekrar gelirse cached durumu döneriz; iyzico gibi sağlayıcılar retry
+// yaptığı için bu kritik.
+model WebhookDelivery {
+  id          String    @id @default(cuid())
+  provider    String // "iyzico" | "stripe" | ...
+  externalId  String // sağlayıcıdan gelen benzersiz olay kimliği
+  status      String    @default("received") // "received" | "processed" | "failed"
+  attempts    Int       @default(1)
+  payload     Json
+  error       String?   @db.Text
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+
+  @@unique([provider, externalId])
+  @@index([status])
+  @@index([receivedAt])
 }
