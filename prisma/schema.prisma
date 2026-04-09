@@ -86,6 +86,28 @@ model Therapist {
   creditTxns          CreditTransaction[]
   lessons             Lesson[]
   passwordResetTokens PasswordResetToken[]
+  apiUsageLogs        ApiUsageLog[]
+}
+
+/// Her Claude API çağrısının teknik maliyet kaydı. Kredi sistemi (business)
+/// ile karıştırılmamalıdır — bu yalnızca mühendislik gözlemlenebilirliği için.
+/// Thinking token'ları output'a dahil edilir (Anthropic faturalaması da öyle).
+model ApiUsageLog {
+  id               String   @id @default(cuid())
+  therapistId      String
+  endpoint         String // "cards/generate", "tools/social-story", vs.
+  model            String // "claude-sonnet-4-6"
+  inputTokens      Int      @default(0) // cache dışı ham input
+  outputTokens     Int      @default(0) // thinking dahil
+  cacheWriteTokens Int      @default(0)
+  cacheReadTokens  Int      @default(0)
+  costUsd          Decimal  @db.Decimal(10, 6)
+  createdAt        DateTime @default(now())
+
+  therapist Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+
+  @@index([therapistId, createdAt])
+  @@index([createdAt])
 }
 
 model Plan {

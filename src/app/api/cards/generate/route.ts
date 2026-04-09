@@ -1,13 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { anthropic, MODEL } from "@/lib/anthropic";
-import { buildCardPrompt } from "@/lib/prompts";
+import { logUsage } from "@/lib/usage";
+import {
+  buildCardPrompt,
+  CARD_SYSTEM_PROMPT,
+  CARD_TOOL,
+  type StudentContext,
+} from "@/lib/prompts";
 import { prisma } from "@/lib/db";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { cardGenerateBodySchema, zodError } from "@/lib/validation";
 import { checkCredits, deductCredits } from "@/lib/credits";
 import { CREDIT_COSTS } from "@/lib/plans";
 import { requireAuth, requireStudentOwnership } from "@/lib/auth-helpers";
-import { extractJson, logError } from "@/lib/utils";
+import { logError } from "@/lib/utils";
+
+const RECENT_CARDS_LIMIT = 5;
+
+function calcAgeYears(birthDate: Date | null): number | null {
+  if (!birthDate) return null;
+  const ms = Date.now() - new Date(birthDate).getTime();
+  return Math.floor(ms / (1000 * 60 * 60 * 24 * 365.25));
+}
 
 export async function POST(request: NextRequest) {
   const gate = await requireAuth();
@@ -54,23 +68,95 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const prompt = buildCardPrompt({ category, difficulty, ageGroup, focusArea, curriculumGoalText });
+    // Öğrenci bağlamı — "isabet" için en büyük sinyal. Tek Promise.all ile
+    // paralel olarak student + son kartlar + tamamlanmış hedefler çekiyoruz.
+    let studentContext: StudentContext | undefined;
+    if (studentId) {
+      const [student, recentCards, completedProgress] = await Promise.all([
+        prisma.student.findUnique({
+          where: { id: studentId },
+          select: {
+            name: true,
+            birthDate: true,
+            workArea: true,
+            diagnosis: true,
+            notes: true,
+            aiProfile: true,
+          },
+        }),
+        prisma.card.findMany({
+          where: { studentId, therapistId: session.user.id },
+          select: { title: true, difficulty: true, createdAt: true },
+          orderBy: { createdAt: "desc" },
+          take: RECENT_CARDS_LIMIT,
+        }),
+        prisma.studentProgress.findMany({
+          where: {
+            studentId,
+            therapistId: session.user.id,
+            status: "completed",
+          },
+          select: { goal: { select: { code: true } } },
+        }),
+      ]);
 
+      if (student) {
+        studentContext = {
+          name: student.name,
+          ageYears: calcAgeYears(student.birthDate),
+          workArea: student.workArea,
+          diagnosis: student.diagnosis,
+          notes: student.notes,
+          aiProfile: student.aiProfile,
+          recentCards,
+          completedGoalCodes: completedProgress.map((p) => p.goal.code),
+        };
+      }
+    }
+
+    const userPrompt = buildCardPrompt({
+      category,
+      difficulty,
+      ageGroup,
+      focusArea,
+      curriculumGoalText,
+      studentContext,
+    });
+
+    // Claude çağrısı — tool-use ile structured output, static kuralları
+    // prompt-cache'e al, klinik içerik için temperature'ı düşür.
     const message = await anthropic.messages.create({
       model: MODEL,
       max_tokens: 4096,
-      messages: [{ role: "user", content: prompt }],
+      temperature: 0.4,
+      system: [
+        {
+          type: "text",
+          text: CARD_SYSTEM_PROMPT,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
+      tools: [CARD_TOOL],
+      tool_choice: { type: "tool", name: CARD_TOOL.name },
+      messages: [{ role: "user", content: userPrompt }],
     });
 
-    const rawContent = message.content[0];
-    if (rawContent.type !== "text") {
-      throw new Error(`Beklenmeyen içerik tipi: ${rawContent.type}`);
-    }
     if (message.stop_reason === "max_tokens") {
       throw new Error("Yanıt çok uzun, token limiti aşıldı. Lütfen tekrar deneyin.");
     }
 
-    const cardContent = extractJson(rawContent.text);
+    // Teknik maliyet telemetrisi — fire-and-forget, generation'ı bloklamaz.
+    // Admin panelindeki aylık maliyet aggregate'inin kaynağı da bu.
+    logUsage(session.user.id, "cards/generate", message.usage);
+
+    // Tool-use yanıtını bul — tool_choice=tool zorladığı için her zaman
+    // tool_use content bloğu dönmesini bekliyoruz.
+    const toolUse = message.content.find((block) => block.type === "tool_use");
+    if (!toolUse || toolUse.type !== "tool_use") {
+      throw new Error("Claude emit_card aracını çağırmadı");
+    }
+
+    const cardContent = toolUse.input as Record<string, unknown>;
     const card = { ...cardContent, category, difficulty, ageGroup };
 
     // Kart kaydet + krediyi atomik düş — deductCredits'e tx geçiyoruz ki

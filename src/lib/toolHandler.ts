@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { anthropic, MODEL } from "@/lib/anthropic";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { extractJson } from "@/lib/utils";
+import { logUsage } from "@/lib/usage";
 
 type StudentSelect = {
   id: string;
@@ -150,6 +151,10 @@ export function createToolHandler<T extends z.ZodTypeAny>(config: ToolConfig<T>)
         system: config.systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
       });
+
+      // Teknik maliyet telemetrisi — kredi sisteminden bağımsız, admin panel
+      // aggregate'i için. Fire-and-forget, hata fırlatmaz.
+      logUsage(session.user.id, `tools/${config.rateLimitKey}`, message.usage);
 
       const rawContent = message.content[0];
       if (rawContent.type !== "text") throw new Error("Beklenmeyen içerik tipi");

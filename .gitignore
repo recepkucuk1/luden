@@ -47,3 +47,6 @@ src/app/api/curriculum/*.pdf
 
 # Claude Code local config
 .claude/
+
+# Eval/benchmark run artifacts (bir kerelik çıktılar)
+/scripts/eval-results/

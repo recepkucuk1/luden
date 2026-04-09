@@ -7,7 +7,12 @@ export async function GET() {
   const gate = await requireAdmin();
   if (gate instanceof NextResponse) return gate;
 
-  const [users, planCounts, cardGroups] = await Promise.all([
+  // Ay başı (UTC) — "bu ay" maliyet aggregate'i için sınır.
+  const monthStart = new Date();
+  monthStart.setUTCDate(1);
+  monthStart.setUTCHours(0, 0, 0, 0);
+
+  const [users, planCounts, cardGroups, monthlyUsage] = await Promise.all([
     prisma.therapist.findMany({
       orderBy: { createdAt: "asc" },
       select: {
@@ -38,8 +43,25 @@ export async function GET() {
     prisma.card.groupBy({
       by: ["therapistId", "toolType"],
       _count: { _all: true },
-    })
+    }),
+    // Bu ay için therapist başına toplam USD maliyet ve çağrı sayısı.
+    // Decimal sum'ı JS number'a çeviriyoruz — tek kart başı maliyet küçük
+    // olduğu için floating point kayıpları anlamsız (admin görüntüleme amaçlı).
+    prisma.apiUsageLog.groupBy({
+      by: ["therapistId"],
+      where: { createdAt: { gte: monthStart } },
+      _sum: { costUsd: true },
+      _count: { _all: true },
+    }),
   ]);
+
+  const usageByTherapist = new Map<string, { usd: number; calls: number }>();
+  for (const g of monthlyUsage) {
+    usageByTherapist.set(g.therapistId, {
+      usd: Number(g._sum.costUsd ?? 0),
+      calls: g._count._all,
+    });
+  }
 
   const mergedUsers = users.map((u) => {
     const stats: Record<string, number> = {};
@@ -48,7 +70,13 @@ export async function GET() {
       .forEach((g) => {
         stats[g.toolType] = g._count._all;
       });
-    return { ...u, cardStats: stats };
+    const usage = usageByTherapist.get(u.id);
+    return {
+      ...u,
+      cardStats: stats,
+      monthlyUsageUsd: usage?.usd ?? 0,
+      monthlyApiCalls: usage?.calls ?? 0,
+    };
   });
 
   return NextResponse.json({ users: mergedUsers, planCounts });

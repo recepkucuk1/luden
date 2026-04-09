@@ -33,6 +33,10 @@ interface UserRow {
   subscriptions: Subscription[];
   _count:        { students: number; cards: number; lessons: number };
   cardStats?:    Record<string, number>;
+  /** Bu ay (UTC ay başından itibaren) Claude API için harcanan teorik USD tutarı */
+  monthlyUsageUsd?: number;
+  /** Bu ay yapılan toplam API çağrı sayısı */
+  monthlyApiCalls?: number;
 }
 
 interface PlanCount {
@@ -403,7 +407,7 @@ function ActionDropdown({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-type SortKey = "name" | "planType" | "credits" | "currentPeriodEnd" | "students" | "lastLogin" | "createdAt" | "cards" | "lessons";
+type SortKey = "name" | "planType" | "credits" | "currentPeriodEnd" | "students" | "lastLogin" | "createdAt" | "cards" | "lessons" | "monthlyUsageUsd";
 type SortDir = "asc" | "desc";
 
 export default function AdminUsersPage() {
@@ -521,6 +525,9 @@ export default function AdminUsersPage() {
       } else if (sortKey === "lessons") {
         valA = a._count.lessons || 0;
         valB = b._count.lessons || 0;
+      } else if (sortKey === "monthlyUsageUsd") {
+        valA = a.monthlyUsageUsd ?? 0;
+        valB = b.monthlyUsageUsd ?? 0;
       } else if (sortKey === "currentPeriodEnd") {
         valA = activeSub(a)?.currentPeriodEnd || "0000-00-00";
         valB = activeSub(b)?.currentPeriodEnd || "0000-00-00";
@@ -601,19 +608,25 @@ export default function AdminUsersPage() {
         </div>
 
         {/* ── Özet kartlar ── */}
-        <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-          {[
-            { label: "Toplam Kullanıcı", value: users.length,          color: "border-l-[#023435]", textColor: "text-[#023435]"  },
-            { label: "Free",             value: planCount("FREE"),      color: "border-l-zinc-400",  textColor: "text-zinc-600"   },
-            { label: "Pro",              value: planCount("PRO"),       color: "border-l-[#107996]", textColor: "text-[#107996]"  },
-            { label: "Advanced",         value: planCount("ADVANCED"),  color: "border-l-[#FE703A]", textColor: "text-[#FE703A]"  },
-          ].map((card) => (
-            <div key={card.label} className={cn("rounded-[20px] border border-white/60 bg-white/40 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-md p-5 border-l-4 transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)]", card.color)}>
-              <p className="text-xs font-bold uppercase tracking-wide text-[#023435]/50">{card.label}</p>
-              <p className={cn("mt-1.5 text-3xl font-extrabold", card.textColor)}>{card.value}</p>
+        {(() => {
+          const totalMonthlyUsd = users.reduce((sum, u) => sum + (u.monthlyUsageUsd ?? 0), 0);
+          return (
+            <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
+              {[
+                { label: "Toplam Kullanıcı", value: users.length.toString(),          color: "border-l-[#023435]", textColor: "text-[#023435]"  },
+                { label: "Free",             value: planCount("FREE").toString(),      color: "border-l-zinc-400",  textColor: "text-zinc-600"   },
+                { label: "Pro",              value: planCount("PRO").toString(),       color: "border-l-[#107996]", textColor: "text-[#107996]"  },
+                { label: "Advanced",         value: planCount("ADVANCED").toString(),  color: "border-l-[#FE703A]", textColor: "text-[#FE703A]"  },
+                { label: "AI Maliyet (Bu Ay)", value: `$${totalMonthlyUsd.toFixed(2)}`, color: "border-l-emerald-500", textColor: "text-emerald-700" },
+              ].map((card) => (
+                <div key={card.label} className={cn("rounded-[20px] border border-white/60 bg-white/40 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-md p-5 border-l-4 transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)]", card.color)}>
+                  <p className="text-xs font-bold uppercase tracking-wide text-[#023435]/50">{card.label}</p>
+                  <p className={cn("mt-1.5 text-3xl font-extrabold", card.textColor)}>{card.value}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
 
         {/* ── FİLTRELEME & ARAMA ÇUBUĞU ── */}
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4 rounded-[20px] border border-white/60 bg-white/60 shadow-sm backdrop-blur-md p-4">
@@ -709,13 +722,20 @@ export default function AdminUsersPage() {
                   >
                     <div className="flex items-center justify-center">Öğrenci <SortIcon columnKey="students" /></div>
                   </th>
-                  <th 
+                  <th
                     className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
                     onClick={() => toggleSort("lessons")}
                   >
                     <div className="flex items-center justify-center">Randevu <SortIcon columnKey="lessons" /></div>
                   </th>
-                  <th 
+                  <th
+                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    onClick={() => toggleSort("monthlyUsageUsd")}
+                    title="Bu ay Claude API için hesaplanan teorik maliyet (USD)"
+                  >
+                    <div className="flex items-center justify-center">AI Maliyet (Bu Ay) <SortIcon columnKey="monthlyUsageUsd" /></div>
+                  </th>
+                  <th
                     className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
                     onClick={() => toggleSort("lastLogin")}
                   >
@@ -820,6 +840,41 @@ export default function AdminUsersPage() {
                         </span>
                       </td>
 
+                      {/* AI Maliyet (Bu Ay) */}
+                      <td className="px-4 py-4 text-center">
+                        <div className="group/cost relative inline-block cursor-help">
+                          <span
+                            className={cn(
+                              "font-extrabold tabular-nums px-2 py-1 rounded-md border",
+                              (u.monthlyUsageUsd ?? 0) > 0
+                                ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                                : "text-[#023435]/40 bg-white/60 border-white",
+                            )}
+                          >
+                            ${(u.monthlyUsageUsd ?? 0).toFixed(4)}
+                          </span>
+                          {(u.monthlyApiCalls ?? 0) > 0 && (
+                            <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 opacity-0 transition-all duration-200 group-hover/cost:opacity-100 group-hover/cost:-translate-y-1">
+                              <div className="min-w-[180px] overflow-hidden rounded-xl border border-white/60 bg-white/85 p-3 shadow-xl backdrop-blur-xl">
+                                <p className="mb-1 text-[10px] font-extrabold uppercase tracking-widest text-[#023435]/50 border-b border-[#023435]/10 pb-1">
+                                  Bu Ay
+                                </p>
+                                <p className="text-xs text-[#023435]/70 font-medium">
+                                  <span className="font-extrabold text-[#023435]">{u.monthlyApiCalls}</span> API çağrısı
+                                </p>
+                                <p className="text-xs text-[#023435]/70 font-medium mt-1">
+                                  Ortalama:{" "}
+                                  <span className="font-extrabold text-[#023435]">
+                                    ${((u.monthlyUsageUsd ?? 0) / Math.max(1, u.monthlyApiCalls ?? 0)).toFixed(5)}
+                                  </span>{" "}
+                                  / çağrı
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+
                       {/* Son Giriş */}
                       <td className="px-4 py-4 text-[13px] font-medium text-[#023435]/70 whitespace-nowrap tabular-nums">
                         {fmtDate(u.lastLogin)}
@@ -855,7 +910,7 @@ export default function AdminUsersPage() {
 
                 {paginatedUsers.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="py-16 text-center text-sm font-medium text-[#023435]/40 bg-white/30 backdrop-blur-sm">
+                    <td colSpan={10} className="py-16 text-center text-sm font-medium text-[#023435]/40 bg-white/30 backdrop-blur-sm">
                       {search || filterPlan !== "ALL" || filterStatus !== "ALL" 
                         ? "Girilen filtrelere uygun kullanıcı bulunamadı." 
                         : "Henüz kayıtlı kullanıcı yok."}
