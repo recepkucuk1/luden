@@ -144,11 +144,25 @@ export function createToolHandler<T extends z.ZodTypeAny>(config: ToolConfig<T>)
         : (config.defaultAgeGroup ?? defaultAgeGroupFromYears(ageYears));
 
       // Build prompt & call Claude
+      //
+      // - `system` array formatında: prompt caching (ephemeral, 5 dk TTL)
+      //   için `cache_control` eklemek gerekiyor. Ardışık tool çağrılarında
+      //   input %90 ucuza geliyor (read $0.30/MTok vs normal $3/MTok).
+      // - `temperature: 0.5`: klinik içerik için default 1.0 çok yaratıcı;
+      //   tool'larda daha deterministik çıktı hem kaliteyi tutarlı tutuyor
+      //   hem output şişkinliğini azaltıyor.
       const userPrompt = config.buildUserPrompt(data, student, ageText);
       const message = await anthropic.messages.create({
         model: MODEL,
         max_tokens: config.maxTokens ?? 4096,
-        system: config.systemPrompt,
+        temperature: 0.5,
+        system: [
+          {
+            type: "text",
+            text: config.systemPrompt,
+            cache_control: { type: "ephemeral" },
+          },
+        ],
         messages: [{ role: "user", content: userPrompt }],
       });
 

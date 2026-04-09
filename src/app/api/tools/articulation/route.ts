@@ -74,6 +74,13 @@ export const POST = createToolHandler({
   responseKey: "drill",
   fallbackTitle: "Artikülasyon Alıştırması",
 
+  // 30 item senaryosunda statik alanlar + dinamik items ~3000-3500 tok'a
+  // ulaşabiliyor. 4096 default'u tavana çarpıp JSON'u ortadan kesiyordu
+  // (production'da gözlenen bug: out_tok=4096 + extractJson fail riski).
+  // 5500 güvenli bir tavan — gerçek kullanım zaten bu kadarı istemez ama
+  // clipping'i matematik olarak imkansız hale getirir.
+  maxTokens: 5500,
+
   buildUserPrompt(data, student, ageText) {
     const positionLabels = data.positions.map((p: string) => POSITION_LABEL[p]).join(", ");
     return `Öğrenci bilgileri:
