@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     // Response gönderildikten sonra profil üret (after = Next.js post-response hook)
     after(async () => {
       try {
-        await generateStudentProfile(student.id);
+        await generateStudentProfile(student.id, session.user.id);
       } catch (err) {
         console.error("[generateStudentProfile] after() hatası:", err);
       }

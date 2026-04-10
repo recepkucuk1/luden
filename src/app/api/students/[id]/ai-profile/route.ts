@@ -36,7 +36,7 @@ export async function POST(
     }
 
     // AI çağrısı — uzun sürer, transaction dışında yapılmalı.
-    const aiProfile = await generateStudentProfile(id);
+    const aiProfile = await generateStudentProfile(id, session.user.id);
 
     // Yazma + kredi düşümünü tek transaction içinde koşturuyoruz:
     // AI çıktısı kaydedilirse kredi kesin olarak düşer, düşemezse yazım da
