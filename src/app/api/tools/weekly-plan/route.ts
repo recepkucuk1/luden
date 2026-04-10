@@ -8,13 +8,19 @@ import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 const COST = 20;
 
+const dayScheduleItem = z.object({
+  dayName:     z.string(),
+  lessonCount: z.number().int().min(1).max(4),
+});
+
 const bodySchema = z.object({
   studentId:       z.string().min(1, "Öğrenci seçin"),
   weekStart:       z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Geçerli tarih girin"),
-  sessionsPerWeek: z.number().int().min(2).max(5),
+  sessionsPerWeek: z.number().int().min(1).max(12),
   sessionDuration: z.enum(["20", "30", "40", "45", "60"]),
   focusAreas:      z.array(z.string()).min(1, "En az bir odak alanı seçin"),
   planApproach:    z.enum(["ai", "guided"]),
+  daySchedule:     z.array(dayScheduleItem).min(1, "En az bir ders günü seçin"),
   extraNote:       z.string().max(500).optional(),
 });
 
@@ -84,16 +90,23 @@ function getWeekRange(weekStart: string): string {
   return `${fmt(start)} - ${fmt(end)}`;
 }
 
-function getDayDates(weekStart: string, count: number): { name: string; date: string }[] {
-  const DAY_NAMES = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma"];
-  const result = [];
-  for (let i = 0; i < count; i++) {
+const DAY_OFFSETS: Record<string, number> = {
+  Pazartesi: 0, Salı: 1, Çarşamba: 2, Perşembe: 3, Cuma: 4, Cumartesi: 5,
+};
+
+function getDayDatesFromSchedule(
+  weekStart: string,
+  daySchedule: { dayName: string; lessonCount: number }[],
+): { name: string; date: string; lessonIndex: number; lessonsOnDay: number }[] {
+  const result: { name: string; date: string; lessonIndex: number; lessonsOnDay: number }[] = [];
+  for (const { dayName, lessonCount } of daySchedule) {
+    const offset = DAY_OFFSETS[dayName] ?? 0;
     const d = new Date(weekStart);
-    d.setDate(d.getDate() + i);
-    result.push({
-      name: DAY_NAMES[i] ?? `Gün ${i + 1}`,
-      date: d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }),
-    });
+    d.setDate(d.getDate() + offset);
+    const dateStr = d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+    for (let li = 0; li < lessonCount; li++) {
+      result.push({ name: dayName, date: dateStr, lessonIndex: li + 1, lessonsOnDay: lessonCount });
+    }
   }
   return result;
 }
@@ -124,7 +137,7 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    const { studentId, weekStart, sessionsPerWeek, sessionDuration, focusAreas, planApproach, extraNote } = parsed.data;
+    const { studentId, weekStart, sessionsPerWeek, sessionDuration, focusAreas, planApproach, daySchedule, extraNote } = parsed.data;
 
     const therapist = await prisma.therapist.findUnique({
       where: { id: session.user.id },
@@ -180,7 +193,7 @@ export async function POST(request: NextRequest) {
     }
 
     const weekRange = getWeekRange(weekStart);
-    const dayDates  = getDayDates(weekStart, sessionsPerWeek);
+    const dayDates  = getDayDatesFromSchedule(weekStart, daySchedule);
 
     const recentCardsBlock = recentCards.length > 0
       ? `Son çalışmalar:\n${recentCards.map((c) => `- ${c.title} (${c.toolType ?? "kart"}, ${new Date(c.createdAt).toLocaleDateString("tr-TR")})`).join("\n")}\n\n`
@@ -205,7 +218,7 @@ ${curriculumTitles.length > 0 ? `- Atanmış müfredat modülleri: ${curriculumT
 
 ${recentCardsBlock}${lastSummaryBlock}Haftalık plan parametreleri:
 - Hafta: ${weekRange}
-- Ders günleri ve tarihleri: ${dayDates.map((d) => `${d.name} ${d.date}`).join(", ")}
+- Ders günleri ve tarihleri: ${dayDates.map((d) => `${d.name} ${d.date}${d.lessonsOnDay > 1 ? ` (${d.lessonIndex}. ders / günde ${d.lessonsOnDay} ders)` : ""}`).join(", ")}
 - Ders süresi: ${sessionDuration} dakika
 - Odak alanları: ${focusAreas.join(", ")}
 - Planlama yaklaşımı: ${planApproach === "ai" ? "Öğrenci profiline ve geçmişe göre AI otomatik önersin" : "Seçilen odak alanlarına göre yönlendirilmiş plan"}

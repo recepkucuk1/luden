@@ -26,7 +26,21 @@ interface CurriculumItem {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const SESSIONS_OPTIONS = [2, 3, 4, 5] as const;
+const WEEKDAYS = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"] as const;
+
+function distributeEvenly(total: number): Record<string, number> {
+  const schedule: Record<string, number> = {};
+  WEEKDAYS.forEach((d) => { schedule[d] = 0; });
+  let remaining = total;
+  let i = 0;
+  while (remaining > 0) {
+    schedule[WEEKDAYS[i % WEEKDAYS.length]]++;
+    remaining--;
+    i++;
+  }
+  return schedule;
+}
+
 const DURATION_OPTIONS = [
   { value: "20", label: "20 dakika" },
   { value: "30", label: "30 dakika" },
@@ -288,7 +302,8 @@ export default function WeeklyPlanPage() {
   const [curricula,   setCurricula]   = useState<CurriculumItem[]>([]);
   const [studentId,   setStudentId]   = useState("");
   const [weekStart,   setWeekStart]   = useState(getMondayOfCurrentWeek);
-  const [sessions,    setSessions]    = useState<2 | 3 | 4 | 5>(3);
+  const [sessions,    setSessions]    = useState(3);
+  const [daySchedule, setDaySchedule] = useState<Record<string, number>>(() => distributeEvenly(3));
   const [duration,    setDuration]    = useState("45");
   const [focusAreas,  setFocusAreas]  = useState<string[]>([]);
   const [customFocus, setCustomFocus] = useState("");
@@ -322,6 +337,21 @@ export default function WeeklyPlanPage() {
   // When student changes, reset focus areas
   useEffect(() => { setFocusAreas([]); }, [studentId]);
 
+  // Auto-distribute lessons when dropdown total changes
+  useEffect(() => {
+    setDaySchedule(distributeEvenly(sessions));
+  }, [sessions]);
+
+  const totalAssigned = Object.values(daySchedule).reduce((a, b) => a + b, 0);
+
+  function updateDay(day: string, delta: number) {
+    setDaySchedule((prev) => {
+      const val = (prev[day] ?? 0) + delta;
+      if (val < 0) return prev;
+      return { ...prev, [day]: val };
+    });
+  }
+
   function toggleFocus(area: string) {
     setFocusAreas((prev) =>
       prev.includes(area) ? prev.filter((a) => a !== area) : [...prev, area]
@@ -334,11 +364,16 @@ export default function WeeklyPlanPage() {
 
   async function handleGenerate() {
     if (!studentId) { toast.error("Lütfen öğrenci seçin"); return; }
+    if (totalAssigned === 0) { toast.error("En az 1 ders günü belirleyin"); return; }
     const effectiveFocus = [...focusAreas, ...(customFocus.trim() ? [customFocus.trim()] : [])];
     if (effectiveFocus.length === 0) { toast.error("En az bir odak alanı seçin"); return; }
     setGenerating(true);
     setSavedCardId(null);
     setPendingCardId(null);
+    // Build daySchedule payload: only days with lessons > 0
+    const activeDays = WEEKDAYS
+      .filter((d) => (daySchedule[d] ?? 0) > 0)
+      .map((d) => ({ dayName: d, lessonCount: daySchedule[d] }));
     try {
       const res = await fetch("/api/tools/weekly-plan", {
         method: "POST",
@@ -346,10 +381,11 @@ export default function WeeklyPlanPage() {
         body: JSON.stringify({
           studentId,
           weekStart,
-          sessionsPerWeek: sessions,
+          sessionsPerWeek: totalAssigned,
           sessionDuration: duration,
           focusAreas: effectiveFocus,
           planApproach: approach,
+          daySchedule: activeDays,
           extraNote: extraNote.trim() || undefined,
         }),
       });
@@ -461,22 +497,55 @@ export default function WeeklyPlanPage() {
             {/* Sessions per week */}
             <div className="space-y-2">
               <label className="text-sm font-bold text-[#023435]/70">Haftalık Ders Sayısı</label>
-              <div className="flex gap-2">
-                {SESSIONS_OPTIONS.map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setSessions(n)}
-                    className={`flex-1 rounded-xl border py-2.5 text-sm font-medium transition-all ${
-                      sessions === n
-                        ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
-                        : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
-                    }`}
-                  >
-                    {n} ders
-                  </button>
+              <select
+                value={sessions}
+                onChange={(e) => setSessions(Number(e.target.value))}
+                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
+              >
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={n}>{n} ders</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Day schedule */}
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-[#023435]/70">
+                Günlük Ders Dağılımı
+                <span className="ml-2 text-xs font-normal text-zinc-400">
+                  Toplam: {totalAssigned} ders
+                </span>
+              </label>
+              <div className="rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm divide-y divide-zinc-100">
+                {WEEKDAYS.map((day) => (
+                  <div key={day} className="flex items-center justify-between px-3 py-2">
+                    <span className="text-sm text-zinc-700">{day}</span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => updateDay(day, -1)}
+                        disabled={!daySchedule[day]}
+                        className="h-7 w-7 rounded-lg border border-zinc-200 text-zinc-500 text-sm font-medium hover:bg-zinc-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        −
+                      </button>
+                      <span className="w-6 text-center text-sm font-semibold text-[#023435]">
+                        {daySchedule[day] ?? 0}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => updateDay(day, 1)}
+                        className="h-7 w-7 rounded-lg border border-zinc-200 text-zinc-500 text-sm font-medium hover:bg-zinc-100 transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
+              {totalAssigned === 0 && (
+                <p className="text-xs text-red-500">En az 1 ders günü belirleyin.</p>
+              )}
             </div>
 
             {/* Duration */}
