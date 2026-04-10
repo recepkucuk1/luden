@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { anthropic, MODEL } from "@/lib/anthropic";
+import { logUsage } from "@/lib/usage";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 const COST = 20;
@@ -215,9 +216,18 @@ Bu parametrelere uygun haftalık çalışma planı oluştur. Tam olarak ${sessio
     const message = await anthropic.messages.create({
       model: MODEL,
       max_tokens: 6000,
-      system: SYSTEM_PROMPT,
+      temperature: 0.5,
+      system: [
+        {
+          type: "text",
+          text: SYSTEM_PROMPT,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
       messages: [{ role: "user", content: userPrompt }],
     });
+
+    logUsage(session.user.id, "tools/weekly-plan", message.usage);
 
     const rawContent = message.content[0];
     if (rawContent.type !== "text") throw new Error("Beklenmeyen içerik tipi");
