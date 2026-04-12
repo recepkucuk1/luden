@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { GlassCalendar } from "@/components/ui/glass-calendar";
 import { ModalPortal } from "@/components/ui/modal-portal";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -435,9 +435,7 @@ function LessonDetailModal({
   const [editingNote, setEditingNote] = useState(false);
   const [scope,       setScope]       = useState<"this" | "all">("this");
 
-  const dateStr = displayDate.toLocaleDateString("tr-TR", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
-  });
+  const dateStr = formatDate(displayDate, "long");
   const originalDateStr = displayDate.toISOString().split("T")[0];
 
   async function changeStatus(status: LessonStatus) {
@@ -622,9 +620,7 @@ function DayLessonList({
   onLessonClick: (l: Lesson, d: Date) => void;
   onAddClick: () => void;
 }) {
-  const dateStr = date.toLocaleDateString("tr-TR", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
-  });
+  const dateStr = formatDate(date, "long");
 
   // Weekly stats
   const planned = allLessons.filter((l) => l.status === "PLANNED").length;
@@ -663,63 +659,116 @@ function DayLessonList({
         </div>
       )}
 
-      {/* Lessons */}
-      <div className="p-4">
+      {/* Lessons Timeline */}
+      <div className="p-5 pl-4 relative">
         {lessons.length === 0 ? (
-          <div className="text-center py-6">
-            <div className="mb-2 text-2xl opacity-20">📅</div>
-            <p className="text-sm text-[#023435]/35">Bu güne ait ders yok</p>
+          <div className="text-center py-8">
+            <div className="mb-3 text-3xl opacity-20">📅</div>
+            <p className="text-sm font-medium text-[#023435]/40">Bu güne ait ders yok</p>
             <button
               onClick={onAddClick}
-              className="mt-3 text-xs text-[#FE703A]/70 hover:text-[#FE703A] transition-colors"
+              className="mt-3 rounded-lg border border-[rgba(2,52,53,0.1)] px-4 py-1.5 text-xs font-semibold text-[#FE703A] hover:bg-[#FE703A]/10 transition-colors"
             >
-              Ders ekle →
+              + Yeni Ders Ekle
             </button>
-            {/* Show upcoming lessons when current day is empty */}
+            {/* Upcoming Timeline Empty State */}
             {upcoming.length > 0 && (
-              <div className="mt-5 pt-4 border-t border-[rgba(2,52,53,0.08)] text-left">
-                <p className="text-[10px] font-medium text-[#023435]/40 uppercase tracking-wider mb-2">Yaklaşan Dersler</p>
-                <div className="space-y-1.5">
+              <div className="mt-8 relative text-left">
+                <div className="flex items-center gap-2 mb-4 pl-1">
+                  <div className="h-1.5 w-1.5 rounded-full bg-[#FE703A] animate-ping" />
+                  <p className="text-[10px] font-bold text-[#023435]/40 uppercase tracking-widest">Yaklaşandaki Oturumlar</p>
+                </div>
+                <div className="ml-[7px] border-l border-dashed border-[#FE703A]/30 pb-2 space-y-4">
                   {upcoming.map((l, i) => (
-                    <button
-                      key={i}
-                      onClick={() => onLessonClick(l, l.displayDate)}
-                      className="w-full text-left rounded-lg px-3 py-2 bg-[rgba(2,52,53,0.04)] hover:bg-[rgba(2,52,53,0.08)] transition-colors"
-                    >
-                      <p className="text-[11px] font-semibold text-[#023435]/70">
-                        {l.displayDate.toLocaleDateString("tr-TR", { weekday: "short", day: "numeric", month: "short" })} · {l.startTime}
-                      </p>
-                      <p className="text-[10px] text-[#023435]/50 truncate">{l.student.name} — {l.title}</p>
-                    </button>
+                    <div key={i} className="relative pl-6">
+                      <div className="absolute -left-[4.5px] top-[14px] h-2 w-2 rounded-full bg-white border-2 border-[#FE703A]" />
+                      <button
+                        onClick={() => onLessonClick(l, l.displayDate)}
+                        className="w-full text-left rounded-xl p-3 bg-white hover:bg-[rgba(2,121,150,0.03)] border border-[rgba(2,52,53,0.05)] hover:border-[#107996]/20 transition-all shadow-sm group"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-[10px] font-bold text-[#107996]">
+                            {formatDate(l.displayDate, "short")} · {l.startTime}
+                          </p>
+                          <span className="text-[9px] font-bold text-[#FE703A] opacity-0 group-hover:opacity-100 transition-opacity">İNCELE →</span>
+                        </div>
+                        <p className="text-sm font-extrabold text-[#023435]">{l.student.name}</p>
+                        {l.title && <p className="text-[10px] text-[#023435]/50 truncate mt-0.5 font-medium">{l.title}</p>}
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
           </div>
         ) : (
-          <div className="space-y-2">
-            {lessons.map((l, i) => (
-              <button
-                key={i}
-                onClick={() => onLessonClick(l, l.displayDate)}
-                className={cn(
-                  "w-full text-left cursor-pointer rounded-xl border p-3 transition-all hover:scale-[1.01] hover:shadow-lg",
-                  STATUS_PILL[l.status]
-                )}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold">{l.startTime} – {l.endTime}</p>
-                    <p className="text-xs mt-0.5 font-medium truncate">{l.student.name}</p>
-                    <p className="text-[11px] mt-0.5 opacity-70 truncate">{l.title}</p>
+          <div className="relative border-l-2 border-[rgba(2,52,53,0.1)] ml-[48px] pb-4 space-y-6">
+            {lessons.map((l, i) => {
+              // Check if lesson is active right now
+              const isToday = l.displayDate.toDateString() === now.toDateString();
+              const lStart = parseInt(l.startTime.split(":")[0]) * 60 + parseInt(l.startTime.split(":")[1]);
+              const lEnd = parseInt(l.endTime.split(":")[0]) * 60 + parseInt(l.endTime.split(":")[1]);
+              const currentMin = now.getHours() * 60 + now.getMinutes();
+              const isActiveNow = isToday && currentMin >= lStart && currentMin <= lEnd;
+
+              return (
+                <div key={i} className="relative pl-6">
+                  {/* Time Axis Label */}
+                  <div className="absolute -left-[58px] top-1.5 w-12 text-right">
+                    <p className={cn("text-[11px] font-bold", isActiveNow ? "text-[#FE703A]" : "text-[#023435]/60")}>
+                      {l.startTime}
+                    </p>
                   </div>
-                  <div className="shrink-0 text-right">
-                    <span className="text-[10px] opacity-60 font-medium">{STATUS_LABEL[l.status]}</span>
-                    {l.isRecurring && <p className="text-[10px] opacity-50">↺</p>}
-                  </div>
+                  
+                  {/* Timeline Dot */}
+                  <div className={cn(
+                    "absolute -left-[5px] top-[10px] h-2 w-2 rounded-full ring-4 ring-white dark:ring-zinc-950",
+                    isActiveNow ? "bg-[#FE703A] animate-pulse ring-[#FE703A]/20" : 
+                    l.status === "COMPLETED" ? "bg-[#023435]" : 
+                    l.status === "CANCELLED" ? "bg-[#692137]" : "bg-[#107996]"
+                  )} />
+
+                  {/* Class Card */}
+                  <button
+                    onClick={() => onLessonClick(l, l.displayDate)}
+                    className={cn(
+                      "w-full text-left cursor-pointer rounded-xl border p-3.5 transition-all hover:-translate-y-0.5 hover:shadow-md",
+                      isActiveNow ? "bg-white shadow-sm border-[#FE703A]/30 ring-1 ring-[#FE703A]/10" : STATUS_PILL[l.status]
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className={cn("text-sm font-bold truncate", isActiveNow ? "text-[#023435]" : "")}>
+                          {l.student.name}
+                        </p>
+                        <p className={cn("text-[11px] font-medium mt-0.5 truncate", isActiveNow ? "text-[#023435]/60" : "opacity-70")}>
+                          {l.title}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className={cn(
+                            "inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                            isActiveNow ? "bg-[#FE703A]/10 text-[#FE703A]" : "bg-black/5"
+                          )}>
+                            {l.startTime} - {l.endTime}
+                          </span>
+                          {l.isRecurring && <span className="text-[10px] opacity-50" title="Tekrarlayan" >↺</span>}
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-right mt-0.5">
+                        <span className={cn(
+                          "text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md",
+                          l.status === "PLANNED" ? "text-[#107996] bg-[#107996]/10 border border-[#107996]/10" :
+                          l.status === "COMPLETED" ? "text-emerald-700 bg-emerald-100 border border-emerald-200" :
+                          "text-[#692137] bg-red-100 border border-red-200"
+                        )}>
+                          {isActiveNow && l.status === "PLANNED" ? "ŞİMDİ" : STATUS_LABEL[l.status]}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
                 </div>
-              </button>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

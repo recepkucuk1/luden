@@ -17,7 +17,7 @@ import {
   Circle,
   Printer,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -122,7 +122,7 @@ async function downloadGoalTrackerPDF(data: TrackerData) {
   const doc   = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const L     = 14;
   const R     = 196;
-  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today = formatDate(new Date(), "medium");
 
   const [regResp, boldResp] = await Promise.all([
     fetch(`${window.location.origin}/fonts/NotoSans-Regular.ttf`),
@@ -617,9 +617,7 @@ export default function GoalTrackerPage() {
                                     </td>
                                     <td className="px-4 py-2.5 text-zinc-400">
                                       {progress?.updatedAt
-                                        ? new Date(progress.updatedAt).toLocaleDateString("tr-TR", {
-                                            day: "2-digit", month: "2-digit", year: "2-digit",
-                                          })
+                                        ? formatDate(progress.updatedAt, "short")
                                         : "—"}
                                     </td>
                                   </tr>
@@ -689,7 +687,7 @@ export default function GoalTrackerPage() {
                               {item.card.title}
                             </Link>
                             <p className="text-[10px] text-zinc-400 mt-0.5">
-                              {new Date(item.date).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
+                              {formatDate(item.date, "medium")}
                             </p>
                           </div>
                         </div>
@@ -704,7 +702,7 @@ export default function GoalTrackerPage() {
                           <div>
                             <p className="text-xs text-zinc-700">{item.prog.goalTitle}</p>
                             <p className="text-[10px] text-zinc-400 mt-0.5">
-                              {new Date(item.date).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
+                              {formatDate(item.date, "medium")}
                             </p>
                           </div>
                         </div>

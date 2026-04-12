@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Library } from "lucide-react";
 import { CommBoardView } from "@/components/cards/CommBoardView";
 import type { CommBoardContent } from "@/components/cards/CommBoardView";
+import { formatDate } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -100,7 +101,7 @@ async function downloadBoardOnlyPDF(board: CommBoardContent, studentName?: strin
   const cells       = Array.isArray(board.cells) ? board.cells : [];
   const cols        = board.cols ?? 3;
   const rows        = board.rows ?? Math.ceil(cells.length / cols);
-  const today       = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today       = formatDate(new Date(), "medium");
 
   const FG_BG: Record<string, string> = {
     yellow: "#FEF3C7", green: "#D1FAE5", blue: "#DBEAFE",
@@ -214,7 +215,7 @@ async function downloadFullReportPDF(board: CommBoardContent, studentName?: stri
 
   const colorCoding = board.colorCoding !== false;
   const cells       = Array.isArray(board.cells) ? board.cells : [];
-  const today       = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today       = formatDate(new Date(), "medium");
 
   const FG_BG: Record<string, string> = {
     yellow: "#FEF3C7", green: "#D1FAE5", blue: "#DBEAFE",

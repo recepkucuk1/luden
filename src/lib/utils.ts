@@ -23,6 +23,56 @@ export function toInputDate(dateStr: string | null): string {
 }
 
 /**
+ * Merkezi tarih formatlama fonksiyonu (GG.AA.YYYY veya kapsamlı format).
+ * @param date - String veya Date objesi.
+ * @param formatType - Kısaca gün.ay.yıl mı yoksa gün ay yıl günadı mı dönecek
+ */
+export function formatDate(
+  date: Date | string | null | undefined,
+  formatType: "short" | "medium" | "long" | "monthYear" = "short"
+): string {
+  if (!date) return "";
+  const d = new Date(date);
+  
+  // Format hatalı (Invalid Date) ise koruma
+  if (isNaN(d.getTime())) return "";
+
+  if (formatType === "short") {
+    // Örnek: "14.04.2026"
+    return d.toLocaleDateString("tr-TR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    });
+  }
+
+  if (formatType === "medium") {
+    // Örnek: "14 Nisan 2026"
+    return d.toLocaleDateString("tr-TR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+  }
+
+  if (formatType === "monthYear") {
+    // Örnek: "Nisan 2026"
+    return d.toLocaleDateString("tr-TR", {
+      month: "long",
+      year: "numeric"
+    });
+  }
+
+  // formatType === "long" (Örnek: "14 Nisan 2026 Pazartesi")
+  return d.toLocaleDateString("tr-TR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+}
+
+/**
  * Extract the first JSON object from a Claude (or any LLM) response.
  *
  * Accepts either a fenced ```json block or a bare `{ ... }` substring.

@@ -9,6 +9,7 @@ import {
 } from "@react-pdf/renderer";
 import type { GeneratedCard } from "@/lib/prompts";
 import { WORK_AREA_LABEL, DIFFICULTY_LABEL, AGE_LABEL } from "@/lib/constants";
+import { formatDate } from "@/lib/utils";
 
 // Noto Sans — tam Unicode + Türkçe desteği
 // public/fonts/ klasöründen yüklenir (client-side absolute URL)
@@ -293,7 +294,7 @@ interface CardPDFDocumentProps {
 }
 
 export function CardPDFDocument({ card }: CardPDFDocumentProps) {
-  const today = new Date().toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const today = formatDate(new Date(), "short");
   const diffColor = DIFFICULTY_COLOR[card.difficulty] ?? "#2563eb";
 
   return (

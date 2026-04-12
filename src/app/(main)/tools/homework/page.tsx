@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowLeft, RefreshCw, Library, Eye, Star, Clock, Package, ChevronRight, Lightbulb } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
 import type { HomeworkContent } from "@/components/cards/HomeworkView";
 
@@ -244,7 +244,7 @@ async function downloadHomeworkPDF(hw: HomeworkContent, studentName?: string) {
     exercise: "Ev Egzersizi", observation: "Gözlem Formu", daily_activity: "Günlük Aktivite",
   };
 
-  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today = formatDate(new Date(), "medium");
 
   const S = StyleSheet.create({
     page:      { fontFamily: "NotoSans", fontSize: 10, color: "#18181b", padding: 44 },

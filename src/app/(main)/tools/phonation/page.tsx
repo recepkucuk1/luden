@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowLeft, RefreshCw, Library, Lightbulb, Info } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
 import { PhonationView } from "@/components/cards/PhonationView";
 import type { PhonationActivityContent } from "@/components/cards/PhonationView";
@@ -156,7 +156,7 @@ async function downloadPhonationPDF(activity: PhonationActivityContent, studentN
   // Disable hyphenation so Turkish words are never broken mid-syllable
   Font.registerHyphenationCallback((word) => [word]);
 
-  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today = formatDate(new Date(), "medium");
   const sounds = Array.isArray(activity.targetSounds) ? activity.targetSounds : [];
 
   const ACTIVITY_TYPE_LABEL: Record<string, string> = {

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowLeft, RefreshCw, Library, LayoutList, LayoutGrid, ChevronDown, ChevronUp, Lightbulb, Info } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
 import type { MatchingGameContent, MatchingPair } from "@/components/cards/MatchingGameView";
 
@@ -184,7 +184,7 @@ async function downloadTablePDF(game: MatchingGameContent, studentName?: string)
     ],
   });
 
-  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today = formatDate(new Date(), "medium");
   const pairs = Array.isArray(game.pairs) ? game.pairs : [];
 
   const S = StyleSheet.create({
@@ -284,7 +284,7 @@ async function downloadCardsPDF(game: MatchingGameContent, studentName?: string)
     ],
   });
 
-  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today = formatDate(new Date(), "medium");
   const pairs = Array.isArray(game.pairs) ? game.pairs : [];
 
   // Build shuffled card list

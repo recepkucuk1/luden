@@ -26,6 +26,7 @@ import {
   DIFFICULTY_LABEL,
   DIFFICULTY_COLOR,
 } from "@/lib/constants";
+import { formatDate } from "@/lib/utils";
 import { motion, useInView } from "framer-motion";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -41,7 +42,7 @@ function relativeTime(dateStr: string): string {
   const diffD = Math.floor(diffH / 24);
   if (diffD === 1) return "Dün";
   if (diffD < 7) return `${diffD} gün önce`;
-  return d.toLocaleDateString("tr-TR", { day: "numeric", month: "short" });
+  return formatDate(d, "short");
 }
 
 // ─── CountUp Animation ───────────────────────────────────────────────────────
@@ -447,11 +448,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {new Date().toLocaleDateString("tr-TR", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                  })}
+                  {formatDate(new Date(), "long")}
                 </p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                   {weekly?.studentsWorked ?? 0} aktif öğrenci · {weekly?.cardsCreated ?? 0} kart üretildi

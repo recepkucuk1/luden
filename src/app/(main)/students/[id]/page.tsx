@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { cn, toInputDate } from "@/lib/utils";
+import { cn, toInputDate, formatDate } from "@/lib/utils";
 import type { GeneratedCard } from "@/lib/prompts";
 import {
   WORK_AREA_LABEL,
@@ -462,7 +462,7 @@ export default function StudentDetailPage({
             <div className="space-y-2">
               {upcomingLessons.map((l) => {
                 const d = new Date(l.date);
-                const dateStr = d.toLocaleDateString("tr-TR", { weekday: "short", day: "numeric", month: "short" });
+                const dateStr = formatDate(d, "medium");
                 const statusColor = l.status === "COMPLETED" ? "text-emerald-600" : l.status === "CANCELLED" ? "text-zinc-400" : "text-[#107996]";
                 return (
                   <div key={l.id} className="flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2">
@@ -664,7 +664,7 @@ export default function StudentDetailPage({
                     )}
                     <div className="mt-auto pt-3 border-t border-[#023435]/5 flex items-center justify-between">
                       <p className="text-[10px] font-bold text-[#023435]/40 uppercase tracking-widest">
-                        {new Date(card.createdAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                        {formatDate(card.createdAt, "short")}
                       </p>
                       <span className="text-xs text-[#FE703A] font-bold group-hover:translate-x-1 transition-transform">
                         Aç →
@@ -747,7 +747,7 @@ export default function StudentDetailPage({
                     </div>
                     <h3 className="font-extrabold text-[#023435] text-[15px] mb-2 line-clamp-2 leading-snug">{assignment.card.title}</h3>
                     <p className="mt-auto pt-3 border-t border-[#023435]/5 text-[10px] font-bold text-[#023435]/40 uppercase tracking-widest">
-                      Atanma: {new Date(assignment.assignedAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                      Atanma: {formatDate(assignment.assignedAt, "short")}
                     </p>
                   </Link>
                   {/* Durum Seçici */}

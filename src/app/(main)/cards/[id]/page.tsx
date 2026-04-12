@@ -15,7 +15,7 @@ import { PhonationView, type PhonationActivityContent } from "@/components/cards
 import { CommBoardView, type CommBoardContent } from "@/components/cards/CommBoardView";
 import { WeeklyPlanView, type WeeklyPlanContent } from "@/components/cards/WeeklyPlanView";
 import type { GeneratedCard } from "@/lib/prompts";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 interface CurriculumGoal {
   id: string;
@@ -219,7 +219,7 @@ async function downloadSessionSummaryFullPDF(card: CardRecord) {
 
   const summary = card.content as unknown as SessionSummaryContent;
   const goals   = Array.isArray(summary.goalPerformance) ? summary.goalPerformance : [];
-  const today   = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today   = formatDate(new Date(), "medium");
 
   function parseP(acc: string | number): number {
     if (typeof acc === "number") return Math.min(100, Math.max(0, acc));
@@ -349,7 +349,7 @@ async function downloadSessionSummaryParentPDF(card: CardRecord) {
   });
 
   const summary = card.content as unknown as SessionSummaryContent;
-  const today   = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today   = formatDate(new Date(), "medium");
 
   const S = StyleSheet.create({
     page:    { fontFamily: "NotoSans", fontSize: 11, color: "#18181b", padding: 56, paddingBottom: 70 },
@@ -404,7 +404,7 @@ async function downloadPhonationPDF(card: CardRecord) {
 
   const activity = card.content as Record<string, unknown>;
   const sounds   = Array.isArray(activity.targetSounds) ? (activity.targetSounds as string[]) : [];
-  const today    = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today    = formatDate(new Date(), "medium");
   const aType    = activity.activityType as string;
 
   const ACTIVITY_TYPE_LABEL: Record<string, string> = {
@@ -659,7 +659,7 @@ async function downloadCommBoardPDF(card: CardRecord, variant: "board" | "report
   const cells       = Array.isArray(board.cells) ? (board.cells as CommBoardContent["cells"]) : [];
   const cols        = (board.cols as number) ?? 3;
   const rows        = (board.rows as number) ?? Math.ceil(cells.length / cols);
-  const today       = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today       = formatDate(new Date(), "medium");
   const studentName = card.student?.name;
 
   const FG_BG: Record<string, string> = {
@@ -797,7 +797,7 @@ async function downloadCommBoardPDF(card: CardRecord, variant: "board" | "report
           <Text style={S.badge}>{`${rows}×${cols} — ${(board.symbolCount as number | undefined) ?? cells.length} sembol`}</Text>
           <Text style={S.badge}>{board.layout === "grid" ? "Grid" : "Satır"}</Text>
           {colorCoding ? <Text style={S.badge}>Fitzgerald renk kodu</Text> : null}
-          <Text style={S.badge}>{today}</Text>
+          <Text style={S.badge}>{formatDate(new Date(), "medium")}</Text>
         </View>
 
         <Text style={S.secHdr}>Semboller ({cells.length} hücre)</Text>
@@ -877,7 +877,7 @@ async function downloadWeeklyPlanPDF(card: CardRecord) {
   const W     = 210;
   const L     = 14;
   const R     = W - 14;
-  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today = formatDate(new Date(), "medium");
 
   // Load NotoSans for Turkish characters
   const [regResp, boldResp] = await Promise.all([
@@ -1226,7 +1226,7 @@ async function downloadHomeworkPDFFromCard(card: CardRecord) {
     exercise: "Ev Egzersizi", observation: "Gözlem Formu", daily_activity: "Günlük Aktivite",
   };
 
-  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today = formatDate(new Date(), "medium");
   const studentName = card.student?.name;
 
   const S = StyleSheet.create({
@@ -1592,9 +1592,7 @@ export default function CardDetailPage({
         {/* Alt çubuk */}
         <div className="flex items-center justify-between mt-4 flex-wrap gap-2">
           <p className="text-xs text-zinc-400">
-            {new Date(card.createdAt).toLocaleDateString("tr-TR", {
-              day: "numeric", month: "long", year: "numeric",
-            })}
+            {formatDate(card.createdAt, "medium")}
             {card.student && ` · ${card.student.name}`}
           </p>
           <div className="flex items-center gap-2">

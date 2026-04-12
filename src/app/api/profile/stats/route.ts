@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { logError } from "@/lib/utils";
+import { logError, formatDate } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -58,7 +58,7 @@ export async function GET() {
         where: { therapistId, createdAt: { gte: start, lt: end } },
       });
       months.push({
-        month: start.toLocaleDateString("tr-TR", { month: "long", year: "numeric" }),
+        month: formatDate(start, "monthYear"),
         count,
       });
     }

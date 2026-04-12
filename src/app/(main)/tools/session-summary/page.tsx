@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowLeft, RefreshCw, Library, Plus, X, Lock } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
 import { SessionSummaryView, type SessionSummaryContent } from "@/components/cards/SessionSummaryView";
 
@@ -130,7 +130,7 @@ async function downloadFullPDF(summary: SessionSummaryContent, studentName?: str
     ],
   });
 
-  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today = formatDate(new Date(), "medium");
   const goals = Array.isArray(summary.goalPerformance) ? summary.goalPerformance : [];
 
   function parseAccPct(acc: string | number): number {
@@ -276,7 +276,7 @@ async function downloadParentPDF(summary: SessionSummaryContent, studentName?: s
     ],
   });
 
-  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today = formatDate(new Date(), "medium");
 
   const S = StyleSheet.create({
     page:    { fontFamily: "NotoSans", fontSize: 11, color: "#18181b", padding: 56, paddingBottom: 70 },

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, Filter } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -81,7 +82,7 @@ const TOOL_LABELS: Record<string, string> = {
 
 function fmtDate(str: string | null | undefined) {
   if (!str) return "—";
-  return new Date(str).toLocaleDateString("tr-TR", { day: "2-digit", month: "short", year: "numeric" });
+  return formatDate(new Date(str), "short");
 }
 
 function activeSub(u: UserRow): Subscription | null {

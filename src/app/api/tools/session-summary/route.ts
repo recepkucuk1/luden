@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createToolHandler } from "@/lib/toolHandler";
+import { formatDate } from "@/lib/utils";
 
 const SESSION_TYPE_LABEL: Record<string, string> = {
   individual:     "Bireysel Oturum",
@@ -79,9 +80,7 @@ export const POST = createToolHandler({
   fallbackTitle: (_, student) => `Oturum Özeti — ${student?.name ?? ""}`,
 
   buildUserPrompt(data, student, ageText) {
-    const dateDisplay = new Date(data.sessionDate).toLocaleDateString("tr-TR", {
-      day: "numeric", month: "long", year: "numeric",
-    });
+    const dateDisplay = formatDate(data.sessionDate, "medium");
 
     const goalsText = data.goals
       .map((g: z.infer<typeof GoalEntrySchema>, i: number) =>

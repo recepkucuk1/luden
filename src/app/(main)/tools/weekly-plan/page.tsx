@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowLeft, Library } from "lucide-react";
+import { cn, formatDate } from "@/lib/utils";
 import { WeeklyPlanView } from "@/components/cards/WeeklyPlanView";
 import type { WeeklyPlanContent } from "@/components/cards/WeeklyPlanView";
 
@@ -114,8 +115,7 @@ function formatWeekRange(weekStart: string): string {
   const start = new Date(weekStart);
   const end   = new Date(weekStart);
   end.setDate(end.getDate() + 6);
-  const fmt = (d: Date) =>
-    d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const fmt = (d: Date) => formatDate(d, "medium");
   return `${fmt(start)} — ${fmt(end)}`;
 }
 
@@ -129,7 +129,7 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
   const W     = 210;
   const L     = 14;
   const R     = W - 14;
-  const today = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const today = formatDate(new Date(), "medium");
 
   // Load NotoSans for Turkish characters
   const [regResp, boldResp] = await Promise.all([

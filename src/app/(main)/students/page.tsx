@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn, toInputDate } from "@/lib/utils";
+import { cn, toInputDate, formatDate } from "@/lib/utils";
 import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
 import { StudentForm, StudentFormData } from "@/components/students/StudentForm";
 import { ModalPortal } from "@/components/ui/modal-portal";
@@ -385,7 +385,7 @@ export default function StudentsPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-semibold text-[#023435]/50 uppercase tracking-widest flex flex-col">
                       <span>{student._count.cards} Materyal</span>
-                      {student.latestCardAt && <span className="text-[9px] opacity-70 mt-0.5">Son: {new Date(student.latestCardAt).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })}</span>}
+                      {student.latestCardAt && <span className="text-[9px] opacity-70 mt-0.5">Son: {formatDate(student.latestCardAt, "short")}</span>}
                     </span>
                     <span className="text-xs text-[#FE703A] font-bold group-hover:translate-x-1 transition-transform">Detay →</span>
                   </div>

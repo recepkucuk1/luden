@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { anthropic, MODEL } from "@/lib/anthropic";
 import { logUsage } from "@/lib/usage";
 import { rateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { formatDate } from "@/lib/utils";
 
 const COST = 20;
 
@@ -85,8 +86,7 @@ function getWeekRange(weekStart: string): string {
   const start = new Date(weekStart);
   const end   = new Date(weekStart);
   end.setDate(end.getDate() + 6);
-  const fmt = (d: Date) =>
-    d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  const fmt = (d: Date) => formatDate(d, "medium");
   return `${fmt(start)} - ${fmt(end)}`;
 }
 
@@ -103,7 +103,7 @@ function getDayDatesFromSchedule(
     const offset = DAY_OFFSETS[dayName] ?? 0;
     const d = new Date(weekStart);
     d.setDate(d.getDate() + offset);
-    const dateStr = d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+    const dateStr = formatDate(d, "medium");
     for (let li = 0; li < lessonCount; li++) {
       result.push({ name: dayName, date: dateStr, lessonIndex: li + 1, lessonsOnDay: lessonCount });
     }
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
     const dayDates  = getDayDatesFromSchedule(weekStart, daySchedule);
 
     const recentCardsBlock = recentCards.length > 0
-      ? `Son çalışmalar:\n${recentCards.map((c) => `- ${c.title} (${c.toolType ?? "kart"}, ${new Date(c.createdAt).toLocaleDateString("tr-TR")})`).join("\n")}\n\n`
+      ? `Son çalışmalar:\n${recentCards.map((c) => `- ${c.title} (${c.toolType ?? "kart"}, ${formatDate(c.createdAt, "short")})`).join("\n")}\n\n`
       : "";
 
     const lastSummaryBlock = (() => {
@@ -208,7 +208,7 @@ export async function POST(request: NextRequest) {
         c.nextSessionGoals   ? `Sonraki hedefler: ${c.nextSessionGoals}` : "",
       ].filter(Boolean);
       if (parts.length === 0) return "";
-      return `Son oturum özeti (${new Date(lastSummary.createdAt).toLocaleDateString("tr-TR")}):\n${parts.join("\n")}\n\n`;
+      return `Son oturum özeti (${formatDate(lastSummary.createdAt, "short")}):\n${parts.join("\n")}\n\n`;
     })();
 
     const userPrompt = `Öğrenci bilgileri:
