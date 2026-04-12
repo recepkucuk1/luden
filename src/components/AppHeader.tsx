@@ -39,6 +39,13 @@ export function AppHeader() {
   // Sayfa değişince mobil menüyü kapat
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
+  // Mobil menü açıldığında background scroll'u kilitle
+  useEffect(() => {
+    if (mobileOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + "/");
   }
@@ -187,7 +194,7 @@ export function AppHeader() {
 
       {/* Mobil menü */}
       {mobileOpen && (
-        <div className="sm:hidden border-t border-white/10 bg-[#023435] px-4 pb-3 pt-2 space-y-0.5">
+        <div className="sm:hidden fixed top-[64px] inset-x-0 bottom-0 z-40 bg-[#023435]/95 backdrop-blur-md px-4 pb-6 pt-4 space-y-1 overflow-y-auto overscroll-contain animate-in fade-in slide-in-from-top-4 duration-300">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}

@@ -245,7 +245,7 @@ export function GlowyWavesHero() {
           initial={{ opacity: 0, x: 40, y: 20 }}
           animate={{ opacity: 1, x: 0, y: 0 }}
           transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-          className="hidden md:block flex-1 max-w-md w-full"
+          className="block md:flex-1 max-w-md w-full mt-2 md:mt-0 max-w-[320px] md:max-w-md mx-auto"
         >
           <motion.div
             animate={{ y: [0, -8, 0] }}
