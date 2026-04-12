@@ -2,6 +2,36 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* ========== MOBILE FIX PACKAGE (Dalga 1) ========== */
+
+/* Touch optimizations — tap delay ve iOS mavi highlight düzeltmesi */
+button, a, [role="button"], input, label, select, textarea, [tabindex] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(254, 112, 58, 0.15);
+}
+
+/* Scroll chain protection — modal açıkken arka plan scroll etmesin */
+body {
+  overscroll-behavior: none;
+}
+[role="dialog"],
+[class*="fixed inset-0"] {
+  overscroll-behavior: contain;
+}
+
+/* iOS Safari auto-zoom önlemesi — input font-size 16px altındaysa sayfa zoom yapar */
+input, select, textarea {
+  font-size: max(16px, 1rem);
+}
+
+/* Dynamic viewport height — iOS adres çubuğu ve klavye hesabı */
+@supports (height: 100dvh) {
+  .h-screen { height: 100dvh; }
+  .min-h-screen { min-height: 100dvh; }
+}
+
+/* ========== /MOBILE FIX PACKAGE ========== */
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
