@@ -380,6 +380,7 @@ export default function StudentDetailPage({
               </div>
             </div>
           </div>
+          </ModalPortal>
         )}
 
         {/* Düzenleme Modalı */}

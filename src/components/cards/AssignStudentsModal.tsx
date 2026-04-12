@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { WORK_AREA_COLOR, WORK_AREA_LABEL } from "@/lib/constants";
-import { WORK_AREA_COLOR, WORK_AREA_LABEL } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
 import { ModalPortal } from "@/components/ui/modal-portal";
 
