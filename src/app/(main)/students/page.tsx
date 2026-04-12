@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn, toInputDate } from "@/lib/utils";
 import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
 import { StudentForm, StudentFormData } from "@/components/students/StudentForm";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 type FilterArea = "all" | "speech" | "language" | "hearing";
 type SortBy = "name" | "birthDate-asc" | "birthDate-desc" | "lastCard" | "mostCards";
@@ -288,7 +289,8 @@ export default function StudentsPage() {
 
       {/* Yeni Öğrenci Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-6">
           <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-bold text-zinc-900">Yeni Öğrenci Ekle</h2>
@@ -303,11 +305,13 @@ export default function StudentsPage() {
             />
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Düzenleme Modalı */}
       {editingStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-bold text-zinc-900">Öğrenci Düzenle</h2>
@@ -329,6 +333,7 @@ export default function StudentsPage() {
             />
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {/* Hata */}

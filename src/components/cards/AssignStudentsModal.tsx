@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { WORK_AREA_COLOR, WORK_AREA_LABEL } from "@/lib/constants";
+import { WORK_AREA_COLOR, WORK_AREA_LABEL } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 interface StudentOption {
   id: string;
@@ -84,7 +86,8 @@ export function AssignStudentsModal({ cardId, cardTitle, onClose, onSaved }: Pro
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
       <div className="w-full max-w-md rounded-2xl bg-white shadow-xl flex flex-col max-h-[80vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
@@ -146,5 +149,6 @@ export function AssignStudentsModal({ cardId, cardTitle, onClose, onSaved }: Pro
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }

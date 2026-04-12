@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { GlassCalendar } from "@/components/ui/glass-calendar";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -266,8 +267,9 @@ function LessonModal({
   const labelCls = "mb-1.5 block text-xs font-medium text-[#023435]/60";
 
   return (
+    <ModalPortal>
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       style={{ background: "rgba(2,52,53,0.4)", backdropFilter: "blur(4px)" }}
       onClick={onClose}
     >
@@ -408,6 +410,7 @@ function LessonModal({
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }
 
@@ -491,8 +494,9 @@ function LessonDetailModal({
   }
 
   return (
+    <ModalPortal>
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       style={{ background: "rgba(2,52,53,0.4)", backdropFilter: "blur(4px)" }}
       onClick={onClose}
     >
@@ -599,6 +603,7 @@ function LessonDetailModal({
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }
 

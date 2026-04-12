@@ -24,6 +24,7 @@ import { ProgressTab } from "@/components/students/ProgressTab";
 import { CurriculumPicker } from "@/components/students/CurriculumPicker";
 import { Markdown } from "@/components/Md";
 import { SwipeableCard } from "@/components/SwipeableCard";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 function parseProfileSections(text: string): { title: string; content: string }[] {
   const result: { title: string; content: string }[] = [];
@@ -361,7 +362,8 @@ export default function StudentDetailPage({
 
         {/* Silme Onayı */}
         {showDeleteConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <ModalPortal>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
             <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-6 text-center">
               <p className="text-base font-semibold text-zinc-900 mb-1">Öğrenciyi sil</p>
               <p className="text-sm text-zinc-500 mb-1">
@@ -382,7 +384,8 @@ export default function StudentDetailPage({
 
         {/* Düzenleme Modalı */}
         {showEdit && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <ModalPortal>
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
             <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-base font-bold text-zinc-900">Öğrenci Düzenle</h2>
@@ -445,6 +448,7 @@ export default function StudentDetailPage({
               </form>
             </div>
           </div>
+          </ModalPortal>
         )}
 
         {/* Yaklaşan Dersler */}

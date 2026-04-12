@@ -16,6 +16,7 @@ import {
   AGE_LABEL,
 } from "@/lib/constants";
 import { Filter } from "lucide-react";
+import { ModalPortal } from "@/components/ui/modal-portal";
 
 interface CardItem {
   id: string;
@@ -1061,7 +1062,8 @@ export default function CardsPage() {
       </main>
 
       {confirmDeleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-6 text-center">
             <p className="text-base font-semibold text-zinc-900 mb-1">Kartı sil</p>
             <p className="text-sm text-zinc-500 mb-5">
@@ -1077,6 +1079,7 @@ export default function CardsPage() {
             </div>
           </div>
         </div>
+        </ModalPortal>
       )}
 
       {assigningCard && (
