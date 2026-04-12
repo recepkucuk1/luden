@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { WORK_AREA_COLOR, WORK_AREA_LABEL } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
 import { ModalPortal } from "@/components/ui/modal-portal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface StudentOption {
   id: string;
@@ -102,11 +103,12 @@ export function AssignStudentsModal({ cardId, cardTitle, onClose, onSaved }: Pro
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-6 w-6 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
+            <div className="space-y-3 py-2">
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
             </div>
           ) : students.length === 0 ? (
             <p className="text-sm text-zinc-400 text-center py-12">Henüz öğrenci eklenmedi.</p>

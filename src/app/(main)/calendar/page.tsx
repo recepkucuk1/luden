@@ -5,6 +5,10 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { GlassCalendar } from "@/components/ui/glass-calendar";
 import { ModalPortal } from "@/components/ui/modal-portal";
+import { Skeleton } from "@/components/ui/skeleton";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -863,19 +867,24 @@ export default function CalendarPage() {
     d.setHours(0, 0, 0, 0);
     return d;
   });
-  const [lessons,        setLessons]        = useState<Lesson[]>([]);
-  const [students,       setStudents]       = useState<Student[]>([]);
-  const [loading,        setLoading]        = useState(true);
+  
+  const query = view === "month"
+    ? `month=${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`
+    : `week=${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
+
+  const { data: studentsData } = useSWR("/api/students", fetcher);
+  const { data: lessonsData, mutate: mutateLessons, isLoading } = useSWR(`/api/lessons?${query}`, fetcher);
+
+  const students: Student[] = studentsData?.students ?? [];
+  const lessons: Lesson[] = lessonsData?.lessons ?? [];
+  const loading = isLoading;
+
   const [showAddModal,   setShowAddModal]   = useState(false);
   const [addInitialDate, setAddInitialDate] = useState<Date | undefined>();
   const [selectedLesson, setSelectedLesson] = useState<{ lesson: Lesson; date: Date } | null>(null);
   const [selectedStudentFilter, setSelectedStudentFilter] = useState<string>("");
 
   useEffect(() => {
-    fetch("/api/students")
-      .then((r) => r.json())
-      .then((d) => setStudents((d.students ?? []).map((s: { id: string; name: string }) => ({ id: s.id, name: s.name }))));
-      
     // Request notification permission for upcoming lesson alerts
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
@@ -908,21 +917,6 @@ export default function CalendarPage() {
     return () => clearInterval(interval);
   }, [lessons]);
 
-  const fetchLessons = useCallback(async () => {
-    setLoading(true);
-    try {
-      const query = view === "month"
-        ? `month=${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`
-        : `week=${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-      const res  = await fetch(`/api/lessons?${query}`);
-      const data = await res.json();
-      setLessons(data.lessons ?? []);
-    } catch { toast.error("Dersler yüklenemedi"); }
-    finally   { setLoading(false); }
-  }, [view, currentDate, weekStart]);
-
-  useEffect(() => { fetchLessons(); }, [fetchLessons]);
-
   // When GlassCalendar selects a date in another month → update currentDate for API
   function handleSelectDate(date: Date) {
     setSelectedDay(date);
@@ -946,16 +940,20 @@ export default function CalendarPage() {
   }
 
   function handleLessonSaved(lesson: Lesson) {
-    setLessons((prev) => {
-      const idx = prev.findIndex((l) => l.id === lesson.id);
-      if (idx >= 0) { const n = [...prev]; n[idx] = lesson; return n; }
-      return [...prev, lesson];
-    });
+    mutateLessons((data: any) => {
+      const prev = data?.lessons ?? [];
+      const idx = prev.findIndex((l: Lesson) => l.id === lesson.id);
+      if (idx >= 0) { const n = [...prev]; n[idx] = lesson; return { ...data, lessons: n }; }
+      return { ...data, lessons: [...prev, lesson] };
+    }, false);
     setShowAddModal(false);
     if (selectedLesson) setSelectedLesson({ lesson, date: selectedLesson.date });
   }
   function handleLessonDeleted(id: string) {
-    setLessons((prev) => prev.filter((l) => l.id !== id));
+    mutateLessons((data: any) => {
+      const prev = data?.lessons ?? [];
+      return { ...data, lessons: prev.filter((l: Lesson) => l.id !== id) };
+    }, false);
     setSelectedLesson(null);
   }
 
@@ -1014,7 +1012,6 @@ export default function CalendarPage() {
       return;
     }
 
-    setLoading(true);
     try {
       const payload: any = {
         date: dStr,
@@ -1033,10 +1030,11 @@ export default function CalendarPage() {
       if (!res.ok) throw new Error(data.error || "Taşıma başarısız");
       
       toast.success("Ders başarıyla taşındı");
-      fetchLessons();
+      mutateLessons(); // SWR ile yeniden doğrula
     } catch (e: any) {
       toast.error(e.message || "Bir hata oluştu");
-      setLoading(false);
+    } finally {
+      // setLoading(false) gerekmez çünkü SWR bunu asenkron yönetiyor ancak drop için state korundu if necessary
     }
   };
 
@@ -1103,8 +1101,15 @@ export default function CalendarPage() {
 
         {/* ── Content ── */}
         {loading ? (
-          <div className="flex flex-1 items-center justify-center py-24">
-            <div className="h-6 w-6 rounded-full border-2 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
+          <div className="flex flex-1 gap-5 py-4">
+            <div className="w-full lg:w-[380px] h-96">
+              <Skeleton className="w-full h-full rounded-2xl" />
+            </div>
+            <div className="hidden lg:flex flex-1 flex-col gap-3">
+              <Skeleton className="w-full h-20 rounded-xl" />
+              <Skeleton className="w-full h-20 rounded-xl" />
+              <Skeleton className="w-full h-20 rounded-xl" />
+            </div>
           </div>
         ) : view === "month" ? (
           /* ── Monthly: GlassCalendar + Day lesson list ── */
