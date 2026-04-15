@@ -6,11 +6,19 @@
 
 import Iyzipay from "iyzipay";
 
-const iyzipay = new Iyzipay({
-  apiKey: process.env.IYZICO_API_KEY!,
-  secretKey: process.env.IYZICO_SECRET_KEY!,
-  uri: process.env.IYZICO_BASE_URL || "https://sandbox-api.iyzipay.com",
-});
+// Lazy initialization — build zamanında env var olmadığı için modül
+// yüklendiğinde değil, ilk API çağrısında oluşturulur.
+let _iyzipay: Iyzipay | null = null;
+function getClient(): Iyzipay {
+  if (!_iyzipay) {
+    _iyzipay = new Iyzipay({
+      apiKey: process.env.IYZICO_API_KEY!,
+      secretKey: process.env.IYZICO_SECRET_KEY!,
+      uri: process.env.IYZICO_BASE_URL || "https://sandbox-api.iyzipay.com",
+    });
+  }
+  return _iyzipay;
+}
 
 // ─── Type Definitions ────────────────────────────────────────────────────────
 
@@ -98,7 +106,7 @@ export async function createProduct(
   description?: string,
 ): Promise<IyzicoResponse<IyzicoProduct>> {
   return new Promise((resolve, reject) => {
-    iyzipay.subscriptionProduct.create(
+    getClient().subscriptionProduct.create(
       {
         locale: Iyzipay.LOCALE.TR,
         conversationId: Date.now().toString(),
@@ -125,7 +133,7 @@ export async function listProducts(
   }>
 > {
   return new Promise((resolve, reject) => {
-    iyzipay.subscriptionProduct.retrieveList(
+    getClient().subscriptionProduct.retrieveList(
       {
         locale: Iyzipay.LOCALE.TR,
         conversationId: Date.now().toString(),
@@ -157,7 +165,7 @@ export async function createPricingPlan(
   input: CreatePricingPlanInput,
 ): Promise<IyzicoResponse<IyzicoPricingPlan>> {
   return new Promise((resolve, reject) => {
-    iyzipay.subscriptionPricingPlan.create(
+    getClient().subscriptionPricingPlan.create(
       {
         locale: Iyzipay.LOCALE.TR,
         conversationId: Date.now().toString(),
@@ -181,7 +189,7 @@ export async function listPricingPlans(
   count = 100,
 ): Promise<IyzicoResponse<{ items: IyzicoPricingPlan[] }>> {
   return new Promise((resolve, reject) => {
-    iyzipay.subscriptionPricingPlan.retrieveList(
+    getClient().subscriptionPricingPlan.retrieveList(
       {
         locale: Iyzipay.LOCALE.TR,
         conversationId: Date.now().toString(),
@@ -210,7 +218,7 @@ export async function initializeCheckoutForm(
   input: InitCheckoutFormInput,
 ): Promise<IyzicoResponse<never>> {
   return new Promise((resolve, reject) => {
-    iyzipay.subscriptionCheckoutForm.initialize(
+    getClient().subscriptionCheckoutForm.initialize(
       {
         locale: Iyzipay.LOCALE.TR,
         conversationId: Date.now().toString(),
@@ -229,7 +237,7 @@ export async function retrieveCheckoutForm(
   token: string,
 ): Promise<IyzicoResponse<IyzicoSubscriptionData>> {
   return new Promise((resolve, reject) => {
-    iyzipay.subscriptionCheckoutForm.retrieve(
+    getClient().subscriptionCheckoutForm.retrieve(
       {
         locale: Iyzipay.LOCALE.TR,
         conversationId: Date.now().toString(),
@@ -250,7 +258,7 @@ export async function retrieveSubscription(
   subscriptionReferenceCode: string,
 ): Promise<IyzicoResponse<IyzicoSubscriptionData>> {
   return new Promise((resolve, reject) => {
-    iyzipay.subscription.retrieve(
+    getClient().subscription.retrieve(
       {
         locale: Iyzipay.LOCALE.TR,
         conversationId: Date.now().toString(),
@@ -268,7 +276,7 @@ export async function cancelSubscription(
   subscriptionReferenceCode: string,
 ): Promise<IyzicoResponse<never>> {
   return new Promise((resolve, reject) => {
-    iyzipay.subscription.cancel(
+    getClient().subscription.cancel(
       {
         locale: Iyzipay.LOCALE.TR,
         conversationId: Date.now().toString(),
