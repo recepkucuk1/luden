@@ -8,8 +8,6 @@ import {
   CheckCircle2,
   LayoutGrid,
   Flame,
-  Sun,
-  Moon,
   User,
   TrendingUp,
   Package,
@@ -119,15 +117,6 @@ export default function DashboardPage() {
   const [recentCards, setRecentCards] = useState<RecentCard[]>([]);
   const [recentStudents, setRecentStudents] = useState<RecentStudent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDark]);
 
   useEffect(() => {
     async function load() {
@@ -154,7 +143,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 bg-gray-50 dark:bg-zinc-950 p-6 flex flex-col items-center justify-center">
+      <div className="flex-1 bg-gray-50 dark:bg-gray-900 p-6 flex flex-col items-center justify-center">
         <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
         <p className="mt-4 text-sm text-gray-500">Yükleniyor...</p>
       </div>
@@ -224,12 +213,6 @@ export default function DashboardPage() {
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Yeni Kart Üret</span>
           </Link>
-          <button
-            onClick={() => setIsDark(!isDark)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-          >
-            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
           <Link
             href="/profile"
             className="p-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"

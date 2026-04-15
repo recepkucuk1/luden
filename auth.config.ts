@@ -34,6 +34,8 @@ export const authConfig: NextAuthConfig = {
       const isApiAuth = path.startsWith("/api/auth");
       const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
 
+      // Webhook endpoint'leri auth gerektirmez — iyzico sunucudan çağırır
+      if (path.startsWith("/api/webhooks")) return true;
       if (isApiAuth) return true;
       if (isPublic) return true;
       if (isAuthPage) {

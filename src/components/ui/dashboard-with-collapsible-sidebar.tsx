@@ -15,14 +15,19 @@ import {
   LogOut,
   Menu,
   X,
+  Sun,
+  Moon,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/ThemeProvider";
 
 export const Sidebar = () => {
   const [open, setOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { theme, toggleTheme } = useTheme();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,6 +61,7 @@ export const Sidebar = () => {
     { icon: Users,        title: "Öğrenciler", href: "/students"    },
     { icon: Layers,       title: "Kütüphane",  href: "/cards"       },
     { icon: CalendarDays, title: "Takvim",     href: "/calendar"    },
+    { icon: CreditCard,   title: "Abonelik",   href: "/subscription"},
   ];
 
   const adminItems = [
@@ -119,31 +125,49 @@ export const Sidebar = () => {
             ))}
         </div>
 
-        {open && (
-          <div className="border-t border-gray-200 dark:border-gray-800 pt-4 space-y-1 absolute bottom-14 left-2 right-2 bg-white dark:bg-gray-900">
+        <div className="border-t border-gray-200 dark:border-gray-800 pt-4 pb-2 space-y-1 absolute bottom-14 left-2 right-2 bg-white dark:bg-gray-900">
+          {open && (
             <div className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               Hesap
             </div>
-            <Option
-              Icon={Settings}
-              title="Profil"
-              href="/profile"
-              currentPath={pathname}
-              open={open}
-            />
-            <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
-              className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400"
-            >
-              <div className="grid h-full w-12 place-content-center">
-                <LogOut className="h-4 w-4" />
-              </div>
+          )}
+          <Option
+            Icon={Settings}
+            title="Profil"
+            href="/profile"
+            currentPath={pathname}
+            open={open}
+          />
+          <button
+            onClick={toggleTheme}
+            className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
+            title={theme === "dark" ? "Gündüz Modu" : "Gece Modu"}
+          >
+            <div className="grid h-full w-12 place-content-center">
+              {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
+            </div>
+            {open && (
+              <span className="text-sm font-medium transition-opacity duration-200 opacity-100">
+                {theme === "dark" ? "Gündüz Modu" : "Gece Modu"}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400"
+            title="Çıkış Yap"
+          >
+            <div className="grid h-full w-12 place-content-center">
+              <LogOut className="h-4 w-4" />
+            </div>
+            {open && (
               <span className="text-sm font-medium transition-opacity duration-200 opacity-100">
                 Çıkış Yap
               </span>
-            </button>
-          </div>
-        )}
+            )}
+          </button>
+        </div>
+
 
         <div className="hidden md:block">
           <ToggleClose open={open} setOpen={setOpen} />

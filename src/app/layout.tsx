@@ -28,13 +28,17 @@ export const metadata: Metadata = {
   },
 };
 
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="tr">
+    <html lang="tr" suppressHydrationWarning>
       <body className={`${jakarta.variable} antialiased`}>
-        <AuthSessionProvider>{children}</AuthSessionProvider>
-        <Toaster position="bottom-right" duration={3000} richColors />
-        <CookieBanner />
+        <ThemeProvider>
+          <AuthSessionProvider>{children}</AuthSessionProvider>
+          <Toaster position="bottom-right" duration={3000} richColors />
+          <CookieBanner />
+        </ThemeProvider>
       </body>
     </html>
   );

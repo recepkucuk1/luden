@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  serverExternalPackages: ["iyzipay"],
   headers: async () => [
     {
       source: "/(.*)",
@@ -11,12 +12,12 @@ const nextConfig: NextConfig = {
           value: [
             "default-src 'self'",
             // NOTE: unsafe-eval geri eklendi — @react-pdf/renderer WASM gerektiriyor
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.hcaptcha.com",
-            "style-src 'self' 'unsafe-inline'",
-            "img-src 'self' data: blob:",
-            "font-src 'self'",
-            "frame-src 'self' https://newassets.hcaptcha.com",
-            "connect-src 'self' https://hcaptcha.com https://sentry.hcaptcha.com https://vitals.vercel-insights.com https://va.vercel-scripts.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.hcaptcha.com *.iyzipay.com *.iyzico.com",
+            "style-src 'self' 'unsafe-inline' *.iyzipay.com *.iyzico.com",
+            "img-src 'self' data: blob: *.iyzipay.com *.iyzico.com",
+            "font-src 'self' *.iyzipay.com *.iyzico.com",
+            "frame-src 'self' https://newassets.hcaptcha.com *.iyzipay.com *.iyzico.com",
+            "connect-src 'self' https://hcaptcha.com https://sentry.hcaptcha.com https://vitals.vercel-insights.com https://va.vercel-scripts.com *.iyzipay.com *.iyzico.com",
             "worker-src 'self' blob:",
           ].join("; "),
         },

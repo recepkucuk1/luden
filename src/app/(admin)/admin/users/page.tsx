@@ -586,9 +586,21 @@ export default function AdminUsersPage() {
 
   return (
     <div 
-      className="min-h-full flex-1 w-full flex flex-col relative overflow-y-auto custom-scrollbar bg-[#F0F4F4]"
-      style={{ background: "linear-gradient(135deg, #f0f7f7 0%, #e8f4f4 50%, #f5fafa 100%)" }}
+      className="min-h-full flex-1 w-full flex flex-col relative overflow-y-auto custom-scrollbar dark:bg-gray-900"
+      style={{ background: "linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%)" }}
     >
+      <style jsx>{`
+        div {
+          --bg-start: #f0f7f7;
+          --bg-mid: #e8f4f4;
+          --bg-end: #f5fafa;
+        }
+        :global(.dark) div {
+          --bg-start: #111827;
+          --bg-mid: #111827;
+          --bg-end: #111827;
+        }
+      `}</style>
       {/* Decorative Orbs */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#107996]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#FE703A]/5 rounded-full blur-[150px] translate-x-1/2 translate-y-1/2 pointer-events-none" />
@@ -597,8 +609,10 @@ export default function AdminUsersPage() {
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-[#023435] tracking-tight">Gelişmiş Yönetim</h1>
-            <p className="mt-1 text-sm text-[#023435]/60">Sistemdeki tüm kayıtlı {users.length} terapist ve kullanıcıyı yönetin.</p>
+            <h1 className="text-3xl font-extrabold text-[#023435] dark:text-zinc-100 tracking-tight">Gelişmiş Yönetim</h1>
+            <p className="mt-1 text-sm text-[#023435]/60 dark:text-zinc-400">
+              Sistemdeki tüm terapistleri ve kullanım metriklerini yönetin.
+            </p>
           </div>
           <a
             href="/admin"

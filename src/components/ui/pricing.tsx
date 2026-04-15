@@ -179,7 +179,7 @@ export function Pricing({
 
               {plan.href ? (
                 <Link
-                  href={plan.href}
+                  href={`${plan.href}${plan.href.includes("?") ? "&" : "?"}cycle=${isMonthly ? "monthly" : "yearly"}`}
                   className={cn(
                     "block w-full rounded-xl py-2.5 text-center text-sm font-semibold transition-all duration-200",
                     plan.isPopular

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Camera, Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { type EarnedBadge } from "@/lib/badges";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface TherapistProfile {
   id: string;
@@ -384,19 +385,27 @@ export default function ProfilePage() {
           </div>
         </div>
         <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarFile} />
-        <div className="text-center">
-          <h1 className="text-xl font-bold text-zinc-900">{displayName}</h1>
-          {specialtyLabel && (
-            <span className="inline-block mt-1 rounded-full bg-[#023435]/10 px-3 py-0.5 text-xs font-medium text-[#023435]">
-              {specialtyLabel}
-            </span>
-          )}
-          {profile && (
-            <p className="text-xs text-zinc-400 mt-1">
-              {PLAN_LABELS[profile.planType] ?? profile.planType} · {profile.credits} kredi
-            </p>
-          )}
-        </div>
+          <div className="text-center">
+            <h1 className="text-xl font-bold text-zinc-900">{displayName}</h1>
+            {specialtyLabel && (
+              <span className="inline-block mt-1 rounded-full bg-[#023435]/10 px-3 py-0.5 text-xs font-medium text-[#023435]">
+                {specialtyLabel}
+              </span>
+            )}
+            {profile && (
+              <div className="flex flex-col items-center mt-2 gap-2">
+                <p className="text-xs text-zinc-500 font-medium">
+                  {PLAN_LABELS[profile.planType] ?? profile.planType} Planı · <span className="text-[#FE703A] font-bold">{profile.credits} Kredi</span>
+                </p>
+                <Link
+                  href="/subscription"
+                  className="rounded-lg border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-600 transition-colors hover:bg-zinc-50"
+                >
+                  Planı Yükselt / Aboneliği Yönet
+                </Link>
+              </div>
+            )}
+          </div>
       </div>
 
       {/* Kişisel Bilgiler */}

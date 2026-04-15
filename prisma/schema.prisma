@@ -118,6 +118,10 @@ model Plan {
   monthlyPrice Int // kuruş cinsinden (37900 = 379 TL)
   yearlyPrice  Int // kuruş cinsinden
   pdfEnabled   Boolean
+  // ── iyzico referans alanları ──
+  iyzicoProductRef     String? // iyzico ürün referans kodu
+  iyzicoMonthlyPlanRef String? // aylık planın iyzico referans kodu
+  iyzicoYearlyPlanRef  String? // yıllık planın iyzico referans kodu
   createdAt    DateTime @default(now())
 
   subscriptions Subscription[]
@@ -130,6 +134,11 @@ model Subscription {
   status           SubscriptionStatus @default(PENDING)
   billingCycle     BillingCycle
   currentPeriodEnd DateTime
+  // ── iyzico referans alanları ──
+  iyzicoSubscriptionRef String?        @unique // iyzico subscription reference code
+  iyzicoCustomerRef     String?                // iyzico customer reference code
+  iyzicoPricingPlanRef  String?                // seçilen iyzico plan referansı
+  cancelledAt           DateTime?              // iptal tarihi
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 

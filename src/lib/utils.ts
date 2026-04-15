@@ -22,10 +22,20 @@ export function toInputDate(dateStr: string | null): string {
   return dateStr.slice(0, 10);
 }
 
+const MONTHS_TR = [
+  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+];
+
+const DAYS_TR = [
+  "Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"
+];
+
 /**
  * Merkezi tarih formatlama fonksiyonu (GG.AA.YYYY veya kapsamlı format).
+ * Tarayıcı yerel ayarlarından bağımsız olarak Türkçe format (GG.AA.YYYY) döner.
  * @param date - String veya Date objesi.
- * @param formatType - Kısaca gün.ay.yıl mı yoksa gün ay yıl günadı mı dönecek
+ * @param formatType - Format türü: short (14.04.2026), medium (14 Nisan 2026), long (14 Nisan 2026 Pazartesi), monthYear (Nisan 2026)
  */
 export function formatDate(
   date: Date | string | null | undefined,
@@ -34,42 +44,32 @@ export function formatDate(
   if (!date) return "";
   const d = new Date(date);
   
-  // Format hatalı (Invalid Date) ise koruma
   if (isNaN(d.getTime())) return "";
+
+  const day = d.getDate();
+  const dayPadded = String(day).padStart(2, "0");
+  const month = d.getMonth(); // 0-indexed
+  const monthPadded = String(month + 1).padStart(2, "0");
+  const year = d.getFullYear();
+  const weekday = d.getDay(); // 0 (Pazar) - 6 (Cumartesi)
 
   if (formatType === "short") {
     // Örnek: "14.04.2026"
-    return d.toLocaleDateString("tr-TR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    });
+    return `${dayPadded}.${monthPadded}.${year}`;
   }
 
   if (formatType === "medium") {
     // Örnek: "14 Nisan 2026"
-    return d.toLocaleDateString("tr-TR", {
-      day: "numeric",
-      month: "long",
-      year: "numeric"
-    });
+    return `${day} ${MONTHS_TR[month]} ${year}`;
   }
 
   if (formatType === "monthYear") {
     // Örnek: "Nisan 2026"
-    return d.toLocaleDateString("tr-TR", {
-      month: "long",
-      year: "numeric"
-    });
+    return `${MONTHS_TR[month]} ${year}`;
   }
 
   // formatType === "long" (Örnek: "14 Nisan 2026 Pazartesi")
-  return d.toLocaleDateString("tr-TR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  });
+  return `${day} ${MONTHS_TR[month]} ${year} ${DAYS_TR[weekday]}`;
 }
 
 /**

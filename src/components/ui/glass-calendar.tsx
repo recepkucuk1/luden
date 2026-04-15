@@ -85,7 +85,7 @@ export function GlassCalendar({
     <div
       className={cn(
         "rounded-2xl p-4 select-none",
-        "bg-[rgba(2,52,53,0.06)] border border-[rgba(2,52,53,0.12)] backdrop-blur-[16px]",
+        "bg-[rgba(2,52,53,0.06)] dark:bg-white/5 border border-[rgba(2,52,53,0.12)] dark:border-white/10 backdrop-blur-[16px]",
         className
       )}
     >
@@ -94,7 +94,7 @@ export function GlassCalendar({
         <button
           onClick={() => go(-1)}
           aria-label="Önceki ay"
-          className="rounded-lg p-1.5 text-[#023435]/40 hover:bg-[#023435]/8 hover:text-[#023435]/80 transition-colors"
+          className="rounded-lg p-1.5 text-[#023435]/40 dark:text-zinc-400 hover:bg-[#023435]/8 dark:hover:bg-white/10 hover:text-[#023435]/80 dark:hover:text-zinc-200 transition-colors"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -110,7 +110,7 @@ export function GlassCalendar({
             animate="center"
             exit="exit"
             transition={{ duration: 0.22, ease: "easeInOut" }}
-            className="text-sm font-semibold capitalize text-[#023435]"
+            className="text-sm font-semibold capitalize text-[#023435] dark:text-zinc-100"
           >
             {format(cursor, "MMMM yyyy", { locale: tr })}
           </motion.h2>
@@ -119,7 +119,7 @@ export function GlassCalendar({
         <button
           onClick={() => go(1)}
           aria-label="Sonraki ay"
-          className="rounded-lg p-1.5 text-[#023435]/40 hover:bg-[#023435]/8 hover:text-[#023435]/80 transition-colors"
+          className="rounded-lg p-1.5 text-[#023435]/40 dark:text-zinc-400 hover:bg-[#023435]/8 dark:hover:bg-white/10 hover:text-[#023435]/80 dark:hover:text-zinc-200 transition-colors"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -132,7 +132,7 @@ export function GlassCalendar({
         {DAY_NAMES.map((name) => (
           <div
             key={name}
-            className="py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-[rgba(2,52,53,0.4)]"
+            className="py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-[rgba(2,52,53,0.4)] dark:text-zinc-500"
           >
             {name}
           </div>
@@ -175,10 +175,10 @@ export function GlassCalendar({
                     isSelected
                       ? "text-white shadow-lg"
                       : isTodayDate
-                        ? "text-[#FE703A] font-semibold hover:bg-[#FE703A]/8"
+                        ? "text-[#FE703A] font-semibold hover:bg-[#FE703A]/8 dark:hover:bg-[#FE703A]/20"
                         : isCurrentMonth
-                          ? "text-[#023435]/70 hover:bg-[#023435]/8"
-                          : "text-[#023435]/25 hover:bg-[#023435]/5"
+                          ? "text-[#023435]/70 dark:text-zinc-300 hover:bg-[#023435]/8 dark:hover:bg-white/10"
+                          : "text-[#023435]/25 dark:text-zinc-600 hover:bg-[#023435]/5 dark:hover:bg-white/5"
                   )}
                   style={
                     isSelected
@@ -216,7 +216,7 @@ export function GlassCalendar({
       </div>
 
       {/* ── Footer: today shortcut ── */}
-      <div className="mt-3 border-t border-[rgba(2,52,53,0.1)] pt-3 flex justify-center">
+      <div className="mt-3 border-t border-[rgba(2,52,53,0.1)] dark:border-white/10 pt-3 flex justify-center">
         <button
           onClick={() => {
             const t = new Date();
@@ -224,7 +224,7 @@ export function GlassCalendar({
             setCursor(startOfMonth(t));
             onSelectDate(t);
           }}
-          className="rounded-lg px-3 py-1 text-[11px] font-medium text-[#023435]/40 hover:bg-[#023435]/8 hover:text-[#023435]/70 transition-colors"
+          className="rounded-lg px-3 py-1 text-[11px] font-medium text-[#023435]/40 dark:text-zinc-400 hover:bg-[#023435]/8 dark:hover:bg-white/10 hover:text-[#023435]/70 dark:hover:text-zinc-200 transition-colors"
         >
           Bugüne git
         </button>
