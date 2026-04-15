@@ -98,7 +98,6 @@ export async function createProduct(
   description?: string,
 ): Promise<IyzicoResponse<IyzicoProduct>> {
   return new Promise((resolve, reject) => {
-    // @ts-expect-error iyzipay types are mostly missing/partial for subscription
     iyzipay.subscriptionProduct.create(
       {
         locale: Iyzipay.LOCALE.TR,
@@ -126,7 +125,6 @@ export async function listProducts(
   }>
 > {
   return new Promise((resolve, reject) => {
-    // @ts-expect-error iyzipay types
     iyzipay.subscriptionProduct.retrieveList(
       {
         locale: Iyzipay.LOCALE.TR,
@@ -159,7 +157,6 @@ export async function createPricingPlan(
   input: CreatePricingPlanInput,
 ): Promise<IyzicoResponse<IyzicoPricingPlan>> {
   return new Promise((resolve, reject) => {
-    // @ts-expect-error iyzipay types
     iyzipay.subscriptionPricingPlan.create(
       {
         locale: Iyzipay.LOCALE.TR,
@@ -184,7 +181,6 @@ export async function listPricingPlans(
   count = 100,
 ): Promise<IyzicoResponse<{ items: IyzicoPricingPlan[] }>> {
   return new Promise((resolve, reject) => {
-    // @ts-expect-error iyzipay types
     iyzipay.subscriptionPricingPlan.retrieveList(
       {
         locale: Iyzipay.LOCALE.TR,
@@ -214,7 +210,6 @@ export async function initializeCheckoutForm(
   input: InitCheckoutFormInput,
 ): Promise<IyzicoResponse<never>> {
   return new Promise((resolve, reject) => {
-    // @ts-expect-error iyzipay types
     iyzipay.subscriptionCheckoutForm.initialize(
       {
         locale: Iyzipay.LOCALE.TR,
@@ -234,7 +229,6 @@ export async function retrieveCheckoutForm(
   token: string,
 ): Promise<IyzicoResponse<IyzicoSubscriptionData>> {
   return new Promise((resolve, reject) => {
-    // @ts-expect-error iyzipay types
     iyzipay.subscriptionCheckoutForm.retrieve(
       {
         locale: Iyzipay.LOCALE.TR,
@@ -256,7 +250,6 @@ export async function retrieveSubscription(
   subscriptionReferenceCode: string,
 ): Promise<IyzicoResponse<IyzicoSubscriptionData>> {
   return new Promise((resolve, reject) => {
-    // @ts-expect-error iyzipay types
     iyzipay.subscription.retrieve(
       {
         locale: Iyzipay.LOCALE.TR,
@@ -275,7 +268,6 @@ export async function cancelSubscription(
   subscriptionReferenceCode: string,
 ): Promise<IyzicoResponse<never>> {
   return new Promise((resolve, reject) => {
-    // @ts-expect-error iyzipay types
     iyzipay.subscription.cancel(
       {
         locale: Iyzipay.LOCALE.TR,
