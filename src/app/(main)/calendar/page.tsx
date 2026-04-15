@@ -74,9 +74,9 @@ const END_HOUR    = 20;
 const HOUR_HEIGHT = 48;
 
 const STATUS_PILL: Record<LessonStatus, string> = {
-  PLANNED:   "bg-[rgba(16,121,150,0.12)] text-[#107996] dark:text-[#90DDF0] border-[#107996]/25 dark:border-[#90DDF0]/25",
-  COMPLETED: "bg-[rgba(2,52,53,0.1)] text-[#023435] dark:text-emerald-400 border-[rgba(2,52,53,0.2)] dark:border-emerald-400/20",
-  CANCELLED: "bg-[rgba(105,33,55,0.1)] text-[#692137] dark:text-red-400 border-[rgba(105,33,55,0.2)] dark:border-red-400/20",
+  PLANNED:   "bg-[rgba(16,121,150,0.12)] text-[#107996] border-[#107996]/25",
+  COMPLETED: "bg-[rgba(2,52,53,0.1)] text-[#023435] border-[rgba(2,52,53,0.2)]",
+  CANCELLED: "bg-[rgba(105,33,55,0.1)] text-[#692137] border-[rgba(105,33,55,0.2)]",
 };
 const STATUS_LABEL: Record<LessonStatus, string> = {
   PLANNED:   "Planlandı",
@@ -84,7 +84,7 @@ const STATUS_LABEL: Record<LessonStatus, string> = {
   CANCELLED: "İptal Edildi",
 };
 
-const GLASS = "bg-[rgba(2,52,53,0.06)] dark:bg-white/5 border border-[rgba(2,52,53,0.12)] dark:border-white/10 backdrop-blur-[12px]";
+const GLASS = "bg-[rgba(2,52,53,0.06)] border border-[rgba(2,52,53,0.12)] backdrop-blur-[12px]";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -503,19 +503,19 @@ function LessonDetailModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-2xl shadow-2xl bg-white dark:bg-zinc-900 border border-[rgba(2,52,53,0.12)] dark:border-white/10"
+        className="w-full max-w-sm rounded-2xl shadow-2xl bg-white border border-[rgba(2,52,53,0.12)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="border-b border-[rgba(2,52,53,0.1)] dark:border-white/10 px-5 py-4">
+        <div className="border-b border-[rgba(2,52,53,0.1)] px-5 py-4">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-xs text-[#023435]/40 dark:text-zinc-500 mb-0.5">{lesson.student.name}</p>
-              <h2 className="text-sm font-semibold text-[#023435] dark:text-zinc-100">{lesson.title}</h2>
+              <p className="text-xs text-[#023435]/40 mb-0.5">{lesson.student.name}</p>
+              <h2 className="text-sm font-semibold text-[#023435]">{lesson.title}</h2>
               {lesson.isRecurring && (
                 <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-[#FE703A]/80">↺ Haftalık tekrarlayan</span>
               )}
             </div>
-            <button onClick={onClose} className="shrink-0 rounded-lg p-1 text-[#023435]/30 dark:text-zinc-500 hover:bg-[#023435]/8 dark:hover:bg-white/10 hover:text-[#023435]/70 dark:hover:text-zinc-300 transition-colors">
+            <button onClick={onClose} className="shrink-0 rounded-lg p-1 text-[#023435]/30 hover:bg-[#023435]/8 hover:text-[#023435]/70 transition-colors">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -524,22 +524,22 @@ function LessonDetailModal({
         </div>
 
         <div className="px-5 py-4 space-y-3">
-          <div className="rounded-xl bg-[rgba(2,52,53,0.05)] dark:bg-white/5 border border-[rgba(2,52,53,0.1)] dark:border-white/10 px-4 py-3 space-y-1">
-            <p className="text-xs font-medium text-[#023435]/50 dark:text-zinc-400 capitalize">{dateStr}</p>
-            <p className="text-sm font-semibold text-[#023435] dark:text-zinc-100">{lesson.startTime} – {lesson.endTime}</p>
+          <div className="rounded-xl bg-[rgba(2,52,53,0.05)] border border-[rgba(2,52,53,0.1)] px-4 py-3 space-y-1">
+            <p className="text-xs font-medium text-[#023435]/50 capitalize">{dateStr}</p>
+            <p className="text-sm font-semibold text-[#023435]">{lesson.startTime} – {lesson.endTime}</p>
           </div>
 
           {lesson.isRecurring && (
-            <div className="flex bg-[rgba(2,52,53,0.04)] dark:bg-white/5 rounded-lg p-1 border border-[rgba(2,52,53,0.08)] dark:border-white/10">
+            <div className="flex bg-[rgba(2,52,53,0.04)] rounded-lg p-1 border border-[rgba(2,52,53,0.08)]">
               <button
                 onClick={() => setScope("this")}
-                className={cn("flex-1 text-[11px] font-semibold py-1.5 rounded-md transition-colors", scope === "this" ? "bg-white dark:bg-zinc-800 shadow-sm text-[#023435] dark:text-zinc-100" : "text-[#023435]/50 dark:text-zinc-500")}
+                className={cn("flex-1 text-[11px] font-semibold py-1.5 rounded-md transition-colors", scope === "this" ? "bg-white shadow-sm text-[#023435]" : "text-[#023435]/50")}
               >
                 Sadece Bu Ders
               </button>
               <button
                 onClick={() => setScope("all")}
-                className={cn("flex-1 text-[11px] font-semibold py-1.5 rounded-md transition-colors", scope === "all" ? "bg-white dark:bg-zinc-800 shadow-sm text-[#023435] dark:text-zinc-100" : "text-[#023435]/50 dark:text-zinc-500")}
+                className={cn("flex-1 text-[11px] font-semibold py-1.5 rounded-md transition-colors", scope === "all" ? "bg-white shadow-sm text-[#023435]" : "text-[#023435]/50")}
               >
                 Tüm Seri
               </button>
@@ -554,26 +554,26 @@ function LessonDetailModal({
             <div className="flex gap-2">
               {lesson.status !== "COMPLETED" && (
                 <button onClick={() => changeStatus("COMPLETED")} disabled={saving}
-                  className="flex-1 rounded-xl border border-[rgba(2,52,53,0.25)] dark:border-white/20 bg-[rgba(2,52,53,0.08)] dark:bg-white/5 py-2 text-xs font-semibold text-[#023435] dark:text-zinc-300 hover:bg-[rgba(2,52,53,0.15)] dark:hover:bg-white/10 disabled:opacity-50 transition-colors">
+                  className="flex-1 rounded-xl border border-[rgba(2,52,53,0.25)] bg-[rgba(2,52,53,0.08)] py-2 text-xs font-semibold text-[#023435] hover:bg-[rgba(2,52,53,0.15)] disabled:opacity-50 transition-colors">
                   ✓ Tamamlandı
                 </button>
               )}
               <button onClick={() => changeStatus("CANCELLED")} disabled={saving}
-                className="flex-1 rounded-xl border border-[rgba(105,33,55,0.25)] dark:border-red-500/30 bg-[rgba(105,33,55,0.08)] dark:bg-red-500/10 py-2 text-xs font-semibold text-[#692137] dark:text-red-400 hover:bg-[rgba(105,33,55,0.15)] dark:hover:bg-red-500/20 disabled:opacity-50 transition-colors">
+                className="flex-1 rounded-xl border border-[rgba(105,33,55,0.25)] bg-[rgba(105,33,55,0.08)] py-2 text-xs font-semibold text-[#692137] hover:bg-[rgba(105,33,55,0.15)] disabled:opacity-50 transition-colors">
                 ✕ İptal Et
               </button>
             </div>
           )}
           {lesson.status === "CANCELLED" && (
             <button onClick={() => changeStatus("PLANNED")} disabled={saving}
-              className="w-full rounded-xl border border-[#107996]/30 dark:border-[#90DDF0]/30 bg-[rgba(16,121,150,0.1)] dark:bg-[#90DDF0]/10 py-2 text-xs font-semibold text-[#107996] dark:text-[#90DDF0] hover:bg-[rgba(16,121,150,0.18)] dark:hover:bg-[#90DDF0]/20 disabled:opacity-50 transition-colors">
+              className="w-full rounded-xl border border-[#107996]/30 bg-[rgba(16,121,150,0.1)] py-2 text-xs font-semibold text-[#107996] hover:bg-[rgba(16,121,150,0.18)] disabled:opacity-50 transition-colors">
               ↺ Yeniden Planla
             </button>
           )}
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-xs font-medium text-[#023435]/50 dark:text-zinc-500">Not</p>
+              <p className="text-xs font-medium text-[#023435]/50">Not</p>
               {!editingNote && (
                 <button onClick={() => setEditingNote(true)} className="text-[10px] text-[#FE703A]/80 hover:text-[#FE703A] transition-colors">Düzenle</button>
               )}
@@ -581,17 +581,17 @@ function LessonDetailModal({
             {editingNote ? (
               <div className="space-y-2">
                 <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3}
-                  className="w-full resize-none rounded-xl border border-[rgba(2,52,53,0.15)] dark:border-white/10 bg-[#f8fafa] dark:bg-zinc-800/50 px-3 py-2 text-sm text-[#023435] dark:text-zinc-100 placeholder-[#023435]/40 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/40" />
+                  className="w-full resize-none rounded-xl border border-[rgba(2,52,53,0.15)] bg-[#f8fafa] px-3 py-2 text-sm text-[#023435] placeholder-[#023435]/40 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/40" />
                 <div className="flex gap-3">
-                  <button onClick={() => setEditingNote(false)} className="text-xs text-[#023435]/30 dark:text-zinc-500 hover:text-[#023435]/60 dark:hover:text-zinc-300 transition-colors">İptal</button>
+                  <button onClick={() => setEditingNote(false)} className="text-xs text-[#023435]/30 hover:text-[#023435]/60 transition-colors">İptal</button>
                   <button onClick={saveNote} disabled={saving} className="text-xs font-semibold text-[#FE703A] disabled:opacity-50 transition-colors">
                     {saving ? "Kaydediliyor..." : "Kaydet"}
                   </button>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-[#023435]/60 dark:text-zinc-400 rounded-xl bg-[rgba(2,52,53,0.04)] dark:bg-white/5 border border-[rgba(2,52,53,0.08)] dark:border-white/10 px-3 py-2 min-h-[2.5rem]">
-                {lesson.note || <span className="text-[#023435]/25 dark:text-zinc-600">Not eklenmemiş</span>}
+              <p className="text-sm text-[#023435]/60 rounded-xl bg-[rgba(2,52,53,0.04)] border border-[rgba(2,52,53,0.08)] px-3 py-2 min-h-[2.5rem]">
+                {lesson.note || <span className="text-[#023435]/25">Not eklenmemiş</span>}
               </p>
             )}
           </div>
@@ -636,10 +636,10 @@ function DayLessonList({
   return (
     <div className={cn("rounded-2xl", GLASS)}>
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.1)] dark:border-white/10 px-5 py-4">
+      <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.1)] px-5 py-4">
         <div>
-          <p className="text-xs text-[rgba(2,52,53,0.4)] dark:text-zinc-500">Seçilen gün</p>
-          <p className="text-sm font-semibold text-[#023435] dark:text-zinc-100 capitalize">{dateStr}</p>
+          <p className="text-xs text-[rgba(2,52,53,0.4)]">Seçilen gün</p>
+          <p className="text-sm font-semibold text-[#023435] capitalize">{dateStr}</p>
         </div>
         <button
           onClick={onAddClick}
@@ -651,10 +651,10 @@ function DayLessonList({
 
       {/* Weekly summary */}
       {allLessons.length > 0 && (
-        <div className="px-5 py-3 border-b border-[rgba(2,52,53,0.08)] dark:border-white/10 flex items-center gap-4">
-          <span className="text-[10px] text-[#023435]/40 dark:text-zinc-500 font-medium">Bu ay:</span>
-          <span className="text-[11px] font-semibold text-[#107996] dark:text-[#90DDF0]">{planned} planlandı</span>
-          <span className="text-[11px] font-semibold text-[#023435] dark:text-emerald-400">{completed} tamamlandı</span>
+        <div className="px-5 py-3 border-b border-[rgba(2,52,53,0.08)] flex items-center gap-4">
+          <span className="text-[10px] text-[#023435]/40 font-medium">Bu ay:</span>
+          <span className="text-[11px] font-semibold text-[#107996]">{planned} planlandı</span>
+          <span className="text-[11px] font-semibold text-[#023435]">{completed} tamamlandı</span>
           {cancelled > 0 && <span className="text-[11px] font-semibold text-[#692137]">{cancelled} iptal</span>}
         </div>
       )}
@@ -664,10 +664,10 @@ function DayLessonList({
         {lessons.length === 0 ? (
           <div className="text-center py-8">
             <div className="mb-3 text-3xl opacity-20">📅</div>
-            <p className="text-sm font-medium text-[#023435]/40 dark:text-zinc-500">Bu güne ait ders yok</p>
+            <p className="text-sm font-medium text-[#023435]/40">Bu güne ait ders yok</p>
             <button
               onClick={onAddClick}
-              className="mt-3 rounded-lg border border-[rgba(2,52,53,0.1)] dark:border-white/10 px-4 py-1.5 text-xs font-semibold text-[#FE703A] hover:bg-[#FE703A]/10 transition-colors"
+              className="mt-3 rounded-lg border border-[rgba(2,52,53,0.1)] px-4 py-1.5 text-xs font-semibold text-[#FE703A] hover:bg-[#FE703A]/10 transition-colors"
             >
               + Yeni Ders Ekle
             </button>
@@ -676,7 +676,7 @@ function DayLessonList({
               <div className="mt-8 relative text-left">
                 <div className="flex items-center gap-2 mb-4 pl-1">
                   <div className="h-1.5 w-1.5 rounded-full bg-[#FE703A] animate-ping" />
-                  <p className="text-[10px] font-bold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest">Yaklaşandaki Oturumlar</p>
+                  <p className="text-[10px] font-bold text-[#023435]/40 uppercase tracking-widest">Yaklaşandaki Oturumlar</p>
                 </div>
                 <div className="ml-[7px] border-l border-dashed border-[#FE703A]/30 pb-2 space-y-4">
                   {upcoming.map((l, i) => (
@@ -722,7 +722,7 @@ function DayLessonList({
                   
                   {/* Timeline Dot */}
                   <div className={cn(
-                    "absolute -left-[5px] top-[10px] h-2 w-2 rounded-full ring-4 ring-white dark:ring-zinc-950",
+                    "absolute -left-[5px] top-[10px] h-2 w-2 rounded-full ring-4 ring-white",
                     isActiveNow ? "bg-[#FE703A] animate-pulse ring-[#FE703A]/20" : 
                     l.status === "COMPLETED" ? "bg-[#023435]" : 
                     l.status === "CANCELLED" ? "bg-[#692137]" : "bg-[#107996]"
@@ -738,10 +738,10 @@ function DayLessonList({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className={cn("text-sm font-bold truncate", isActiveNow ? "text-[#023435]" : "dark:text-zinc-100")}>
+                        <p className={cn("text-sm font-bold truncate", isActiveNow ? "text-[#023435]" : "")}>
                           {l.student.name}
                         </p>
-                        <p className={cn("text-[11px] font-medium mt-0.5 truncate", isActiveNow ? "text-[#023435]/60" : "opacity-70 dark:text-zinc-300")}>
+                        <p className={cn("text-[11px] font-medium mt-0.5 truncate", isActiveNow ? "text-[#023435]/60" : "opacity-70")}>
                           {l.title}
                         </p>
                         <div className="flex items-center gap-2 mt-2">
@@ -757,9 +757,9 @@ function DayLessonList({
                       <div className="shrink-0 text-right mt-0.5">
                         <span className={cn(
                           "text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md",
-                          l.status === "PLANNED" ? "text-[#107996] dark:text-[#90DDF0] bg-[#107996]/10 border border-[#107996]/10" :
-                          l.status === "COMPLETED" ? "text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-400/10 border border-emerald-200 dark:border-emerald-400/20" :
-                          "text-[#692137] dark:text-red-400 bg-red-100 dark:bg-red-400/10 border border-red-200 dark:border-red-400/20"
+                          l.status === "PLANNED" ? "text-[#107996] bg-[#107996]/10 border border-[#107996]/10" :
+                          l.status === "COMPLETED" ? "text-emerald-700 bg-emerald-100 border border-emerald-200" :
+                          "text-[#692137] bg-red-100 border border-red-200"
                         )}>
                           {isActiveNow && l.status === "PLANNED" ? "ŞİMDİ" : STATUS_LABEL[l.status]}
                         </span>
@@ -1035,8 +1035,8 @@ export default function CalendarPage() {
   })();
 
   const navBtn = cn(
-    "rounded-lg border border-[rgba(2,52,53,0.15)] dark:border-zinc-800 p-1.5 text-[#023435]/50 dark:text-zinc-400",
-    "hover:bg-[rgba(2,52,53,0.06)] dark:hover:bg-zinc-800 hover:text-[#023435]/80 dark:hover:text-zinc-200 transition-colors"
+    "rounded-lg border border-[rgba(2,52,53,0.15)] p-1.5 text-[#023435]/50",
+    "hover:bg-[rgba(2,52,53,0.06)] hover:text-[#023435]/80 transition-colors"
   );
 
   const handleDropLesson = async (lessonId: string, newDate: Date, newHour: number) => {
@@ -1089,7 +1089,7 @@ export default function CalendarPage() {
 
   return (
     <main
-      className="flex flex-col dark:bg-gray-900"
+      className="flex flex-col"
       style={{ minHeight: "100vh", background: "linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%)" }}
     >
       <style jsx>{`
@@ -1114,7 +1114,7 @@ export default function CalendarPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <button onClick={goToday} className="rounded-lg border border-[rgba(2,52,53,0.15)] dark:border-white/20 px-3 py-1.5 text-xs font-medium text-[#023435]/60 dark:text-zinc-400 hover:bg-[rgba(2,52,53,0.06)] dark:hover:bg-white/10 hover:text-[#023435]/90 dark:hover:text-zinc-200 transition-colors">
+            <button onClick={goToday} className="rounded-lg border border-[rgba(2,52,53,0.15)] px-3 py-1.5 text-xs font-medium text-[#023435]/60 hover:bg-[rgba(2,52,53,0.06)] hover:text-[#023435]/90 transition-colors">
               Bugün
             </button>
             <button onClick={nextPeriod} className={navBtn}>
@@ -1122,7 +1122,7 @@ export default function CalendarPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
-            <h1 className="text-base font-semibold text-[#023435] dark:text-zinc-100 ml-1">
+            <h1 className="text-base font-semibold text-[#023435] ml-1">
               {view === "week" ? weekLabel : `${MONTH_LABELS[currentDate.getMonth()]} ${currentDate.getFullYear()}`}
             </h1>
           </div>
@@ -1131,7 +1131,7 @@ export default function CalendarPage() {
             <select
               value={selectedStudentFilter}
               onChange={(e) => setSelectedStudentFilter(e.target.value)}
-              className="rounded-xl border border-[rgba(2,52,53,0.1)] dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 px-3 py-1.5 text-xs font-semibold text-[#023435]/80 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800/80 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/20 transition-all cursor-pointer"
+              className="rounded-xl border border-[rgba(2,52,53,0.1)] bg-white/50 px-3 py-1.5 text-xs font-semibold text-[#023435]/80 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#FE703A]/20 transition-all cursor-pointer"
             >
               <option value="">Tüm Öğrenciler</option>
               {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -1144,7 +1144,7 @@ export default function CalendarPage() {
                   onClick={() => setView(v)}
                   className={cn(
                     "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-                    view === v ? "bg-[#023435] dark:bg-white/20 text-white" : "text-[#023435]/40 dark:text-zinc-500 hover:text-[#023435]/70 dark:hover:text-zinc-300"
+                    view === v ? "bg-[#023435] text-white" : "text-[#023435]/40 hover:text-[#023435]/70"
                   )}
                 >
                   {v === "month" ? "Aylık" : "Haftalık"}

@@ -1497,21 +1497,21 @@ export default function CardDetailPage({
   return (
     <>
       {/* Breadcrumb */}
-      <div className="border-b border-zinc-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-2.5">
+      <div className="border-b border-zinc-100 bg-white px-6 py-2.5">
         <div className="mx-auto max-w-3xl flex items-center gap-2 text-sm">
           {card.student ? (
             <>
-              <Link href="/students" className="text-zinc-400 dark:text-gray-500 hover:text-zinc-600 dark:hover:text-gray-300 transition-colors">Öğrenciler</Link>
-              <span className="text-zinc-300 dark:text-gray-700">/</span>
-              <Link href={`/students/${card.student.id}`} className="text-zinc-400 dark:text-gray-500 hover:text-zinc-600 dark:hover:text-gray-300 transition-colors">
+              <Link href="/students" className="text-zinc-400 hover:text-zinc-600 transition-colors">Öğrenciler</Link>
+              <span className="text-zinc-300">/</span>
+              <Link href={`/students/${card.student.id}`} className="text-zinc-400 hover:text-zinc-600 transition-colors">
                 {card.student.name}
               </Link>
             </>
           ) : (
-            <Link href="/cards" className="text-zinc-400 dark:text-gray-500 hover:text-zinc-600 dark:hover:text-gray-300 transition-colors">Kütüphane</Link>
+            <Link href="/cards" className="text-zinc-400 hover:text-zinc-600 transition-colors">Kütüphane</Link>
           )}
-          <span className="text-zinc-300 dark:text-gray-700">/</span>
-          <span className="text-zinc-700 dark:text-gray-200 font-medium truncate max-w-[200px]">{card.title}</span>
+          <span className="text-zinc-300">/</span>
+          <span className="text-zinc-700 font-medium truncate max-w-[200px]">{card.title}</span>
         </div>
       </div>
 
@@ -1525,24 +1525,24 @@ export default function CardDetailPage({
 
         {/* Müfredat Hedefleri */}
         {card.curriculumGoals.length > 0 && (
-          <div className="mb-4 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50 dark:bg-purple-900/10 px-4 py-3">
+          <div className="mb-4 rounded-xl border border-purple-200 bg-purple-50 px-4 py-3">
             <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-purple-500 dark:text-purple-400 text-sm">🎯</span>
-              <p className="text-xs font-semibold text-purple-700 dark:text-purple-300">
+              <span className="text-purple-500 text-sm">🎯</span>
+              <p className="text-xs font-semibold text-purple-700">
                 Müfredat Hedefleri ({card.curriculumGoals.length})
               </p>
             </div>
             <div className="flex flex-col gap-1.5">
               {card.curriculumGoals.map((goal) => (
                 <div key={goal.id} className="flex items-start gap-2">
-                  <span className="rounded-full bg-purple-200 dark:bg-purple-800/50 px-1.5 py-0.5 text-[10px] font-semibold text-purple-800 dark:text-purple-200 shrink-0 mt-px">
+                  <span className="rounded-full bg-purple-200 px-1.5 py-0.5 text-[10px] font-semibold text-purple-800 shrink-0 mt-px">
                     {goal.code}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-[10px] text-purple-500 dark:text-purple-400 leading-none mb-0.5">
+                    <p className="text-[10px] text-purple-500 leading-none mb-0.5">
                       {goal.curriculum.code} {goal.curriculum.title}
                     </p>
-                    <p className="text-xs text-purple-700 dark:text-purple-200 leading-snug">{goal.title}</p>
+                    <p className="text-xs text-purple-700 leading-snug">{goal.title}</p>
                   </div>
                 </div>
               ))}
@@ -1551,7 +1551,7 @@ export default function CardDetailPage({
         )}
 
         {/* ── İçerik — toolType'a göre ── */}
-        <div className="rounded-2xl border border-zinc-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 p-6 shadow-sm">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
           {toolType === "SOCIAL_STORY" ? (
             <SocialStoryView story={card.content as unknown as SocialStoryContent} />
           ) : toolType === "ARTICULATION_DRILL" ? (
@@ -1591,7 +1591,7 @@ export default function CardDetailPage({
 
         {/* Alt çubuk */}
         <div className="flex items-center justify-between mt-4 flex-wrap gap-2">
-          <p className="text-xs text-zinc-400 dark:text-gray-500">
+          <p className="text-xs text-zinc-400">
             {formatDate(card.createdAt, "medium")}
             {card.student && ` · ${card.student.name}`}
           </p>
@@ -1619,7 +1619,7 @@ export default function CardDetailPage({
               <button
                 onClick={handleDownloadPDF}
                 disabled={downloading}
-                className="flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-zinc-600 dark:text-gray-300 hover:bg-zinc-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-60"
+                className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-60"
               >
                 {downloading ? "Hazırlanıyor…" : "PDF İndir"}
               </button>
@@ -1662,11 +1662,11 @@ export default function CardDetailPage({
             )}
             <button
               onClick={() => setShowAssign(true)}
-              className="flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-zinc-600 dark:text-gray-300 hover:bg-zinc-50 dark:hover:bg-gray-800 hover:border-zinc-300 dark:hover:border-gray-500 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 transition-colors"
             >
               Öğrenciye Ata
               {assignedCount > 0 && (
-                <span className="rounded-full bg-[#023435]/10 dark:bg-gray-700 text-[#023435] dark:text-gray-300 px-1.5 py-0.5 text-[10px] font-semibold">
+                <span className="rounded-full bg-[#023435]/10 text-[#023435] px-1.5 py-0.5 text-[10px] font-semibold">
                   {assignedCount}
                 </span>
               )}

@@ -277,22 +277,22 @@ export default function StudentDetailPage({
       <div className="absolute bottom-1/4 left-0 w-[500px] h-[500px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none -translate-x-1/2 translate-y-1/2" />
 
       {/* Breadcrumb - Sticky */}
-      <div className="sticky top-0 z-30 border-b border-white/60 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.03)] px-6 py-3 transition-all">
+      <div className="sticky top-0 z-30 border-b border-white/60 bg-white/70 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.03)] px-6 py-3 transition-all">
         <div className="mx-auto max-w-5xl flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-bold">
-            <Link href="/students" className="text-[#023435]/50 dark:text-gray-400 hover:text-[#023435] dark:hover:text-gray-200 transition-colors">
+            <Link href="/students" className="text-[#023435]/50 hover:text-[#023435] transition-colors">
               Öğrenciler
             </Link>
-            <span className="text-[#023435]/30 dark:text-gray-600">/</span>
-            <span className="text-[#023435] dark:text-gray-100 tracking-tight">{student.name}</span>
+            <span className="text-[#023435]/30">/</span>
+            <span className="text-[#023435] tracking-tight">{student.name}</span>
           </div>
 
           {/* Quick Actions in Header */}
           <div className="flex items-center gap-2 flex-wrap justify-end">
-            <Button size="sm" variant="outline" onClick={() => setShowDeleteConfirm(true)} className="rounded-xl border-white dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 hover:text-red-700 dark:hover:text-red-400 shadow-sm transition-all h-8 text-xs font-bold px-3">
+            <Button size="sm" variant="outline" onClick={() => setShowDeleteConfirm(true)} className="rounded-xl border-white bg-white/50 text-red-600 hover:bg-red-50 hover:border-red-200 hover:text-red-700 shadow-sm transition-all h-8 text-xs font-bold px-3">
               Sil
             </Button>
-            <Button size="sm" variant="outline" onClick={openEdit} className="rounded-xl border-white dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 text-[#023435]/60 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:text-[#023435] dark:hover:text-gray-100 shadow-sm transition-all h-8 text-xs font-bold px-3">
+            <Button size="sm" variant="outline" onClick={openEdit} className="rounded-xl border-white bg-white/50 text-[#023435]/60 hover:bg-white hover:text-[#023435] shadow-sm transition-all h-8 text-xs font-bold px-3">
               Düzenle
             </Button>
             <Link
@@ -308,22 +308,22 @@ export default function StudentDetailPage({
 
       <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 py-8 relative z-10 flex-1 space-y-6">
         {/* Öğrenci Bilgileri (Kutu) */}
-        <div className="rounded-3xl border border-white/80 dark:border-gray-700/80 bg-white/60 dark:bg-gray-800/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 h-32 w-32 bg-gradient-to-bl from-white/60 dark:hidden to-transparent pointer-events-none rounded-tr-3xl" />
+        <div className="rounded-3xl border border-white/80 bg-white/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 h-32 w-32 bg-gradient-to-bl from-white/60 to-transparent pointer-events-none rounded-tr-3xl" />
           
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 relative z-10">
             <div className="flex items-center gap-5 min-w-0">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#023435]/10 dark:from-gray-700/50 to-[#107996]/10 dark:to-gray-800/50 text-[#023435] dark:text-gray-200 font-extrabold text-2xl shadow-sm border border-white dark:border-gray-700">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#023435]/10 to-[#107996]/10 text-[#023435] font-extrabold text-2xl shadow-sm border border-white">
                 {student.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h1 className="text-2xl font-extrabold text-[#023435] dark:text-gray-100 tracking-tight">{student.name}</h1>
+                <h1 className="text-2xl font-extrabold text-[#023435] tracking-tight">{student.name}</h1>
                 <div className="flex flex-wrap items-center gap-2 mt-2">
-                  <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[student.workArea] ?? "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400")}>
+                  <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[student.workArea] ?? "border-gray-200 text-gray-600")}>
                     {WORK_AREA_LABEL[student.workArea] ?? student.workArea}
                   </span>
                   {student.birthDate && (
-                    <span className="rounded-md border border-zinc-200/60 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 dark:text-gray-400 uppercase tracking-widest">{calcAge(student.birthDate)}</span>
+                    <span className="rounded-md border border-zinc-200/60 bg-white px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 uppercase tracking-widest">{calcAge(student.birthDate)}</span>
                   )}
                   {student.diagnosis && (
                     <span className="truncate rounded-md border border-[#107996]/20 bg-[#107996]/5 px-2 py-0.5 text-[10px] font-extrabold text-[#107996] uppercase tracking-widest">{student.diagnosis}</span>
@@ -334,11 +334,11 @@ export default function StudentDetailPage({
           </div>
 
           {(student.notes || (student.curriculumIds?.length ?? 0) > 0) && (
-            <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-gray-700/50 space-y-3">
+            <div className="mt-4 pt-4 border-t border-zinc-100 space-y-3">
               {student.notes && (
                 <div>
-                  <p className="text-xs font-semibold text-zinc-400 dark:text-gray-500 uppercase tracking-wide mb-1">Notlar</p>
-                  <p className="text-sm text-zinc-600 dark:text-gray-300">{student.notes}</p>
+                  <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide mb-1">Notlar</p>
+                  <p className="text-sm text-zinc-600">{student.notes}</p>
                 </div>
               )}
               {(student.curriculumIds?.length ?? 0) > 0 && (
@@ -465,10 +465,10 @@ export default function StudentDetailPage({
                 const dateStr = formatDate(d, "medium");
                 const statusColor = l.status === "COMPLETED" ? "text-emerald-600" : l.status === "CANCELLED" ? "text-zinc-400" : "text-[#107996]";
                 return (
-                  <div key={l.id} className="flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-gray-800/80 px-3 py-2">
+                  <div key={l.id} className="flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2">
                     <div>
-                      <p className="text-xs font-medium text-zinc-700 dark:text-gray-200">{l.title}</p>
-                      <p className="text-[11px] text-zinc-400 dark:text-gray-500 mt-0.5">{dateStr} · {l.startTime}–{l.endTime}</p>
+                      <p className="text-xs font-medium text-zinc-700">{l.title}</p>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">{dateStr} · {l.startTime}–{l.endTime}</p>
                     </div>
                     <span className={cn("text-[10px] font-semibold", statusColor)}>
                       {l.status === "COMPLETED" ? "Tamamlandı" : l.status === "CANCELLED" ? "İptal" : "Planlandı"}
@@ -481,7 +481,7 @@ export default function StudentDetailPage({
         )}
 
         {/* Sekme Bar */}
-        <div className="flex gap-2 border-b border-[#023435]/10 dark:border-gray-800 mt-2 px-1">
+        <div className="flex gap-2 border-b border-[#023435]/10 mt-2 px-1">
           {([
             { key: "cards", label: "Kartlar", count: student.cards.length + student.assignments.length },
             { key: "progress", label: "İlerleme", count: null },
@@ -493,13 +493,13 @@ export default function StudentDetailPage({
               className={cn(
                 "px-5 py-3 text-[13px] font-extrabold uppercase tracking-wide transition-all translate-y-[1px]",
                 activeTab === tab.key
-                  ? "text-[#023435] dark:text-gray-100 border-b-[3px] border-[#FE703A]"
-                  : "text-[#023435]/40 dark:text-gray-500 hover:text-[#023435] dark:hover:text-gray-300 border-b-[3px] border-transparent"
+                  ? "text-[#023435] border-b-[3px] border-[#FE703A]"
+                  : "text-[#023435]/40 hover:text-[#023435] border-b-[3px] border-transparent"
               )}
             >
               {tab.label}
               {tab.count !== null && (
-                <span className={cn("ml-2 rounded-full px-2 py-0.5 text-[10px]", activeTab === tab.key ? "bg-[#FE703A]/10 text-[#FE703A] dark:text-[#FE703A]" : "bg-[#023435]/5 dark:bg-gray-800 text-[#023435]/40 dark:text-gray-500")}>{tab.count}</span>
+                <span className={cn("ml-2 rounded-full px-2 py-0.5 text-[10px]", activeTab === tab.key ? "bg-[#FE703A]/10 text-[#FE703A]" : "bg-[#023435]/5 text-[#023435]/40")}>{tab.count}</span>
               )}
             </button>
           ))}
@@ -536,9 +536,9 @@ export default function StudentDetailPage({
 
             {/* Yeniden üret onay diyaloğu */}
             {confirmRegenerate && (
-              <div className="mb-5 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/50 p-4">
-                <p className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-1">Mevcut profil silinecek, devam et?</p>
-                <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">Yeni profil oluşturmak 20 kredi harcar.</p>
+              <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm font-medium text-amber-800 mb-1">Mevcut profil silinecek, devam et?</p>
+                <p className="text-xs text-amber-600 mb-3">Yeni profil oluşturmak 20 kredi harcar.</p>
                 <div className="flex gap-2">
                   <button
                     onClick={handleGenerateProfile}
@@ -641,9 +641,9 @@ export default function StudentDetailPage({
                   onDeletePress={() => { setSwipeOpenId(null); setConfirmCardId(card.id); }}
                 >
                 <div
-                  className="group relative rounded-3xl border border-border bg-card/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] dark:shadow-none backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 overflow-hidden flex flex-col h-full"
+                  className="group relative rounded-3xl border border-border bg-card/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 overflow-hidden flex flex-col h-full"
                 >
-                  <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/40 dark:from-white/5 to-transparent pointer-events-none rounded-tr-3xl" />
+                  <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/40 to-transparent pointer-events-none rounded-tr-3xl" />
                   <Link href={`/cards/${card.id}`} className="block p-5 flex-1 relative z-10 flex flex-col">
                     <div className="flex flex-wrap gap-1.5 mb-3 pr-8">
                       <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[card.category] ?? "border-border text-muted-foreground")}>
@@ -656,7 +656,7 @@ export default function StudentDetailPage({
                         {card.ageGroup}
                       </span>
                     </div>
-                    <h3 className="font-extrabold text-[#023435] dark:text-foreground text-[15px] mb-2 line-clamp-2 leading-snug">{card.title}</h3>
+                    <h3 className="font-extrabold text-[#023435] text-[15px] mb-2 line-clamp-2 leading-snug">{card.title}</h3>
                     {(card.content as GeneratedCard).objective && (
                       <p className="text-[12px] font-medium text-muted-foreground mb-2 line-clamp-2">
                         {(card.content as GeneratedCard).objective}
@@ -674,7 +674,7 @@ export default function StudentDetailPage({
 
                   <button
                     onClick={() => setConfirmCardId(card.id)}
-                    className="absolute top-4 right-4 rounded-full bg-card/90 shadow-sm border border-border p-2 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 transition-all hover:scale-110 opacity-0 group-hover:opacity-100 z-20"
+                    className="absolute top-4 right-4 rounded-full bg-card/90 shadow-sm border border-border p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-all hover:scale-110 opacity-0 group-hover:opacity-100 z-20"
                   >
                     ✕
                   </button>

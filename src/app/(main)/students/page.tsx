@@ -219,7 +219,7 @@ export default function StudentsPage() {
   }, [students, filterArea, sortBy]);
 
   return (
-    <div className="min-h-full flex-1 w-full flex flex-col relative bg-[#F0F4F4] dark:bg-gray-900 overflow-x-hidden custom-scrollbar" style={{ background: "linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%)" }}>
+    <div className="min-h-full flex-1 w-full flex flex-col relative bg-[#F0F4F4] overflow-x-hidden custom-scrollbar" style={{ background: "linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%)" }}>
       <style jsx>{`
         div {
           --bg-start: #f0f7f7;
@@ -237,11 +237,11 @@ export default function StudentsPage() {
       <div className="absolute bottom-1/4 left-0 w-[500px] h-[500px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none -translate-x-1/2 translate-y-1/2" />
 
       {/* Header */}
-      <div className="sticky top-0 z-20 border-b border-white/60 dark:border-white/5 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.03)] px-6 py-4 transition-all">
+      <div className="sticky top-0 z-20 border-b border-white/60 bg-white/70 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.03)] px-6 py-4 transition-all">
         <div className="mx-auto max-w-6xl flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-extrabold text-[#023435] dark:text-zinc-100 tracking-tight">Öğrenciler</h1>
-            <p className="mt-0.5 text-xs text-[#023435]/60 dark:text-zinc-400 font-medium">
+            <h1 className="text-2xl font-extrabold text-[#023435] tracking-tight">Öğrenciler</h1>
+            <p className="mt-0.5 text-xs text-[#023435]/60 font-medium">
               {loading ? "Yükleniyor…" : (
                 filtered.length === students.length
                   ? `${students.length} öğrenci`
@@ -262,7 +262,7 @@ export default function StudentsPage() {
         {/* Filtre + Sıralama */}
         {!loading && students.length > 0 && (
           <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex gap-2 w-max p-1 bg-white/40 dark:bg-gray-800/40 backdrop-blur-md border border-white/60 dark:border-gray-700/60 rounded-full shadow-inner overflow-x-auto custom-scrollbar">
+            <div className="flex gap-2 w-max p-1 bg-white/40 backdrop-blur-md border border-white/60 rounded-full shadow-inner overflow-x-auto custom-scrollbar">
               {FILTER_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
@@ -270,13 +270,13 @@ export default function StudentsPage() {
                   className={cn(
                     "rounded-full px-5 py-2 text-xs font-bold transition-all whitespace-nowrap",
                     filterArea === opt.value
-                      ? "bg-[#023435] dark:bg-gray-700 text-white dark:text-gray-100 shadow-md shadow-[#023435]/20 dark:shadow-black/20"
-                      : "bg-transparent text-[#023435]/60 dark:text-gray-400 hover:text-[#023435] dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-gray-800/50"
+                      ? "bg-[#023435] text-white shadow-md shadow-[#023435]/20"
+                      : "bg-transparent text-[#023435]/60 hover:text-[#023435] hover:bg-white/60"
                   )}
                 >
                   {opt.label}
                   {opt.value !== "all" && (
-                    <span className={cn("ml-1.5 px-1.5 py-0.5 rounded-full text-[10px]", filterArea === opt.value ? "bg-white/20 dark:bg-gray-800/50 text-white dark:text-gray-300" : "bg-[#023435]/10 dark:bg-gray-800/50 text-[#023435]/60 dark:text-gray-500")}>
+                    <span className={cn("ml-1.5 px-1.5 py-0.5 rounded-full text-[10px]", filterArea === opt.value ? "bg-white/20 text-white" : "bg-[#023435]/10 text-[#023435]/60")}>
                       {students.filter((s) => s.workArea === opt.value).length}
                     </span>
                   )}
@@ -285,11 +285,11 @@ export default function StudentsPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-[#023435]/60 dark:text-gray-400 shrink-0">Sırala:</span>
+              <span className="text-xs font-bold text-[#023435]/60 shrink-0">Sırala:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortBy)}
-                className="rounded-xl border border-white/80 dark:border-gray-700/60 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md shadow-sm px-4 py-2 text-sm font-bold text-[#023435] dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/50 transition-all cursor-pointer"
+                className="rounded-xl border border-white/80 bg-white/50 backdrop-blur-md shadow-sm px-4 py-2 text-sm font-bold text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#FE703A]/50 transition-all cursor-pointer"
               >
                 {SORT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value} className="text-sm font-medium">{opt.label}</option>
@@ -350,7 +350,7 @@ export default function StudentsPage() {
 
       {/* Hata */}
       {fetchError && (
-        <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/50 px-4 py-3 text-sm text-red-700 dark:text-red-400 mb-4">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-4">
           <strong>Hata:</strong> {fetchError}
         </div>
       )}
@@ -361,14 +361,14 @@ export default function StudentsPage() {
           <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
         </div>
       ) : students.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 dark:border-gray-700 bg-white/40 dark:bg-gray-800/40 shadow-sm backdrop-blur-md py-20 text-center relative z-10">
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 bg-white/40 shadow-sm backdrop-blur-md py-20 text-center relative z-10">
           <div className="text-5xl mb-4 opacity-80">👤</div>
-          <p className="text-lg font-bold text-[#023435] dark:text-gray-100 mb-1">Henüz öğrenci kaydınız yok</p>
-          <p className="text-sm font-medium text-[#023435]/50 dark:text-gray-400">Öğrencilerinizi eklemeye başlayarak raporlar üretebilirsiniz.</p>
+          <p className="text-lg font-bold text-[#023435] mb-1">Henüz öğrenci kaydınız yok</p>
+          <p className="text-sm font-medium text-[#023435]/50">Öğrencilerinizi eklemeye başlayarak raporlar üretebilirsiniz.</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 dark:border-gray-700 bg-white/40 dark:bg-gray-800/40 backdrop-blur-md py-16 text-center relative z-10">
-          <p className="text-sm font-bold text-[#023435]/60 dark:text-gray-400 mb-3">Bu filtreye uygun öğrenci bulunamadı.</p>
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 bg-white/40 backdrop-blur-md py-16 text-center relative z-10">
+          <p className="text-sm font-bold text-[#023435]/60 mb-3">Bu filtreye uygun öğrenci bulunamadı.</p>
           <button onClick={() => setFilterArea("all")} className="text-xs font-bold text-[#FE703A] border border-[#FE703A]/30 px-3 py-1.5 rounded-lg hover:bg-[#FE703A]/10 transition-colors">
             Filtreyi Temizle
           </button>
@@ -376,26 +376,26 @@ export default function StudentsPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 relative z-10">
           {filtered.map((student) => (
-            <div key={student.id} className="group relative rounded-3xl border border-white/80 dark:border-gray-700/80 bg-white/60 dark:bg-gray-800/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 dark:hover:border-gray-600/80 overflow-hidden flex flex-col">
-              <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/60 dark:hidden to-transparent pointer-events-none rounded-tr-3xl" />
+            <div key={student.id} className="group relative rounded-3xl border border-white/80 bg-white/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 overflow-hidden flex flex-col">
+              <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/60 to-transparent pointer-events-none rounded-tr-3xl" />
               <Link href={`/students/${student.id}`} className="block p-5 flex-1 relative z-10">
                 <div className="mb-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#023435]/10 dark:from-gray-700/50 to-[#107996]/10 dark:to-gray-800/50 text-[#023435] dark:text-gray-200 font-extrabold text-lg shadow-sm border border-white dark:border-gray-700">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#023435]/10 to-[#107996]/10 text-[#023435] font-extrabold text-lg shadow-sm border border-white">
                     {student.name.charAt(0).toUpperCase()}
                   </div>
                 </div>
-                <h3 className="font-extrabold text-[#023435] dark:text-gray-100 text-[16px] mb-2 line-clamp-1">{student.name}</h3>
+                <h3 className="font-extrabold text-[#023435] text-[16px] mb-2 line-clamp-1">{student.name}</h3>
                 <div className="flex flex-wrap items-center gap-1.5 text-xs mb-4">
-                  <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[student.workArea] ?? "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400")}>
+                  <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[student.workArea] ?? "border-gray-200 text-gray-600")}>
                     {WORK_AREA_LABEL[student.workArea] ?? student.workArea}
                   </span>
-                  {student.birthDate && <span className="rounded-md border border-zinc-200/60 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 dark:text-gray-400 uppercase tracking-widest">{calcAge(student.birthDate)}</span>}
+                  {student.birthDate && <span className="rounded-md border border-zinc-200/60 bg-white px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 uppercase tracking-widest">{calcAge(student.birthDate)}</span>}
                   {student.diagnosis && <span className="truncate rounded-md border border-[#107996]/20 bg-[#107996]/5 px-2 py-0.5 text-[10px] font-extrabold text-[#107996] uppercase tracking-widest">{student.diagnosis}</span>}
                 </div>
                 
-                <div className="mt-auto pt-4 border-t border-[#023435]/5 dark:border-gray-700/50 space-y-3">
+                <div className="mt-auto pt-4 border-t border-[#023435]/5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-[#023435]/50 dark:text-gray-400 uppercase tracking-widest flex flex-col">
+                    <span className="text-[11px] font-semibold text-[#023435]/50 uppercase tracking-widest flex flex-col">
                       <span>{student._count.cards} Materyal</span>
                       {student.latestCardAt && <span className="text-[9px] opacity-70 mt-0.5">Son: {formatDate(student.latestCardAt, "short")}</span>}
                     </span>
@@ -403,13 +403,13 @@ export default function StudentsPage() {
                   </div>
                   
                   {student.progressSummary.total > 0 && (
-                    <div className="bg-white/50 dark:bg-gray-800/50 p-2.5 rounded-xl border border-white/60 dark:border-gray-700/60">
+                    <div className="bg-white/50 p-2.5 rounded-xl border border-white/60">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[10px] font-bold text-[#023435]/40 dark:text-gray-500 uppercase tracking-wider">{student.progressSummary.completed}/{student.progressSummary.total} Hedef</span>
-                        <span className="text-[10px] font-extrabold text-[#107996] dark:text-[#90DDF0]">{Math.round((student.progressSummary.completed / student.progressSummary.total) * 100)}%</span>
+                        <span className="text-[10px] font-bold text-[#023435]/40 uppercase tracking-wider">{student.progressSummary.completed}/{student.progressSummary.total} Hedef</span>
+                        <span className="text-[10px] font-extrabold text-[#107996]">{Math.round((student.progressSummary.completed / student.progressSummary.total) * 100)}%</span>
                       </div>
-                      <div className="h-1.5 w-full rounded-full bg-[#023435]/5 dark:bg-gray-700 overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-[#107996] to-[#023435] dark:from-[#90DDF0] dark:to-[#107996] transition-all duration-500 rounded-full" style={{ width: `${(student.progressSummary.completed / student.progressSummary.total) * 100}%` }} />
+                      <div className="h-1.5 w-full rounded-full bg-[#023435]/5 overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-[#107996] to-[#023435] transition-all duration-500 rounded-full" style={{ width: `${(student.progressSummary.completed / student.progressSummary.total) * 100}%` }} />
                       </div>
                     </div>
                   )}
@@ -417,21 +417,21 @@ export default function StudentsPage() {
               </Link>
               
               <div className="absolute top-4 right-4 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all z-20">
-                <button onClick={(e) => { e.preventDefault(); setFormError(null); setEditingStudent(student); }} className="rounded-full bg-white/90 dark:bg-gray-800/90 shadow-sm border border-white dark:border-gray-700 p-2 text-[#023435]/40 dark:text-gray-400 hover:text-[#107996] dark:hover:text-[#90DDF0] hover:bg-white dark:hover:bg-gray-700 transition-all hover:scale-110" title="Düzenle">
+                <button onClick={(e) => { e.preventDefault(); setFormError(null); setEditingStudent(student); }} className="rounded-full bg-white/90 shadow-sm border border-white p-2 text-[#023435]/40 hover:text-[#107996] hover:bg-white transition-all hover:scale-110" title="Düzenle">
                   <Pencil size={14} />
                 </button>
-                <button onClick={(e) => { e.preventDefault(); setConfirmDeleteId(student.id); }} className="rounded-full bg-white/90 dark:bg-gray-800/90 shadow-sm border border-white dark:border-gray-700 p-2 text-[#023435]/40 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all hover:scale-110" title="Sil">
+                <button onClick={(e) => { e.preventDefault(); setConfirmDeleteId(student.id); }} className="rounded-full bg-white/90 shadow-sm border border-white p-2 text-[#023435]/40 hover:text-red-600 hover:bg-red-50 transition-all hover:scale-110" title="Sil">
                   <Trash2 size={14} />
                 </button>
               </div>
 
               {/* Silme onayı */}
               {confirmDeleteId === student.id && (
-                <div className="absolute inset-0 rounded-3xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 p-5 z-30">
-                  <p className="text-sm font-bold text-[#023435] dark:text-gray-100 text-center">Bu öğrenciyi silmek istediğinize emin misiniz?</p>
-                  <p className="text-[11px] font-semibold text-red-500/80 dark:text-red-400/80 uppercase tracking-widest text-center">Tüm materyalleri de silinecektir.</p>
+                <div className="absolute inset-0 rounded-3xl bg-white/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 p-5 z-30">
+                  <p className="text-sm font-bold text-[#023435] text-center">Bu öğrenciyi silmek istediğinize emin misiniz?</p>
+                  <p className="text-[11px] font-semibold text-red-500/80 uppercase tracking-widest text-center">Tüm materyalleri de silinecektir.</p>
                   <div className="flex gap-2 w-full mt-2">
-                    <button onClick={() => setConfirmDeleteId(null)} className="flex-1 rounded-xl border border-[#023435]/10 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-xs font-bold text-[#023435]/60 dark:text-gray-300 hover:bg-[#023435]/5 dark:hover:bg-gray-700 transition-colors">İptal</button>
+                    <button onClick={() => setConfirmDeleteId(null)} className="flex-1 rounded-xl border border-[#023435]/10 bg-white px-3 py-2.5 text-xs font-bold text-[#023435]/60 hover:bg-[#023435]/5 transition-colors">İptal</button>
                     <button onClick={() => handleDelete(student.id)} disabled={deletingId === student.id} className="flex-1 rounded-xl bg-red-600 px-3 py-2.5 text-xs font-bold text-white shadow-md hover:bg-red-700 disabled:opacity-60 transition-colors">
                       {deletingId === student.id ? "Siliniyor…" : "Evet, Sil"}
                     </button>

@@ -92,22 +92,22 @@ export function CardPreview({ card }: CardPreviewProps) {
             )}
           </Button>
         </div>
-        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{card.title}</h2>
-        <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed"><InlineMd text={card.objective} /></p>
+        <h2 className="text-2xl font-bold text-zinc-900">{card.title}</h2>
+        <p className="text-zinc-600 text-sm leading-relaxed"><InlineMd text={card.objective} /></p>
       </div>
 
       {/* Materyaller */}
       {card.materials?.length > 0 && (
-        <Card className="border-zinc-100 dark:border-zinc-800 dark:bg-zinc-900/50">
+        <Card className="border-zinc-100">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+            <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">
               📦 Materyaller
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
             <div className="flex flex-wrap gap-2">
               {card.materials.map((m, i) => (
-                <span key={i} className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1 text-sm text-zinc-700 dark:text-zinc-300">
+                <span key={i} className="rounded-full bg-zinc-100 px-3 py-1 text-sm text-zinc-700">
                   {m}
                 </span>
               ))}
@@ -118,16 +118,16 @@ export function CardPreview({ card }: CardPreviewProps) {
 
       {/* Uygulama Adımları */}
       {card.instructions?.length > 0 && (
-        <Card className="border-zinc-100 dark:border-zinc-800 dark:bg-zinc-900/50">
+        <Card className="border-zinc-100">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+            <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">
               📋 Uygulama Adımları
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
             <ol className="space-y-2">
               {card.instructions.map((step, i) => (
-                <li key={i} className="flex gap-3 text-sm text-zinc-700 dark:text-zinc-300">
+                <li key={i} className="flex gap-3 text-sm text-zinc-700">
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FE703A]/10 text-xs font-bold text-[#FE703A]">
                     {i + 1}
                   </span>
@@ -141,22 +141,22 @@ export function CardPreview({ card }: CardPreviewProps) {
 
       {/* Egzersizler */}
       {card.exercises?.length > 0 && (
-        <Card className="border-zinc-100 dark:border-zinc-800 dark:bg-zinc-900/50">
+        <Card className="border-zinc-100">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+            <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">
               🏃 Egzersizler
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-3">
             {card.exercises.map((ex, i) => (
-              <div key={i} className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 p-3 space-y-1">
+              <div key={i} className="rounded-lg bg-zinc-50 p-3 space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{ex.name}</span>
-                  <span className="text-xs text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-full px-2 py-0.5">
+                  <span className="text-sm font-semibold text-zinc-800">{ex.name}</span>
+                  <span className="text-xs text-zinc-400 bg-white border border-zinc-200 rounded-full px-2 py-0.5">
                     {ex.repetitions}
                   </span>
                 </div>
-                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed"><InlineMd text={ex.description} /></p>
+                <p className="text-xs text-zinc-600 leading-relaxed"><InlineMd text={ex.description} /></p>
               </div>
             ))}
           </CardContent>
@@ -165,30 +165,30 @@ export function CardPreview({ card }: CardPreviewProps) {
 
       {/* Uzman Notları */}
       {card.therapistNotes && (
-        <Card className="border-amber-100 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/10">
+        <Card className="border-amber-100 bg-amber-50">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-amber-700 dark:text-amber-500 uppercase tracking-wide">
+            <CardTitle className="text-sm font-semibold text-amber-700 uppercase tracking-wide">
               📝 Uzman Notları
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <p className="text-sm text-amber-800 dark:text-amber-400/90 leading-relaxed"><InlineMd text={card.therapistNotes} /></p>
+            <p className="text-sm text-amber-800 leading-relaxed"><InlineMd text={card.therapistNotes} /></p>
           </CardContent>
         </Card>
       )}
 
       {/* İlerleme Göstergeleri */}
       {card.progressIndicators?.length > 0 && (
-        <Card className="border-zinc-100 dark:border-zinc-800 dark:bg-zinc-900/50">
+        <Card className="border-zinc-100">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
+            <CardTitle className="text-sm font-semibold text-zinc-500 uppercase tracking-wide">
               📈 İlerleme Göstergeleri
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
             <ul className="space-y-1">
               {card.progressIndicators.map((pi, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+                <li key={i} className="flex items-start gap-2 text-sm text-zinc-700">
                   <span className="text-emerald-500 mt-0.5">✓</span>
                   <InlineMd text={pi} />
                 </li>
@@ -200,14 +200,14 @@ export function CardPreview({ card }: CardPreviewProps) {
 
       {/* Ev Egzersizi */}
       {card.homeExercise && (
-        <Card className="border-[#023435]/15 dark:border-emerald-900/30 bg-[#023435]/5 dark:bg-emerald-900/10">
+        <Card className="border-[#023435]/15 bg-[#023435]/5">
           <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-[#023435] dark:text-emerald-500 uppercase tracking-wide">
+            <CardTitle className="text-sm font-semibold text-[#023435] uppercase tracking-wide">
               🏠 Ev Egzersizi
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <p className="text-sm text-[#023435] dark:text-emerald-400 leading-relaxed"><InlineMd text={card.homeExercise} /></p>
+            <p className="text-sm text-[#023435] leading-relaxed"><InlineMd text={card.homeExercise} /></p>
           </CardContent>
         </Card>
       )}

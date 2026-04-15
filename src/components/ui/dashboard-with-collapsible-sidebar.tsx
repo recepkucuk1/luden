@@ -15,19 +15,15 @@ import {
   LogOut,
   Menu,
   X,
-  Sun,
-  Moon,
   CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/components/ThemeProvider";
 
 export const Sidebar = () => {
   const [open, setOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
-  const { theme, toggleTheme } = useTheme();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -71,11 +67,11 @@ export const Sidebar = () => {
   return (
     <>
       {/* Mobile Hamburger Header */}
-      <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 absolute top-0 left-0 right-0 z-50">
+      <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-200 bg-white absolute top-0 left-0 right-0 z-50">
         <Logo size="small" />
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-lg"
+          className="text-gray-600 hover:bg-gray-100 p-2 rounded-lg"
         >
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -93,7 +89,7 @@ export const Sidebar = () => {
       <nav
         className={cn(
           "fixed md:sticky top-0 h-screen shrink-0 border-r transition-all duration-300 ease-in-out z-50 md:z-0",
-          "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-2 shadow-sm",
+          "border-gray-200 bg-white p-2 shadow-sm",
           open ? "w-64" : "w-16",
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
@@ -125,9 +121,9 @@ export const Sidebar = () => {
             ))}
         </div>
 
-        <div className="border-t border-gray-200 dark:border-gray-800 pt-4 pb-2 space-y-1 absolute bottom-14 left-2 right-2 bg-white dark:bg-gray-900">
+        <div className="border-t border-gray-200 pt-4 pb-2 space-y-1 absolute bottom-14 left-2 right-2 bg-white">
           {open && (
-            <div className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
               Hesap
             </div>
           )}
@@ -139,22 +135,8 @@ export const Sidebar = () => {
             open={open}
           />
           <button
-            onClick={toggleTheme}
-            className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
-            title={theme === "dark" ? "Gündüz Modu" : "Gece Modu"}
-          >
-            <div className="grid h-full w-12 place-content-center">
-              {theme === "dark" ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
-            </div>
-            {open && (
-              <span className="text-sm font-medium transition-opacity duration-200 opacity-100">
-                {theme === "dark" ? "Gündüz Modu" : "Gece Modu"}
-              </span>
-            )}
-          </button>
-          <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400"
+            className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-gray-600 hover:bg-red-50 hover:text-red-600"
             title="Çıkış Yap"
           >
             <div className="grid h-full w-12 place-content-center">
@@ -195,8 +177,8 @@ const Option = ({ Icon, title, href, currentPath, open, notifs }: OptionProps) =
       className={cn(
         "relative flex h-11 w-full items-center rounded-md transition-all duration-200",
         isSelected
-          ? "bg-[#023435]/10 dark:bg-[#023435]/30 text-[#023435] dark:text-emerald-300 shadow-sm border-l-2 border-[#FE703A]"
-          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
+          ? "bg-[#023435]/10 text-[#023435] shadow-sm border-l-2 border-[#FE703A]"
+          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
       )}
     >
       <div className="grid h-full w-12 place-content-center">
@@ -208,7 +190,7 @@ const Option = ({ Icon, title, href, currentPath, open, notifs }: OptionProps) =
         </span>
       )}
       {notifs && open && (
-        <span className="absolute right-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#FE703A] dark:bg-[#FE703A] text-xs text-white font-medium">
+        <span className="absolute right-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#FE703A] text-xs text-white font-medium">
           {notifs}
         </span>
       )}
@@ -218,10 +200,10 @@ const Option = ({ Icon, title, href, currentPath, open, notifs }: OptionProps) =
 
 const TitleSection = ({ open, userName, userImage }: { open: boolean; userName: string; userImage?: string | null }) => {
   return (
-    <div className="mb-6 border-b border-gray-200 dark:border-gray-800 pb-4 pt-2 md:pt-0">
+    <div className="mb-6 border-b border-gray-200 pb-4 pt-2 md:pt-0">
       <Link
         href="/dashboard"
-        className="flex items-center justify-between rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+        className="flex items-center justify-between rounded-md p-2 transition-colors hover:bg-gray-50"
       >
         <div className="flex items-center gap-3">
           {userImage ? (
@@ -233,10 +215,10 @@ const TitleSection = ({ open, userName, userImage }: { open: boolean; userName: 
             <div className={cn("transition-opacity duration-200", open ? "opacity-100" : "opacity-0")}>
               <div className="flex items-center gap-2">
                 <div className="max-w-[130px]">
-                  <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                  <span className="block text-sm font-semibold text-gray-900 truncate">
                     {userName}
                   </span>
-                  <span className="block text-xs text-gray-500 dark:text-gray-400">Pro Plan</span>
+                  <span className="block text-xs text-gray-500">Pro Plan</span>
                 </div>
               </div>
             </div>
@@ -270,16 +252,16 @@ const ToggleClose = ({ open, setOpen }: { open: boolean; setOpen: (v: boolean) =
   return (
     <button
       onClick={() => setOpen(!open)}
-      className="absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-800 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+      className="absolute bottom-0 left-0 right-0 border-t border-gray-200 transition-colors hover:bg-gray-50"
     >
       <div className="flex items-center p-3">
         <div className="grid size-10 place-content-center">
           <ChevronsRight
-            className={cn("h-4 w-4 transition-transform duration-300 text-gray-500 dark:text-gray-400", open && "rotate-180")}
+            className={cn("h-4 w-4 transition-transform duration-300 text-gray-500", open && "rotate-180")}
           />
         </div>
         {open && (
-          <span className={cn("text-sm font-medium text-gray-600 dark:text-gray-300 transition-opacity duration-200", open ? "opacity-100" : "opacity-0")}>
+          <span className={cn("text-sm font-medium text-gray-600 transition-opacity duration-200", open ? "opacity-100" : "opacity-0")}>
             Daralt
           </span>
         )}

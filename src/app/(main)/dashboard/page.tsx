@@ -105,9 +105,9 @@ interface RecentStudent {
 const CATEGORY_META: Record<string, { label: string; color: string; bg: string }> = {
   speech:   { label: "Konuşma", color: "bg-[#023435]",  bg: "bg-[#023435]/10" },
   language: { label: "Dil",     color: "bg-[#FE703A]",  bg: "bg-[#FE703A]/10" },
-  hearing:  { label: "İşitme",  color: "bg-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-  fluency:  { label: "Akıcılık", color: "bg-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
-  voice:    { label: "Ses",     color: "bg-pink-500",   bg: "bg-pink-50 dark:bg-pink-900/20" },
+  hearing:  { label: "İşitme",  color: "bg-emerald-500", bg: "bg-emerald-50" },
+  fluency:  { label: "Akıcılık", color: "bg-purple-500", bg: "bg-purple-50" },
+  voice:    { label: "Ses",     color: "bg-pink-500",   bg: "bg-pink-50" },
 };
 
 // ─── Dashboard Page ──────────────────────────────────────────────────────────
@@ -143,7 +143,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 bg-gray-50 dark:bg-gray-900 p-6 flex flex-col items-center justify-center">
+      <div className="flex-1 bg-gray-50 p-6 flex flex-col items-center justify-center">
         <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
         <p className="mt-4 text-sm text-gray-500">Yükleniyor...</p>
       </div>
@@ -159,15 +159,15 @@ export default function DashboardPage() {
       label: "Toplam Öğrenci",
       value: stats?.students ?? 0,
       sub: `Bu hafta ${weekly?.studentsWorked ?? 0} aktif öğrenci`,
-      iconBg: "bg-[#023435]/10 dark:bg-[#023435]/30",
-      iconColor: "text-[#023435] dark:text-emerald-400",
+      iconBg: "bg-[#023435]/10",
+      iconColor: "text-[#023435]",
     },
     {
       icon: LayoutGrid,
       label: "Toplam Kart",
       value: stats?.cards ?? 0,
       sub: `Bu hafta ${weekly?.cardsCreated ?? 0} yeni kart`,
-      iconBg: "bg-[#FE703A]/10 dark:bg-[#FE703A]/20",
+      iconBg: "bg-[#FE703A]/10",
       iconColor: "text-[#FE703A]",
     },
     {
@@ -175,8 +175,8 @@ export default function DashboardPage() {
       label: "Tamamlanan Hedef",
       value: weekly?.goalsCompleted ?? 0,
       sub: "Bu hafta genel değerlendirme",
-      iconBg: "bg-emerald-50 dark:bg-emerald-900/20",
-      iconColor: "text-emerald-600 dark:text-emerald-400",
+      iconBg: "bg-emerald-50",
+      iconColor: "text-emerald-600",
     },
     {
       icon: Flame,
@@ -184,8 +184,8 @@ export default function DashboardPage() {
       value: weekly?.streak ?? 0,
       suffix: "gün",
       sub: "Çalışmaya devam et!",
-      iconBg: "bg-orange-50 dark:bg-orange-900/20",
-      iconColor: "text-orange-600 dark:text-orange-400",
+      iconBg: "bg-orange-50",
+      iconColor: "text-orange-600",
     },
   ];
 
@@ -197,12 +197,12 @@ export default function DashboardPage() {
   const totalCategoryItems = categoryEntries.reduce((s, [, v]) => s + v, 0);
 
   return (
-    <div className="flex-1 bg-gray-50 dark:bg-gray-950 p-4 sm:p-6 overflow-auto">
+    <div className="flex-1 bg-gray-50 p-4 sm:p-6 overflow-auto">
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Genel Bakış</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Luden paneline hoş geldiniz</p>
+          <h1 className="text-3xl font-bold text-gray-900">Genel Bakış</h1>
+          <p className="text-gray-600 mt-1">Luden paneline hoş geldiniz</p>
         </div>
         <div className="flex items-center gap-2 self-end sm:self-auto">
           {/* Quick Action CTA */}
@@ -215,7 +215,7 @@ export default function DashboardPage() {
           </Link>
           <Link
             href="/profile"
-            className="p-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+            className="p-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <User className="h-5 w-5" />
           </Link>
@@ -230,7 +230,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: i * 0.08 }}
-            className="p-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-all group"
+            className="p-6 rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all group"
           >
             <div className="flex items-center justify-between mb-4">
               <div className={`p-2 rounded-lg ${card.iconBg} transition-colors`}>
@@ -238,16 +238,16 @@ export default function DashboardPage() {
               </div>
               <TrendingUp className="h-4 w-4 text-emerald-500 opacity-50 group-hover:opacity-100 transition-opacity" />
             </div>
-            <h3 className="font-medium text-gray-600 dark:text-gray-400 mb-1">{card.label}</h3>
+            <h3 className="font-medium text-gray-600 mb-1">{card.label}</h3>
             <div className="flex items-end gap-1.5">
-              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <p className="text-3xl font-bold text-gray-900">
                 <CountUp target={card.value} />
               </p>
               {card.suffix && (
-                <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">{card.suffix}</p>
+                <p className="text-sm font-semibold text-gray-500 mb-1">{card.suffix}</p>
               )}
             </div>
-            <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-2 font-medium">{card.sub}</p>
+            <p className="text-sm text-emerald-600 mt-2 font-medium">{card.sub}</p>
           </motion.div>
         ))}
       </div>
@@ -261,9 +261,9 @@ export default function DashboardPage() {
           transition={{ duration: 0.5, delay: 0.35 }}
           className="lg:col-span-2"
         >
-          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm h-full max-h-[500px] flex flex-col">
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm h-full max-h-[500px] flex flex-col">
             <div className="flex items-center justify-between mb-6 shrink-0">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Son Üretilen Kartlar</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Son Üretilen Kartlar</h3>
               <Link href="/cards" className="text-sm text-[#FE703A] hover:text-[#FE703A]/80 font-medium transition-colors">
                 Tümünü gör
               </Link>
@@ -274,8 +274,8 @@ export default function DashboardPage() {
                 <div className="h-12 w-12 rounded-xl bg-[#FE703A]/10 flex items-center justify-center mb-3">
                   <Package className="h-6 w-6 text-[#FE703A]" />
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Henüz kart üretilmedi</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">AI ile saniyeler içinde ilk kartınızı oluşturun</p>
+                <p className="text-sm text-gray-500 mb-1">Henüz kart üretilmedi</p>
+                <p className="text-xs text-gray-400 mb-4">AI ile saniyeler içinde ilk kartınızı oluşturun</p>
                 <Link
                   href="/generate"
                   className="inline-flex items-center gap-1.5 rounded-lg bg-[#FE703A] px-4 py-2 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors"
@@ -290,13 +290,13 @@ export default function DashboardPage() {
                   <Link
                     href={`/cards/${card.id}`}
                     key={card.id}
-                    className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer border border-transparent hover:border-gray-100 dark:hover:border-gray-800 group"
+                    className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border border-transparent hover:border-gray-100 group"
                   >
-                    <div className="p-2 rounded-lg bg-[#023435]/10 dark:bg-[#023435]/30 group-hover:bg-[#023435] transition-colors">
-                      <Package className="h-5 w-5 text-[#023435] dark:text-emerald-400 group-hover:text-white transition-colors" />
+                    <div className="p-2 rounded-lg bg-[#023435]/10 group-hover:bg-[#023435] transition-colors">
+                      <Package className="h-5 w-5 text-[#023435] group-hover:text-white transition-colors" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <p className="text-sm font-medium text-gray-900 truncate">
                         {card.title}
                       </p>
                       <div className="flex items-center gap-1.5 mt-1">
@@ -313,14 +313,14 @@ export default function DashboardPage() {
                           {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
                         </Badge>
                         {card.student && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400 ml-1 truncate max-w-[100px] inline-block">
+                          <span className="text-xs text-gray-500 ml-1 truncate max-w-[100px] inline-block">
                             {card.student.name}
                           </span>
                         )}
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className="inline-flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
+                      <span className="inline-flex items-center gap-1 text-xs text-gray-400">
                         <Clock className="h-3 w-3" />
                         {relativeTime(card.createdAt)}
                       </span>
@@ -341,13 +341,13 @@ export default function DashboardPage() {
         >
           {/* Onboarding Widget (compact) */}
           {isEmpty && (
-            <div className="rounded-xl border border-[#023435]/20 dark:border-[#023435]/40 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+            <div className="rounded-xl border border-[#023435]/20 bg-white shadow-sm overflow-hidden">
               <div className="bg-gradient-to-r from-[#023435] to-[#04595B] px-4 py-3 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-[#FE703A]" />
                 <span className="text-sm font-semibold text-white">Başlangıç Adımları</span>
                 <span className="ml-auto text-xs text-white/50">1/3</span>
               </div>
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+              <div className="divide-y divide-gray-100">
                 {[
                   { done: true, label: "Hesap oluştur", href: "" },
                   { done: (stats?.students ?? 0) > 0, label: "Öğrenci ekle", href: "/students" },
@@ -357,13 +357,13 @@ export default function DashboardPage() {
                     <div
                       className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                         step.done
-                          ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-400"
+                          ? "bg-emerald-100 text-emerald-600"
+                          : "bg-gray-100 text-gray-400"
                       }`}
                     >
                       {step.done ? "✓" : i + 1}
                     </div>
-                    <span className={`text-sm flex-1 ${step.done ? "line-through text-gray-400" : "text-gray-700 dark:text-gray-300 font-medium"}`}>
+                    <span className={`text-sm flex-1 ${step.done ? "line-through text-gray-400" : "text-gray-700 font-medium"}`}>
                       {step.label}
                     </span>
                     {!step.done && step.href && (
@@ -378,10 +378,10 @@ export default function DashboardPage() {
           )}
 
           {/* Category Distribution */}
-          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-5">Alan Dağılımı</h3>
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-5">Alan Dağılımı</h3>
             {categoryEntries.length === 0 ? (
-              <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">Henüz veri yok</p>
+              <p className="text-sm text-gray-400 text-center py-4">Henüz veri yok</p>
             ) : (
               <div className="space-y-4">
                 {categoryEntries.map(([key, value]) => {
@@ -390,13 +390,13 @@ export default function DashboardPage() {
                   return (
                     <div key={key}>
                       <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-600 flex items-center gap-2">
                           <span className={`h-2.5 w-2.5 rounded-full ${meta.color}`} />
                           {meta.label}
                         </span>
-                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{value}</span>
+                        <span className="text-sm font-bold text-gray-900">{value}</span>
                       </div>
-                      <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                      <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${pct}%` }}
@@ -407,8 +407,8 @@ export default function DashboardPage() {
                     </div>
                   );
                 })}
-                <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
-                  <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
+                <div className="pt-2 border-t border-gray-100">
+                  <div className="flex justify-between text-xs text-gray-400">
                     <span>Toplam</span>
                     <span className="font-semibold">{totalCategoryItems} kart</span>
                   </div>
@@ -418,22 +418,22 @@ export default function DashboardPage() {
           </div>
 
           {/* Today's Plan Mini Widget */}
-          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Bugün</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Bugün</h3>
               <Link href="/calendar" className="text-xs text-[#FE703A] hover:text-[#FE703A]/80 font-medium transition-colors">
                 Takvim
               </Link>
             </div>
-            <div className="flex items-center gap-3 rounded-xl bg-[#023435]/5 dark:bg-[#023435]/20 p-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#023435]/10 dark:bg-[#023435]/30">
-                <CalendarDays className="h-5 w-5 text-[#023435] dark:text-emerald-400" />
+            <div className="flex items-center gap-3 rounded-xl bg-[#023435]/5 p-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#023435]/10">
+                <CalendarDays className="h-5 w-5 text-[#023435]" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <p className="text-sm font-medium text-gray-700">
                   {formatDate(new Date(), "long")}
                 </p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                <p className="text-xs text-gray-400 mt-0.5">
                   {weekly?.studentsWorked ?? 0} aktif öğrenci · {weekly?.cardsCreated ?? 0} kart üretildi
                 </p>
               </div>
@@ -442,14 +442,14 @@ export default function DashboardPage() {
             <div className="mt-4 grid grid-cols-2 gap-2">
               <Link
                 href="/generate"
-                className="flex items-center gap-2 rounded-lg border border-gray-100 dark:border-gray-800 px-3 py-2.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:border-[#FE703A]/30 hover:text-[#FE703A] transition-colors"
+                className="flex items-center gap-2 rounded-lg border border-gray-100 px-3 py-2.5 text-xs font-medium text-gray-600 hover:border-[#FE703A]/30 hover:text-[#FE703A] transition-colors"
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 Kart Üret
               </Link>
               <Link
                 href="/students"
-                className="flex items-center gap-2 rounded-lg border border-gray-100 dark:border-gray-800 px-3 py-2.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:border-[#023435]/30 hover:text-[#023435] dark:hover:text-emerald-400 transition-colors"
+                className="flex items-center gap-2 rounded-lg border border-gray-100 px-3 py-2.5 text-xs font-medium text-gray-600 hover:border-[#023435]/30 hover:text-[#023435] transition-colors"
               >
                 <Users className="h-3.5 w-3.5" />
                 Öğrenciler
@@ -458,9 +458,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Students */}
-          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Yeni Öğrenciler</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Yeni Öğrenciler</h3>
               <Link href="/students" className="text-xs text-[#FE703A] hover:text-[#FE703A]/80 font-medium transition-colors">
                 Tümü
               </Link>
@@ -482,15 +482,15 @@ export default function DashboardPage() {
                   <Link
                     href={`/students/${student.id}`}
                     key={student.id}
-                    className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
+                    className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-colors group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#023435]/10 dark:bg-[#023435]/30 text-[#023435] dark:text-emerald-400 font-bold text-xs shrink-0 group-hover:bg-[#023435] group-hover:text-white transition-colors">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#023435]/10 text-[#023435] font-bold text-xs shrink-0 group-hover:bg-[#023435] group-hover:text-white transition-colors">
                         {student.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{student.name}</span>
+                      <span className="text-sm font-medium text-gray-700">{student.name}</span>
                     </div>
-                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                    <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">
                       {student.cardCount} kart
                     </span>
                   </Link>

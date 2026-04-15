@@ -87,7 +87,7 @@ function HomeContent() {
 
   return (
     <div
-      className="w-full flex flex-col relative md:h-[calc(100vh-0px)] md:overflow-hidden dark:bg-gray-900"
+      className="w-full flex flex-col relative md:h-[calc(100vh-0px)] md:overflow-hidden"
       style={{ background: "linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%)" }}
     >
       <style jsx>{`
@@ -108,9 +108,9 @@ function HomeContent() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] md:flex-1 md:min-h-0">
         {/* Sol: Form */}
         <div className="flex flex-col md:h-full md:min-h-0">
-          <div className="mb-4 shrink-0 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-2xl border border-white/70 dark:border-white/10 px-4 py-3 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
+          <div className="mb-4 shrink-0 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/70 px-4 py-3 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-extrabold text-[#023435] dark:text-zinc-100 tracking-tight">Öğrenme Kartı Oluştur</h2>
+              <h2 className="text-lg font-extrabold text-[#023435] tracking-tight">Öğrenme Kartı Oluştur</h2>
               {studentName && (
                 <Link
                   href="/students"
@@ -120,9 +120,9 @@ function HomeContent() {
                 </Link>
               )}
             </div>
-            <p className="text-sm text-[#023435]/60 dark:text-zinc-400 mt-0.5">Parametreleri seç, AI öğrenme kartını üretsin.</p>
+            <p className="text-sm text-[#023435]/60 mt-0.5">Parametreleri seç, AI öğrenme kartını üretsin.</p>
           </div>
-          <div className="rounded-2xl border border-white/80 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
+          <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
             <CardGeneratorForm
               key={formKey}
               onCardGenerated={handleCardGenerated}
@@ -137,9 +137,9 @@ function HomeContent() {
 
         {/* Sağ: Önizleme */}
         <div className="flex flex-col md:h-full md:min-h-0">
-          <div className="mb-4 shrink-0 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-2xl border border-white/70 dark:border-white/10 px-4 py-3 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
-            <h2 className="text-lg font-extrabold text-[#023435] dark:text-zinc-100 tracking-tight">Kart Önizleme</h2>
-            <p className="text-sm text-[#023435]/60 dark:text-zinc-400 mt-0.5">
+          <div className="mb-4 shrink-0 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/70 px-4 py-3 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
+            <h2 className="text-lg font-extrabold text-[#023435] tracking-tight">Kart Önizleme</h2>
+            <p className="text-sm text-[#023435]/60 mt-0.5">
               {card ? "Üretilen öğrenme kartı aşağıda görüntüleniyor." : "Kart üretildiğinde burada görünecek."}
             </p>
           </div>
@@ -154,11 +154,11 @@ function HomeContent() {
               </div>
             ) : card ? (
               <div className="flex flex-col gap-4 md:flex-1 md:min-h-0">
-                <div className="rounded-2xl border border-white/80 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar min-h-[500px] md:flex-1 md:min-h-0">
+                <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar min-h-[500px] md:flex-1 md:min-h-0">
                   <CardPreview card={card} />
                 </div>
                 {/* Sonraki adım CTA'ları */}
-                <div className="rounded-2xl border border-white/80 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)] shrink-0">
+                <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)] shrink-0">
                   <p className="text-xs font-semibold text-zinc-400 mb-3">Sonraki adım</p>
                   <div className="flex flex-wrap gap-2">
                     <Link

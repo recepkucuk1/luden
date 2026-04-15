@@ -70,8 +70,8 @@ function ToolCard({ item, section }: { item: ToolItem; section: ToolSection }) {
       className={cn(
         "group relative flex flex-col justify-between overflow-hidden rounded-[20px] border p-4 transition-all duration-300",
         item.active 
-          ? "bg-white/60 dark:bg-gray-800/60 border-white/80 dark:border-gray-700/80 shadow-[0_4px_24px_rgba(2,52,53,0.03)] hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:-translate-y-1 hover:bg-white/90 dark:hover:bg-gray-700/80" 
-          : "bg-[rgba(255,255,255,0.4)] dark:bg-gray-800/30 border-white/30 dark:border-gray-700/30 cursor-not-allowed grayscale-[0.2]"
+          ? "bg-white/60 border-white/80 shadow-[0_4px_24px_rgba(2,52,53,0.03)] hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:-translate-y-1 hover:bg-white/90" 
+          : "bg-[rgba(255,255,255,0.4)] border-white/30 cursor-not-allowed grayscale-[0.2]"
       )}
       style={{
         backdropFilter: "blur(20px)",
@@ -104,11 +104,11 @@ function ToolCard({ item, section }: { item: ToolItem; section: ToolSection }) {
         
         <div className="flex-1 mt-0.5">
           <div className="flex items-center justify-between gap-1">
-            <h3 className={cn("text-[14px] leading-tight font-bold tracking-tight", item.active ? "text-[#023435] dark:text-gray-100" : "text-[#023435]/50 dark:text-gray-500")}>
+            <h3 className={cn("text-[14px] leading-tight font-bold tracking-tight", item.active ? "text-[#023435]" : "text-[#023435]/50")}>
               {item.title}
             </h3>
             {!item.active && (
-              <span className="shrink-0 rounded-full bg-[#023435]/5 dark:bg-gray-800 px-2 py-0.5 text-[9px] font-bold text-[#023435]/40 dark:text-gray-500 tracking-wide uppercase border border-[#023435]/5 dark:border-gray-700">
+              <span className="shrink-0 rounded-full bg-[#023435]/5 px-2 py-0.5 text-[9px] font-bold text-[#023435]/40 tracking-wide uppercase border border-[#023435]/5">
                 Yakında
               </span>
             )}
@@ -117,7 +117,7 @@ function ToolCard({ item, section }: { item: ToolItem; section: ToolSection }) {
       </div>
       
       <div className="relative z-10">
-        <p className={cn("text-[12px] leading-snug", item.active ? "text-[#023435]/60 dark:text-gray-400" : "text-[#023435]/40 dark:text-gray-600")}>
+        <p className={cn("text-[12px] leading-snug", item.active ? "text-[#023435]/60" : "text-[#023435]/40")}>
           {item.desc}
         </p>
       </div>
@@ -145,7 +145,7 @@ export default function ToolsPage() {
 
   return (
     <div 
-      className="min-h-full flex-1 w-full flex flex-col relative overflow-y-auto custom-scrollbar dark:bg-gray-900"
+      className="min-h-full flex-1 w-full flex flex-col relative overflow-y-auto custom-scrollbar"
       style={{ background: "linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%)" }}
     >
       <style jsx>{`
@@ -168,13 +168,13 @@ export default function ToolsPage() {
         {/* Header Section */}
         <div className="mb-6 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mb-2 rounded-full bg-white/60 dark:bg-zinc-800/60 border border-[rgba(2,52,53,0.1)] dark:border-white/10 text-[#FE703A] text-[10px] font-bold tracking-wide uppercase shadow-sm">
+            <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1 mb-2 rounded-full bg-white/60 border border-[rgba(2,52,53,0.1)] text-[#FE703A] text-[10px] font-bold tracking-wide uppercase shadow-sm">
               <Sparkles className="w-3 h-3" /> Devamlı Gelişen Koleksiyon
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#023435] dark:text-zinc-100 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#023435] tracking-tight">
               Terapist Araçları
             </h1>
-            <p className="mt-1 text-[13px] sm:text-sm text-[#023435]/60 dark:text-zinc-400 max-w-xl">
+            <p className="mt-1 text-[13px] sm:text-sm text-[#023435]/60 max-w-xl">
               Seanslarınızı daha verimli hale getirin. Materyal üretin, plan yapın ve izleyin.
             </p>
           </div>
@@ -182,7 +182,7 @@ export default function ToolsPage() {
 
         {/* Tab Filter */}
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-6 w-full overflow-x-auto pb-2 scrollbar-none">
-          <div className="flex p-1.5 rounded-2xl bg-white/40 dark:bg-gray-800/40 border border-white/60 dark:border-gray-700/60 shadow-[0_2px_12px_rgba(2,52,53,0.03)] backdrop-blur-md w-full sm:w-auto">
+          <div className="flex p-1.5 rounded-2xl bg-white/40 border border-white/60 shadow-[0_2px_12px_rgba(2,52,53,0.03)] backdrop-blur-md w-full sm:w-auto">
             {TABS.map((tab) => {
               const isActive = activeTab === tab;
               return (
@@ -192,13 +192,13 @@ export default function ToolsPage() {
                   className={cn(
                     "relative px-5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all duration-300 outline-none flex-1 sm:flex-none whitespace-nowrap",
                     isActive 
-                      ? "text-white dark:text-gray-100 shadow-md shadow-[#023435]/10 dark:shadow-black/20" 
-                      : "text-[#023435]/50 dark:text-gray-400 hover:text-[#023435] dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50"
+                      ? "text-white shadow-md shadow-[#023435]/10" 
+                      : "text-[#023435]/50 hover:text-[#023435] hover:bg-white/50"
                   )}
                 >
                   {isActive && (
                     <span 
-                      className="absolute inset-0 rounded-xl bg-[#023435] dark:bg-gray-700" 
+                      className="absolute inset-0 rounded-xl bg-[#023435]" 
                       style={{ 
                         boxShadow: "inset 0 1px 1px rgba(255,255,255,0.2), 0 4px 12px rgba(2,52,53,0.15)"
                       }} 
@@ -224,7 +224,7 @@ export default function ToolsPage() {
                   >
                     <section.Icon className="h-4 w-4" strokeWidth={2.5} />
                   </div>
-                  <h2 className="text-[15px] font-bold text-[#023435] dark:text-zinc-100">
+                  <h2 className="text-[15px] font-bold text-[#023435]">
                     {section.title}
                   </h2>
                 </div>
@@ -242,11 +242,11 @@ export default function ToolsPage() {
           {/* Empty State Fallback */}
           {filteredSections.length === 0 && (
              <div className="flex flex-col items-center justify-center py-20 text-center">
-               <div className="h-16 w-16 mb-4 rounded-3xl bg-white/60 dark:bg-gray-800/60 flex items-center justify-center text-[#023435]/20 dark:text-gray-500 shadow-sm border border-white dark:border-gray-700">
+               <div className="h-16 w-16 mb-4 rounded-3xl bg-white/60 flex items-center justify-center text-[#023435]/20 shadow-sm border border-white">
                  <Wand2 className="h-8 w-8" />
                </div>
-               <h3 className="text-lg font-bold text-[#023435] dark:text-gray-100">Bu kategoride henüz araç yok</h3>
-               <p className="mt-1 text-sm text-[#023435]/50 dark:text-gray-400">Yakında yeni materyaller eklenecektir.</p>
+               <h3 className="text-lg font-bold text-[#023435]">Bu kategoride henüz araç yok</h3>
+               <p className="mt-1 text-sm text-[#023435]/50">Yakında yeni materyaller eklenecektir.</p>
              </div>
           )}
         </div>
