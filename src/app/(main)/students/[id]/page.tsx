@@ -364,12 +364,12 @@ export default function StudentDetailPage({
         {showDeleteConfirm && (
           <ModalPortal>
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
-            <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-6 text-center">
-              <p className="text-base font-semibold text-zinc-900 mb-1">Öğrenciyi sil</p>
-              <p className="text-sm text-zinc-500 mb-1">
+            <div className="w-full max-w-sm rounded-2xl bg-card shadow-xl p-6 text-center">
+              <p className="text-base font-semibold text-foreground mb-1">Öğrenciyi sil</p>
+              <p className="text-sm text-muted-foreground mb-1">
                 <strong>{student.name}</strong> silinecek.
               </p>
-              <p className="text-xs text-zinc-400 mb-5">Bu işlem geri alınamaz. Tüm kartlar da silinecek.</p>
+              <p className="text-xs text-muted-foreground mb-5">Bu işlem geri alınamaz. Tüm kartlar da silinecek.</p>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={() => setShowDeleteConfirm(false)} disabled={deletingStudent}>
                   İptal
@@ -387,10 +387,10 @@ export default function StudentDetailPage({
         {showEdit && (
           <ModalPortal>
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
-            <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6 max-h-[90vh] overflow-y-auto">
+            <div className="w-full max-w-md rounded-2xl bg-card shadow-xl p-6 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-5">
-                <h2 className="text-base font-bold text-zinc-900">Öğrenci Düzenle</h2>
-                <button onClick={() => setShowEdit(false)} className="text-zinc-400 hover:text-zinc-600 text-lg leading-none">✕</button>
+                <h2 className="text-base font-bold text-foreground">Öğrenci Düzenle</h2>
+                <button onClick={() => setShowEdit(false)} className="text-muted-foreground hover:text-foreground text-lg leading-none">✕</button>
               </div>
               <form onSubmit={handleEdit} className="space-y-4">
                 <div className="space-y-1.5">
@@ -413,7 +413,7 @@ export default function StudentDetailPage({
                           "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all text-xs font-medium",
                           editWorkArea === w.value
                             ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
-                            : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
+                            : "border-border bg-card text-muted-foreground hover:border-border/80"
                         )}
                       >
                         <span className="text-lg">{w.icon}</span>
@@ -454,9 +454,9 @@ export default function StudentDetailPage({
 
         {/* Yaklaşan Dersler */}
         {upcomingLessons.length > 0 && (
-          <div className="rounded-2xl border border-zinc-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/40 p-4 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-zinc-900 dark:text-gray-100">Yaklaşan Dersler</h2>
+              <h2 className="text-sm font-semibold text-foreground">Yaklaşan Dersler</h2>
               <a href="/calendar" className="text-xs text-[#FE703A] hover:underline">Takvime git →</a>
             </div>
             <div className="space-y-2">
@@ -516,18 +516,18 @@ export default function StudentDetailPage({
 
         {/* Eğitim Profili Sekmesi */}
         {activeTab === "aiProfile" && (
-          <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm p-6">
+          <div className="rounded-2xl border border-border bg-card shadow-sm p-6">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-base font-semibold text-zinc-900">Eğitim Profili</h2>
-                <p className="text-xs text-zinc-400 mt-0.5">
+                <h2 className="text-base font-semibold text-foreground">Eğitim Profili</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   AI destekli klinik arka plan ve uzman önerileri · 20 kredi
                 </p>
               </div>
               {student.aiProfile && !generatingProfile && (
                 <button
                   onClick={() => setConfirmRegenerate(true)}
-                  className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
                 >
                   Yeniden Üret
                 </button>
@@ -536,9 +536,9 @@ export default function StudentDetailPage({
 
             {/* Yeniden üret onay diyaloğu */}
             {confirmRegenerate && (
-              <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                <p className="text-sm font-medium text-amber-800 mb-1">Mevcut profil silinecek, devam et?</p>
-                <p className="text-xs text-amber-600 mb-3">Yeni profil oluşturmak 20 kredi harcar.</p>
+              <div className="mb-5 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/50 p-4">
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-1">Mevcut profil silinecek, devam et?</p>
+                <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">Yeni profil oluşturmak 20 kredi harcar.</p>
                 <div className="flex gap-2">
                   <button
                     onClick={handleGenerateProfile}
@@ -548,7 +548,7 @@ export default function StudentDetailPage({
                   </button>
                   <button
                     onClick={() => setConfirmRegenerate(false)}
-                    className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+                    className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
                   >
                     İptal
                   </button>
@@ -560,8 +560,8 @@ export default function StudentDetailPage({
             {!student.aiProfile && !generatingProfile && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="text-4xl mb-3">🧠</div>
-                <p className="text-sm font-medium text-zinc-700 mb-1">Henüz eğitim profili oluşturulmadı</p>
-                <p className="text-xs text-zinc-400 mb-5">
+                <p className="text-sm font-medium text-foreground mb-1">Henüz eğitim profili oluşturulmadı</p>
+                <p className="text-xs text-muted-foreground mb-5">
                   AI, öğrencinin bilgilerine göre klinik arka plan ve uzman önerileri hazırlar.
                 </p>
                 <button
@@ -577,8 +577,8 @@ export default function StudentDetailPage({
             {generatingProfile && (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="h-6 w-6 rounded-full border-2 border-[#FE703A]/20 border-t-[#FE703A] animate-spin mx-auto mb-4" />
-                <p className="text-sm font-medium text-zinc-500">Profil oluşturuluyor…</p>
-                <p className="text-xs text-zinc-400 mt-1">Bu birkaç saniye sürebilir.</p>
+                <p className="text-sm font-medium text-muted-foreground">Profil oluşturuluyor…</p>
+                <p className="text-xs text-muted-foreground mt-1">Bu birkaç saniye sürebilir.</p>
               </div>
             )}
 
@@ -587,8 +587,8 @@ export default function StudentDetailPage({
               <div className="space-y-3 min-w-0">
                 {parseProfileSections(student.aiProfile).map((section) => {
                   const style = SECTION_STYLE[section.title] ?? {
-                    box: "bg-zinc-50 border border-zinc-100",
-                    title: "text-zinc-700",
+                    box: "bg-muted border border-border",
+                    title: "text-foreground",
                   };
                   return (
                     <div key={section.title} className={cn("rounded-xl p-4", style.box)}>
@@ -617,10 +617,10 @@ export default function StudentDetailPage({
           </div>
 
           {student.cards.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 bg-white/40 shadow-sm backdrop-blur-md py-16 text-center relative z-10">
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-border bg-card/40 shadow-sm backdrop-blur-md py-16 text-center relative z-10">
               <div className="text-4xl mb-4 opacity-80">🗂️</div>
-              <p className="text-lg font-bold text-[#023435] mb-1">Henüz özel kart üretilmedi</p>
-              <p className="text-sm font-medium text-[#023435]/50 mb-4">
+              <p className="text-lg font-bold text-foreground mb-1">Henüz özel kart üretilmedi</p>
+              <p className="text-sm font-medium text-muted-foreground mb-4">
                 Bu öğrenci için yapay zeka destekli gelişim kartı hazırlamak çok kolay.
               </p>
               <Link
@@ -641,29 +641,29 @@ export default function StudentDetailPage({
                   onDeletePress={() => { setSwipeOpenId(null); setConfirmCardId(card.id); }}
                 >
                 <div
-                  className="group relative rounded-3xl border border-white/80 bg-white/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 overflow-hidden flex flex-col h-full"
+                  className="group relative rounded-3xl border border-border bg-card/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] dark:shadow-none backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 overflow-hidden flex flex-col h-full"
                 >
-                  <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/60 to-transparent pointer-events-none rounded-tr-3xl" />
+                  <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/40 dark:from-white/5 to-transparent pointer-events-none rounded-tr-3xl" />
                   <Link href={`/cards/${card.id}`} className="block p-5 flex-1 relative z-10 flex flex-col">
                     <div className="flex flex-wrap gap-1.5 mb-3 pr-8">
-                      <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[card.category] ?? "border-zinc-200 text-zinc-600")}>
+                      <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[card.category] ?? "border-border text-muted-foreground")}>
                         {WORK_AREA_LABEL[card.category] ?? card.category}
                       </span>
-                      <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", DIFFICULTY_COLOR[card.difficulty] ?? "border-zinc-200 text-zinc-600")}>
+                      <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", DIFFICULTY_COLOR[card.difficulty] ?? "border-border text-muted-foreground")}>
                         {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
                       </span>
-                      <span className="rounded-md border border-zinc-200/60 bg-white px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 uppercase tracking-widest">
+                      <span className="rounded-md border border-border/60 bg-card px-2 py-0.5 text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest">
                         {card.ageGroup}
                       </span>
                     </div>
-                    <h3 className="font-extrabold text-[#023435] text-[15px] mb-2 line-clamp-2 leading-snug">{card.title}</h3>
+                    <h3 className="font-extrabold text-[#023435] dark:text-foreground text-[15px] mb-2 line-clamp-2 leading-snug">{card.title}</h3>
                     {(card.content as GeneratedCard).objective && (
-                      <p className="text-[12px] font-medium text-[#023435]/60 mb-2 line-clamp-2">
+                      <p className="text-[12px] font-medium text-muted-foreground mb-2 line-clamp-2">
                         {(card.content as GeneratedCard).objective}
                       </p>
                     )}
-                    <div className="mt-auto pt-3 border-t border-[#023435]/5 flex items-center justify-between">
-                      <p className="text-[10px] font-bold text-[#023435]/40 uppercase tracking-widest">
+                    <div className="mt-auto pt-3 border-t border-border/30 flex items-center justify-between">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                         {formatDate(card.createdAt, "short")}
                       </p>
                       <span className="text-xs text-[#FE703A] font-bold group-hover:translate-x-1 transition-transform">
@@ -674,20 +674,20 @@ export default function StudentDetailPage({
 
                   <button
                     onClick={() => setConfirmCardId(card.id)}
-                    className="absolute top-4 right-4 rounded-full bg-white/90 shadow-sm border border-white p-2 text-[#023435]/40 hover:text-red-600 hover:bg-red-50 transition-all hover:scale-110 opacity-0 group-hover:opacity-100 z-20"
+                    className="absolute top-4 right-4 rounded-full bg-card/90 shadow-sm border border-border p-2 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 transition-all hover:scale-110 opacity-0 group-hover:opacity-100 z-20"
                   >
                     ✕
                   </button>
 
                   {confirmCardId === card.id && (
-                    <div className="absolute inset-0 rounded-3xl bg-white/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 p-5 z-30">
-                      <p className="text-sm font-bold text-[#023435] text-center">
+                    <div className="absolute inset-0 rounded-3xl bg-card/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 p-5 z-30">
+                      <p className="text-sm font-bold text-foreground text-center">
                         Bu kartı silmek istediğinize emin misiniz?
                       </p>
                       <div className="flex gap-2 w-full mt-2">
                         <button
                           onClick={() => setConfirmCardId(null)}
-                          className="flex-1 rounded-xl border border-[#023435]/10 bg-white px-3 py-2.5 text-xs font-bold text-[#023435]/60 hover:bg-[#023435]/5 transition-colors"
+                          className="flex-1 rounded-xl border border-border bg-card px-3 py-2.5 text-xs font-bold text-muted-foreground hover:bg-muted transition-colors"
                         >
                           İptal
                         </button>

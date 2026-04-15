@@ -21,26 +21,25 @@ function ErrorContent() {
       case "internal_error":
         return "Sistemde bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
       default:
-        // Try decoding if iyzico sent something specific in URL
         return reason ? decodeURIComponent(reason) : "Ödeme başarısız oldu veya iyzico işlemi reddetti.";
     }
   };
 
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
-      <div className="rounded-2xl border border-red-100 bg-white p-10 shadow-sm max-w-md w-full relative overflow-hidden">
+      <div className="rounded-2xl border border-red-200 dark:border-red-900 bg-card p-10 shadow-sm max-w-md w-full relative overflow-hidden">
         <div className="relative z-10 flex flex-col items-center">
-          <div className="h-20 w-20 rounded-full bg-red-50 flex items-center justify-center mb-6">
+          <div className="h-20 w-20 rounded-full bg-red-500/10 flex items-center justify-center mb-6">
             <XCircle className="h-10 w-10 text-red-500" />
           </div>
-          
-          <h1 className="text-2xl font-bold text-zinc-900 mb-2">İşlem Tamamlanamadı</h1>
-          <p className="text-sm text-zinc-500 mb-8 leading-relaxed">
+
+          <h1 className="text-2xl font-bold text-foreground mb-2">İşlem Tamamlanamadı</h1>
+          <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
             {getReasonMessage()}
           </p>
 
           <Link href="/subscription" className="w-full">
-            <Button variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700">
+            <Button variant="outline" className="w-full border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-700 dark:hover:text-red-300">
               Tekrar Dene
             </Button>
           </Link>

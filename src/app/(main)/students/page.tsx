@@ -303,10 +303,10 @@ export default function StudentsPage() {
       {showForm && (
         <ModalPortal>
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-6">
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-md rounded-2xl bg-card shadow-xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-base font-bold text-zinc-900">Yeni Öğrenci Ekle</h2>
-              <button onClick={() => setShowForm(false)} className="text-zinc-400 hover:text-zinc-600 text-lg leading-none">✕</button>
+              <h2 className="text-base font-bold text-foreground">Yeni Öğrenci Ekle</h2>
+              <button onClick={() => setShowForm(false)} className="text-muted-foreground hover:text-foreground text-lg leading-none">✕</button>
             </div>
             <StudentForm 
               curricula={curricula}
@@ -324,10 +324,10 @@ export default function StudentsPage() {
       {editingStudent && (
         <ModalPortal>
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6">
+          <div className="w-full max-w-md rounded-2xl bg-card shadow-xl p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-base font-bold text-zinc-900">Öğrenci Düzenle</h2>
-              <button onClick={() => setEditingStudent(null)} className="text-zinc-400 hover:text-zinc-600 text-lg leading-none">✕</button>
+              <h2 className="text-base font-bold text-foreground">Öğrenci Düzenle</h2>
+              <button onClick={() => setEditingStudent(null)} className="text-muted-foreground hover:text-foreground text-lg leading-none">✕</button>
             </div>
             <StudentForm 
               initialValues={{
@@ -350,7 +350,7 @@ export default function StudentsPage() {
 
       {/* Hata */}
       {fetchError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 mb-4">
+        <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/50 px-4 py-3 text-sm text-red-700 dark:text-red-400 mb-4">
           <strong>Hata:</strong> {fetchError}
         </div>
       )}

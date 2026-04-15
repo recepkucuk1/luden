@@ -70,18 +70,18 @@ export function Pricing({
   return (
     <div className="mx-auto max-w-6xl px-6 py-20">
       <div className="mb-12 text-center">
-        <h2 className="text-2xl font-bold text-zinc-900 sm:text-3xl">{title}</h2>
-        <p className="mt-2 text-sm text-zinc-500">{description}</p>
+        <h2 className="text-2xl font-bold text-foreground sm:text-3xl">{title}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
       </div>
 
       <div className="mb-10 flex items-center justify-center gap-3">
-        <Label className="text-sm font-medium text-zinc-700">Aylık</Label>
+        <Label className="text-sm font-medium text-foreground">Aylık</Label>
         <Switch
           ref={switchRef as React.RefObject<HTMLButtonElement>}
           checked={!isMonthly}
           onCheckedChange={handleToggle}
         />
-        <Label className="text-sm font-medium text-zinc-700">
+        <Label className="text-sm font-medium text-foreground">
           Yıllık{" "}
           <span className="font-semibold text-[#FE703A]">(%15 indirim)</span>
         </Label>
@@ -111,8 +111,8 @@ export function Pricing({
               opacity: { duration: 0.5 },
             }}
             className={cn(
-              "relative flex flex-col rounded-2xl border bg-white p-6",
-              plan.isPopular ? "border-2 border-[#FE703A]" : "border-zinc-200",
+              "relative flex flex-col rounded-2xl border bg-card p-6",
+              plan.isPopular ? "border-2 border-[#FE703A]" : "border-border",
               !plan.isPopular && "lg:mt-5",
               index === 0 && "origin-right",
               index === 3 && "origin-left"
@@ -126,18 +126,18 @@ export function Pricing({
             )}
 
             <div className="flex flex-1 flex-col">
-              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                 {plan.name}
               </p>
 
               <div className="mt-5 flex items-baseline gap-1">
                 {plan.customPriceLabel ? (
-                  <span className="text-4xl font-bold text-zinc-900">
+                  <span className="text-4xl font-bold text-foreground">
                     {plan.customPriceLabel}
                   </span>
                 ) : (
                   <>
-                    <span className="text-4xl font-bold text-zinc-900">
+                    <span className="text-4xl font-bold text-foreground">
                       <NumberFlow
                         value={isMonthly ? (plan.price ?? 0) : (plan.yearlyPrice ?? 0)}
                         format={{
@@ -152,7 +152,7 @@ export function Pricing({
                       />
                     </span>
                     {plan.period && (
-                      <span className="text-sm font-medium text-zinc-400">
+                      <span className="text-sm font-medium text-muted-foreground">
                         / {isMonthly ? plan.period : (plan.yearlyPeriod ?? plan.period)}
                       </span>
                     )}
@@ -161,7 +161,7 @@ export function Pricing({
               </div>
 
               {!plan.customPriceLabel && (
-                <p className="mt-0.5 text-xs text-zinc-400">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {isMonthly ? "aylık faturalandırılır" : "yıllık faturalandırılır"}
                 </p>
               )}
@@ -170,12 +170,12 @@ export function Pricing({
                 {plan.features.map((feature, idx) => (
                   <li key={idx} className="flex items-center gap-2">
                     <Check className="h-4 w-4 shrink-0 text-[#FE703A]" />
-                    <span className="text-sm text-zinc-600">{feature}</span>
+                    <span className="text-sm text-muted-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
 
-              <hr className="my-6 border-zinc-100" />
+              <hr className="my-6 border-border/50" />
 
               {plan.href ? (
                 <Link
@@ -184,7 +184,7 @@ export function Pricing({
                     "block w-full rounded-xl py-2.5 text-center text-sm font-semibold transition-all duration-200",
                     plan.isPopular
                       ? "bg-[#FE703A] text-white hover:bg-[#FE703A]/90"
-                      : "border border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                      : "border border-border text-foreground hover:bg-muted"
                   )}
                 >
                   {plan.buttonText}
@@ -192,19 +192,19 @@ export function Pricing({
               ) : (
                 <button
                   disabled
-                  className="w-full rounded-xl border border-zinc-100 bg-zinc-50 py-2.5 text-sm font-semibold text-zinc-400 cursor-not-allowed"
+                  className="w-full rounded-xl border border-border/50 bg-muted py-2.5 text-sm font-semibold text-muted-foreground cursor-not-allowed"
                 >
                   {plan.buttonText}
                 </button>
               )}
 
-              <p className="mt-4 text-center text-xs text-zinc-400">
+              <p className="mt-4 text-center text-xs text-muted-foreground">
                 {plan.description}
               </p>
 
               {creditNote && (
-                <p className="mt-3 rounded-xl bg-zinc-50 px-3 py-2.5 text-[11px] leading-relaxed text-zinc-400">
-                  <span className="font-medium text-zinc-500">Kredi nedir?</span>{" "}
+                <p className="mt-3 rounded-xl bg-muted px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
+                  <span className="font-medium text-foreground">Kredi nedir?</span>{" "}
                   {creditNote}
                 </p>
               )}

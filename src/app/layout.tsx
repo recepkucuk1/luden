@@ -34,6 +34,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="tr" suppressHydrationWarning>
       <body className={`${jakarta.variable} antialiased`}>
+        {/*
+          Blocking inline script — JS yüklenmeden önce çalışır, FOUC'u önler.
+          localStorage'daki tercih yoksa sistem dark mode'una uyar.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('luden-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`,
+          }}
+        />
         <ThemeProvider>
           <AuthSessionProvider>{children}</AuthSessionProvider>
           <Toaster position="bottom-right" duration={3000} richColors />
