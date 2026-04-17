@@ -1,61 +1,28 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import * as React from "react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-type Theme = "light" | "dark";
-
-interface ThemeContextType {
-  theme: Theme;
-  toggleTheme: () => void;
-  setTheme: (theme: Theme) => void;
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
+/**
+ * 3-state theme provider backed by next-themes.
+ *   - "light" / "dark" / "system"
+ *   - class-based (.dark on <html>)
+ *   - persisted via localStorage key `luden-theme`
+ *   - disableTransitionOnChange: avoids color flicker on toggle
+ *
+ * FOUC is prevented by the inline script in `app/layout.tsx` (sets
+ * .dark on <html> before React hydrates).
+ */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
-  const [mounted, setMounted] = useState(false);
-
-  // Initial load
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("luden-theme") as Theme | null;
-    if (savedTheme) {
-      setThemeState(savedTheme);
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setThemeState("dark");
-    }
-    setMounted(true);
-  }, []);
-
-  // Sync theme with DOM
-  useEffect(() => {
-    if (!mounted) return;
-    
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    localStorage.setItem("luden-theme", theme);
-  }, [theme, mounted]);
-
-  const toggleTheme = () => {
-    setThemeState((prev) => (prev === "light" ? "dark" : "light"));
-  };
-
-  const setTheme = (t: Theme) => setThemeState(t);
-
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      storageKey="luden-theme"
+      disableTransitionOnChange
+    >
       {children}
-    </ThemeContext.Provider>
+    </NextThemesProvider>
   );
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return context;
 }
