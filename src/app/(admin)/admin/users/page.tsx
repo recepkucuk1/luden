@@ -586,7 +586,7 @@ export default function AdminUsersPage() {
 
   return (
     <div 
-      className="min-h-full flex-1 w-full flex flex-col relative overflow-y-auto custom-scrollbar"
+      className="min-h-full flex-1 w-full flex flex-col relative overflow-y-auto custom-scrollbar dark:bg-gray-900"
       style={{ background: "linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%)" }}
     >
       <style jsx>{`
@@ -609,8 +609,8 @@ export default function AdminUsersPage() {
         {/* ── Header ── */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-[#023435] tracking-tight">Gelişmiş Yönetim</h1>
-            <p className="mt-1 text-sm text-[#023435]/60">
+            <h1 className="text-3xl font-extrabold text-[#023435] dark:text-zinc-100 tracking-tight">Gelişmiş Yönetim</h1>
+            <p className="mt-1 text-sm text-[#023435]/60 dark:text-zinc-400">
               Sistemdeki tüm terapistleri ve kullanım metriklerini yönetin.
             </p>
           </div>

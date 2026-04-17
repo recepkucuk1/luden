@@ -309,7 +309,7 @@ function PillGroup({
             "rounded-lg px-3 py-1.5 text-xs font-medium transition-all border",
               value === o.value
                 ? activeClass
-                : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-700 hover:border-zinc-300"
+                : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600"
             )}
         >
           {o.label}
@@ -341,7 +341,7 @@ function MultiPillGroup({
           "rounded-lg px-3 py-1.5 text-xs font-medium transition-all border",
             values.length === 0
               ? activeClass
-              : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-700 hover:border-zinc-300"
+              : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600"
           )}
       >
         Tümü
@@ -355,7 +355,7 @@ function MultiPillGroup({
             "rounded-lg px-3 py-1.5 text-xs font-medium transition-all border",
               values.includes(o)
                 ? activeClass
-                : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-700 hover:border-zinc-300"
+                : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600"
             )}
         >
           {o}
@@ -730,7 +730,7 @@ export default function CardsPage() {
   }
 
   return (
-    <div className="min-h-full flex-1 w-full flex flex-col relative bg-[#F0F4F4] overflow-x-hidden custom-scrollbar" style={{ background: "linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%)" }}>
+    <div className="min-h-full flex-1 w-full flex flex-col relative bg-[#F0F4F4] dark:bg-gray-900 overflow-x-hidden custom-scrollbar" style={{ background: "linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%)" }}>
       <style jsx>{`
         div {
           --bg-start: #f0f7f7;
@@ -748,11 +748,11 @@ export default function CardsPage() {
       <div className="absolute bottom-1/4 left-0 w-[500px] h-[500px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none -translate-x-1/2 translate-y-1/2" />
 
       {/* Header */}
-      <div className="sticky top-0 z-20 border-b border-white/60 bg-white/70 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.03)] px-6 py-4 transition-all">
+      <div className="sticky top-0 z-20 border-b border-white/60 dark:border-white/5 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.03)] px-6 py-4 transition-all">
         <div className="mx-auto max-w-6xl flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-extrabold text-[#023435] tracking-tight">Kütüphane</h1>
-            <p className="mt-0.5 text-xs text-[#023435]/60 font-medium">{cards.length} materyal kayıtlı</p>
+            <h1 className="text-2xl font-extrabold text-[#023435] dark:text-zinc-100 tracking-tight">Kütüphane</h1>
+            <p className="mt-0.5 text-xs text-[#023435]/60 dark:text-zinc-400 font-medium">{cards.length} materyal kayıtlı</p>
           </div>
           <Link href="/generate">
             <Button className="bg-[#FE703A] hover:bg-[#FE703A]/90 text-white font-bold tracking-wide shadow-md shadow-[#FE703A]/20 transition-all hover:-translate-y-0.5 rounded-xl px-5 h-10">
@@ -764,10 +764,10 @@ export default function CardsPage() {
 
       <main className="mx-auto max-w-6xl w-full px-4 sm:px-6 py-8 relative z-10 flex-1">
         {cards.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 bg-white/40 shadow-sm backdrop-blur-md py-20 text-center">
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 dark:border-white/10 bg-white/40 dark:bg-zinc-900/40 shadow-sm backdrop-blur-md py-20 text-center">
             <div className="text-5xl mb-4 opacity-80">🗂️</div>
-            <p className="text-lg font-bold text-[#023435] mb-1">Henüz materyal üretilmedi</p>
-            <p className="text-sm font-medium text-[#023435]/50 mb-6">Öğrencileriniz için harika materyaller üretmeye başlayın.</p>
+            <p className="text-lg font-bold text-[#023435] dark:text-zinc-100 mb-1">Henüz materyal üretilmedi</p>
+            <p className="text-sm font-medium text-[#023435]/50 dark:text-zinc-500 mb-6">Öğrencileriniz için harika materyaller üretmeye başlayın.</p>
             <Link href="/generate">
               <Button className="bg-[#107996] hover:bg-[#107996]/90 text-white font-bold tracking-wide shadow-md shadow-[#107996]/20 transition-all hover:-translate-y-0.5 rounded-xl px-6 h-11 text-sm">
                 ✨ Materyal Üret
@@ -778,7 +778,7 @@ export default function CardsPage() {
           <>
             {/* ── İhtişamlı Yatay Menü (Araç Türü) ── */}
             <div className="mb-6 overflow-x-auto pb-2 custom-scrollbar">
-              <div className="flex gap-2 w-max p-1 bg-white/40 backdrop-blur-md border border-white/60 rounded-full shadow-inner">
+              <div className="flex gap-2 w-max p-1 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md border border-white/60 dark:border-white/10 rounded-full shadow-inner">
                 {TOOL_TYPE_OPTIONS.map((o) => (
                   <button
                     key={o.value}
@@ -787,8 +787,8 @@ export default function CardsPage() {
                     className={cn(
                       "rounded-full px-5 py-2 text-xs font-bold transition-all whitespace-nowrap",
                       filterToolType === o.value
-                        ? "bg-[#023435] text-white shadow-md shadow-[#023435]/20"
-                        : "bg-transparent text-[#023435]/60 hover:text-[#023435] hover:bg-white/60"
+                        ? "bg-[#023435] text-white shadow-md shadow-[#023435]/20 dark:bg-emerald-700"
+                        : "bg-transparent text-[#023435]/60 dark:text-zinc-400 hover:text-[#023435] dark:hover:text-zinc-200 hover:bg-white/60 dark:hover:bg-white/10"
                     )}
                   >
                     {o.label}
@@ -801,7 +801,7 @@ export default function CardsPage() {
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <button
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/50 border border-white/60 text-[#023435] text-sm font-bold shadow-sm hover:bg-white hover:-translate-y-0.5 transition-all w-max"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/50 dark:bg-zinc-900/50 border border-white/60 dark:border-white/10 text-[#023435] dark:text-zinc-100 text-sm font-bold shadow-sm hover:bg-white dark:hover:bg-zinc-800 hover:-translate-y-0.5 transition-all w-max"
               >
                 <Filter className="w-4 h-4 text-[#FE703A]" />
                 {showAdvancedFilters ? "Seçenekleri Gizle" : "Gelişmiş Seçenekler"}
@@ -819,7 +819,7 @@ export default function CardsPage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortBy)}
-                  className="rounded-xl border border-white/80 bg-white/50 backdrop-blur-md shadow-sm px-4 py-2 text-sm font-bold text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#FE703A]/50 transition-all cursor-pointer"
+                  className="rounded-xl border border-white/80 dark:border-white/10 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md shadow-sm px-4 py-2 text-sm font-bold text-[#023435] dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/50 transition-all cursor-pointer"
                 >
                   {SORT_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value} className="text-sm font-medium">{o.label}</option>
@@ -830,17 +830,17 @@ export default function CardsPage() {
 
             {/* ── Filtre Paneli (Akordeon Mantığı) ── */}
             {showAdvancedFilters && (
-              <div className="animate-in fade-in slide-in-from-top-2 mb-6 space-y-4 rounded-3xl border border-white/80 bg-white/60 shadow-[0_8px_32px_rgba(2,52,53,0.04)] backdrop-blur-xl p-5 md:p-6 transition-all">
+              <div className="animate-in fade-in slide-in-from-top-2 mb-6 space-y-4 rounded-3xl border border-white/80 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 shadow-[0_8px_32px_rgba(2,52,53,0.04)] backdrop-blur-xl p-5 md:p-6 transition-all">
 
                 {/* Ortak: Öğrenci ve Yaş Grubu (Eğer hem öğrenci hem yaş yoksa da sorun değil, esnek yapı) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-[#023435]/5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-[#023435]/5 dark:border-white/10">
                   {uniqueStudents.length > 0 && (
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Öğrenci Seçimi</span>
+                      <span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Öğrenci Seçimi</span>
                       <select
                         value={filterStudent}
                         onChange={(e) => setFilterStudent(e.target.value)}
-                        className="rounded-xl border border-white/60 bg-white/80 px-3 py-2 text-sm text-[#023435] font-semibold focus:outline-none focus:ring-2 focus:ring-[#107996]/30 shadow-sm cursor-pointer"
+                        className="rounded-xl border border-white/60 dark:border-zinc-800 bg-white/80 dark:bg-zinc-800 px-3 py-2 text-sm text-[#023435] dark:text-zinc-100 font-semibold focus:outline-none focus:ring-2 focus:ring-[#107996]/30 shadow-sm cursor-pointer"
                       >
                         <option value="">Tüm Öğrenciler</option>
                         {uniqueStudents.map((s) => (
@@ -851,7 +851,7 @@ export default function CardsPage() {
                   )}
 
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Hedef Yaş Grubu</span>
+                    <span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Hedef Yaş Grubu</span>
                     <PillGroup
                       options={AGE_OPTIONS}
                       value={filterAgeGroup}
@@ -865,7 +865,7 @@ export default function CardsPage() {
               {filterToolType === "learning" && (
                 <div className="pt-2 space-y-4">
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Kategori & Zorluk</span>
+                    <span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Kategori & Zorluk</span>
                     <div className="flex flex-wrap gap-4">
                       <PillGroup options={CATEGORY_OPTIONS} value={filterCategory} onChange={setFilterCategory} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435]" />
                       <div className="w-px bg-[#023435]/10" />
@@ -874,8 +874,8 @@ export default function CardsPage() {
                   </div>
                   {curricula.length > 0 && (
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Bağlı Modül</span>
-                      <select value={filterCurriculum} onChange={(e) => setFilterCurriculum(e.target.value)} className="rounded-xl border border-white/60 bg-white/80 px-3 py-2 text-sm text-[#023435] font-semibold max-w-sm">
+                      <span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Bağlı Modül</span>
+                      <select value={filterCurriculum} onChange={(e) => setFilterCurriculum(e.target.value)} className="rounded-xl border border-white/60 dark:border-zinc-800 bg-white/80 dark:bg-zinc-800 px-3 py-2 text-sm text-[#023435] dark:text-zinc-100 font-semibold max-w-sm">
                         <option value="">Tüm modüller</option>
                         {curricula.map((c) => (<option key={c.id} value={c.id}>{c.title}</option>))}
                       </select>
@@ -886,16 +886,16 @@ export default function CardsPage() {
 
               {filterToolType === "social_story" && (
                 <div className="pt-2 space-y-4">
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Durum</span><PillGroup options={SITUATION_OPTIONS} value={filterSituation} onChange={setFilterSituation} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435]" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Ortam</span><PillGroup options={ENVIRONMENT_OPTIONS} value={filterEnvironment} onChange={setFilterEnvironment} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Uzunluk</span><PillGroup options={STORY_LENGTH_OPTIONS} value={filterStoryLength} onChange={setFilterStoryLength} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Durum</span><PillGroup options={SITUATION_OPTIONS} value={filterSituation} onChange={setFilterSituation} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Ortam</span><PillGroup options={ENVIRONMENT_OPTIONS} value={filterEnvironment} onChange={setFilterEnvironment} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Uzunluk</span><PillGroup options={STORY_LENGTH_OPTIONS} value={filterStoryLength} onChange={setFilterStoryLength} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
               {filterToolType === "session_summary" && (
                 <div className="pt-2 space-y-4">
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Oturum Türü</span><PillGroup options={SS_SESSION_TYPE_OPTIONS} value={filterSsType} onChange={setFilterSsType} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Gelişim Sonucu</span><PillGroup options={SS_PERFORMANCE_OPTIONS} value={filterSsPerformance} onChange={setFilterSsPerformance} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Oturum Türü</span><PillGroup options={SS_SESSION_TYPE_OPTIONS} value={filterSsType} onChange={setFilterSsType} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Gelişim Sonucu</span><PillGroup options={SS_PERFORMANCE_OPTIONS} value={filterSsPerformance} onChange={setFilterSsPerformance} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
@@ -955,7 +955,7 @@ export default function CardsPage() {
 
             {/* ── Liste ── */}
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white py-16 text-center">
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-zinc-200 dark:border-gray-700 bg-white dark:bg-gray-800/40 py-16 text-center">
                 {filterToolType !== "all" ? (() => {
                   const opt = TOOL_TYPE_OPTIONS.find((o) => o.value === filterToolType);
                   return (
@@ -975,7 +975,7 @@ export default function CardsPage() {
                   );
                 })() : (
                   <>
-                    <p className="text-sm font-bold text-[#023435]/60 mb-3">Bu filtrelere uyan materyal bulunamadı.</p>
+                    <p className="text-sm font-bold text-[#023435]/60 dark:text-zinc-500 mb-3">Bu filtrelere uyan materyal bulunamadı.</p>
                     <button onClick={clearFilters} className="text-xs font-bold text-[#FE703A] border border-[#FE703A]/30 px-3 py-1.5 rounded-lg hover:bg-[#FE703A]/10 transition-colors">
                       Filtreleri Temizle
                     </button>
@@ -994,14 +994,14 @@ export default function CardsPage() {
                     onDeletePress={() => { setSwipeOpenId(null); setConfirmDeleteId(card.id); }}
                   >
                   <div
-                    className="group relative rounded-3xl border border-white/80 bg-white/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 overflow-hidden flex flex-col min-h-[180px]"
+                    className="group relative rounded-3xl border border-white/80 dark:border-gray-700/80 bg-white/60 dark:bg-gray-800/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 dark:hover:border-gray-600/80 overflow-hidden flex flex-col min-h-[180px]"
                   >
-                    <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/60 to-transparent pointer-events-none rounded-tr-3xl" />
+                    <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/60 dark:hidden to-transparent pointer-events-none rounded-tr-3xl" />
                     
                     {/* Hover delete button */}
                     <button
                       onClick={(e) => { e.preventDefault(); setConfirmDeleteId(card.id); }}
-                      className="absolute top-4 right-4 z-10 rounded-lg px-2 py-1 text-xs font-bold text-[#023435]/30 hover:text-red-600 hover:bg-red-50 focus:opacity-100 transition-all opacity-0 group-hover:opacity-100"
+                      className="absolute top-4 right-4 z-10 rounded-lg px-2 py-1 text-xs font-bold text-[#023435]/30 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 focus:opacity-100 transition-all opacity-0 group-hover:opacity-100"
                     >
                       Sil
                     </button>
@@ -1020,24 +1020,24 @@ export default function CardsPage() {
                           );
                         })()}
                         {WORK_AREA_LABEL[card.category] && (
-                          <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[card.category] ?? "border-gray-200 text-gray-600")}>
+                          <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", WORK_AREA_COLOR[card.category] ?? "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400")}>
                             {WORK_AREA_LABEL[card.category]}
                           </span>
                         )}
-                        <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", DIFFICULTY_COLOR[card.difficulty] ?? "border-gray-200 text-gray-600")}>
+                        <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", DIFFICULTY_COLOR[card.difficulty] ?? "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400")}>
                           {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
                         </span>
-                        <span className="rounded-md border border-zinc-200/60 bg-white px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 uppercase tracking-widest">
+                        <span className="rounded-md border border-zinc-200/60 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 dark:text-gray-400 uppercase tracking-widest">
                           {AGE_LABEL[card.ageGroup] ?? card.ageGroup}
                         </span>
                       </div>
-                      <h3 className="font-extrabold text-[#023435] text-[15px] mb-2 line-clamp-2 leading-snug">{card.title}</h3>
+                      <h3 className="font-extrabold text-[#023435] dark:text-gray-100 text-[15px] mb-2 line-clamp-2 leading-snug">{card.title}</h3>
                       <div className="space-y-1">
                         {card.student && (
-                          <p className="text-xs font-semibold text-[#107996]">Atanan: {card.student.name}</p>
+                          <p className="text-xs font-semibold text-[#107996] dark:text-[#90DDF0]">Atanan: {card.student.name}</p>
                         )}
                         {card._count.assignments > 0 && (
-                          <p className="text-[11px] font-semibold text-[#023435]/50 uppercase tracking-widest">
+                          <p className="text-[11px] font-semibold text-[#023435]/50 dark:text-gray-500 uppercase tracking-widest">
                             {card._count.assignments} öğrenciye atandı
                           </p>
                         )}
@@ -1046,7 +1046,7 @@ export default function CardsPage() {
                     <div className="px-5 pb-5 relative z-10">
                       <button
                         onClick={() => setAssigningCard(card)}
-                        className="w-full rounded-xl border border-[#023435]/10 bg-white/50 px-3 py-2 text-xs font-bold text-[#023435] shadow-sm hover:bg-[#023435] hover:border-[#023435] hover:text-white transition-all transform hover:scale-[1.02]"
+                        className="w-full rounded-xl border border-[#023435]/10 dark:border-gray-700 bg-white/50 dark:bg-gray-800/80 px-3 py-2 text-xs font-bold text-[#023435] dark:text-gray-300 shadow-sm hover:bg-[#023435] dark:hover:bg-gray-700 hover:border-[#023435] dark:hover:border-gray-600 hover:text-white dark:hover:text-gray-100 transition-all transform hover:scale-[1.02]"
                       >
                         Öğrenci Ata
                       </button>

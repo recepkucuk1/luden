@@ -70,9 +70,9 @@ function CheckoutContent() {
   if (error) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center space-y-4">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center shadow-sm">
-          <h2 className="mb-2 text-lg font-bold text-red-600">Ödeme Hatası</h2>
-          <p className="text-sm text-red-500">{error}</p>
+        <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/50 p-6 text-center shadow-sm">
+          <h2 className="mb-2 text-lg font-bold text-red-600 dark:text-red-400">Ödeme Hatası</h2>
+          <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
           <button
             onClick={() => router.push("/subscription")}
             className="mt-6 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
@@ -96,7 +96,7 @@ function CheckoutContent() {
       <div className="rounded-2xl border border-border bg-card p-6 md:p-10 shadow-sm relative min-h-[400px]">
         {loading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-card/80 backdrop-blur-sm z-10 rounded-2xl">
-            <Loader2 className="h-8 w-8 animate-spin text-[#023435]" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#023435] dark:text-white" />
             <p className="mt-4 text-sm font-medium text-muted-foreground">Ödeme formu yükleniyor...</p>
           </div>
         )}

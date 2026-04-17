@@ -32,6 +32,8 @@ input, select, textarea {
 
 /* ========== /MOBILE FIX PACKAGE ========== */
 
+@custom-variant dark (&:is(.dark *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -114,6 +116,57 @@ input, select, textarea {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  /* ── Elevation sistemi: background < sidebar < card < popover < muted ──
+     Tüm yüzeyler brand teal (#023435) ile hizalanmış düşük chroma (195°)
+     taşıyor — düz siyah değil, branded dark.                             */
+
+  --background:         oklch(0.11 0.012 195);   /* taban katman */
+  --foreground:         oklch(0.96 0.004 195);   /* metin: hafif teal tinted beyaz */
+
+  --card:               oklch(0.17 0.010 195);   /* kart yüzeyi — 1. elevation */
+  --card-foreground:    oklch(0.96 0.004 195);
+
+  --popover:            oklch(0.21 0.008 195);   /* dropdown / modal — 2. elevation */
+  --popover-foreground: oklch(0.96 0.004 195);
+
+  /* Primary: brand orange — dark modda da CTA orange kalır */
+  --primary:            oklch(0.66 0.179 33.4);
+  --primary-foreground: oklch(1 0 0);
+
+  --secondary:           oklch(0.23 0.010 195);
+  --secondary-foreground: oklch(0.96 0.004 195);
+
+  --muted:              oklch(0.22 0.009 195);
+  --muted-foreground:   oklch(0.58 0.012 195);   /* ikincil metin */
+
+  --accent:             oklch(0.23 0.010 195);
+  --accent-foreground:  oklch(0.96 0.004 195);
+
+  --destructive:        oklch(0.65 0.200 22.2);
+
+  /* Border & input: hafif teal tinted beyaz saydamlık */
+  --border:             oklch(0.96 0.004 195 / 10%);
+  --input:              oklch(0.96 0.004 195 / 14%);
+  --ring:               oklch(0.55 0.040 195);   /* focus ring: daha belirgin teal */
+
+  --chart-1: oklch(0.809 0.105 251.813);
+  --chart-2: oklch(0.623 0.214 259.815);
+  --chart-3: oklch(0.546 0.245 262.881);
+  --chart-4: oklch(0.488 0.243 264.376);
+  --chart-5: oklch(0.424 0.199 265.638);
+
+  /* Sidebar: background ile card arası — solda sabit oturur */
+  --sidebar:                    oklch(0.14 0.011 195);
+  --sidebar-foreground:         oklch(0.96 0.004 195);
+  --sidebar-primary:            oklch(0.66 0.179 33.4);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent:             oklch(0.21 0.010 195);
+  --sidebar-accent-foreground:  oklch(0.96 0.004 195);
+  --sidebar-border:             oklch(0.96 0.004 195 / 8%);
+  --sidebar-ring:               oklch(0.55 0.040 195);
 }
 
 @layer base {
