@@ -616,7 +616,7 @@ export default function AdminUsersPage() {
           </div>
           <a
             href="/admin"
-            className="rounded-xl border border-white/60 bg-white/40 shadow-sm backdrop-blur-md px-5 py-2.5 text-sm font-bold text-[#023435] dark:text-foreground hover:bg-white/80 hover:-translate-y-0.5 transition-all"
+            className="rounded-xl border border-white/60 dark:border-border/60 bg-white/40 dark:bg-card/40 shadow-sm backdrop-blur-md px-5 py-2.5 text-sm font-bold text-[#023435] dark:text-foreground hover:bg-white/80 dark:bg-card/80 hover:-translate-y-0.5 transition-all"
           >
             ← Admin Panele Dön
           </a>
@@ -634,7 +634,7 @@ export default function AdminUsersPage() {
                 { label: "Advanced",         value: planCount("ADVANCED").toString(),  color: "border-l-[#FE703A]", textColor: "text-[#FE703A]"  },
                 { label: "AI Maliyet (Bu Ay)", value: `$${totalMonthlyUsd.toFixed(2)}`, color: "border-l-emerald-500", textColor: "text-emerald-700" },
               ].map((card) => (
-                <div key={card.label} className={cn("rounded-[20px] border border-white/60 bg-white/40 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-md p-5 border-l-4 transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)]", card.color)}>
+                <div key={card.label} className={cn("rounded-[20px] border border-white/60 dark:border-border/60 bg-white/40 dark:bg-card/40 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-md p-5 border-l-4 transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)]", card.color)}>
                   <p className="text-xs font-bold uppercase tracking-wide text-[#023435]/50 dark:text-muted-foreground">{card.label}</p>
                   <p className={cn("mt-1.5 text-3xl font-extrabold", card.textColor)}>{card.value}</p>
                 </div>
@@ -644,7 +644,7 @@ export default function AdminUsersPage() {
         })()}
 
         {/* ── FİLTRELEME & ARAMA ÇUBUĞU ── */}
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 rounded-[20px] border border-white/60 bg-white/60 shadow-sm backdrop-blur-md p-4">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 rounded-[20px] border border-white/60 dark:border-border/60 bg-white/60 dark:bg-card/60 shadow-sm backdrop-blur-md p-4">
           <div className="relative w-full lg:max-w-md">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#023435]/40 dark:text-muted-foreground/75" />
             <input
@@ -652,7 +652,7 @@ export default function AdminUsersPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="İsim veya email ile arayın..."
-              className="w-full rounded-xl border border-white/40 bg-white/60 pl-10 pr-4 py-2 text-sm text-[#023435] dark:text-foreground placeholder:text-[#023435]/40 dark:text-muted-foreground/75 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 focus:bg-white transition-all shadow-inner"
+              className="w-full rounded-xl border border-white/40 dark:border-border/60 bg-white/60 dark:bg-card/60 pl-10 pr-4 py-2 text-sm text-[#023435] dark:text-foreground placeholder:text-[#023435]/40 dark:text-muted-foreground/75 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 focus:bg-white transition-all shadow-inner"
             />
           </div>
           
@@ -662,7 +662,7 @@ export default function AdminUsersPage() {
               <select
                 value={filterPlan}
                 onChange={(e) => setFilterPlan(e.target.value as any)}
-                className="rounded-xl border border-white/40 bg-white/60 px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 appearance-none font-medium cursor-pointer"
+                className="rounded-xl border border-white/40 dark:border-border/60 bg-white/60 dark:bg-card/60 px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 appearance-none font-medium cursor-pointer"
               >
                 <option value="ALL">Tüm Planlar</option>
                 <option value="FREE">Free</option>
@@ -675,7 +675,7 @@ export default function AdminUsersPage() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as any)}
-              className="rounded-xl border border-white/40 bg-white/60 px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 appearance-none font-medium cursor-pointer"
+              className="rounded-xl border border-white/40 dark:border-border/60 bg-white/60 dark:bg-card/60 px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 appearance-none font-medium cursor-pointer"
             >
               <option value="ALL">Tüm Durumlar</option>
               <option value="ADMIN">Sadece Adminler</option>
@@ -685,7 +685,7 @@ export default function AdminUsersPage() {
             <select
               value={perPage}
               onChange={(e) => setPerPage(Number(e.target.value))}
-              className="rounded-xl border border-white/40 bg-white/60 px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 appearance-none font-medium cursor-pointer"
+              className="rounded-xl border border-white/40 dark:border-border/60 bg-white/60 dark:bg-card/60 px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#FE703A]/30 appearance-none font-medium cursor-pointer"
             >
               <option value={10}>10 Göster</option>
               <option value={20}>20 Göster</option>
@@ -696,62 +696,62 @@ export default function AdminUsersPage() {
         </div>
 
         {/* ── Tablo Alanı ── */}
-        <div className="rounded-[24px] border border-white/80 bg-white/70 shadow-[0_8px_32px_rgba(2,52,53,0.04)] backdrop-blur-xl overflow-hidden flex flex-col">
+        <div className="rounded-[24px] border border-white/80 dark:border-border/60 bg-white/70 dark:bg-card/70 shadow-[0_8px_32px_rgba(2,52,53,0.04)] backdrop-blur-xl overflow-hidden flex flex-col">
           <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#023435]/5 bg-white/40">
+                <tr className="border-b border-[#023435]/5 bg-white/40 dark:bg-card/40">
                   <th 
-                    className="text-left px-5 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    className="text-left px-5 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 dark:bg-card/50 transition-colors whitespace-nowrap"
                     onClick={() => toggleSort("name")}
                   >
                     <div className="flex items-center">Ad / Email <SortIcon columnKey="name" /></div>
                   </th>
                   <th 
-                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 dark:bg-card/50 transition-colors whitespace-nowrap"
                     onClick={() => toggleSort("planType")}
                   >
                     <div className="flex items-center">Plan <SortIcon columnKey="planType" /></div>
                   </th>
                   <th 
-                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 dark:bg-card/50 transition-colors whitespace-nowrap"
                     onClick={() => toggleSort("credits")}
                   >
                     <div className="flex items-center">Kredi <SortIcon columnKey="credits" /></div>
                   </th>
                   <th 
-                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 dark:bg-card/50 transition-colors whitespace-nowrap"
                     onClick={() => toggleSort("currentPeriodEnd")}
                   >
                     <div className="flex items-center">Üyelik Bitiş <SortIcon columnKey="currentPeriodEnd" /></div>
                   </th>
                   <th 
-                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 dark:bg-card/50 transition-colors whitespace-nowrap"
                     onClick={() => toggleSort("cards")}
                   >
                     <div className="flex items-center justify-center">Materyal <SortIcon columnKey="cards" /></div>
                   </th>
                   <th 
-                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 dark:bg-card/50 transition-colors whitespace-nowrap"
                     onClick={() => toggleSort("students")}
                   >
                     <div className="flex items-center justify-center">Öğrenci <SortIcon columnKey="students" /></div>
                   </th>
                   <th
-                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 dark:bg-card/50 transition-colors whitespace-nowrap"
                     onClick={() => toggleSort("lessons")}
                   >
                     <div className="flex items-center justify-center">Randevu <SortIcon columnKey="lessons" /></div>
                   </th>
                   <th
-                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    className="text-center px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 dark:bg-card/50 transition-colors whitespace-nowrap"
                     onClick={() => toggleSort("monthlyUsageUsd")}
                     title="Bu ay Claude API için hesaplanan teorik maliyet (USD)"
                   >
                     <div className="flex items-center justify-center">AI Maliyet (Bu Ay) <SortIcon columnKey="monthlyUsageUsd" /></div>
                   </th>
                   <th
-                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 transition-colors whitespace-nowrap"
+                    className="text-left px-4 py-4 text-xs font-bold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest cursor-pointer hover:bg-white/50 dark:bg-card/50 transition-colors whitespace-nowrap"
                     onClick={() => toggleSort("lastLogin")}
                   >
                     <div className="flex items-center">Son Giriş <SortIcon columnKey="lastLogin" /></div>
@@ -765,7 +765,7 @@ export default function AdminUsersPage() {
                   return (
                     <tr
                       key={u.id}
-                      className={cn("transition-all duration-200 group", u.suspended ? "bg-red-50/50 hover:bg-red-50/80" : "hover:bg-white/60")}
+                      className={cn("transition-all duration-200 group", u.suspended ? "bg-red-50/50 hover:bg-red-50/80" : "hover:bg-white/60 dark:bg-card/60")}
                     >
                       {/* Ad / Email */}
                       <td className="px-5 py-4">
@@ -795,7 +795,7 @@ export default function AdminUsersPage() {
 
                       {/* Kredi */}
                       <td className="px-4 py-4">
-                        <span className="font-extrabold text-[#023435] dark:text-foreground tabular-nums bg-white/60 border border-white px-2 py-1 rounded-md shadow-sm drop-shadow-sm">
+                        <span className="font-extrabold text-[#023435] dark:text-foreground tabular-nums bg-white/60 dark:bg-card/60 border border-white px-2 py-1 rounded-md shadow-sm drop-shadow-sm">
                           {u.credits.toLocaleString("tr-TR")}
                         </span>
                       </td>
@@ -813,7 +813,7 @@ export default function AdminUsersPage() {
                           </span>
                           {/* Tooltip Popup */}
                           <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 opacity-0 transition-all duration-200 group-hover/tooltip:opacity-100 group-hover/tooltip:-translate-y-1">
-                            <div className="min-w-[200px] overflow-hidden rounded-xl border border-white/60 bg-white/80 p-3 shadow-xl backdrop-blur-xl">
+                            <div className="min-w-[200px] overflow-hidden rounded-xl border border-white/60 dark:border-border/60 bg-white/80 dark:bg-card/80 p-3 shadow-xl backdrop-blur-xl">
                               <p className="mb-2 text-[10px] font-extrabold uppercase tracking-widest text-[#023435]/50 dark:text-muted-foreground border-b border-[#023435]/10 pb-1">
                                 Kategori Dağılımı
                               </p>
@@ -863,14 +863,14 @@ export default function AdminUsersPage() {
                               "font-extrabold tabular-nums px-2 py-1 rounded-md border",
                               (u.monthlyUsageUsd ?? 0) > 0
                                 ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-                                : "text-[#023435]/40 dark:text-muted-foreground/75 bg-white/60 border-white",
+                                : "text-[#023435]/40 dark:text-muted-foreground/75 bg-white/60 dark:bg-card/60 border-white",
                             )}
                           >
                             ${(u.monthlyUsageUsd ?? 0).toFixed(4)}
                           </span>
                           {(u.monthlyApiCalls ?? 0) > 0 && (
                             <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 opacity-0 transition-all duration-200 group-hover/cost:opacity-100 group-hover/cost:-translate-y-1">
-                              <div className="min-w-[180px] overflow-hidden rounded-xl border border-white/60 bg-white/85 p-3 shadow-xl backdrop-blur-xl">
+                              <div className="min-w-[180px] overflow-hidden rounded-xl border border-white/60 dark:border-border/60 bg-white/85 dark:bg-card/85 p-3 shadow-xl backdrop-blur-xl">
                                 <p className="mb-1 text-[10px] font-extrabold uppercase tracking-widest text-[#023435]/50 dark:text-muted-foreground border-b border-[#023435]/10 pb-1">
                                   Bu Ay
                                 </p>
@@ -899,7 +899,7 @@ export default function AdminUsersPage() {
                       <td className="px-4 py-4">
                         {confirmDel === u.id ? (
                           <div className="flex items-center justify-end gap-2 animate-in fade-in slide-in-from-right-4">
-                            <button onClick={() => setConfirmDel(null)} className="text-xs font-bold text-[#023435]/40 dark:text-muted-foreground/75 hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors bg-white/50 px-3 py-1.5 rounded-lg border border-white">İptal</button>
+                            <button onClick={() => setConfirmDel(null)} className="text-xs font-bold text-[#023435]/40 dark:text-muted-foreground/75 hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors bg-white/50 dark:bg-card/50 px-3 py-1.5 rounded-lg border border-white">İptal</button>
                             <button
                               onClick={() => handleDelete(u.id)}
                               disabled={deleting}
@@ -925,7 +925,7 @@ export default function AdminUsersPage() {
 
                 {paginatedUsers.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="py-16 text-center text-sm font-medium text-[#023435]/40 dark:text-muted-foreground/75 bg-white/30 backdrop-blur-sm">
+                    <td colSpan={10} className="py-16 text-center text-sm font-medium text-[#023435]/40 dark:text-muted-foreground/75 bg-white/30 dark:bg-card/30 backdrop-blur-sm">
                       {search || filterPlan !== "ALL" || filterStatus !== "ALL" 
                         ? "Girilen filtrelere uygun kullanıcı bulunamadı." 
                         : "Henüz kayıtlı kullanıcı yok."}
@@ -938,7 +938,7 @@ export default function AdminUsersPage() {
 
           {/* ── PAGINATION CONTROLS ── */}
           {totalPages > 1 && (
-            <div className="bg-white/40 border-t border-[#023435]/5 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="bg-white/40 dark:bg-card/40 border-t border-[#023435]/5 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-sm font-medium text-[#023435]/60 dark:text-muted-foreground">
                 Toplam <span className="font-extrabold text-[#023435] dark:text-foreground">{totalItems}</span> kayıt · Sayfa {currentPage} / {totalPages}
               </div>
@@ -946,7 +946,7 @@ export default function AdminUsersPage() {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="p-2 rounded-xl border border-white/60 bg-white/60 text-[#023435] dark:text-foreground hover:bg-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="p-2 rounded-xl border border-white/60 dark:border-border/60 bg-white/60 dark:bg-card/60 text-[#023435] dark:text-foreground hover:bg-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -967,7 +967,7 @@ export default function AdminUsersPage() {
                           "w-9 h-9 rounded-xl text-sm font-bold transition-all border shadow-sm",
                           currentPage === pageNum 
                             ? "bg-[#023435] text-white border-[#023435]" 
-                            : "bg-white/60 text-[#023435] dark:text-foreground border-white/60 hover:bg-white"
+                            : "bg-white/60 dark:bg-card/60 text-[#023435] dark:text-foreground border-white/60 dark:border-border/60 hover:bg-white"
                         )}
                       >
                         {pageNum}
@@ -978,7 +978,7 @@ export default function AdminUsersPage() {
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="p-2 rounded-xl border border-white/60 bg-white/60 text-[#023435] dark:text-foreground hover:bg-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="p-2 rounded-xl border border-white/60 dark:border-border/60 bg-white/60 dark:bg-card/60 text-[#023435] dark:text-foreground hover:bg-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>

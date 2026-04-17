@@ -842,7 +842,7 @@ function HowItWorksCarousel() {
                   "flex items-start gap-3 rounded-xl px-3 py-3 text-left transition-all duration-300",
                   i === active
                     ? "bg-white shadow-sm border border-[rgba(2,52,53,0.1)] dark:border-border/70"
-                    : "hover:bg-white/60"
+                    : "hover:bg-white/60 dark:bg-card/60"
                 )}
               >
                 <span className={cn(
@@ -1359,7 +1359,7 @@ export default function LandingPage() {
                   href="https://instagram.com/ludenlab"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/60 hover:text-white hover:border-white/40 dark:border-border/60 transition-colors"
                   aria-label="Instagram"
                 >
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -1371,7 +1371,7 @@ export default function LandingPage() {
                   href="https://linkedin.com/company/ludenlab"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/60 hover:text-white hover:border-white/40 dark:border-border/60 transition-colors"
                   aria-label="LinkedIn"
                 >
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">

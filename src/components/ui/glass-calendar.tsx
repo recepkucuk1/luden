@@ -206,7 +206,7 @@ export function GlassCalendar({
 
                   {/* Lesson dot when selected */}
                   {lesson && isSelected && (
-                    <span className="absolute bottom-0.5 left-1/2 h-0.5 w-3 -translate-x-1/2 rounded-full bg-white/60" />
+                    <span className="absolute bottom-0.5 left-1/2 h-0.5 w-3 -translate-x-1/2 rounded-full bg-white/60 dark:bg-card/60" />
                   )}
                 </button>
               );

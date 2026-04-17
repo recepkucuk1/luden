@@ -271,7 +271,7 @@ export default function StudentDetailPage({
   }
 
   return (
-    <div className="min-h-full flex-1 w-full flex flex-col relative bg-[#F0F4F4] overflow-x-hidden custom-scrollbar" style={{ background: "linear-gradient(135deg, #f0f7f7 0%, #e8f4f4 50%, #f5fafa 100%)" }}>
+    <div className="min-h-full flex-1 w-full flex flex-col relative bg-background overflow-x-hidden custom-scrollbar" style={{ background: "var(--surface-page-gradient)" }}>
       {/* Dekoratif Işıklar (Orbs) */}
       <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-[#107996]/10 rounded-full blur-[120px] pointer-events-none translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-1/4 left-0 w-[500px] h-[500px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none -translate-x-1/2 translate-y-1/2" />
@@ -718,7 +718,7 @@ export default function StudentDetailPage({
           </div>
 
           {student.assignments.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 bg-white/40 shadow-sm backdrop-blur-md py-16 text-center relative z-10">
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 dark:border-border/60 bg-white/40 dark:bg-card/40 shadow-sm backdrop-blur-md py-16 text-center relative z-10">
               <div className="text-4xl mb-4 opacity-80">📋</div>
               <p className="text-lg font-bold text-[#023435] dark:text-foreground mb-1">Henüz kart atanmadı</p>
               <p className="text-sm font-medium text-[#023435]/50 dark:text-muted-foreground">
@@ -730,7 +730,7 @@ export default function StudentDetailPage({
               {student.assignments.map((assignment) => (
                 <div
                   key={assignment.id}
-                  className="group relative rounded-3xl border border-white/80 bg-white/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 overflow-hidden flex flex-col h-full"
+                  className="group relative rounded-3xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 shadow-[0_4px_24px_rgba(2,52,53,0.03)] backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-[0_12px_48px_rgba(2,52,53,0.08)] hover:border-[#107996]/30 overflow-hidden flex flex-col h-full"
                 >
                   <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-bl from-white/60 to-transparent pointer-events-none rounded-tr-3xl" />
                   <Link href={`/cards/${assignment.card.id}`} className="block p-5 pb-3 flex-1 relative z-10 flex flex-col">
@@ -753,7 +753,7 @@ export default function StudentDetailPage({
                   {/* Durum Seçici */}
                   <div className="px-5 pb-5 relative z-10 pt-2 border-t border-dashed border-[#023435]/10 mt-2">
                     <p className="text-[9px] font-extrabold text-[#023435]/50 dark:text-muted-foreground uppercase tracking-wider mb-2 text-center">GELİŞİM DURUMU</p>
-                    <div className="flex bg-white/50 p-1 rounded-xl border border-white/60 shadow-inner">
+                    <div className="flex bg-white/50 dark:bg-card/50 p-1 rounded-xl border border-white/60 dark:border-border/60 shadow-inner">
                       {(["not_started", "in_progress", "completed"] as const).map((s) => {
                         const isColorSelected = assignment.status === s;
                         let activeStyles = "";
@@ -805,7 +805,7 @@ export default function StudentDetailPage({
                             "flex-1 rounded-lg px-2 py-2 text-[9px] font-extrabold uppercase tracking-wider transition-all border border-transparent mx-0.5",
                             isColorSelected
                               ? activeStyles
-                              : "bg-transparent text-[#023435]/40 dark:text-muted-foreground/75 hover:text-[#023435]/70 dark:hover:text-foreground/90 dark:text-foreground/80 hover:bg-white/40"
+                              : "bg-transparent text-[#023435]/40 dark:text-muted-foreground/75 hover:text-[#023435]/70 dark:hover:text-foreground/90 dark:text-foreground/80 hover:bg-white/40 dark:bg-card/40"
                           )}
                         >
                           {CARD_STATUS_LABEL[s]}

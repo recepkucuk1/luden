@@ -278,7 +278,7 @@ function LessonModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl shadow-2xl bg-white border border-[rgba(2,52,53,0.12)] dark:border-border/80"
+        className="w-full max-w-md rounded-2xl shadow-2xl bg-white dark:bg-popover border border-[rgba(2,52,53,0.12)] dark:border-border/80"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.1)] dark:border-border/70 px-5 py-4">
@@ -324,7 +324,7 @@ function LessonModal({
               </div>
               
               {showCalendar && (
-                <div className="absolute top-[52px] left-0 right-0 z-50 bg-white shadow-[0_8px_32px_rgba(2,52,53,0.12)] rounded-3xl border border-[rgba(2,52,53,0.08)] dark:border-border/60 overflow-hidden">
+                <div className="absolute top-[52px] left-0 right-0 z-50 bg-white dark:bg-popover shadow-[0_8px_32px_rgba(2,52,53,0.12)] rounded-3xl border border-[rgba(2,52,53,0.08)] dark:border-border/60 overflow-hidden">
                   <GlassCalendar
                     selectedDate={(() => {
                       const d = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr));
@@ -684,7 +684,7 @@ function DayLessonList({
                       <div className="absolute -left-[4.5px] top-[14px] h-2 w-2 rounded-full bg-white border-2 border-[#FE703A]" />
                       <button
                         onClick={() => onLessonClick(l, l.displayDate)}
-                        className="w-full text-left rounded-xl p-3 bg-white hover:bg-[rgba(2,121,150,0.03)] border border-[rgba(2,52,53,0.05)] dark:border-border/40 hover:border-[#107996]/20 transition-all shadow-sm group"
+                        className="w-full text-left rounded-xl p-3 bg-white dark:bg-card hover:bg-[rgba(2,121,150,0.03)] dark:hover:bg-accent/50 border border-[rgba(2,52,53,0.05)] dark:border-border/40 hover:border-[#107996]/20 transition-all shadow-sm group"
                       >
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-[10px] font-bold text-[#107996]">
@@ -733,7 +733,7 @@ function DayLessonList({
                     onClick={() => onLessonClick(l, l.displayDate)}
                     className={cn(
                       "w-full text-left cursor-pointer rounded-xl border p-3.5 transition-all hover:-translate-y-0.5 hover:shadow-md",
-                      isActiveNow ? "bg-white shadow-sm border-[#FE703A]/30 ring-1 ring-[#FE703A]/10" : STATUS_PILL[l.status]
+                      isActiveNow ? "bg-white dark:bg-card shadow-sm border-[#FE703A]/30 ring-1 ring-[#FE703A]/10" : STATUS_PILL[l.status]
                     )}
                   >
                     <div className="flex items-start justify-between gap-2">

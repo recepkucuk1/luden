@@ -446,7 +446,7 @@ export default function StudentsPage() {
       {/* Daha fazla yükle */}
       {hasMore && (
         <div className="flex justify-center mt-8 pb-8 relative z-10">
-          <button onClick={loadMoreStudents} disabled={loadingMore} className="rounded-xl border border-white/80 bg-white/60 backdrop-blur-md shadow-sm px-6 py-2.5 text-sm font-bold text-[#023435] dark:text-foreground hover:bg-white disabled:opacity-60 transition-all hover:-translate-y-0.5">
+          <button onClick={loadMoreStudents} disabled={loadingMore} className="rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-md shadow-sm px-6 py-2.5 text-sm font-bold text-[#023435] dark:text-foreground hover:bg-white disabled:opacity-60 transition-all hover:-translate-y-0.5">
             {loadingMore ? "Yükleniyor…" : "Daha Fazla Yükle"}
           </button>
         </div>

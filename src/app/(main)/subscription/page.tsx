@@ -102,7 +102,7 @@ export default function SubscriptionPage() {
   ];
 
   return (
-    <div className="py-12 bg-zinc-50 min-h-screen">
+    <div className="py-12 bg-background min-h-screen">
       <Pricing 
         plans={plans} 
         title="Gücünüzü Zirveye Taşıyın"

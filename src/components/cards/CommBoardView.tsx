@@ -85,7 +85,7 @@ function BoardCell({ cell, colorCoding }: { cell: CommBoardCell; colorCoding: bo
       </p>
 
       {/* Visual placeholder */}
-      <div className="flex-1 flex items-center justify-center rounded-lg bg-white/60 border border-dashed border-zinc-300 px-2 py-1.5 my-1 min-h-[48px]">
+      <div className="flex-1 flex items-center justify-center rounded-lg bg-white/60 dark:bg-card/60 border border-dashed border-zinc-300 px-2 py-1.5 my-1 min-h-[48px]">
         <p className="text-[10px] text-zinc-400 italic text-center leading-snug">
           {cell.visualDescription}
         </p>

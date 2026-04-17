@@ -451,7 +451,7 @@ export default function CommBoardPage() {
   }
 
   return (
-    <div className="min-h-screen relative" style={{ background: "linear-gradient(135deg, #f0f7f7 0%, #e8f4f4 50%, #f5fafa 100%)" }}>
+    <div className="min-h-screen relative" style={{ background: "var(--surface-page-gradient)" }}>
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
       <div className="relative z-10 mx-auto max-w-3xl px-6 py-10">
@@ -468,7 +468,7 @@ export default function CommBoardPage() {
 
         {/* Form */}
         {!board && (
-          <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] space-y-6">
+          <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] space-y-6">
 
             {/* Student */}
             <div className="space-y-2">
@@ -476,7 +476,7 @@ export default function CommBoardPage() {
               <select
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
-                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
+                className="w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
               >
                 <option value="">— Öğrenci seçin —</option>
                 {students.map((s) => (
@@ -484,7 +484,7 @@ export default function CommBoardPage() {
                 ))}
               </select>
               {selectedStudent && (
-                <div className="rounded-xl border border-white/70 bg-white/50 backdrop-blur-sm p-3 flex items-center gap-3">
+                <div className="rounded-xl border border-white/70 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm p-3 flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-[#023435]/10 text-[#023435] dark:text-foreground flex items-center justify-center font-bold text-xs shrink-0">
                     {selectedStudent.name.charAt(0)}
                   </div>
@@ -529,7 +529,7 @@ export default function CommBoardPage() {
                   value={customCategory}
                   onChange={(e) => setCustomCategory(e.target.value)}
                   placeholder="Kategori adını yazın (örn: Spor aktiviteleri)"
-                  className="mt-2 w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
+                  className="mt-2 w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
                 />
               )}
             </div>
@@ -601,7 +601,7 @@ export default function CommBoardPage() {
             </div>
 
             {/* Color coding toggle */}
-            <div className="flex items-center justify-between rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-4 py-3">
+            <div className="flex items-center justify-between rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-4 py-3">
               <div>
                 <p className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Fitzgerald Renk Kodlaması</p>
                 <p className="text-xs text-zinc-400 mt-0.5">İsim=Sarı · Fiil=Yeşil · Sıfat=Mavi · Sosyal=Pembe · Soru=Turuncu</p>
@@ -628,7 +628,7 @@ export default function CommBoardPage() {
             </div>
 
             {generating && (
-              <div className="rounded-xl border border-white/70 bg-white/50 backdrop-blur-sm py-4">
+              <div className="rounded-xl border border-white/70 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm py-4">
                 <LoadingMessages />
               </div>
             )}

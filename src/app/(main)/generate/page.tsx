@@ -146,7 +146,7 @@ function HomeContent() {
 
           <div className="overflow-y-auto no-scrollbar flex flex-col md:flex-1 md:min-h-0">
             {loading ? (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
+              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
                 <div className="text-center space-y-4 px-8">
                   <div className="mx-auto h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
                   <LoadingMessages />
@@ -185,7 +185,7 @@ function HomeContent() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-[#023435]/15 bg-white/40 backdrop-blur-xl">
+              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-[#023435]/15 bg-white/40 dark:bg-card/40 backdrop-blur-xl">
                 <div className="text-center space-y-2 px-8">
                   <div className="text-4xl">🗂️</div>
                   <p className="text-sm font-medium text-zinc-500">Henüz kart üretilmedi</p>
