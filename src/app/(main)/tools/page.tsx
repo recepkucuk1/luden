@@ -193,7 +193,7 @@ export default function ToolsPage() {
                     "relative px-5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all duration-300 outline-none flex-1 sm:flex-none whitespace-nowrap",
                     isActive 
                       ? "text-white dark:text-gray-100 shadow-md shadow-[#023435]/10 dark:shadow-black/20" 
-                      : "text-[#023435]/50 dark:text-gray-400 hover:text-[#023435] dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50"
+                      : "text-[#023435]/50 dark:text-gray-400 hover:text-[#023435] dark:hover:text-foreground dark:text-foreground dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50"
                   )}
                 >
                   {isActive && (

@@ -457,11 +457,11 @@ export default function CommBoardPage() {
       <div className="relative z-10 mx-auto max-w-3xl px-6 py-10">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/tools" className="mb-4 inline-flex items-center gap-1.5 text-sm text-[#023435]/50 hover:text-[#023435] transition-colors">
+          <Link href="/tools" className="mb-4 inline-flex items-center gap-1.5 text-sm text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" /> Araçlara Dön
           </Link>
-          <h1 className="text-2xl font-bold text-[#023435]">İletişim Panosu Üretici</h1>
-          <p className="mt-1 text-sm text-[#023435]/60">
+          <h1 className="text-2xl font-bold text-[#023435] dark:text-foreground">İletişim Panosu Üretici</h1>
+          <p className="mt-1 text-sm text-[#023435]/60 dark:text-muted-foreground">
             Alternatif ve destekleyici iletişim için kişiselleştirilmiş görsel iletişim panoları üretin.
           </p>
         </div>
@@ -472,11 +472,11 @@ export default function CommBoardPage() {
 
             {/* Student */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">Öğrenci (isteğe bağlı)</label>
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Öğrenci (isteğe bağlı)</label>
               <select
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
-                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
+                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
               >
                 <option value="">— Öğrenci seçin —</option>
                 {students.map((s) => (
@@ -485,7 +485,7 @@ export default function CommBoardPage() {
               </select>
               {selectedStudent && (
                 <div className="rounded-xl border border-white/70 bg-white/50 backdrop-blur-sm p-3 flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-[#023435]/10 text-[#023435] flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="h-8 w-8 rounded-full bg-[#023435]/10 text-[#023435] dark:text-foreground flex items-center justify-center font-bold text-xs shrink-0">
                     {selectedStudent.name.charAt(0)}
                   </div>
                   <div>
@@ -500,7 +500,7 @@ export default function CommBoardPage() {
 
             {/* Board type */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">Pano Türü</label>
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Pano Türü</label>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {BOARD_TYPE_OPTIONS.map((opt) => (
                   <button
@@ -515,7 +515,7 @@ export default function CommBoardPage() {
                   >
                     <span className="text-lg leading-none">{opt.emoji}</span>
                     <div>
-                      <p className={`text-xs font-semibold ${boardType === opt.value ? "text-[#023435]" : "text-zinc-700"}`}>
+                      <p className={`text-xs font-semibold ${boardType === opt.value ? "text-[#023435] dark:text-foreground" : "text-zinc-700"}`}>
                         {opt.label}
                       </p>
                       <p className="text-[10px] text-zinc-400 leading-snug mt-0.5">{opt.desc}</p>
@@ -529,14 +529,14 @@ export default function CommBoardPage() {
                   value={customCategory}
                   onChange={(e) => setCustomCategory(e.target.value)}
                   placeholder="Kategori adını yazın (örn: Spor aktiviteleri)"
-                  className="mt-2 w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
+                  className="mt-2 w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
                 />
               )}
             </div>
 
             {/* Symbol count */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">Sembol Sayısı</label>
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Sembol Sayısı</label>
               <div className="flex gap-2 flex-wrap">
                 {SYMBOL_COUNT_OPTIONS.map((opt) => (
                   <button
@@ -545,7 +545,7 @@ export default function CommBoardPage() {
                     onClick={() => setSymbolCount(opt.value)}
                     className={`rounded-xl border px-4 py-2 text-sm font-medium transition-all ${
                       symbolCount === opt.value
-                        ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                        ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                         : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
                     }`}
                   >
@@ -558,7 +558,7 @@ export default function CommBoardPage() {
 
             {/* Layout */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">Düzen</label>
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Düzen</label>
               <div className="flex gap-2">
                 {([["grid", "Grid", "Satır ve sütun"], ["strip", "Satır", "Tek yatay şerit"]] as const).map(([v, l, d]) => (
                   <button
@@ -567,7 +567,7 @@ export default function CommBoardPage() {
                     onClick={() => setLayout(v)}
                     className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all text-left ${
                       layout === v
-                        ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                        ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                         : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
                     }`}
                   >
@@ -580,7 +580,7 @@ export default function CommBoardPage() {
 
             {/* Text mode */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">Metin Dili</label>
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Metin Dili</label>
               <div className="flex gap-2">
                 {([["word_only", "Sadece kelime", "Su"], ["word_sentence", "Kelime + cümle", "Su istiyorum"]] as const).map(([v, l, ex]) => (
                   <button
@@ -589,7 +589,7 @@ export default function CommBoardPage() {
                     onClick={() => setTextMode(v)}
                     className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all text-left ${
                       textMode === v
-                        ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                        ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                         : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
                     }`}
                   >
@@ -603,7 +603,7 @@ export default function CommBoardPage() {
             {/* Color coding toggle */}
             <div className="flex items-center justify-between rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-4 py-3">
               <div>
-                <p className="text-sm font-bold text-[#023435]/70">Fitzgerald Renk Kodlaması</p>
+                <p className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Fitzgerald Renk Kodlaması</p>
                 <p className="text-xs text-zinc-400 mt-0.5">İsim=Sarı · Fiil=Yeşil · Sıfat=Mavi · Sosyal=Pembe · Soru=Turuncu</p>
               </div>
               <button
@@ -652,7 +652,7 @@ export default function CommBoardPage() {
               <button
                 onClick={handleDownloadReport}
                 disabled={downloadingBoard || downloadingReport}
-                className="flex items-center gap-1.5 rounded-xl border border-[#023435]/30 bg-[#023435]/5 px-4 py-2.5 text-sm font-semibold text-[#023435] hover:bg-[#023435]/10 transition-colors disabled:opacity-60"
+                className="flex items-center gap-1.5 rounded-xl border border-[#023435]/30 bg-[#023435]/5 px-4 py-2.5 text-sm font-semibold text-[#023435] dark:text-foreground hover:bg-[#023435]/10 dark:hover:bg-accent/50 transition-colors disabled:opacity-60"
               >
                 {downloadingReport ? "Hazırlanıyor…" : "PDF İndir — Tam Rapor"}
               </button>

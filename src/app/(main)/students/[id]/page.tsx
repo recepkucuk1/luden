@@ -44,7 +44,7 @@ function parseProfileSections(text: string): { title: string; content: string }[
 const SECTION_STYLE: Record<string, { box: string; title: string }> = {
   "Kavramsal Arka Plan": {
     box: "bg-[#023435]/5 border border-[#023435]/10",
-    title: "text-[#023435]",
+    title: "text-[#023435] dark:text-foreground",
   },
   "Uzmana Öneriler": {
     box: "bg-[#FE703A]/5 border border-[#FE703A]/10",
@@ -280,7 +280,7 @@ export default function StudentDetailPage({
       <div className="sticky top-0 z-30 border-b border-white/60 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.03)] px-6 py-3 transition-all">
         <div className="mx-auto max-w-5xl flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-bold">
-            <Link href="/students" className="text-[#023435]/50 dark:text-gray-400 hover:text-[#023435] dark:hover:text-gray-200 transition-colors">
+            <Link href="/students" className="text-[#023435]/50 dark:text-gray-400 hover:text-[#023435] dark:hover:text-foreground dark:text-foreground dark:hover:text-gray-200 transition-colors">
               Öğrenciler
             </Link>
             <span className="text-[#023435]/30 dark:text-gray-600">/</span>
@@ -292,7 +292,7 @@ export default function StudentDetailPage({
             <Button size="sm" variant="outline" onClick={() => setShowDeleteConfirm(true)} className="rounded-xl border-white dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 hover:text-red-700 dark:hover:text-red-400 shadow-sm transition-all h-8 text-xs font-bold px-3">
               Sil
             </Button>
-            <Button size="sm" variant="outline" onClick={openEdit} className="rounded-xl border-white dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 text-[#023435]/60 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:text-[#023435] dark:hover:text-gray-100 shadow-sm transition-all h-8 text-xs font-bold px-3">
+            <Button size="sm" variant="outline" onClick={openEdit} className="rounded-xl border-white dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 text-[#023435]/60 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:text-[#023435] dark:hover:text-foreground dark:text-foreground dark:hover:text-gray-100 shadow-sm transition-all h-8 text-xs font-bold px-3">
               Düzenle
             </Button>
             <Link
@@ -412,7 +412,7 @@ export default function StudentDetailPage({
                         className={cn(
                           "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all text-xs font-medium",
                           editWorkArea === w.value
-                            ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                            ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                             : "border-border bg-card text-muted-foreground hover:border-border/80"
                         )}
                       >
@@ -494,7 +494,7 @@ export default function StudentDetailPage({
                 "px-5 py-3 text-[13px] font-extrabold uppercase tracking-wide transition-all translate-y-[1px]",
                 activeTab === tab.key
                   ? "text-[#023435] dark:text-gray-100 border-b-[3px] border-[#FE703A]"
-                  : "text-[#023435]/40 dark:text-gray-500 hover:text-[#023435] dark:hover:text-gray-300 border-b-[3px] border-transparent"
+                  : "text-[#023435]/40 dark:text-gray-500 hover:text-[#023435] dark:hover:text-foreground dark:text-foreground dark:hover:text-gray-300 border-b-[3px] border-transparent"
               )}
             >
               {tab.label}
@@ -610,9 +610,9 @@ export default function StudentDetailPage({
         {/* Bu öğrenci için üretilen kartlar */}
         <div>
           <div className="flex items-center justify-between mb-4 mt-2">
-            <h2 className="text-xl font-extrabold text-[#023435] tracking-tight">
+            <h2 className="text-xl font-extrabold text-[#023435] dark:text-foreground tracking-tight">
               Öğrenciye Özel Üretilenler
-              <span className="ml-3 text-sm font-semibold text-[#023435]/40">({student.cards.length})</span>
+              <span className="ml-3 text-sm font-semibold text-[#023435]/40 dark:text-muted-foreground/75">({student.cards.length})</span>
             </h2>
           </div>
 
@@ -711,17 +711,17 @@ export default function StudentDetailPage({
         {/* Atanan kartlar */}
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-extrabold text-[#023435] tracking-tight">
+            <h2 className="text-xl font-extrabold text-[#023435] dark:text-foreground tracking-tight">
               Kütüphaneden Atananlar
-              <span className="ml-3 text-sm font-semibold text-[#023435]/40">({student.assignments.length})</span>
+              <span className="ml-3 text-sm font-semibold text-[#023435]/40 dark:text-muted-foreground/75">({student.assignments.length})</span>
             </h2>
           </div>
 
           {student.assignments.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-3xl border border-white/80 bg-white/40 shadow-sm backdrop-blur-md py-16 text-center relative z-10">
               <div className="text-4xl mb-4 opacity-80">📋</div>
-              <p className="text-lg font-bold text-[#023435] mb-1">Henüz kart atanmadı</p>
-              <p className="text-sm font-medium text-[#023435]/50">
+              <p className="text-lg font-bold text-[#023435] dark:text-foreground mb-1">Henüz kart atanmadı</p>
+              <p className="text-sm font-medium text-[#023435]/50 dark:text-muted-foreground">
                 Kart kütüphanesinden bu öğrenciye materyal atayabilirsiniz.
               </p>
             </div>
@@ -741,18 +741,18 @@ export default function StudentDetailPage({
                       <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest border", DIFFICULTY_COLOR[assignment.card.difficulty] ?? "border-zinc-200 text-zinc-600")}>
                         {DIFFICULTY_LABEL[assignment.card.difficulty] ?? assignment.card.difficulty}
                       </span>
-                      <span className="rounded-md border border-zinc-200/60 bg-white px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 uppercase tracking-widest">
+                      <span className="rounded-md border border-zinc-200/60 bg-white px-2 py-0.5 text-[10px] font-extrabold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-widest">
                         {assignment.card.ageGroup}
                       </span>
                     </div>
-                    <h3 className="font-extrabold text-[#023435] text-[15px] mb-2 line-clamp-2 leading-snug">{assignment.card.title}</h3>
-                    <p className="mt-auto pt-3 border-t border-[#023435]/5 text-[10px] font-bold text-[#023435]/40 uppercase tracking-widest">
+                    <h3 className="font-extrabold text-[#023435] dark:text-foreground text-[15px] mb-2 line-clamp-2 leading-snug">{assignment.card.title}</h3>
+                    <p className="mt-auto pt-3 border-t border-[#023435]/5 text-[10px] font-bold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest">
                       Atanma: {formatDate(assignment.assignedAt, "short")}
                     </p>
                   </Link>
                   {/* Durum Seçici */}
                   <div className="px-5 pb-5 relative z-10 pt-2 border-t border-dashed border-[#023435]/10 mt-2">
-                    <p className="text-[9px] font-extrabold text-[#023435]/50 uppercase tracking-wider mb-2 text-center">GELİŞİM DURUMU</p>
+                    <p className="text-[9px] font-extrabold text-[#023435]/50 dark:text-muted-foreground uppercase tracking-wider mb-2 text-center">GELİŞİM DURUMU</p>
                     <div className="flex bg-white/50 p-1 rounded-xl border border-white/60 shadow-inner">
                       {(["not_started", "in_progress", "completed"] as const).map((s) => {
                         const isColorSelected = assignment.status === s;
@@ -805,7 +805,7 @@ export default function StudentDetailPage({
                             "flex-1 rounded-lg px-2 py-2 text-[9px] font-extrabold uppercase tracking-wider transition-all border border-transparent mx-0.5",
                             isColorSelected
                               ? activeStyles
-                              : "bg-transparent text-[#023435]/40 hover:text-[#023435]/70 hover:bg-white/40"
+                              : "bg-transparent text-[#023435]/40 dark:text-muted-foreground/75 hover:text-[#023435]/70 dark:hover:text-foreground/90 dark:text-foreground/80 hover:bg-white/40"
                           )}
                         >
                           {CARD_STATUS_LABEL[s]}

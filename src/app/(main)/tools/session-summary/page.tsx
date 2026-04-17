@@ -490,8 +490,8 @@ export default function SessionSummaryPage() {
     }
   }
 
-  const inputCls = "w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30";
-  const labelCls = "block text-xs font-bold text-[#023435]/70 mb-1.5 uppercase tracking-wide";
+  const inputCls = "w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30 dark:text-muted-foreground/60";
+  const labelCls = "block text-xs font-bold text-[#023435]/70 dark:text-foreground/80 mb-1.5 uppercase tracking-wide";
   const selCls   = cn(inputCls, "cursor-pointer");
 
   return (
@@ -506,13 +506,13 @@ export default function SessionSummaryPage() {
       <div className="mb-5 shrink-0 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/70 px-5 py-4 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
         <Link
           href="/tools"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 hover:text-[#023435] transition-colors"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Araçlara Dön
         </Link>
-        <h1 className="text-xl font-extrabold text-[#023435] tracking-tight">Oturum Özeti Oluşturucu</h1>
-        <p className="text-sm text-[#023435]/60 mt-0.5">
+        <h1 className="text-xl font-extrabold text-[#023435] dark:text-foreground tracking-tight">Oturum Özeti Oluşturucu</h1>
+        <p className="text-sm text-[#023435]/60 dark:text-muted-foreground mt-0.5">
           Oturum sonrası profesyonel ve yapılandırılmış değerlendirme raporları oluşturun.
         </p>
       </div>
@@ -582,7 +582,7 @@ export default function SessionSummaryPage() {
                       className={cn(
                         "rounded-lg border px-3 py-2 text-xs font-semibold transition-colors",
                         duration === d
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                           : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                       )}
                     >
@@ -604,7 +604,7 @@ export default function SessionSummaryPage() {
                       className={cn(
                         "rounded-lg border px-3 py-2.5 text-left transition-colors",
                         sessionType === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                           : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                       )}
                     >
@@ -620,7 +620,7 @@ export default function SessionSummaryPage() {
                   <span>
                     Çalışılan Hedefler
                     {selectedGoals.length > 0 && (
-                      <span className="ml-1.5 rounded-full bg-[#023435]/10 text-[#023435] px-1.5 py-0.5 text-[10px] font-semibold">
+                      <span className="ml-1.5 rounded-full bg-[#023435]/10 text-[#023435] dark:text-foreground px-1.5 py-0.5 text-[10px] font-semibold">
                         {selectedGoals.length}
                       </span>
                     )}
@@ -740,7 +740,7 @@ export default function SessionSummaryPage() {
                       className={cn(
                         "w-full rounded-lg border px-3 py-2 text-left text-xs font-semibold transition-colors",
                         overallPerformance === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                           : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                       )}
                     >
@@ -822,7 +822,7 @@ export default function SessionSummaryPage() {
                   <button
                     onClick={handleDownloadParent}
                     disabled={downloading}
-                    className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-4 py-2 text-xs font-semibold text-[#023435] hover:bg-[#023435]/10 disabled:opacity-60 transition-colors"
+                    className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-4 py-2 text-xs font-semibold text-[#023435] dark:text-foreground hover:bg-[#023435]/10 dark:hover:bg-accent/50 disabled:opacity-60 transition-colors"
                   >
                     Veli Notu PDF İndir
                   </button>

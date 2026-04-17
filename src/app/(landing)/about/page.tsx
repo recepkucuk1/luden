@@ -10,7 +10,7 @@ const DOT = <span className="mr-2 text-[#FE703A]">●</span>;
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-12">
-      <h2 className="text-xl font-bold text-[#023435] mb-6 pb-2 border-b border-[#023435]/10">{title}</h2>
+      <h2 className="text-xl font-bold text-[#023435] dark:text-foreground mb-6 pb-2 border-b border-[#023435]/10">{title}</h2>
       {children}
     </section>
   );
@@ -28,10 +28,10 @@ export default function AboutPage() {
         {/* Başlık */}
         <div className="text-center mb-14">
           <div className="text-2xl font-bold mb-1">
-            <span className="text-[#023435]">Luden</span>
+            <span className="text-[#023435] dark:text-foreground">Luden</span>
             <span className="text-[#FE703A]">Lab</span>
           </div>
-          <h1 className="text-2xl font-bold text-[#023435] mt-4">Hakkımızda</h1>
+          <h1 className="text-2xl font-bold text-[#023435] dark:text-foreground mt-4">Hakkımızda</h1>
         </div>
 
         {/* Bölüm 1: Hakkımızda */}
@@ -48,7 +48,7 @@ export default function AboutPage() {
           </P>
 
           {/* Neden LudenLab */}
-          <h3 className="text-base font-bold text-[#023435] mt-6 mb-4">Neden LudenLab?</h3>
+          <h3 className="text-base font-bold text-[#023435] dark:text-foreground mt-6 mb-4">Neden LudenLab?</h3>
           <div className="grid sm:grid-cols-2 gap-4 mb-8">
             {[
               {
@@ -75,7 +75,7 @@ export default function AboutPage() {
               <div key={i} className="flex items-start gap-3 bg-[#023435]/[0.03] rounded-xl p-4">
                 {DOT}
                 <div>
-                  <p className="font-semibold text-[#023435] text-sm mb-1">{item.title}</p>
+                  <p className="font-semibold text-[#023435] dark:text-foreground text-sm mb-1">{item.title}</p>
                   <p className="text-gray-600 text-sm leading-relaxed">{item.desc}</p>
                 </div>
               </div>
@@ -83,7 +83,7 @@ export default function AboutPage() {
           </div>
 
           {/* Homo Ludens */}
-          <h3 className="text-base font-bold text-[#023435] mb-4">Homo Ludens Felsefesi</h3>
+          <h3 className="text-base font-bold text-[#023435] dark:text-foreground mb-4">Homo Ludens Felsefesi</h3>
           <div className="border-l-4 border-[#FE703A] pl-5 py-1">
             <P>
               LudenLab ismindeki &ldquo;Luden&rdquo;, Johan Huizinga&apos;nın &ldquo;Homo Ludens&rdquo; (Oynayan İnsan) kavramından
@@ -104,7 +104,7 @@ export default function AboutPage() {
               ["Meslek Grubu", "35 Eğitim Grubu"],
             ].map(([label, value], i) => (
               <p key={i} className="flex items-start gap-2">
-                <span className="font-medium text-[#023435] shrink-0 min-w-[130px]">{label}:</span>
+                <span className="font-medium text-[#023435] dark:text-foreground shrink-0 min-w-[130px]">{label}:</span>
                 <span>{value}</span>
               </p>
             ))}
@@ -161,11 +161,11 @@ export default function AboutPage() {
               },
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-4 bg-[#023435]/[0.03] rounded-xl p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#023435]/10 text-[#023435]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#023435]/10 text-[#023435] dark:text-foreground">
                   {item.icon}
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-[#023435]/60 uppercase tracking-wide mb-1">{item.label}</p>
+                  <p className="text-xs font-semibold text-[#023435]/60 dark:text-muted-foreground uppercase tracking-wide mb-1">{item.label}</p>
                   {item.href ? (
                     <a href={item.href} className="text-sm text-gray-700 hover:text-[#FE703A] transition-colors">
                       {item.value}

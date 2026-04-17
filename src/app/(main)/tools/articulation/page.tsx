@@ -258,7 +258,7 @@ function DrillResultView({ drill }: { drill: DrillResult }) {
     <div className="space-y-5">
       {/* Header badges */}
       <div>
-        <h2 className="text-lg font-bold text-[#023435] mb-3">{drill.title}</h2>
+        <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-3">{drill.title}</h2>
         <div className="flex flex-wrap gap-1.5">
           {sounds.map((s) => (
             <span key={s} className="rounded-full bg-[#107996]/10 border border-[#107996]/20 px-2.5 py-0.5 text-xs font-semibold text-[#107996]">
@@ -419,8 +419,8 @@ export default function ArticulationPage() {
     setTheme("none");
   }
 
-  const inputCls = "w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30";
-  const labelCls = "block text-xs font-bold text-[#023435]/70 mb-1.5 uppercase tracking-wide";
+  const inputCls = "w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30 dark:text-muted-foreground/60";
+  const labelCls = "block text-xs font-bold text-[#023435]/70 dark:text-foreground/80 mb-1.5 uppercase tracking-wide";
 
   return (
     <div
@@ -434,13 +434,13 @@ export default function ArticulationPage() {
       <div className="mb-5 shrink-0 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/70 px-5 py-4 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
         <Link
           href="/tools"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 hover:text-[#023435] transition-colors"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Araçlara Dön
         </Link>
-        <h1 className="text-xl font-extrabold text-[#023435] tracking-tight">Artikülasyon Alıştırma Üretici</h1>
-        <p className="text-sm text-[#023435]/60 mt-0.5">
+        <h1 className="text-xl font-extrabold text-[#023435] dark:text-foreground tracking-tight">Artikülasyon Alıştırma Üretici</h1>
+        <p className="text-sm text-[#023435]/60 dark:text-muted-foreground mt-0.5">
           Konuşma sesi bozuklukları için hedef ses bazlı, kişiselleştirilmiş alıştırma materyalleri üretin.
         </p>
       </div>
@@ -534,7 +534,7 @@ export default function ArticulationPage() {
                       className={cn(
                         "rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
                         positions.includes(p.value)
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                           : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                       )}
                     >
@@ -547,7 +547,7 @@ export default function ArticulationPage() {
                     className={cn(
                       "rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
                       positions.length === 3
-                        ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                        ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                         : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                     )}
                   >
@@ -568,7 +568,7 @@ export default function ArticulationPage() {
                       className={cn(
                         "w-full flex items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors",
                         level === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                           : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                       )}
                     >
@@ -591,7 +591,7 @@ export default function ArticulationPage() {
                       className={cn(
                         "flex-1 rounded-lg border py-2 text-xs font-semibold transition-colors",
                         itemCount === n
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                           : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                       )}
                     >

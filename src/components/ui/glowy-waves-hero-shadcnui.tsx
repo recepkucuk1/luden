@@ -3,6 +3,7 @@
 import { motion, type Variants } from "framer-motion";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 
 type Point = {
@@ -48,6 +49,13 @@ export function GlowyWavesHero() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const mouseRef = useRef<Point>({ x: 0, y: 0 });
   const targetMouseRef = useRef<Point>({ x: 0, y: 0 });
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+  const isDarkRef = useRef(isDark);
+
+  useEffect(() => {
+    isDarkRef.current = isDark;
+  }, [isDark]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -146,8 +154,13 @@ export function GlowyWavesHero() {
         (targetMouseRef.current.y - mouseRef.current.y) * smoothing;
 
       const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, "#023435");
-      gradient.addColorStop(1, "#012425");
+      if (isDarkRef.current) {
+        gradient.addColorStop(0, "#061617");
+        gradient.addColorStop(1, "#030d0e");
+      } else {
+        gradient.addColorStop(0, "#023435");
+        gradient.addColorStop(1, "#012425");
+      }
 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -173,7 +186,7 @@ export function GlowyWavesHero() {
   return (
     <section
       className="relative isolate flex min-h-[75vh] w-full items-center justify-center overflow-hidden"
-      style={{ backgroundColor: "#023435" }}
+      style={{ backgroundColor: isDark ? "#061617" : "#023435" }}
       role="region"
       aria-label="Hero bölümü"
     >

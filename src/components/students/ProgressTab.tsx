@@ -392,7 +392,7 @@ export function ProgressTab({
                                 className={cn(
                                   "rounded p-1 transition-colors",
                                   noteOpen || hasNote
-                                    ? "text-[#023435]"
+                                    ? "text-[#023435] dark:text-foreground"
                                     : "text-zinc-200 hover:text-zinc-400"
                                 )}
                               >

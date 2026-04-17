@@ -51,13 +51,13 @@ function FaqAccordion() {
             onClick={() => setOpen(open === i ? null : i)}
             className={cn(
               "flex w-full items-center justify-between px-6 py-5 text-left text-sm font-medium transition-colors",
-              open === i ? "text-[#023435] bg-[#F4B2A6]/5" : "text-zinc-900 hover:bg-[#F4B2A6]/10"
+              open === i ? "text-[#023435] dark:text-foreground bg-[#F4B2A6]/5" : "text-zinc-900 hover:bg-[#F4B2A6]/10"
             )}
           >
             <span className="flex items-center gap-3">
               <span className={cn(
                 "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] md:text-[10px] font-bold transition-colors duration-300",
-                open === i ? "bg-[#FE703A] text-white" : "bg-[#F4B2A6]/20 text-[#023435]/40"
+                open === i ? "bg-[#FE703A] text-white" : "bg-[#F4B2A6]/20 text-[#023435]/40 dark:text-muted-foreground/75"
               )}>{i + 1}</span>
               {item.q}
             </span>
@@ -104,7 +104,7 @@ function CarouselTag({ children, color }: {
   const cls: Record<string, string> = {
     blue:   "bg-[rgba(16,121,150,0.1)] text-[#107996]",
     orange: "bg-[rgba(254,112,58,0.1)] text-[#FE703A]",
-    green:  "bg-[rgba(2,52,53,0.1)] text-[#023435]",
+    green:  "bg-[rgba(2,52,53,0.1)] dark:bg-card/70 text-[#023435] dark:text-foreground",
     yellow: "bg-[rgba(244,174,16,0.15)] text-amber-800",
   };
   return (
@@ -121,11 +121,11 @@ function MockDropdown({ label, value, highlight }: { label: string; value: strin
       <div className={cn(
         "flex items-center justify-between rounded-xl border px-3 py-2 text-sm",
         highlight
-          ? "border-[#FE703A] bg-[#FE703A]/5 text-[#023435] font-medium"
-          : "border-[rgba(2,52,53,0.12)] bg-[#f8fafa] text-[#023435]"
+          ? "border-[#FE703A] bg-[#FE703A]/5 text-[#023435] dark:text-foreground font-medium"
+          : "border-[rgba(2,52,53,0.12)] dark:border-border/80 bg-[#f8fafa] dark:bg-muted/20 text-[#023435] dark:text-foreground"
       )}>
         <span>{value}</span>
-        <svg className="h-4 w-4 shrink-0 text-[#023435]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="h-4 w-4 shrink-0 text-[#023435]/30 dark:text-muted-foreground/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </div>
@@ -140,22 +140,22 @@ function MockPdfCard({ header, tags, rows, cta }: {
   cta: string;
 }) {
   return (
-    <div className="max-w-xl mx-auto rounded-xl border border-[rgba(2,52,53,0.12)] bg-white shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.08)] px-5 py-3">
-        <span className="font-bold text-[#023435]">Luden<span className="text-[#FE703A]">Lab</span></span>
+    <div className="max-w-xl mx-auto rounded-xl border border-[rgba(2,52,53,0.12)] dark:border-border/80 bg-white shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.08)] dark:border-border/60 px-5 py-3">
+        <span className="font-bold text-[#023435] dark:text-foreground">Luden<span className="text-[#FE703A]">Lab</span></span>
         <span className="text-xs text-[rgba(2,52,53,0.4)]">{header}</span>
       </div>
-      <div className="flex flex-wrap gap-1.5 px-5 py-3 border-b border-[rgba(2,52,53,0.06)]">{tags}</div>
+      <div className="flex flex-wrap gap-1.5 px-5 py-3 border-b border-[rgba(2,52,53,0.06)] dark:border-border/50">{tags}</div>
       <div className="px-5 py-4 space-y-3">
         {rows.map((s) => (
           <div key={s.label}>
-            <p className="text-[11px] md:text-[10px] font-bold uppercase tracking-wider text-[#023435]/40 mb-1">{s.label}</p>
-            {s.title && <p className="text-sm font-semibold text-[#023435] mb-0.5">{s.title}</p>}
+            <p className="text-[11px] md:text-[10px] font-bold uppercase tracking-wider text-[#023435]/40 dark:text-muted-foreground/75 mb-1">{s.label}</p>
+            {s.title && <p className="text-sm font-semibold text-[#023435] dark:text-foreground mb-0.5">{s.title}</p>}
             <p className="text-xs text-[rgba(2,52,53,0.6)] leading-relaxed">{s.body}</p>
           </div>
         ))}
       </div>
-      <div className="flex items-center justify-between border-t border-[rgba(2,52,53,0.08)] px-5 py-3">
+      <div className="flex items-center justify-between border-t border-[rgba(2,52,53,0.08)] dark:border-border/60 px-5 py-3">
         <span className="text-xs md:text-[11px] text-[rgba(2,52,53,0.4)]">{cta}</span>
         <span className="flex items-center gap-1.5 text-xs font-semibold text-[#107996]">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -179,7 +179,7 @@ function KartSlide1() {
         <MockDropdown label="Tanı türü" value="Dil Gelişim Gecikmesi" />
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
+        <div className="flex-1 rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(2,52,53,0.1)] dark:border-border/70 p-4">
           <p className="text-xs md:text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Seçilen müfredat hedefi</p>
           <div className="space-y-2.5">
             {[
@@ -187,8 +187,8 @@ function KartSlide1() {
               { code: "2.2.3", title: "Sözcük dağarcığını genişletir", active: true },
             ].map((g) => (
               <div key={g.code} className="flex items-start gap-2.5">
-                <span className={cn("shrink-0 mt-0.5 h-5 w-5 rounded-full flex items-center justify-center text-[11px] md:text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]")}>✓</span>
-                <span className="text-xs text-[rgba(2,52,53,0.65)]"><span className="font-semibold text-[#023435]">{g.code}</span><span className="ml-1.5">{g.title}</span></span>
+                <span className={cn("shrink-0 mt-0.5 h-5 w-5 rounded-full flex items-center justify-center text-[11px] md:text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435] dark:text-foreground")}>✓</span>
+                <span className="text-xs text-[rgba(2,52,53,0.65)]"><span className="font-semibold text-[#023435] dark:text-foreground">{g.code}</span><span className="ml-1.5">{g.title}</span></span>
               </div>
             ))}
           </div>
@@ -210,7 +210,7 @@ function KartSlide2() {
         <CarouselTag color="yellow">Dil Gelişim Gecikmesi</CarouselTag>
         <span className="inline-flex items-center rounded-full bg-[rgba(16,121,150,0.08)] border border-[#107996]/20 px-2.5 py-0.5 text-xs md:text-[11px] font-semibold text-[#107996]">Hedef 2.2.3</span>
       </div>
-      <h3 className="text-lg font-bold text-[#023435]">Mutfak Keşfi — Sözcük Bulma Oyunu</h3>
+      <h3 className="text-lg font-bold text-[#023435] dark:text-foreground">Mutfak Keşfi — Sözcük Bulma Oyunu</h3>
       <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Uzman, mutfak ortamındaki gerçek nesneleri kullanarak öğrencinin aktif sözcük dağarcığını genişletir. Öğrenci nesneleri keşfeder, adlandırır ve işlevlerini kendi cümleleriyle anlatır.</p>
       <div className="space-y-2">
         {["Mutfaktan 6-8 tanıdık nesne seçin (bardak, kaşık, tabak, tencere, sünger, peçete)","Her nesneyi sırayla göstererek \"Bu ne? Ne işe yarıyor?\" diye sorun","Öğrenci bilmediğinde nesneyi tanımlayın, dokunmasını sağlayın ve adını 2 kez tekrarlayın","Tüm nesneleri masaya dizin, \"Yemeği karıştıran nesneyi göster\" gibi işlev soruları sorun"].map((step, i) => (
@@ -226,13 +226,13 @@ function KartSlide2() {
 function KartSlide3() {
   return (
     <div className="space-y-4 max-w-2xl">
-      <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
+      <div className="rounded-xl bg-[#fffaf7] dark:bg-brand-orange/8 px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
         <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
         <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Tanıdık nesnelerle başlayın — ev ortamı en güçlü doğal bağlamdır. Öğrenci nesneye dokunabilmeli, koklayabilmeli; çoklu duyusal deneyim sözcük yerleşimini hızlandırır. &ldquo;Aferin&rdquo; yerine &ldquo;Bak, tencerenin ne işe yaradığını hatırladın!&rdquo; gibi süreci ön plana çıkaran geri bildirimler kullanın.</p>
         <p className="text-xs md:text-[11px] text-[rgba(2,52,53,0.4)] mt-2">Hedef 2.2.3 — Sözcük dağarcığını genişletir</p>
       </div>
-      <div className="border-t border-[rgba(2,52,53,0.08)]" />
-      <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
+      <div className="border-t border-[rgba(2,52,53,0.08)] dark:border-border/60" />
+      <div className="rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
         <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME ÖNERİSİ</p>
         <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veliden akşam yemeği hazırlığı sırasında 3-4 nesneyi öğrenciye isimlendirmesini istemesini isteyin. Günlük rutine gömülü tekrar, haftalık 2 seans kadar etkili olabilir.</p>
       </div>
@@ -271,7 +271,7 @@ function ArtSlide1() {
         <MockDropdown label="Zorluk seviyesi" value="Kelime Düzeyi" />
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
+        <div className="flex-1 rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(2,52,53,0.1)] dark:border-border/70 p-4">
           <p className="text-xs md:text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Önerilen egzersiz türleri</p>
           <div className="space-y-2.5">
             {[
@@ -280,8 +280,8 @@ function ArtSlide1() {
               { label: "Kelime düzeyi (10 sözcük)", active: true },
             ].map((g) => (
               <div key={g.label} className="flex items-center gap-2.5">
-                <span className={cn("shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[11px] md:text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]/40")}>✓</span>
-                <span className={cn("text-xs", g.active ? "text-[#023435]" : "text-[rgba(2,52,53,0.4)]")}>{g.label}</span>
+                <span className={cn("shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[11px] md:text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]/40 dark:text-muted-foreground/75")}>✓</span>
+                <span className={cn("text-xs", g.active ? "text-[#023435] dark:text-foreground" : "text-[rgba(2,52,53,0.4)]")}>{g.label}</span>
               </div>
             ))}
           </div>
@@ -301,7 +301,7 @@ function ArtSlide2() {
         <CarouselTag color="orange">Sözcük başı</CarouselTag>
         <CarouselTag color="green">7-12 yaş · Kelime düzeyi</CarouselTag>
       </div>
-      <h3 className="text-lg font-bold text-[#023435]">/s/ Sesi Kelime Çalışması — Sözcük Başı</h3>
+      <h3 className="text-lg font-bold text-[#023435] dark:text-foreground">/s/ Sesi Kelime Çalışması — Sözcük Başı</h3>
       <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Hedef /s/ sesini sözcük başında doğru üretebilmek için 10 adet yaşa uygun Türkçe kelimeyle yapılandırılmış çalışma. Her kelime hece ayrımı ve örnek cümleyle birlikte sunulur.</p>
       <div className="space-y-2">
         {[
@@ -322,13 +322,13 @@ function ArtSlide2() {
 function ArtSlide3() {
   return (
     <div className="space-y-4 max-w-2xl">
-      <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
+      <div className="rounded-xl bg-[#fffaf7] dark:bg-brand-orange/8 px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
         <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
         <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">/s/ sesinde dil ucu kontrolü kritiktir. Lateral kaçış (havanın yandan çıkması) varsa dil ortasından hava geçişini pekiştirin. Ayna kullanımı görsel geri bildirim sağlar. Her doğru üretimde &ldquo;Havanın ortadan çıkışını hissettin mi? Harika kontrol!&rdquo; gibi farkındalık temelli geri bildirimler verin.</p>
         <p className="text-xs md:text-[11px] text-[rgba(2,52,53,0.4)] mt-2">/s/ · Sözcük başı pozisyon çalışması</p>
       </div>
-      <div className="border-t border-[rgba(2,52,53,0.08)]" />
-      <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
+      <div className="border-t border-[rgba(2,52,53,0.08)] dark:border-border/60" />
+      <div className="rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
         <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME ÖNERİSİ</p>
         <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veliye 5 hedef kelime listesi verin (sabun, süt, simit, sandal, sepet). Öğrenci bu kelimeleri günlük konuşmada bilinçli kullanmaya çalışsın. Doğru üretimde velinin göz kontağı + gülümseme ile onaylaması yeterlidir.</p>
       </div>
@@ -367,7 +367,7 @@ function EvSlide1() {
         <MockDropdown label="Hedef alan" value="Dil anlama ve üretme" />
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
+        <div className="flex-1 rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(2,52,53,0.1)] dark:border-border/70 p-4">
           <p className="text-xs md:text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Haftalık program</p>
           <div className="space-y-1.5">
             {["Pazartesi — Kahvaltı sırasında nesne adlandırma","Çarşamba — Park yürüyüşünde renk + nesne tanımlama","Cuma — Uyku öncesi resimli kitap anlatımı"].map((d, i) => (
@@ -393,7 +393,7 @@ function EvSlide2() {
         <CarouselTag color="orange">15 dk/gün</CarouselTag>
         <CarouselTag color="green">Temel seviye</CarouselTag>
       </div>
-      <h3 className="text-lg font-bold text-[#023435]">Kahvaltı Masasında Dil Oyunu</h3>
+      <h3 className="text-lg font-bold text-[#023435] dark:text-foreground">Kahvaltı Masasında Dil Oyunu</h3>
       <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Günlük kahvaltı rutinini fırsat olarak kullanarak öğrencinin hem nesne adlandırma hem de cümle kurma becerilerini doğal ortamda güçlendiren bir aktivite. Öğrenci nesneleri adlandırır, tercihlerini ifade eder ve basit isteklerde bulunur.</p>
       <div className="space-y-2">
         {[
@@ -414,12 +414,12 @@ function EvSlide2() {
 function EvSlide3() {
   return (
     <div className="space-y-4 max-w-2xl">
-      <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
+      <div className="rounded-xl bg-[#fffaf7] dark:bg-brand-orange/8 px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
         <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">VELİ TALİMATI</p>
         <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Aktiviteyi her sabah kahvaltıda uygulayın — aynı saatte yapılan çalışma rutin oluşturur ve öğrenmeyi kolaylaştırır. Öğrenci sözcüğü hatırlayamazsa 3 saniye bekleyin, ardından sözcüğün ilk hecesini verin (&ldquo;pey...&rdquo; gibi). Tam cümle kurabildiğinde &ldquo;Bak, ne güzel söyledin, peynir istediğini anlattın!&rdquo; gibi süreç odaklı geri bildirim verin.</p>
       </div>
-      <div className="border-t border-[rgba(2,52,53,0.08)]" />
-      <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
+      <div className="border-t border-[rgba(2,52,53,0.08)] dark:border-border/60" />
+      <div className="rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
         <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">UZMAN NOTU</p>
         <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veli gözlem formunu bir sonraki seansta getirsin. Öğrencinin spontan kullandığı sözcükler ile modelleme sonrası tekrar ettiği sözcükleri ayrı not etmesi hedef güncellemesinde çok işe yarar.</p>
       </div>
@@ -458,7 +458,7 @@ function SesSlide1() {
         <MockDropdown label="Seviye" value="Kolay" />
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
+        <div className="flex-1 rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(2,52,53,0.1)] dark:border-border/70 p-4">
           <p className="text-xs md:text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Seans hedefleri</p>
           <div className="space-y-2.5">
             {[
@@ -467,8 +467,8 @@ function SesSlide1() {
               { label: "Sözcük düzeyinde üretim", active: false },
             ].map((g) => (
               <div key={g.label} className="flex items-center gap-2.5">
-                <span className={cn("shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[11px] md:text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]/40")}>✓</span>
-                <span className={cn("text-xs", g.active ? "text-[#023435]" : "text-[rgba(2,52,53,0.4)]")}>{g.label}</span>
+                <span className={cn("shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[11px] md:text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]/40 dark:text-muted-foreground/75")}>✓</span>
+                <span className={cn("text-xs", g.active ? "text-[#023435] dark:text-foreground" : "text-[rgba(2,52,53,0.4)]")}>{g.label}</span>
               </div>
             ))}
           </div>
@@ -489,7 +489,7 @@ function SesSlide2() {
         <CarouselTag color="green">Çiftlik teması</CarouselTag>
         <CarouselTag color="yellow">5-8 yaş · Kolay</CarouselTag>
       </div>
-      <h3 className="text-lg font-bold text-[#023435]">Çiftlikte /ş/ Avı — Ses Bulma Oyunu</h3>
+      <h3 className="text-lg font-bold text-[#023435] dark:text-foreground">Çiftlikte /ş/ Avı — Ses Bulma Oyunu</h3>
       <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Çiftlik sahnesindeki nesneler arasında /ş/ sesi içerenleri bulma oyunu. Öğrenci resmi inceler, /ş/ sesli nesneleri işaretler ve her birini sesli olarak adlandırır.</p>
       <div className="space-y-2">
         {[
@@ -510,12 +510,12 @@ function SesSlide2() {
 function SesSlide3() {
   return (
     <div className="space-y-4 max-w-2xl">
-      <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
+      <div className="rounded-xl bg-[#fffaf7] dark:bg-brand-orange/8 px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
         <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
         <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Ses avı aktivitesinde öğrencinin kendi keşfetmesi kritiktir — cevabı söylemeyin, ipuçları verin. Yanlış cevaplarda &ldquo;Dinle: masa... /ş/ sesi var mı? Bir daha deneyelim&rdquo; gibi yönlendirin. Oyun bittiğinde bulunan nesnelerle kısa bir hikâye kurdurmak genellemeyi güçlendirir.</p>
       </div>
-      <div className="border-t border-[rgba(2,52,53,0.08)]" />
-      <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
+      <div className="border-t border-[rgba(2,52,53,0.08)] dark:border-border/60" />
+      <div className="rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
         <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME</p>
         <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veliden evde &ldquo;ses dedektifi&rdquo; oyunu oynamasını isteyin: çocuk evdeki nesnelerde /ş/ sesini arar. Banyoda şampuan, şişe; mutfakta kaşık, şeker gibi. Günlük 5 dakika doğal ortamda ses farkındalığı çalışması seans verimliliğini artırır.</p>
       </div>
@@ -554,7 +554,7 @@ function HedefSlide1() {
         <MockDropdown label="Ölçüm birimi" value="% doğru yanıt (10 deneme üzerinden)" />
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex-1 rounded-xl bg-[#f0f7f7] border border-[rgba(2,52,53,0.1)] p-4">
+        <div className="flex-1 rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(2,52,53,0.1)] dark:border-border/70 p-4">
           <p className="text-xs md:text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Başlangıç kriterleri</p>
           <div className="space-y-1.5">
             {["Başlangıç: %30 doğru yanıt","Kısa dönem hedef: %60","Uzun dönem hedef: %80"].map((d, i) => (
@@ -586,16 +586,16 @@ function HedefSlide2() {
         <CarouselTag color="orange">Hedef 2.2.3</CarouselTag>
         <CarouselTag color="green">2. Dönem</CarouselTag>
       </div>
-      <h3 className="text-lg font-bold text-[#023435]">İlerleme Tablosu — Sözcük Dağarcığı</h3>
-      <div className="rounded-xl border border-[rgba(2,52,53,0.1)] overflow-hidden">
-        <div className="grid grid-cols-3 bg-[#f0f7f7] px-4 py-2 text-xs md:text-[11px] font-bold uppercase tracking-wide text-[rgba(2,52,53,0.45)]">
+      <h3 className="text-lg font-bold text-[#023435] dark:text-foreground">İlerleme Tablosu — Sözcük Dağarcığı</h3>
+      <div className="rounded-xl border border-[rgba(2,52,53,0.1)] dark:border-border/70 overflow-hidden">
+        <div className="grid grid-cols-3 bg-[#f0f7f7] dark:bg-card/40 px-4 py-2 text-xs md:text-[11px] font-bold uppercase tracking-wide text-[rgba(2,52,53,0.45)]">
           <span>Tarih</span><span>Doğru %</span><span>Not</span>
         </div>
         {rows.map((r) => (
-          <div key={r.tarih} className="grid grid-cols-3 px-4 py-2.5 text-xs text-[rgba(2,52,53,0.7)] border-t border-[rgba(2,52,53,0.06)] items-center">
-            <span className="font-medium text-[#023435]">{r.tarih}</span>
+          <div key={r.tarih} className="grid grid-cols-3 px-4 py-2.5 text-xs text-[rgba(2,52,53,0.7)] border-t border-[rgba(2,52,53,0.06)] dark:border-border/50 items-center">
+            <span className="font-medium text-[#023435] dark:text-foreground">{r.tarih}</span>
             <div className="flex items-center gap-2">
-              <div className="h-1.5 flex-1 rounded-full bg-[rgba(2,52,53,0.08)]">
+              <div className="h-1.5 flex-1 rounded-full bg-[rgba(2,52,53,0.08)] dark:bg-card/60">
                 <div className="h-full rounded-full bg-[#FE703A]" style={{ width: `${r.oran}%` }} />
               </div>
               <span className="font-semibold text-[#FE703A] shrink-0">{r.oran}%</span>
@@ -611,12 +611,12 @@ function HedefSlide2() {
 function HedefSlide3() {
   return (
     <div className="space-y-4 max-w-2xl">
-      <div className="rounded-xl bg-[#fffaf7] px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
+      <div className="rounded-xl bg-[#fffaf7] dark:bg-brand-orange/8 px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
         <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">DÖNEM ANALİZİ</p>
         <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Öğrenci 4 hafta içinde %30&rsquo;dan %65&rsquo;e ilerledi — haftalık ortalama %8.75 artış. Kısa dönem hedef olan %60 aşıldı. Mutfak temalı doğal ortam çalışmaları en yüksek ilerlemeyi sağladı (tek seansta %15 artış). Uzun dönem hedef %80 için tahmini 2 seans daha gerekli.</p>
       </div>
-      <div className="border-t border-[rgba(2,52,53,0.08)]" />
-      <div className="rounded-xl bg-[#f0f7f7] border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
+      <div className="border-t border-[rgba(2,52,53,0.08)] dark:border-border/60" />
+      <div className="rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
         <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">SONRAKİ ADIM ÖNERİSİ</p>
         <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Sözcük dağarcığını cümle düzeyine taşımak için hedef 2.2.4&rsquo;e (basit cümleler kurar) geçiş planlanabilir. Ev ödevi frekansını haftada 3&rsquo;ten 5&rsquo;e çıkarmak ve doğal ortam çalışmalarını sürdürmek ilerleme hızını koruyacaktır.</p>
       </div>
@@ -770,7 +770,7 @@ function HowItWorksCarousel() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25 }}
-              className="text-2xl font-bold text-[#023435] mb-2"
+              className="text-2xl font-bold text-[#023435] dark:text-foreground mb-2"
             >
               {currentTool.headline}
             </motion.h2>
@@ -799,7 +799,7 @@ function HowItWorksCarousel() {
           {FEATURE_PILLS.map((pill) => (
             <span
               key={pill.label}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(2,52,53,0.12)] bg-white px-3 py-1.5 text-xs font-medium text-[#023435]/70"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(2,52,53,0.12)] dark:border-border/80 bg-white px-3 py-1.5 text-xs font-medium text-[#023435]/70 dark:text-foreground/80"
             >
               <span className="text-[#FE703A]">{pill.icon}</span>
               {pill.label}
@@ -822,7 +822,7 @@ function HowItWorksCarousel() {
                 "flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
                 i === activeTool
                   ? "bg-[#023435] text-white shadow-sm"
-                  : "border border-[rgba(2,52,53,0.12)] bg-white text-[#023435]/60 hover:bg-white hover:text-[#023435] hover:border-[rgba(2,52,53,0.25)]"
+                  : "border border-[rgba(2,52,53,0.12)] dark:border-border/80 bg-white text-[#023435]/60 dark:text-muted-foreground hover:bg-white hover:text-[#023435] dark:hover:text-foreground dark:text-foreground hover:border-[rgba(2,52,53,0.25)] dark:border-border"
               )}
             >
               <span>{tool.icon}</span>
@@ -841,7 +841,7 @@ function HowItWorksCarousel() {
                 className={cn(
                   "flex items-start gap-3 rounded-xl px-3 py-3 text-left transition-all duration-300",
                   i === active
-                    ? "bg-white shadow-sm border border-[rgba(2,52,53,0.1)]"
+                    ? "bg-white shadow-sm border border-[rgba(2,52,53,0.1)] dark:border-border/70"
                     : "hover:bg-white/60"
                 )}
               >
@@ -849,12 +849,12 @@ function HowItWorksCarousel() {
                   "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-colors duration-300",
                   i === active
                     ? "bg-[#FE703A] text-white"
-                    : "bg-[rgba(2,52,53,0.08)] text-[#023435]/40"
+                    : "bg-[rgba(2,52,53,0.08)] dark:bg-card/60 text-[#023435]/40 dark:text-muted-foreground/75"
                 )}>{i + 1}</span>
                 <div>
                   <p className={cn(
                     "text-xs font-semibold transition-colors duration-300",
-                    i === active ? "text-[#023435]" : "text-[#023435]/50"
+                    i === active ? "text-[#023435] dark:text-foreground" : "text-[#023435]/50 dark:text-muted-foreground"
                   )}>{slide.title}</p>
                   <p className={cn(
                     "text-xs md:text-[11px] mt-0.5 leading-snug transition-colors duration-300",
@@ -867,12 +867,12 @@ function HowItWorksCarousel() {
 
           {/* Right — Slide panel */}
           <div
-            className="relative flex-1 bg-white rounded-2xl border border-[rgba(2,52,53,0.1)] shadow-sm overflow-hidden"
+            className="relative flex-1 bg-white rounded-2xl border border-[rgba(2,52,53,0.1)] dark:border-border/70 shadow-sm overflow-hidden"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
           >
             {/* Progress bar */}
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[rgba(2,52,53,0.06)] z-10">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[rgba(2,52,53,0.06)] dark:bg-card/50 z-10">
               <motion.div
                 className="h-full bg-[#FE703A]"
                 animate={{ width: `${((active + 1) / count) * 100}%` }}
@@ -900,14 +900,14 @@ function HowItWorksCarousel() {
             {/* Bottom bar — mobile nav */}
             <div className="flex items-end justify-between gap-4 px-7 pb-6 md:px-10 md:pb-8">
               <div className="md:hidden">
-                <p className="text-sm font-semibold text-[#023435]">{slides[active].title}</p>
+                <p className="text-sm font-semibold text-[#023435] dark:text-foreground">{slides[active].title}</p>
                 <p className="text-xs text-[rgba(2,52,53,0.45)] mt-0.5">{slides[active].desc}</p>
               </div>
               <div className="hidden md:block" />
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => { setDirection(-1); setActive((a) => (a - 1 + count) % count); }}
-                  className="h-10 w-10 md:h-8 md:w-8 shrink-0 rounded-[9px] bg-white border border-[rgba(2,52,53,0.2)] flex items-center justify-center text-[#023435]/50 hover:bg-[#023435] hover:text-white hover:border-[#023435] transition-colors"
+                  className="h-10 w-10 md:h-8 md:w-8 shrink-0 rounded-[9px] bg-white border border-[rgba(2,52,53,0.2)] dark:border-border flex items-center justify-center text-[#023435]/50 dark:text-muted-foreground hover:bg-[#023435] hover:text-white hover:border-[#023435] transition-colors"
                   aria-label="Önceki"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -920,14 +920,14 @@ function HowItWorksCarousel() {
                     onClick={() => goTo(i)}
                     className={cn(
                       "h-2 rounded-full transition-all duration-300",
-                      i === active ? "w-6 bg-[#FE703A]" : "w-2 bg-[rgba(2,52,53,0.2)] hover:bg-[rgba(2,52,53,0.4)]"
+                      i === active ? "w-6 bg-[#FE703A]" : "w-2 bg-[rgba(2,52,53,0.2)] dark:bg-card hover:bg-[rgba(2,52,53,0.4)] dark:bg-card"
                     )}
                     aria-label={`Slayt ${i + 1}`}
                   />
                 ))}
                 <button
                   onClick={() => { setDirection(1); setActive((a) => (a + 1) % count); }}
-                  className="h-10 w-10 md:h-8 md:w-8 shrink-0 rounded-[9px] bg-white border border-[rgba(2,52,53,0.2)] flex items-center justify-center text-[#023435]/50 hover:bg-[#023435] hover:text-white hover:border-[#023435] transition-colors"
+                  className="h-10 w-10 md:h-8 md:w-8 shrink-0 rounded-[9px] bg-white border border-[rgba(2,52,53,0.2)] dark:border-border flex items-center justify-center text-[#023435]/50 dark:text-muted-foreground hover:bg-[#023435] hover:text-white hover:border-[#023435] transition-colors"
                   aria-label="Sonraki"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1276,7 +1276,7 @@ export default function LandingPage() {
       <section id="pricing" className="bg-zinc-50">
         <Pricing plans={PLANS} creditNote={CREDIT_NOTE} />
         <div className="flex flex-col items-center gap-2 mt-8 pb-10">
-          <p className="text-sm text-[#023435]/50">
+          <p className="text-sm text-[#023435]/50 dark:text-muted-foreground">
             Tüm ödemeler iyzico güvencesiyle gerçekleştirilir.
           </p>
           <Image

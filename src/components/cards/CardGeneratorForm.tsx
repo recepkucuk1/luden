@@ -224,9 +224,9 @@ export function CardGeneratorForm({
       {/* Seçili Öğrenci */}
       {studentId && studentName && (
         <div className="flex items-center gap-2 rounded-xl border border-[#023435]/20 bg-[#023435]/5 px-3 py-2">
-          <span className="text-[#023435] text-sm">👤</span>
-          <span className="text-sm text-[#023435] font-medium">{studentName}</span>
-          <span className="text-xs text-[#023435]/60 ml-auto">için kart üretiliyor</span>
+          <span className="text-[#023435] dark:text-foreground text-sm">👤</span>
+          <span className="text-sm text-[#023435] dark:text-foreground font-medium">{studentName}</span>
+          <span className="text-xs text-[#023435]/60 dark:text-muted-foreground ml-auto">için kart üretiliyor</span>
         </div>
       )}
 
@@ -275,7 +275,7 @@ export function CardGeneratorForm({
                 className={cn(
                   "rounded-lg border-2 py-2 text-sm font-medium transition-all",
                   watchedAgeGroup === age.value
-                    ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                    ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                     : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
                 )}
               >
@@ -400,8 +400,8 @@ export function CardGeneratorForm({
         {/* Seçim özeti */}
         {(selectedSubGoalIds.length > 0 || selectedMainGoalId) && (
           <div className="flex items-start gap-2 rounded-xl border border-[#023435]/20 bg-[#023435]/5 px-3 py-2">
-            <span className="text-[#023435] text-xs mt-0.5">🎯</span>
-            <p className="text-xs text-[#023435] leading-relaxed">
+            <span className="text-[#023435] dark:text-foreground text-xs mt-0.5">🎯</span>
+            <p className="text-xs text-[#023435] dark:text-foreground leading-relaxed">
               {selectedSubGoalIds.length > 0
                 ? `${selectedSubGoalIds.length} alt hedef seçildi`
                 : mainGoals.find((g) => g.id === selectedMainGoalId)?.title}

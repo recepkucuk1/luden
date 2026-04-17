@@ -449,7 +449,7 @@ export default function DashboardPage() {
               </Link>
               <Link
                 href="/students"
-                className="flex items-center gap-2 rounded-lg border border-gray-100 dark:border-gray-800 px-3 py-2.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:border-[#023435]/30 hover:text-[#023435] dark:hover:text-emerald-400 transition-colors"
+                className="flex items-center gap-2 rounded-lg border border-gray-100 dark:border-gray-800 px-3 py-2.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:border-[#023435]/30 hover:text-[#023435] dark:hover:text-foreground dark:text-foreground dark:hover:text-emerald-400 transition-colors"
               >
                 <Users className="h-3.5 w-3.5" />
                 Öğrenciler

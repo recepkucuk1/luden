@@ -63,7 +63,7 @@ function focusBadgeClass(area: string) {
   for (const [key, cls] of Object.entries(FOCUS_COLORS)) {
     if (area.toLowerCase().includes(key.toLowerCase())) return cls;
   }
-  return "bg-[#023435]/10 text-[#023435] border-[#023435]/20";
+  return "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20";
 }
 
 function DayCard({ day }: { day: WeeklyPlanDay }) {
@@ -127,7 +127,7 @@ function DayCard({ day }: { day: WeeklyPlanDay }) {
           {day.mainWork.targetGoals && day.mainWork.targetGoals.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-2">
               {day.mainWork.targetGoals.map((g, i) => (
-                <span key={i} className="rounded-full bg-[#023435]/5 border border-[#023435]/10 px-2 py-0.5 text-[10px] text-[#023435]">🎯 {g}</span>
+                <span key={i} className="rounded-full bg-[#023435]/5 border border-[#023435]/10 px-2 py-0.5 text-[10px] text-[#023435] dark:text-foreground">🎯 {g}</span>
               ))}
             </div>
           )}
@@ -166,7 +166,7 @@ export function WeeklyPlanView({ plan }: { plan: WeeklyPlanContent }) {
     <div className="space-y-6">
       {/* Badges */}
       <div className="flex flex-wrap gap-1.5">
-        <span className="rounded-full bg-[#023435]/10 border border-[#023435]/20 px-2.5 py-0.5 text-xs font-medium text-[#023435]">
+        <span className="rounded-full bg-[#023435]/10 border border-[#023435]/20 px-2.5 py-0.5 text-xs font-medium text-[#023435] dark:text-foreground">
           {plan.weekRange}
         </span>
         <span className="rounded-full bg-zinc-100 border border-zinc-200 px-2.5 py-0.5 text-xs font-medium text-zinc-600">

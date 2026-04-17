@@ -49,13 +49,13 @@ const TOOL_TYPE_OPTIONS: { value: ToolTypeFilter; label: string; href?: string }
 
 const TOOL_TYPE_BADGE: Record<string, string> = {
   LEARNING_CARD:      "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
-  SOCIAL_STORY:       "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
+  SOCIAL_STORY:       "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20",
   ARTICULATION_DRILL: "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20",
   HOMEWORK_MATERIAL:  "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
   SESSION_SUMMARY:    "bg-purple-50 text-purple-700 border-purple-200",
   MATCHING_GAME:      "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
   PHONATION_ACTIVITY:   "bg-green-50 text-green-700 border-green-200",
-  COMMUNICATION_BOARD:  "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
+  COMMUNICATION_BOARD:  "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20",
   WEEKLY_PLAN:          "bg-amber-50 text-amber-700 border-amber-200",
 };
 
@@ -788,7 +788,7 @@ export default function CardsPage() {
                       "rounded-full px-5 py-2 text-xs font-bold transition-all whitespace-nowrap",
                       filterToolType === o.value
                         ? "bg-[#023435] text-white shadow-md shadow-[#023435]/20 dark:bg-emerald-700"
-                        : "bg-transparent text-[#023435]/60 dark:text-zinc-400 hover:text-[#023435] dark:hover:text-zinc-200 hover:bg-white/60 dark:hover:bg-white/10"
+                        : "bg-transparent text-[#023435]/60 dark:text-zinc-400 hover:text-[#023435] dark:hover:text-foreground dark:text-foreground dark:hover:text-zinc-200 hover:bg-white/60 dark:hover:bg-white/10"
                     )}
                   >
                     {o.label}
@@ -867,7 +867,7 @@ export default function CardsPage() {
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Kategori & Zorluk</span>
                     <div className="flex flex-wrap gap-4">
-                      <PillGroup options={CATEGORY_OPTIONS} value={filterCategory} onChange={setFilterCategory} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435]" />
+                      <PillGroup options={CATEGORY_OPTIONS} value={filterCategory} onChange={setFilterCategory} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435] dark:text-foreground" />
                       <div className="w-px bg-[#023435]/10" />
                       <PillGroup options={DIFFICULTY_OPTIONS} value={filterDifficulty} onChange={setFilterDifficulty} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" />
                     </div>
@@ -886,7 +886,7 @@ export default function CardsPage() {
 
               {filterToolType === "social_story" && (
                 <div className="pt-2 space-y-4">
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Durum</span><PillGroup options={SITUATION_OPTIONS} value={filterSituation} onChange={setFilterSituation} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Durum</span><PillGroup options={SITUATION_OPTIONS} value={filterSituation} onChange={setFilterSituation} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435] dark:text-foreground" /></div>
                   <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Ortam</span><PillGroup options={ENVIRONMENT_OPTIONS} value={filterEnvironment} onChange={setFilterEnvironment} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
                   <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest pl-1">Uzunluk</span><PillGroup options={STORY_LENGTH_OPTIONS} value={filterStoryLength} onChange={setFilterStoryLength} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
@@ -901,46 +901,46 @@ export default function CardsPage() {
 
               {filterToolType === "phonation" && (
                 <div className="pt-2 space-y-4">
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Aktivite Türü</span><PillGroup options={PA_ACTIVITY_TYPE_OPTIONS} value={filterPaType} onChange={setFilterPaType} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Hedef Sesler (Çoklu Seçim)</span><MultiPillGroup options={PA_SOUND_OPTIONS} values={filterPaSounds} onChange={setFilterPaSounds} activeClass="border-amber-400 bg-amber-50 text-amber-700" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Zorluk Derecesi</span><PillGroup options={PA_DIFFICULTY_OPTIONS} value={filterPaDifficulty} onChange={setFilterPaDifficulty} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Aktivite Türü</span><PillGroup options={PA_ACTIVITY_TYPE_OPTIONS} value={filterPaType} onChange={setFilterPaType} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Hedef Sesler (Çoklu Seçim)</span><MultiPillGroup options={PA_SOUND_OPTIONS} values={filterPaSounds} onChange={setFilterPaSounds} activeClass="border-amber-400 bg-amber-50 text-amber-700" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Zorluk Derecesi</span><PillGroup options={PA_DIFFICULTY_OPTIONS} value={filterPaDifficulty} onChange={setFilterPaDifficulty} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
               {filterToolType === "matching_game" && (
                 <div className="pt-2 space-y-4">
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Eşleştirme Modeli</span><PillGroup options={MG_MATCH_TYPE_OPTIONS} value={filterMgMatchType} onChange={setFilterMgMatchType} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Zorluk</span><PillGroup options={MG_DIFFICULTY_OPTIONS} value={filterMgDifficulty} onChange={setFilterMgDifficulty} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Eşleştirme Modeli</span><PillGroup options={MG_MATCH_TYPE_OPTIONS} value={filterMgMatchType} onChange={setFilterMgMatchType} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Zorluk</span><PillGroup options={MG_DIFFICULTY_OPTIONS} value={filterMgDifficulty} onChange={setFilterMgDifficulty} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
               {filterToolType === "comm_board" && (
                 <div className="pt-2 space-y-4">
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Pano Konsepti</span><PillGroup options={CB_BOARD_TYPE_OPTIONS} value={filterCbBoardType} onChange={setFilterCbBoardType} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435]" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Düzen</span><PillGroup options={CB_LAYOUT_OPTIONS} value={filterCbLayout} onChange={setFilterCbLayout} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Eleman Sayısı</span><PillGroup options={CB_SYMBOL_COUNT_OPTIONS} value={filterCbSymbolCount} onChange={setFilterCbSymbolCount} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Pano Konsepti</span><PillGroup options={CB_BOARD_TYPE_OPTIONS} value={filterCbBoardType} onChange={setFilterCbBoardType} activeClass="border-[#023435]/40 bg-[#023435]/10 text-[#023435] dark:text-foreground" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Düzen</span><PillGroup options={CB_LAYOUT_OPTIONS} value={filterCbLayout} onChange={setFilterCbLayout} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Eleman Sayısı</span><PillGroup options={CB_SYMBOL_COUNT_OPTIONS} value={filterCbSymbolCount} onChange={setFilterCbSymbolCount} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
               {filterToolType === "weekly_plan" && (
                 <div className="pt-2 space-y-4">
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Yoğunluk</span><PillGroup options={WP_SESSIONS_OPTIONS} value={filterWpSessions} onChange={setFilterWpSessions} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Yoğunluk</span><PillGroup options={WP_SESSIONS_OPTIONS} value={filterWpSessions} onChange={setFilterWpSessions} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
                 </div>
               )}
 
               {filterToolType === "articulation" && (
                 <div className="pt-2 space-y-4">
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Hedef Sesler</span><MultiPillGroup options={SOUND_OPTIONS} values={filterSounds} onChange={setFilterSounds} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Seviye</span><PillGroup options={ARTICULATON_LEVEL_OPTIONS} value={filterLevel} onChange={setFilterLevel} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Tema</span><PillGroup options={THEME_OPTIONS} value={filterTheme} onChange={setFilterTheme} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Hedef Sesler</span><MultiPillGroup options={SOUND_OPTIONS} values={filterSounds} onChange={setFilterSounds} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Seviye</span><PillGroup options={ARTICULATON_LEVEL_OPTIONS} value={filterLevel} onChange={setFilterLevel} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Tema</span><PillGroup options={THEME_OPTIONS} value={filterTheme} onChange={setFilterTheme} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
 
               {filterToolType === "homework" && (
                 <div className="pt-2 space-y-4">
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Odak Alanı</span><PillGroup options={HW_AREA_OPTIONS} value={filterHwArea} onChange={setFilterHwArea} activeClass="border-purple-400 bg-purple-50 text-purple-700" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Materyal Tipi</span><PillGroup options={HW_MATERIAL_OPTIONS} value={filterHwMaterial} onChange={setFilterHwMaterial} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
-                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 uppercase tracking-widest pl-1">Beklenen Süre</span><PillGroup options={HW_DURATION_OPTIONS} value={filterHwDuration} onChange={setFilterHwDuration} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Odak Alanı</span><PillGroup options={HW_AREA_OPTIONS} value={filterHwArea} onChange={setFilterHwArea} activeClass="border-purple-400 bg-purple-50 text-purple-700" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Materyal Tipi</span><PillGroup options={HW_MATERIAL_OPTIONS} value={filterHwMaterial} onChange={setFilterHwMaterial} activeClass="border-[#107996]/40 bg-[#107996]/10 text-[#107996]" /></div>
+                  <div className="flex flex-col gap-1.5"><span className="text-[11px] font-extrabold text-[#023435]/40 dark:text-muted-foreground/75 uppercase tracking-widest pl-1">Beklenen Süre</span><PillGroup options={HW_DURATION_OPTIONS} value={filterHwDuration} onChange={setFilterHwDuration} activeClass="border-[#FE703A]/40 bg-[#FE703A]/10 text-[#FE703A]" /></div>
                 </div>
               )}
             </div>

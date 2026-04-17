@@ -125,7 +125,7 @@ export function CommBoardView({ board }: { board: CommBoardContent }) {
       {/* Badges */}
       <div className="flex flex-wrap gap-1.5">
         {board.boardType && (
-          <span className="rounded-full bg-[#023435]/10 border border-[#023435]/20 px-2.5 py-0.5 text-xs font-medium text-[#023435]">
+          <span className="rounded-full bg-[#023435]/10 border border-[#023435]/20 px-2.5 py-0.5 text-xs font-medium text-[#023435] dark:text-foreground">
             {BOARD_TYPE_LABEL[board.boardType] ?? board.boardType}
           </span>
         )}

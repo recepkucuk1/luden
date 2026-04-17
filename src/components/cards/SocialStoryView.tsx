@@ -23,7 +23,7 @@ const SENTENCE_TYPE_LABEL: Record<string, string> = {
 
 const SENTENCE_TYPE_COLOR: Record<string, string> = {
   descriptive: "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
-  perspective: "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
+  perspective: "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20",
   directive:   "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20",
   affirmative: "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
 };
@@ -31,7 +31,7 @@ const SENTENCE_TYPE_COLOR: Record<string, string> = {
 export function SocialStoryView({ story }: { story: SocialStoryContent }) {
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-bold text-[#023435]">{story.title}</h2>
+      <h2 className="text-lg font-bold text-[#023435] dark:text-foreground">{story.title}</h2>
 
       <div className="space-y-2.5">
         {story.sentences?.map((s, i) => (

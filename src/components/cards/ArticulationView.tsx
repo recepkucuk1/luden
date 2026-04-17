@@ -153,7 +153,7 @@ export function ArticulationView({ drill }: { drill: ArticulationContent }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-bold text-[#023435] mb-3">{drill.title}</h2>
+        <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-3">{drill.title}</h2>
         <div className="flex flex-wrap gap-1.5">
           {sounds.map((s) => (
             <span key={s} className="rounded-full bg-[#107996]/10 border border-[#107996]/20 px-2.5 py-0.5 text-xs font-semibold text-[#107996]">

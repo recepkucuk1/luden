@@ -10,7 +10,7 @@ const DOT = <span className="mr-2 text-[#FE703A]">●</span>;
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-10">
-      <h2 className="text-lg font-bold text-[#023435] mb-4 pb-2 border-b border-[#023435]/10">{title}</h2>
+      <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-4 pb-2 border-b border-[#023435]/10">{title}</h2>
       {children}
     </section>
   );
@@ -19,7 +19,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function SubSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-5">
-      <h3 className="text-base font-semibold text-[#023435] mb-3">{title}</h3>
+      <h3 className="text-base font-semibold text-[#023435] dark:text-foreground mb-3">{title}</h3>
       {children}
     </div>
   );
@@ -50,19 +50,19 @@ export default function PrivacyPage() {
         {/* Başlık */}
         <div className="text-center mb-12">
           <div className="text-2xl font-bold mb-1">
-            <span className="text-[#023435]">Luden</span>
+            <span className="text-[#023435] dark:text-foreground">Luden</span>
             <span className="text-[#FE703A]">Lab</span>
           </div>
-          <h1 className="text-2xl font-bold text-[#023435] mt-4 mb-6">
+          <h1 className="text-2xl font-bold text-[#023435] dark:text-foreground mt-4 mb-6">
             Gizlilik Politikası ve Kişisel Verilerin Korunması
           </h1>
           <div className="inline-block text-left bg-[#023435]/5 rounded-xl px-6 py-4 text-sm text-gray-600 space-y-1">
-            <p><span className="font-medium text-[#023435]">Platform:</span> ludenlab.com</p>
-            <p><span className="font-medium text-[#023435]">İşletme:</span> Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti.</p>
-            <p><span className="font-medium text-[#023435]">E-posta:</span>{" "}
+            <p><span className="font-medium text-[#023435] dark:text-foreground">Platform:</span> ludenlab.com</p>
+            <p><span className="font-medium text-[#023435] dark:text-foreground">İşletme:</span> Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti.</p>
+            <p><span className="font-medium text-[#023435] dark:text-foreground">E-posta:</span>{" "}
               <a href="mailto:info@ludenlab.com" className="text-[#FE703A] hover:underline">info@ludenlab.com</a>
             </p>
-            <p><span className="font-medium text-[#023435]">Son Güncelleme:</span> 04.04.2026</p>
+            <p><span className="font-medium text-[#023435] dark:text-foreground">Son Güncelleme:</span> 04.04.2026</p>
           </div>
         </div>
 
@@ -220,12 +220,12 @@ export default function PrivacyPage() {
         <Section title="10. İletişim">
           <P>Gizlilik politikamız hakkında soru, görüş ve talepleriniz için:</P>
           <div className="bg-[#023435]/5 rounded-xl px-6 py-4 space-y-2 text-gray-600 text-sm">
-            <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435]">E-posta:</span>{" "}
+            <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435] dark:text-foreground">E-posta:</span>{" "}
               <a href="mailto:info@ludenlab.com" className="text-[#FE703A] hover:underline">info@ludenlab.com</a>
             </span></p>
-            <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435]">Kurum:</span>{" "}
+            <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435] dark:text-foreground">Kurum:</span>{" "}
               Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti.</span></p>
-            <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435]">Adres:</span> İzmir, Türkiye</span></p>
+            <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435] dark:text-foreground">Adres:</span> İzmir, Türkiye</span></p>
           </div>
         </Section>
 

@@ -64,7 +64,7 @@ const SENTENCE_TYPE_LABEL: Record<string, string> = {
 
 const SENTENCE_TYPE_COLOR: Record<string, string> = {
   descriptive:  "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
-  perspective:  "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
+  perspective:  "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20",
   directive:    "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20",
   affirmative:  "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
 };
@@ -180,8 +180,8 @@ export default function SocialStoryPage() {
     setStudentId("");
   }
 
-  const inputCls = "w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30";
-  const labelCls = "block text-xs font-bold text-[#023435]/70 mb-1.5 uppercase tracking-wide";
+  const inputCls = "w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30 dark:text-muted-foreground/60";
+  const labelCls = "block text-xs font-bold text-[#023435]/70 dark:text-foreground/80 mb-1.5 uppercase tracking-wide";
 
   return (
     <div
@@ -195,13 +195,13 @@ export default function SocialStoryPage() {
       <div className="mb-5 shrink-0 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/70 px-5 py-4 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
         <Link
           href="/tools"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 hover:text-[#023435] transition-colors"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Araçlara Dön
         </Link>
-        <h1 className="text-xl font-extrabold text-[#023435] tracking-tight">Sosyal Hikaye Üretici</h1>
-        <p className="text-sm text-[#023435]/60 mt-0.5">
+        <h1 className="text-xl font-extrabold text-[#023435] dark:text-foreground tracking-tight">Sosyal Hikaye Üretici</h1>
+        <p className="text-sm text-[#023435]/60 dark:text-muted-foreground mt-0.5">
           Pragmatik dil ve sosyal iletişim becerileri için Carol Gray formatında kişiselleştirilmiş sosyal hikayeler üretin.
         </p>
       </div>
@@ -304,7 +304,7 @@ export default function SocialStoryPage() {
                         className={cn(
                           "rounded-lg border px-3 py-2.5 text-left transition-colors",
                           length === l
-                            ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                            ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                             : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                         )}
                       >
@@ -358,7 +358,7 @@ export default function SocialStoryPage() {
                 {/* Hikaye kartı */}
                 <div className="rounded-2xl border border-white/80 bg-white/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
                   {/* Başlık */}
-                  <h2 className="text-lg font-bold text-[#023435] mb-5">{story.title}</h2>
+                  <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-5">{story.title}</h2>
 
                   {/* Cümleler */}
                   <div className="space-y-2.5">

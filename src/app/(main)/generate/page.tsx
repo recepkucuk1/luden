@@ -114,7 +114,7 @@ function HomeContent() {
               {studentName && (
                 <Link
                   href="/students"
-                  className="text-xs text-[#023435]/50 hover:text-[#023435] underline"
+                  className="text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground underline"
                 >
                   öğrencilere dön
                 </Link>

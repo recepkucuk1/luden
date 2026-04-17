@@ -430,11 +430,11 @@ export default function WeeklyPlanPage() {
       <div className="relative z-10 mx-auto max-w-3xl px-6 py-10">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/tools" className="mb-4 inline-flex items-center gap-1.5 text-sm text-[#023435]/50 hover:text-[#023435] transition-colors">
+          <Link href="/tools" className="mb-4 inline-flex items-center gap-1.5 text-sm text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" /> Araçlara Dön
           </Link>
-          <h1 className="text-2xl font-bold text-[#023435]">Haftalık Çalışma Planı</h1>
-          <p className="mt-1 text-sm text-[#023435]/60">
+          <h1 className="text-2xl font-bold text-[#023435] dark:text-foreground">Haftalık Çalışma Planı</h1>
+          <p className="mt-1 text-sm text-[#023435]/60 dark:text-muted-foreground">
             Öğrenci bazlı, hedef odaklı haftalık ders planları oluşturun.
           </p>
         </div>
@@ -445,11 +445,11 @@ export default function WeeklyPlanPage() {
 
             {/* Student */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">Öğrenci</label>
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Öğrenci</label>
               <select
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
-                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
+                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
               >
                 <option value="">— Öğrenci seçin —</option>
                 {students.map((s) => (
@@ -459,7 +459,7 @@ export default function WeeklyPlanPage() {
               {selectedStudent && (
                 <div className="rounded-xl border border-white/70 bg-white/50 backdrop-blur-sm p-3 space-y-1">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-[#023435]/10 text-[#023435] flex items-center justify-center font-bold text-xs shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-[#023435]/10 text-[#023435] dark:text-foreground flex items-center justify-center font-bold text-xs shrink-0">
                       {selectedStudent.name.charAt(0)}
                     </div>
                     <div>
@@ -482,12 +482,12 @@ export default function WeeklyPlanPage() {
 
             {/* Week */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">Hafta</label>
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Hafta</label>
               <input
                 type="date"
                 value={weekStart}
                 onChange={(e) => setWeekStart(e.target.value)}
-                className="rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20"
+                className="rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20"
               />
               {weekStart && (
                 <p className="text-xs text-zinc-400">{formatWeekRange(weekStart)}</p>
@@ -496,11 +496,11 @@ export default function WeeklyPlanPage() {
 
             {/* Sessions per week */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">Haftalık Ders Sayısı</label>
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Haftalık Ders Sayısı</label>
               <select
                 value={sessions}
                 onChange={(e) => setSessions(Number(e.target.value))}
-                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
+                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
               >
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
                   <option key={n} value={n}>{n} ders</option>
@@ -510,7 +510,7 @@ export default function WeeklyPlanPage() {
 
             {/* Day schedule */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">
                 Günlük Ders Dağılımı
                 <span className="ml-2 text-xs font-normal text-zinc-400">
                   Toplam: {totalAssigned} ders
@@ -529,7 +529,7 @@ export default function WeeklyPlanPage() {
                       >
                         −
                       </button>
-                      <span className="w-6 text-center text-sm font-semibold text-[#023435]">
+                      <span className="w-6 text-center text-sm font-semibold text-[#023435] dark:text-foreground">
                         {daySchedule[day] ?? 0}
                       </span>
                       <button
@@ -550,11 +550,11 @@ export default function WeeklyPlanPage() {
 
             {/* Duration */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">Ders Süresi</label>
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Ders Süresi</label>
               <select
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
+                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
               >
                 {DURATION_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -564,7 +564,7 @@ export default function WeeklyPlanPage() {
 
             {/* Focus areas */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">
                 Odak Alanları
                 {studentCurricula.length > 0 && (
                   <span className="ml-2 text-[10px] font-normal text-[#FE703A]">Öğrencinin modüllerinden</span>
@@ -588,13 +588,13 @@ export default function WeeklyPlanPage() {
                 value={customFocus}
                 onChange={(e) => setCustomFocus(e.target.value)}
                 placeholder="Diğer (serbest metin — isteğe bağlı)"
-                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
+                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
               />
             </div>
 
             {/* Approach */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">Planlama Yaklaşımı</label>
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Planlama Yaklaşımı</label>
               <div className="flex gap-2">
                 {([
                   ["ai",      "AI Önersin",        "Öğrenci profili ve geçmişe göre otomatik"],
@@ -606,7 +606,7 @@ export default function WeeklyPlanPage() {
                     onClick={() => setApproach(v)}
                     className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all text-left ${
                       approach === v
-                        ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                        ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                         : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
                     }`}
                   >
@@ -619,13 +619,13 @@ export default function WeeklyPlanPage() {
 
             {/* Extra note */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70">Ek Not <span className="text-zinc-400 font-normal">(isteğe bağlı)</span></label>
+              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Ek Not <span className="text-zinc-400 font-normal">(isteğe bağlı)</span></label>
               <textarea
                 value={extraNote}
                 onChange={(e) => setExtraNote(e.target.value)}
                 rows={3}
                 placeholder="Bu hafta dikkat edilecek özel durumlar, veli geri bildirimi, geçen haftadan devam eden konular..."
-                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] placeholder:text-zinc-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
+                className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground placeholder:text-zinc-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
               />
             </div>
 

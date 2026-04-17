@@ -29,7 +29,7 @@ const MATERIAL_TYPE_LABEL: Record<string, string> = {
 
 const MATERIAL_TYPE_COLOR: Record<string, string> = {
   exercise:       "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
-  observation:    "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
+  observation:    "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20",
   daily_activity: "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
 };
 
@@ -38,7 +38,7 @@ export function HomeworkView({ hw }: { hw: HomeworkContent }) {
     <div className="space-y-5">
       {/* Başlık + badge'ler */}
       <div>
-        <h2 className="text-lg font-bold text-[#023435] mb-3">{hw.title}</h2>
+        <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-3">{hw.title}</h2>
         <div className="flex flex-wrap gap-1.5">
           <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${MATERIAL_TYPE_COLOR[hw.materialType] ?? "bg-zinc-100 text-zinc-600 border-zinc-200"}`}>
             {MATERIAL_TYPE_LABEL[hw.materialType] ?? hw.materialType}
@@ -123,10 +123,10 @@ export function HomeworkView({ hw }: { hw: HomeworkContent }) {
       {hw.celebration && (
         <div className="rounded-xl border border-[#023435]/20 bg-[#023435]/5 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Star className="h-4 w-4 text-[#023435] shrink-0" />
-            <span className="text-xs font-semibold text-[#023435]">Kutlama Anı</span>
+            <Star className="h-4 w-4 text-[#023435] dark:text-foreground shrink-0" />
+            <span className="text-xs font-semibold text-[#023435] dark:text-foreground">Kutlama Anı</span>
           </div>
-          <p className="text-xs text-[#023435]/80 leading-relaxed">{hw.celebration}</p>
+          <p className="text-xs text-[#023435]/80 dark:text-foreground/90 leading-relaxed">{hw.celebration}</p>
         </div>
       )}
 

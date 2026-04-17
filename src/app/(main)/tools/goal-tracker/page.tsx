@@ -82,8 +82,8 @@ const STATUS_META: Record<string, { label: string; cls: string }> = {
   not_started:   { label: "Başlanmamış",    cls: "bg-zinc-100 text-zinc-500" },
   in_progress:   { label: "Devam Ediyor",   cls: "bg-[#FE703A]/10 text-[#FE703A]" },
   consolidating: { label: "Pekiştiriliyor", cls: "bg-[#F4AE10]/15 text-amber-700" },
-  mastered:      { label: "Kazanıldı",      cls: "bg-[#023435]/10 text-[#023435]" },
-  completed:     { label: "Kazanıldı",      cls: "bg-[#023435]/10 text-[#023435]" },
+  mastered:      { label: "Kazanıldı",      cls: "bg-[#023435]/10 text-[#023435] dark:text-foreground" },
+  completed:     { label: "Kazanıldı",      cls: "bg-[#023435]/10 text-[#023435] dark:text-foreground" },
 };
 
 const TOOL_LABELS: Record<string, string> = {
@@ -382,14 +382,14 @@ export default function GoalTrackerPage() {
 
         {/* Page header */}
         <div className="mb-8">
-          <Link href="/tools" className="inline-flex items-center gap-1.5 text-xs text-[#023435]/50 hover:text-[#023435] mb-4">
+          <Link href="/tools" className="inline-flex items-center gap-1.5 text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground mb-4">
             <ArrowLeft className="h-3.5 w-3.5" />
             Araçlara Dön
           </Link>
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
-              <h1 className="text-2xl font-bold text-[#023435]">Hedef Takip Tablosu</h1>
-              <p className="mt-1 text-sm text-[#023435]/60">
+              <h1 className="text-2xl font-bold text-[#023435] dark:text-foreground">Hedef Takip Tablosu</h1>
+              <p className="mt-1 text-sm text-[#023435]/60 dark:text-muted-foreground">
                 Öğrencilerinizin BEP hedeflerini takip edin, ilerlemeyi görselleştirin.
               </p>
             </div>
@@ -425,11 +425,11 @@ export default function GoalTrackerPage() {
 
         {/* Student selector */}
         <div className="mb-6 rounded-xl border border-white/80 bg-white/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-          <label className="block mb-1.5 text-xs font-bold text-[#023435]/70 uppercase tracking-wide">Öğrenci Seç</label>
+          <label className="block mb-1.5 text-xs font-bold text-[#023435]/70 dark:text-foreground/80 uppercase tracking-wide">Öğrenci Seç</label>
           <select
             value={selectedId}
             onChange={e => setSelectedId(e.target.value)}
-            className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20"
+            className="w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20"
           >
             <option value="">-- Öğrenci seçin --</option>
             {students.map(s => (
@@ -508,7 +508,7 @@ export default function GoalTrackerPage() {
             <div className="rounded-xl border border-white/80 bg-white/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-zinc-600">Genel İlerleme</span>
-                <span className="text-sm font-bold text-[#023435]">%{stats.overallPct}</span>
+                <span className="text-sm font-bold text-[#023435] dark:text-foreground">%{stats.overallPct}</span>
               </div>
               <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-100 flex">
                 {stats.total > 0 && (
@@ -609,7 +609,7 @@ export default function GoalTrackerPage() {
                                         title={progress?.notes ? "Notu görüntüle / düzenle" : "Not ekle"}
                                         className={cn(
                                           "p-1 rounded hover:bg-zinc-100 transition-colors",
-                                          progress?.notes ? "text-[#023435]" : "text-zinc-300"
+                                          progress?.notes ? "text-[#023435] dark:text-foreground" : "text-zinc-300"
                                         )}
                                       >
                                         <StickyNote className="h-3.5 w-3.5" />
@@ -682,7 +682,7 @@ export default function GoalTrackerPage() {
                           <div>
                             <Link
                               href={`/cards/${item.card.id}`}
-                              className="text-xs font-medium text-zinc-700 hover:text-[#023435] hover:underline"
+                              className="text-xs font-medium text-zinc-700 hover:text-[#023435] dark:hover:text-foreground dark:text-foreground hover:underline"
                             >
                               {item.card.title}
                             </Link>

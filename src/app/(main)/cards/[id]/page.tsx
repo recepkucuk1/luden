@@ -41,13 +41,13 @@ interface CardRecord {
 
 const TOOL_TYPE_BADGE: Record<string, { label: string; cls: string }> = {
   LEARNING_CARD:      { label: "Öğrenme Kartı",      cls: "bg-[#107996]/10 text-[#107996] border-[#107996]/20" },
-  SOCIAL_STORY:       { label: "Sosyal Hikaye",       cls: "bg-[#023435]/10 text-[#023435] border-[#023435]/20" },
+  SOCIAL_STORY:       { label: "Sosyal Hikaye",       cls: "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20" },
   ARTICULATION_DRILL: { label: "Artikülasyon",        cls: "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20" },
   HOMEWORK_MATERIAL:  { label: "Ev Ödevi Materyali",  cls: "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30" },
   SESSION_SUMMARY:    { label: "Oturum Özeti",        cls: "bg-purple-50 text-purple-700 border-purple-200" },
   MATCHING_GAME:      { label: "Kelime Eşleştirme",   cls: "bg-[#107996]/10 text-[#107996] border-[#107996]/20" },
   PHONATION_ACTIVITY:  { label: "Sesletim Aktivitesi", cls: "bg-green-50 text-green-700 border-green-200" },
-  COMMUNICATION_BOARD: { label: "İletişim Panosu",     cls: "bg-[#023435]/10 text-[#023435] border-[#023435]/20" },
+  COMMUNICATION_BOARD: { label: "İletişim Panosu",     cls: "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20" },
   WEEKLY_PLAN:         { label: "Haftalık Plan",        cls: "bg-amber-50 text-amber-700 border-amber-200" },
 };
 
@@ -1609,7 +1609,7 @@ export default function CardDetailPage({
                 <button
                   onClick={handleDownloadCardsPDF}
                   disabled={downloading || downloadingCards}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] hover:bg-[#023435]/10 transition-colors disabled:opacity-60"
+                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] dark:text-foreground hover:bg-[#023435]/10 dark:hover:bg-accent/50 transition-colors disabled:opacity-60"
                 >
                   {downloadingCards ? "Hazırlanıyor…" : "PDF — Kesme Kartları"}
                 </button>
@@ -1636,7 +1636,7 @@ export default function CardDetailPage({
                 <button
                   onClick={handleDownloadReportPDF}
                   disabled={downloadingBoardPDF || downloadingReportPDF}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] hover:bg-[#023435]/10 transition-colors disabled:opacity-60"
+                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] dark:text-foreground hover:bg-[#023435]/10 dark:hover:bg-accent/50 transition-colors disabled:opacity-60"
                 >
                   {downloadingReportPDF ? "Hazırlanıyor…" : "PDF — Tam Rapor"}
                 </button>
@@ -1654,7 +1654,7 @@ export default function CardDetailPage({
                 <button
                   onClick={handleDownloadParentPDF}
                   disabled={downloading || downloadingParent}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] hover:bg-[#023435]/10 transition-colors disabled:opacity-60"
+                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] dark:text-foreground hover:bg-[#023435]/10 dark:hover:bg-accent/50 transition-colors disabled:opacity-60"
                 >
                   {downloadingParent ? "Hazırlanıyor…" : "Veli Notu PDF"}
                 </button>

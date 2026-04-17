@@ -12,7 +12,7 @@ export function Markdown({ children }: { children: string }) {
     <ReactMarkdown
       components={{
         h2: ({ children }) => (
-          <h2 className="text-sm font-bold text-[#023435] mt-4 mb-2 first:mt-0">{children}</h2>
+          <h2 className="text-sm font-bold text-[#023435] dark:text-foreground mt-4 mb-2 first:mt-0">{children}</h2>
         ),
         h3: ({ children }) => (
           <h3 className="text-sm font-semibold text-zinc-700 mt-3 mb-1.5">{children}</h3>

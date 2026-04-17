@@ -87,7 +87,7 @@ export function SessionSummaryView({ summary }: { summary: SessionSummaryContent
     <div className="space-y-5">
       {/* Başlık */}
       <div>
-        <h2 className="text-lg font-bold text-[#023435] mb-3 leading-snug">{summary.title}</h2>
+        <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-3 leading-snug">{summary.title}</h2>
 
         {/* Oturum bilgileri badge'leri */}
         <div className="flex flex-wrap gap-1.5">
@@ -200,11 +200,11 @@ export function SessionSummaryView({ summary }: { summary: SessionSummaryContent
         <div className="rounded-xl border-2 border-[#023435]/20 bg-[#023435]/5 p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="h-8 w-8 shrink-0 rounded-full bg-[#023435]/10 flex items-center justify-center">
-              <Home className="h-4 w-4 text-[#023435]" />
+              <Home className="h-4 w-4 text-[#023435] dark:text-foreground" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#023435]">Veliye İletilecek Not</p>
-              <p className="text-[10px] text-[#023435]/60">Bu bölümü veliye iletebilirsiniz</p>
+              <p className="text-sm font-bold text-[#023435] dark:text-foreground">Veliye İletilecek Not</p>
+              <p className="text-[10px] text-[#023435]/60 dark:text-muted-foreground">Bu bölümü veliye iletebilirsiniz</p>
             </div>
           </div>
           <p className="text-sm text-zinc-700 leading-relaxed">{summary.parentNote}</p>

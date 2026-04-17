@@ -52,7 +52,7 @@ const MATERIAL_TYPE_LABEL: Record<string, string> = {
 
 const MATERIAL_TYPE_COLOR: Record<string, string> = {
   exercise:       "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
-  observation:    "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
+  observation:    "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20",
   daily_activity: "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
 };
 
@@ -105,7 +105,7 @@ function HomeworkResult({ hw, forPdf = false }: { hw: HomeworkContent; forPdf?: 
     <div className="space-y-5">
       {/* Başlık + badge'ler */}
       <div>
-        <h2 className="text-lg font-bold text-[#023435] mb-3">{hw.title}</h2>
+        <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-3">{hw.title}</h2>
         <div className="flex flex-wrap gap-1.5">
           <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-semibold", MATERIAL_TYPE_COLOR[hw.materialType] ?? "bg-zinc-100 text-zinc-600 border-zinc-200")}>
             {MATERIAL_TYPE_LABEL[hw.materialType] ?? hw.materialType}
@@ -190,10 +190,10 @@ function HomeworkResult({ hw, forPdf = false }: { hw: HomeworkContent; forPdf?: 
       {hw.celebration && (
         <div className="rounded-xl border border-[#023435]/20 bg-[#023435]/5 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Star className="h-4 w-4 text-[#023435] shrink-0" />
-            <span className="text-xs font-semibold text-[#023435]">Kutlama Anı</span>
+            <Star className="h-4 w-4 text-[#023435] dark:text-foreground shrink-0" />
+            <span className="text-xs font-semibold text-[#023435] dark:text-foreground">Kutlama Anı</span>
           </div>
-          <p className="text-xs text-[#023435]/80 leading-relaxed">{hw.celebration}</p>
+          <p className="text-xs text-[#023435]/80 dark:text-foreground/90 leading-relaxed">{hw.celebration}</p>
         </div>
       )}
 
@@ -480,8 +480,8 @@ export default function HomeworkPage() {
     }
   }
 
-  const inputCls = "w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30";
-  const labelCls = "block text-xs font-bold text-[#023435]/70 mb-1.5 uppercase tracking-wide";
+  const inputCls = "w-full rounded-xl border border-white/80 bg-white/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30 dark:text-muted-foreground/60";
+  const labelCls = "block text-xs font-bold text-[#023435]/70 dark:text-foreground/80 mb-1.5 uppercase tracking-wide";
 
   return (
     <div
@@ -495,13 +495,13 @@ export default function HomeworkPage() {
       <div className="mb-5 shrink-0 bg-white/50 backdrop-blur-xl rounded-2xl border border-white/70 px-5 py-4 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
         <Link
           href="/tools"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 hover:text-[#023435] transition-colors"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Araçlara Dön
         </Link>
-        <h1 className="text-xl font-extrabold tracking-tight text-[#023435]">Ev Ödevi Materyali Üretici</h1>
-        <p className="text-sm text-[#023435]/60 mt-0.5">
+        <h1 className="text-xl font-extrabold tracking-tight text-[#023435] dark:text-foreground">Ev Ödevi Materyali Üretici</h1>
+        <p className="text-sm text-[#023435]/60 dark:text-muted-foreground mt-0.5">
           Velilerin evde uygulayabileceği, uzman yönlendirmeli çalışma materyalleri üretin.
         </p>
       </div>
@@ -590,7 +590,7 @@ export default function HomeworkPage() {
                       className={cn(
                         "rounded-lg border px-3 py-2.5 text-center transition-colors",
                         duration === d
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                           : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                       )}
                     >
@@ -615,7 +615,7 @@ export default function HomeworkPage() {
                       className={cn(
                         "rounded-lg border px-3 py-2.5 text-left transition-colors",
                         parentLevel === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                           : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                       )}
                     >
@@ -638,7 +638,7 @@ export default function HomeworkPage() {
                       className={cn(
                         "w-full rounded-lg border px-3 py-2.5 text-left transition-colors",
                         materialType === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                           : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                       )}
                     >

@@ -388,7 +388,7 @@ export default function ProfilePage() {
           <div className="text-center">
             <h1 className="text-xl font-bold text-zinc-900">{displayName}</h1>
             {specialtyLabel && (
-              <span className="inline-block mt-1 rounded-full bg-[#023435]/10 px-3 py-0.5 text-xs font-medium text-[#023435]">
+              <span className="inline-block mt-1 rounded-full bg-[#023435]/10 px-3 py-0.5 text-xs font-medium text-[#023435] dark:text-foreground">
                 {specialtyLabel}
               </span>
             )}
@@ -491,7 +491,7 @@ export default function ProfilePage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
             <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
               <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Bu Ay</p>
-              <p className="text-2xl font-bold text-[#023435] mt-1">{thisMonthCount}</p>
+              <p className="text-2xl font-bold text-[#023435] dark:text-foreground mt-1">{thisMonthCount}</p>
               <div className="flex items-center gap-1 mt-1">
                 {monthDiff > 0
                   ? <><TrendingUp className="h-3 w-3 text-green-500" /><span className="text-[10px] text-green-600">+{monthDiff} geçen aya göre</span></>

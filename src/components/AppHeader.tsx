@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -93,6 +94,14 @@ export function AppHeader() {
 
           {/* Sağ: Kullanıcı dropdown + hamburger */}
           <div className="flex items-center gap-2">
+            <ThemeToggle
+              variant="segmented"
+              className="hidden sm:inline-flex bg-white/10 border-white/20 [&_button]:text-white/70 [&_button:hover]:text-white [&_button[aria-checked=true]]:bg-white/20 [&_button[aria-checked=true]]:text-white"
+            />
+            <ThemeToggle
+              variant="compact"
+              className="sm:hidden text-white/70 hover:text-white hover:bg-white/10"
+            />
             {session?.user && (
               <div className="relative hidden sm:block" ref={dropdownRef}>
                 <button
@@ -120,7 +129,7 @@ export function AppHeader() {
                       <Link
                         href="/admin/users"
                         onClick={() => setOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm text-[#023435] font-medium hover:bg-[#023435]/5 transition-colors"
+                        className="flex items-center px-4 py-2 text-sm text-[#023435] dark:text-foreground font-medium hover:bg-[#023435]/5 dark:hover:bg-accent/30 transition-colors"
                       >
                         Admin Panel
                       </Link>

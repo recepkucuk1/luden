@@ -320,7 +320,7 @@ export function PhonationView({ activity }: { activity: PhonationActivityContent
     <div className="space-y-5">
       {/* Başlık + badge'ler */}
       <div>
-        <h2 className="text-lg font-bold text-[#023435] mb-3 leading-snug">{activity.title}</h2>
+        <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-3 leading-snug">{activity.title}</h2>
         <div className="flex flex-wrap gap-1.5">
           <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-semibold", ACTIVITY_TYPE_COLOR[activity.activityType] ?? "bg-zinc-100 text-zinc-600 border-zinc-200")}>
             {ACTIVITY_TYPE_LABEL[activity.activityType] ?? activity.activityType}

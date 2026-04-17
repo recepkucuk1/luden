@@ -75,7 +75,7 @@ const HOUR_HEIGHT = 48;
 
 const STATUS_PILL: Record<LessonStatus, string> = {
   PLANNED:   "bg-[rgba(16,121,150,0.12)] text-[#107996] dark:text-[#90DDF0] border-[#107996]/25 dark:border-[#90DDF0]/25",
-  COMPLETED: "bg-[rgba(2,52,53,0.1)] text-[#023435] dark:text-emerald-400 border-[rgba(2,52,53,0.2)] dark:border-emerald-400/20",
+  COMPLETED: "bg-[rgba(2,52,53,0.1)] dark:bg-card/70 text-[#023435] dark:text-emerald-400 border-[rgba(2,52,53,0.2)] dark:border-emerald-400/20",
   CANCELLED: "bg-[rgba(105,33,55,0.1)] text-[#692137] dark:text-red-400 border-[rgba(105,33,55,0.2)] dark:border-red-400/20",
 };
 const STATUS_LABEL: Record<LessonStatus, string> = {
@@ -182,7 +182,7 @@ function TimeSelect({ value, onChange, inputCls }: {
       >
         {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
       </select>
-      <span className="text-[#023435]/50 font-semibold select-none">:</span>
+      <span className="text-[#023435]/50 dark:text-muted-foreground font-semibold select-none">:</span>
       <select
         value={mm ?? "00"}
         onChange={(e) => onChange(`${hh ?? "09"}:${e.target.value}`)}
@@ -267,8 +267,8 @@ function LessonModal({
     }
   }
 
-  const inputCls = "w-full rounded-xl border border-[rgba(2,52,53,0.15)] bg-[#f8fafa] px-3 py-2 text-sm text-[#023435] placeholder-[#023435]/40 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/40";
-  const labelCls = "mb-1.5 block text-xs font-medium text-[#023435]/60";
+  const inputCls = "w-full rounded-xl border border-[rgba(2,52,53,0.15)] dark:border-border bg-[#f8fafa] dark:bg-muted/20 px-3 py-2 text-sm text-[#023435] dark:text-foreground placeholder-[#023435]/40 dark:placeholder-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/40";
+  const labelCls = "mb-1.5 block text-xs font-medium text-[#023435]/60 dark:text-muted-foreground";
 
   return (
     <ModalPortal>
@@ -278,12 +278,12 @@ function LessonModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl shadow-2xl bg-white border border-[rgba(2,52,53,0.12)]"
+        className="w-full max-w-md rounded-2xl shadow-2xl bg-white border border-[rgba(2,52,53,0.12)] dark:border-border/80"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.1)] px-5 py-4">
-          <h2 className="text-sm font-semibold text-[#023435]">{isEdit ? "Dersi Düzenle" : "Yeni Ders Ekle"}</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-[#023435]/40 hover:bg-[#023435]/8 hover:text-[#023435]/80 transition-colors">
+        <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.1)] dark:border-border/70 px-5 py-4">
+          <h2 className="text-sm font-semibold text-[#023435] dark:text-foreground">{isEdit ? "Dersi Düzenle" : "Yeni Ders Ekle"}</h2>
+          <button onClick={onClose} className="rounded-lg p-1 text-[#023435]/40 dark:text-muted-foreground/75 hover:bg-[#023435]/8 dark:hover:bg-accent/40 hover:text-[#023435]/80 dark:hover:text-foreground dark:text-foreground/90 transition-colors">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -307,15 +307,15 @@ function LessonModal({
             <div className="relative mt-1">
               <div className="flex items-center gap-2">
                 <input value={dayStr} onChange={(e) => setDayStr(e.target.value)} placeholder="GG" className={cn(inputCls, "w-16 text-center")} maxLength={2} />
-                <span className="text-[#023435]/30 hidden sm:inline">/</span>
+                <span className="text-[#023435]/30 dark:text-muted-foreground/60 hidden sm:inline">/</span>
                 <input value={monthStr} onChange={(e) => setMonthStr(e.target.value)} placeholder="AA" className={cn(inputCls, "w-16 text-center")} maxLength={2} />
-                <span className="text-[#023435]/30 hidden sm:inline">/</span>
+                <span className="text-[#023435]/30 dark:text-muted-foreground/60 hidden sm:inline">/</span>
                 <input value={yearStr} onChange={(e) => setYearStr(e.target.value)} placeholder="YYYY" className={cn(inputCls, "w-20 text-center")} maxLength={4} />
                 
                 <button
                   type="button"
                   onClick={() => setShowCalendar(!showCalendar)}
-                  className="ml-auto w-11 h-11 flex items-center justify-center rounded-xl bg-[rgba(2,52,53,0.04)] hover:bg-[#FE703A]/10 text-[#023435]/60 hover:text-[#FE703A] transition-colors border border-transparent shadow-[0_2px_4px_rgba(2,52,53,0.02)]"
+                  className="ml-auto w-11 h-11 flex items-center justify-center rounded-xl bg-[rgba(2,52,53,0.04)] dark:bg-card/40 hover:bg-[#FE703A]/10 text-[#023435]/60 dark:text-muted-foreground hover:text-[#FE703A] transition-colors border border-transparent shadow-[0_2px_4px_rgba(2,52,53,0.02)]"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -324,7 +324,7 @@ function LessonModal({
               </div>
               
               {showCalendar && (
-                <div className="absolute top-[52px] left-0 right-0 z-50 bg-white shadow-[0_8px_32px_rgba(2,52,53,0.12)] rounded-3xl border border-[rgba(2,52,53,0.08)] overflow-hidden">
+                <div className="absolute top-[52px] left-0 right-0 z-50 bg-white shadow-[0_8px_32px_rgba(2,52,53,0.12)] rounded-3xl border border-[rgba(2,52,53,0.08)] dark:border-border/60 overflow-hidden">
                   <GlassCalendar
                     selectedDate={(() => {
                       const d = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr));
@@ -352,7 +352,7 @@ function LessonModal({
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] text-[#023435]/40 font-medium">Süre:</span>
+            <span className="text-[10px] text-[#023435]/40 dark:text-muted-foreground/75 font-medium">Süre:</span>
             {[30, 40, 45, 60].map((m) => {
               const st = timeToMinutes(startTime);
               const end = st + m;
@@ -367,7 +367,7 @@ function LessonModal({
                     "rounded-lg px-2.5 py-1 text-[11px] font-semibold border transition-colors",
                     isActive
                       ? "bg-[#FE703A] text-white border-[#FE703A]"
-                      : "border-[rgba(2,52,53,0.15)] text-[#023435]/50 hover:border-[#FE703A]/50"
+                      : "border-[rgba(2,52,53,0.15)] dark:border-border text-[#023435]/50 dark:text-muted-foreground hover:border-[#FE703A]/50"
                   )}
                 >
                   {m}dk
@@ -378,7 +378,7 @@ function LessonModal({
           <div>
             <label className="flex items-center gap-2.5 cursor-pointer">
               <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} className="h-4 w-4 rounded accent-[#FE703A]" />
-              <span className="text-sm font-medium text-[#023435]/70">Haftalık tekrarlayan ders</span>
+              <span className="text-sm font-medium text-[#023435]/70 dark:text-foreground/80">Haftalık tekrarlayan ders</span>
             </label>
             {isRecurring && (
               <div className="mt-2.5 flex gap-1.5 flex-wrap">
@@ -391,7 +391,7 @@ function LessonModal({
                       "rounded-lg px-3 py-1.5 text-xs font-semibold border transition-colors",
                       recurringDay === d.value
                         ? "bg-[#FE703A] text-white border-[#FE703A]"
-                        : "border-[rgba(2,52,53,0.2)] text-[#023435]/50 hover:border-[#FE703A]/50 hover:text-[#023435]/80"
+                        : "border-[rgba(2,52,53,0.2)] dark:border-border text-[#023435]/50 dark:text-muted-foreground hover:border-[#FE703A]/50 hover:text-[#023435]/80 dark:hover:text-foreground dark:text-foreground/90"
                     )}
                   >
                     {d.label}
@@ -401,13 +401,13 @@ function LessonModal({
             )}
           </div>
           <div>
-            <label className={labelCls}>Not <span className="text-[#023435]/30">(isteğe bağlı)</span></label>
+            <label className={labelCls}>Not <span className="text-[#023435]/30 dark:text-muted-foreground/60">(isteğe bağlı)</span></label>
             <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Ders notu..." className={cn(inputCls, "resize-none")} />
           </div>
         </div>
 
-        <div className="border-t border-[rgba(2,52,53,0.1)] px-5 py-4 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl border border-[rgba(2,52,53,0.15)] px-4 py-2 text-sm text-[#023435]/60 hover:bg-[#023435]/5 transition-colors">İptal</button>
+        <div className="border-t border-[rgba(2,52,53,0.1)] dark:border-border/70 px-5 py-4 flex justify-end gap-2">
+          <button onClick={onClose} className="rounded-xl border border-[rgba(2,52,53,0.15)] dark:border-border px-4 py-2 text-sm text-[#023435]/60 dark:text-muted-foreground hover:bg-[#023435]/5 dark:hover:bg-accent/30 transition-colors">İptal</button>
           <button onClick={handleSave} disabled={saving} className="rounded-xl bg-[#FE703A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-50 transition-colors">
             {saving ? "Kaydediliyor..." : "Kaydet"}
           </button>
@@ -515,7 +515,7 @@ function LessonDetailModal({
                 <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-[#FE703A]/80">↺ Haftalık tekrarlayan</span>
               )}
             </div>
-            <button onClick={onClose} className="shrink-0 rounded-lg p-1 text-[#023435]/30 dark:text-zinc-500 hover:bg-[#023435]/8 dark:hover:bg-white/10 hover:text-[#023435]/70 dark:hover:text-zinc-300 transition-colors">
+            <button onClick={onClose} className="shrink-0 rounded-lg p-1 text-[#023435]/30 dark:text-zinc-500 hover:bg-[#023435]/8 dark:hover:bg-white/10 hover:text-[#023435]/70 dark:hover:text-foreground/90 dark:text-foreground/80 dark:hover:text-zinc-300 transition-colors">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -554,7 +554,7 @@ function LessonDetailModal({
             <div className="flex gap-2">
               {lesson.status !== "COMPLETED" && (
                 <button onClick={() => changeStatus("COMPLETED")} disabled={saving}
-                  className="flex-1 rounded-xl border border-[rgba(2,52,53,0.25)] dark:border-white/20 bg-[rgba(2,52,53,0.08)] dark:bg-white/5 py-2 text-xs font-semibold text-[#023435] dark:text-zinc-300 hover:bg-[rgba(2,52,53,0.15)] dark:hover:bg-white/10 disabled:opacity-50 transition-colors">
+                  className="flex-1 rounded-xl border border-[rgba(2,52,53,0.25)] dark:border-white/20 bg-[rgba(2,52,53,0.08)] dark:bg-white/5 py-2 text-xs font-semibold text-[#023435] dark:text-zinc-300 hover:bg-[rgba(2,52,53,0.15)] dark:bg-card/80 dark:hover:bg-white/10 disabled:opacity-50 transition-colors">
                   ✓ Tamamlandı
                 </button>
               )}
@@ -583,7 +583,7 @@ function LessonDetailModal({
                 <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3}
                   className="w-full resize-none rounded-xl border border-[rgba(2,52,53,0.15)] dark:border-white/10 bg-[#f8fafa] dark:bg-zinc-800/50 px-3 py-2 text-sm text-[#023435] dark:text-zinc-100 placeholder-[#023435]/40 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/40" />
                 <div className="flex gap-3">
-                  <button onClick={() => setEditingNote(false)} className="text-xs text-[#023435]/30 dark:text-zinc-500 hover:text-[#023435]/60 dark:hover:text-zinc-300 transition-colors">İptal</button>
+                  <button onClick={() => setEditingNote(false)} className="text-xs text-[#023435]/30 dark:text-zinc-500 hover:text-[#023435]/60 dark:text-muted-foreground dark:hover:text-zinc-300 transition-colors">İptal</button>
                   <button onClick={saveNote} disabled={saving} className="text-xs font-semibold text-[#FE703A] disabled:opacity-50 transition-colors">
                     {saving ? "Kaydediliyor..." : "Kaydet"}
                   </button>
@@ -597,7 +597,7 @@ function LessonDetailModal({
           </div>
         </div>
 
-        <div className="border-t border-[rgba(2,52,53,0.1)] px-5 py-3 flex justify-end">
+        <div className="border-t border-[rgba(2,52,53,0.1)] dark:border-border/70 px-5 py-3 flex justify-end">
           <button onClick={handleDelete} disabled={deleting}
             className="text-xs font-medium text-[#692137]/60 hover:text-[#692137] disabled:opacity-50 transition-colors">
             {deleting ? "Siliniyor..." : "Dersi Sil"}
@@ -684,7 +684,7 @@ function DayLessonList({
                       <div className="absolute -left-[4.5px] top-[14px] h-2 w-2 rounded-full bg-white border-2 border-[#FE703A]" />
                       <button
                         onClick={() => onLessonClick(l, l.displayDate)}
-                        className="w-full text-left rounded-xl p-3 bg-white hover:bg-[rgba(2,121,150,0.03)] border border-[rgba(2,52,53,0.05)] hover:border-[#107996]/20 transition-all shadow-sm group"
+                        className="w-full text-left rounded-xl p-3 bg-white hover:bg-[rgba(2,121,150,0.03)] border border-[rgba(2,52,53,0.05)] dark:border-border/40 hover:border-[#107996]/20 transition-all shadow-sm group"
                       >
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-[10px] font-bold text-[#107996]">
@@ -692,8 +692,8 @@ function DayLessonList({
                           </p>
                           <span className="text-[9px] font-bold text-[#FE703A] opacity-0 group-hover:opacity-100 transition-opacity">İNCELE →</span>
                         </div>
-                        <p className="text-sm font-extrabold text-[#023435]">{l.student.name}</p>
-                        {l.title && <p className="text-[10px] text-[#023435]/50 truncate mt-0.5 font-medium">{l.title}</p>}
+                        <p className="text-sm font-extrabold text-[#023435] dark:text-foreground">{l.student.name}</p>
+                        {l.title && <p className="text-[10px] text-[#023435]/50 dark:text-muted-foreground truncate mt-0.5 font-medium">{l.title}</p>}
                       </button>
                     </div>
                   ))}
@@ -702,7 +702,7 @@ function DayLessonList({
             )}
           </div>
         ) : (
-          <div className="relative border-l-2 border-[rgba(2,52,53,0.1)] ml-[48px] pb-4 space-y-6">
+          <div className="relative border-l-2 border-[rgba(2,52,53,0.1)] dark:border-border/70 ml-[48px] pb-4 space-y-6">
             {lessons.map((l, i) => {
               // Check if lesson is active right now
               const isToday = l.displayDate.toDateString() === now.toDateString();
@@ -715,7 +715,7 @@ function DayLessonList({
                 <div key={i} className="relative pl-6">
                   {/* Time Axis Label */}
                   <div className="absolute -left-[58px] top-1.5 w-12 text-right">
-                    <p className={cn("text-[11px] font-bold", isActiveNow ? "text-[#FE703A]" : "text-[#023435]/60")}>
+                    <p className={cn("text-[11px] font-bold", isActiveNow ? "text-[#FE703A]" : "text-[#023435]/60 dark:text-muted-foreground")}>
                       {l.startTime}
                     </p>
                   </div>
@@ -738,10 +738,10 @@ function DayLessonList({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className={cn("text-sm font-bold truncate", isActiveNow ? "text-[#023435]" : "dark:text-zinc-100")}>
+                        <p className={cn("text-sm font-bold truncate", isActiveNow ? "text-[#023435] dark:text-foreground" : "dark:text-zinc-100")}>
                           {l.student.name}
                         </p>
-                        <p className={cn("text-[11px] font-medium mt-0.5 truncate", isActiveNow ? "text-[#023435]/60" : "opacity-70 dark:text-zinc-300")}>
+                        <p className={cn("text-[11px] font-medium mt-0.5 truncate", isActiveNow ? "text-[#023435]/60 dark:text-muted-foreground" : "opacity-70 dark:text-zinc-300")}>
                           {l.title}
                         </p>
                         <div className="flex items-center gap-2 mt-2">
@@ -819,16 +819,16 @@ function WeekView({
   return (
     <div className="overflow-x-auto">
       <div
-        className="flex border-b border-[rgba(2,52,53,0.1)] sticky top-0 z-10"
+        className="flex border-b border-[rgba(2,52,53,0.1)] dark:border-border/70 sticky top-0 z-10"
         style={{ background: "rgba(240,247,247,0.92)", backdropFilter: "blur(12px)" }}
       >
         <div className="w-14 shrink-0" />
         {weekDays.map((d, i) => {
           const isToday = isSameDay(d, today);
           return (
-            <div key={i} className={cn("flex-1 min-w-[100px] py-2 text-center border-l border-[rgba(2,52,53,0.08)]", isToday && "bg-[#FE703A]/5")}>
+            <div key={i} className={cn("flex-1 min-w-[100px] py-2 text-center border-l border-[rgba(2,52,53,0.08)] dark:border-border/60", isToday && "bg-[#FE703A]/5")}>
               <p className="text-[11px] font-medium text-[rgba(2,52,53,0.4)]">{DAY_LABELS[i]}</p>
-              <p className={cn("text-sm font-bold mt-0.5", isToday ? "text-[#FE703A]" : "text-[#023435]/70")}>{d.getDate()}</p>
+              <p className={cn("text-sm font-bold mt-0.5", isToday ? "text-[#FE703A]" : "text-[#023435]/70 dark:text-foreground/80")}>{d.getDate()}</p>
             </div>
           );
         })}
@@ -849,13 +849,13 @@ function WeekView({
           return (
             <div
               key={i}
-              className={cn("flex-1 min-w-[100px] relative border-l border-[rgba(2,52,53,0.08)]", isToday && "border-l-2 border-l-[#FE703A]/30")}
+              className={cn("flex-1 min-w-[100px] relative border-l border-[rgba(2,52,53,0.08)] dark:border-border/60", isToday && "border-l-2 border-l-[#FE703A]/30")}
               style={{ height: "100%", background: isToday ? "rgba(254,112,58,0.04)" : undefined }}
             >
               {hours.map((h) => (
                 <div
                   key={h}
-                  className="absolute w-full border-t border-[rgba(2,52,53,0.06)] group/slot cursor-pointer"
+                  className="absolute w-full border-t border-[rgba(2,52,53,0.06)] dark:border-border/50 group/slot cursor-pointer"
                   style={{ top: (h - START_HOUR) * HOUR_HEIGHT, height: HOUR_HEIGHT }}
                   onClick={() => onSlotClick?.(day, h)}
                   onDragOver={(e) => e.preventDefault()}
@@ -1036,7 +1036,7 @@ export default function CalendarPage() {
 
   const navBtn = cn(
     "rounded-lg border border-[rgba(2,52,53,0.15)] dark:border-zinc-800 p-1.5 text-[#023435]/50 dark:text-zinc-400",
-    "hover:bg-[rgba(2,52,53,0.06)] dark:hover:bg-zinc-800 hover:text-[#023435]/80 dark:hover:text-zinc-200 transition-colors"
+    "hover:bg-[rgba(2,52,53,0.06)] dark:bg-card/50 dark:hover:bg-zinc-800 hover:text-[#023435]/80 dark:hover:text-foreground dark:text-foreground/90 dark:hover:text-zinc-200 transition-colors"
   );
 
   const handleDropLesson = async (lessonId: string, newDate: Date, newHour: number) => {
@@ -1114,7 +1114,7 @@ export default function CalendarPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <button onClick={goToday} className="rounded-lg border border-[rgba(2,52,53,0.15)] dark:border-white/20 px-3 py-1.5 text-xs font-medium text-[#023435]/60 dark:text-zinc-400 hover:bg-[rgba(2,52,53,0.06)] dark:hover:bg-white/10 hover:text-[#023435]/90 dark:hover:text-zinc-200 transition-colors">
+            <button onClick={goToday} className="rounded-lg border border-[rgba(2,52,53,0.15)] dark:border-white/20 px-3 py-1.5 text-xs font-medium text-[#023435]/60 dark:text-zinc-400 hover:bg-[rgba(2,52,53,0.06)] dark:bg-card/50 dark:hover:bg-white/10 hover:text-[#023435]/90 dark:text-foreground/90 dark:hover:text-zinc-200 transition-colors">
               Bugün
             </button>
             <button onClick={nextPeriod} className={navBtn}>
@@ -1137,14 +1137,14 @@ export default function CalendarPage() {
               {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
 
-            <div className={cn("flex rounded-xl p-0.5 border border-[rgba(2,52,53,0.06)] bg-[rgba(2,52,53,0.02)] shadow-inner", GLASS)}>
+            <div className={cn("flex rounded-xl p-0.5 border border-[rgba(2,52,53,0.06)] dark:border-border/50 bg-[rgba(2,52,53,0.02)] dark:bg-card/30 shadow-inner", GLASS)}>
               {(["month", "week"] as const).map((v) => (
                 <button
                   key={v}
                   onClick={() => setView(v)}
                   className={cn(
                     "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-                    view === v ? "bg-[#023435] dark:bg-white/20 text-white" : "text-[#023435]/40 dark:text-zinc-500 hover:text-[#023435]/70 dark:hover:text-zinc-300"
+                    view === v ? "bg-[#023435] dark:bg-white/20 text-white" : "text-[#023435]/40 dark:text-zinc-500 hover:text-[#023435]/70 dark:hover:text-foreground/90 dark:text-foreground/80 dark:hover:text-zinc-300"
                   )}
                 >
                   {v === "month" ? "Aylık" : "Haftalık"}

@@ -134,7 +134,7 @@ function VerifyEmailContent() {
           {status === "pending" && (
             <div className="text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#023435]/10 mx-auto mb-4">
-                <Mail className="h-7 w-7 text-[#023435]" />
+                <Mail className="h-7 w-7 text-[#023435] dark:text-foreground" />
               </div>
               <h1 className="text-xl font-bold text-zinc-900 mb-2">Email adresini doğrula</h1>
               <p className="text-sm text-zinc-500 mb-2 leading-relaxed">

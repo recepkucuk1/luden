@@ -88,7 +88,7 @@ export function StudentForm({
               className={cn(
                 "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all text-xs font-medium",
                 workArea === w.value
-                  ? "border-[#023435] bg-[#023435]/5 text-[#023435]"
+                  ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
                   : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
               )}
             >

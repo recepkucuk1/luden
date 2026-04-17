@@ -32,7 +32,7 @@ const MATCH_TYPE_LABEL: Record<string, string> = {
 
 const MATCH_TYPE_COLOR: Record<string, string> = {
   definition: "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
-  image_desc: "bg-[#023435]/10 text-[#023435] border-[#023435]/20",
+  image_desc: "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20",
   synonym:    "bg-green-50 text-green-700 border-green-200",
   antonym:    "bg-red-50 text-red-700 border-red-200",
   category:   "bg-purple-50 text-purple-700 border-purple-200",
@@ -54,7 +54,7 @@ export function MatchingGameView({ game }: { game: MatchingGameContent }) {
     <div className="space-y-5">
       {/* Başlık + badge'ler */}
       <div>
-        <h2 className="text-lg font-bold text-[#023435] mb-3 leading-snug">{game.title}</h2>
+        <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-3 leading-snug">{game.title}</h2>
         <div className="flex flex-wrap gap-1.5">
           <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-semibold", MATCH_TYPE_COLOR[game.matchType] ?? "bg-zinc-100 text-zinc-600 border-zinc-200")}>
             {MATCH_TYPE_LABEL[game.matchType] ?? game.matchType}

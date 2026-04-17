@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const NAV_LINKS = [
   { href: "/#features", label: "Özellikler" },
@@ -35,7 +36,7 @@ export default function LandingLayout({ children }: { children: React.ReactNode 
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900">
+    <div className="min-h-screen bg-background text-foreground">
       {/* ── Header ── */}
       <header className={cn(
         "sticky top-0 z-40 px-6 transition-all duration-300 bg-[#023435]",
@@ -67,6 +68,14 @@ export default function LandingLayout({ children }: { children: React.ReactNode 
           </nav>
 
           <div className="flex items-center gap-2">
+            <ThemeToggle
+              variant="segmented"
+              className="hidden sm:inline-flex bg-white/10 border-white/20 [&_button]:text-white/70 [&_button:hover]:text-white [&_button[aria-checked=true]]:bg-white/20 [&_button[aria-checked=true]]:text-white"
+            />
+            <ThemeToggle
+              variant="compact"
+              className="sm:hidden text-white/70 hover:text-white hover:bg-white/10"
+            />
             <Link
               href="/login"
               className="hidden sm:inline-flex rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-colors"
