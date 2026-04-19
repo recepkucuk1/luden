@@ -1,10 +1,6 @@
 "use client";
 
-import { buttonVariants } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Check, Star } from "lucide-react";
 import Link from "next/link";
@@ -41,11 +37,11 @@ export function Pricing({
 }: PricingProps) {
   const [isMonthly, setIsMonthly] = useState(true);
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-  const switchRef = useRef<HTMLButtonElement>(null);
+  const switchRef = useRef<HTMLDivElement>(null);
 
-  const handleToggle = (checked: boolean) => {
-    setIsMonthly(!checked);
-    if (checked && switchRef.current) {
+  const handleToggle = (yearly: boolean) => {
+    setIsMonthly(!yearly);
+    if (yearly && switchRef.current) {
       const rect = switchRef.current.getBoundingClientRect();
       const x = rect.left + rect.width / 2;
       const y = rect.top + rect.height / 2;
@@ -57,7 +53,7 @@ export function Pricing({
           x: x / window.innerWidth,
           y: y / window.innerHeight,
         },
-        colors: ["#FE703A", "#F4B2A6", "#023435", "#F4AE10"],
+        colors: ["#fe703a", "#ffce52", "#2cc069", "#4a90e2"],
         ticks: 200,
         gravity: 1.2,
         decay: 0.94,
@@ -68,76 +64,220 @@ export function Pricing({
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-20">
-      <div className="mb-12 text-center">
-        <h2 className="text-2xl font-bold text-foreground sm:text-3xl">{title}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "80px 24px" }}>
+      <div style={{ textAlign: "center", marginBottom: 32 }}>
+        <div
+          style={{
+            display: "inline-block",
+            padding: "6px 14px",
+            borderRadius: 999,
+            background: "var(--poster-accent)",
+            border: "2px solid var(--poster-ink)",
+            boxShadow: "0 3px 0 var(--poster-ink)",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: ".08em",
+            textTransform: "uppercase",
+            color: "#fff",
+            fontFamily: "var(--font-display)",
+            marginBottom: 14,
+          }}
+        >
+          Fiyatlandırma
+        </div>
+        <h2
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            fontSize: "clamp(32px, 5vw, 44px)",
+            letterSpacing: "-.02em",
+            color: "var(--poster-ink)",
+            margin: 0,
+          }}
+        >
+          {title}
+        </h2>
+        <p
+          style={{
+            marginTop: 10,
+            fontSize: 15,
+            color: "var(--poster-ink-2)",
+            fontFamily: "var(--font-display)",
+          }}
+        >
+          {description}
+        </p>
       </div>
 
-      <div className="mb-10 flex items-center justify-center gap-3">
-        <Label className="text-sm font-medium text-foreground">Aylık</Label>
-        <Switch
-          ref={switchRef as React.RefObject<HTMLButtonElement>}
-          checked={!isMonthly}
-          onCheckedChange={handleToggle}
-        />
-        <Label className="text-sm font-medium text-foreground">
-          Yıllık{" "}
-          <span className="font-semibold text-[#FE703A]">(%15 indirim)</span>
-        </Label>
+      {/* Billing toggle — poster pill */}
+      <div
+        ref={switchRef}
+        style={{
+          display: "inline-flex",
+          margin: "0 auto 36px",
+          left: "50%",
+          position: "relative",
+          transform: "translateX(-50%)",
+          padding: 4,
+          background: "var(--poster-panel)",
+          border: "2px solid var(--poster-ink)",
+          borderRadius: 999,
+          boxShadow: "0 4px 0 var(--poster-ink)",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => handleToggle(false)}
+          style={{
+            padding: "8px 20px",
+            borderRadius: 999,
+            border: "none",
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: "pointer",
+            background: isMonthly ? "var(--poster-ink)" : "transparent",
+            color: isMonthly ? "#fff" : "var(--poster-ink-2)",
+            transition: "background .15s, color .15s",
+          }}
+        >
+          Aylık
+        </button>
+        <button
+          type="button"
+          onClick={() => handleToggle(true)}
+          style={{
+            padding: "8px 20px",
+            borderRadius: 999,
+            border: "none",
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: "pointer",
+            background: !isMonthly ? "var(--poster-accent)" : "transparent",
+            color: !isMonthly ? "#fff" : "var(--poster-ink-2)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            transition: "background .15s, color .15s",
+          }}
+        >
+          Yıllık
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              padding: "2px 6px",
+              borderRadius: 6,
+              background: !isMonthly ? "#fff" : "var(--poster-yellow)",
+              color: "var(--poster-ink)",
+              border: "1.5px solid var(--poster-ink)",
+            }}
+          >
+            -%15
+          </span>
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 pt-8 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+          gap: 20,
+          paddingTop: 16,
+        }}
+      >
         {plans.map((plan, index) => (
           <motion.div
             key={index}
-            initial={{ y: 50, opacity: 1 }}
+            initial={{ y: 30, opacity: 1 }}
             whileInView={
               isDesktop
                 ? {
-                    y: plan.isPopular ? -20 : 0,
+                    y: plan.isPopular ? -16 : 0,
                     opacity: 1,
-                    scale: index === 0 || index === 3 ? 0.94 : 1.0,
                   }
                 : {}
             }
             viewport={{ once: true }}
             transition={{
-              duration: 1.6,
+              duration: 1.2,
               type: "spring",
               stiffness: 100,
               damping: 30,
-              delay: 0.4,
-              opacity: { duration: 0.5 },
+              delay: 0.2,
+              opacity: { duration: 0.4 },
             }}
-            className={cn(
-              "relative flex flex-col rounded-2xl border bg-card p-6",
-              plan.isPopular ? "border-2 border-[#FE703A]" : "border-border",
-              !plan.isPopular && "lg:mt-5",
-              index === 0 && "origin-right",
-              index === 3 && "origin-left"
-            )}
+            style={{
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+              background: "var(--poster-panel)",
+              border: "2px solid var(--poster-ink)",
+              borderRadius: 18,
+              boxShadow: plan.isPopular
+                ? "0 8px 0 var(--poster-accent)"
+                : "0 6px 0 var(--poster-ink)",
+              padding: "24px 20px",
+            }}
           >
             {plan.isPopular && (
-              <div className="absolute right-0 top-0 flex items-center rounded-bl-xl rounded-tr-xl bg-[#FE703A] px-2 py-0.5">
-                <Star className="h-4 w-4 fill-white text-white" />
-                <span className="ml-1 text-sm font-semibold text-white">Popüler</span>
+              <div
+                style={{
+                  position: "absolute",
+                  top: -14,
+                  right: 16,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "4px 10px",
+                  background: "var(--poster-accent)",
+                  color: "#fff",
+                  border: "2px solid var(--poster-ink)",
+                  borderRadius: 999,
+                  boxShadow: "0 3px 0 var(--poster-ink)",
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 700,
+                  fontSize: 12,
+                }}
+              >
+                <Star size={12} fill="currentColor" />
+                Popüler
               </div>
             )}
 
-            <div className="flex flex-1 flex-col">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <div style={{ display: "flex", flex: 1, flexDirection: "column" }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: ".12em",
+                  textTransform: "uppercase",
+                  color: "var(--poster-ink-2)",
+                  fontFamily: "var(--font-display)",
+                  margin: 0,
+                }}
+              >
                 {plan.name}
               </p>
 
-              <div className="mt-5 flex items-baseline gap-1">
+              <div
+                style={{
+                  marginTop: 18,
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: 4,
+                  color: "var(--poster-ink)",
+                  fontFamily: "var(--font-display)",
+                }}
+              >
                 {plan.customPriceLabel ? (
-                  <span className="text-4xl font-bold text-foreground">
+                  <span style={{ fontSize: 36, fontWeight: 800, letterSpacing: "-.02em" }}>
                     {plan.customPriceLabel}
                   </span>
                 ) : (
                   <>
-                    <span className="text-4xl font-bold text-foreground">
+                    <span style={{ fontSize: 36, fontWeight: 800, letterSpacing: "-.02em" }}>
                       <NumberFlow
                         value={isMonthly ? (plan.price ?? 0) : (plan.yearlyPrice ?? 0)}
                         format={{
@@ -152,7 +292,7 @@ export function Pricing({
                       />
                     </span>
                     {plan.period && (
-                      <span className="text-sm font-medium text-muted-foreground">
+                      <span style={{ fontSize: 13, fontWeight: 500, color: "var(--poster-ink-2)" }}>
                         / {isMonthly ? plan.period : (plan.yearlyPeriod ?? plan.period)}
                       </span>
                     )}
@@ -161,50 +301,152 @@ export function Pricing({
               </div>
 
               {!plan.customPriceLabel && (
-                <p className="mt-0.5 text-xs text-muted-foreground">
+                <p
+                  style={{
+                    marginTop: 2,
+                    fontSize: 11,
+                    color: "var(--poster-ink-3)",
+                    fontFamily: "var(--font-display)",
+                  }}
+                >
                   {isMonthly ? "aylık faturalandırılır" : "yıllık faturalandırılır"}
                 </p>
               )}
 
-              <ul className="mt-6 flex flex-1 flex-col gap-2.5">
+              <ul
+                style={{
+                  marginTop: 22,
+                  display: "flex",
+                  flex: 1,
+                  flexDirection: "column",
+                  gap: 10,
+                  padding: 0,
+                  listStyle: "none",
+                }}
+              >
                 {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2">
-                    <Check className="h-4 w-4 shrink-0 text-[#FE703A]" />
-                    <span className="text-sm text-muted-foreground">{feature}</span>
+                  <li key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        width: 20,
+                        height: 20,
+                        borderRadius: 6,
+                        background: "var(--poster-accent)",
+                        border: "1.5px solid var(--poster-ink)",
+                        color: "#fff",
+                        marginTop: 1,
+                      }}
+                    >
+                      <Check size={12} strokeWidth={3} />
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 13,
+                        lineHeight: 1.5,
+                        color: "var(--poster-ink-2)",
+                        fontFamily: "var(--font-display)",
+                      }}
+                    >
+                      {feature}
+                    </span>
                   </li>
                 ))}
               </ul>
 
-              <hr className="my-6 border-border/50" />
+              <div
+                style={{
+                  margin: "22px 0 16px",
+                  height: 2,
+                  background: "var(--poster-ink)",
+                  opacity: 0.1,
+                }}
+              />
 
               {plan.href ? (
                 <Link
                   href={`${plan.href}${plan.href.includes("?") ? "&" : "?"}cycle=${isMonthly ? "monthly" : "yearly"}`}
-                  className={cn(
-                    "block w-full rounded-xl py-2.5 text-center text-sm font-semibold transition-all duration-200",
-                    plan.isPopular
-                      ? "bg-[#FE703A] text-white hover:bg-[#FE703A]/90"
-                      : "border border-border text-foreground hover:bg-muted"
-                  )}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    padding: "11px 16px",
+                    textAlign: "center",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    fontFamily: "var(--font-display)",
+                    borderRadius: 12,
+                    border: "2px solid var(--poster-ink)",
+                    boxShadow: "0 4px 0 var(--poster-ink)",
+                    background: plan.isPopular ? "var(--poster-accent)" : "var(--poster-panel)",
+                    color: plan.isPopular ? "#fff" : "var(--poster-ink)",
+                    textDecoration: "none",
+                    transition: "transform .1s, box-shadow .1s",
+                  }}
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = "translateY(3px)";
+                    e.currentTarget.style.boxShadow = "0 1px 0 var(--poster-ink)";
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = "";
+                    e.currentTarget.style.boxShadow = "0 4px 0 var(--poster-ink)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "";
+                    e.currentTarget.style.boxShadow = "0 4px 0 var(--poster-ink)";
+                  }}
                 >
                   {plan.buttonText}
                 </Link>
               ) : (
                 <button
                   disabled
-                  className="w-full rounded-xl border border-border/50 bg-muted py-2.5 text-sm font-semibold text-muted-foreground cursor-not-allowed"
+                  style={{
+                    width: "100%",
+                    padding: "11px 16px",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    fontFamily: "var(--font-display)",
+                    borderRadius: 12,
+                    border: "2px dashed var(--poster-ink)",
+                    background: "transparent",
+                    color: "var(--poster-ink-3)",
+                    cursor: "not-allowed",
+                  }}
                 >
                   {plan.buttonText}
                 </button>
               )}
 
-              <p className="mt-4 text-center text-xs text-muted-foreground">
+              <p
+                style={{
+                  marginTop: 14,
+                  textAlign: "center",
+                  fontSize: 11,
+                  color: "var(--poster-ink-3)",
+                  fontFamily: "var(--font-display)",
+                }}
+              >
                 {plan.description}
               </p>
 
               {creditNote && (
-                <p className="mt-3 rounded-xl bg-muted px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
-                  <span className="font-medium text-foreground">Kredi nedir?</span>{" "}
+                <p
+                  style={{
+                    marginTop: 12,
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    background: "var(--poster-bg-2)",
+                    border: "1.5px solid var(--poster-ink)",
+                    fontSize: 11,
+                    lineHeight: 1.5,
+                    color: "var(--poster-ink-2)",
+                    fontFamily: "var(--font-display)",
+                  }}
+                >
+                  <span style={{ fontWeight: 700, color: "var(--poster-ink)" }}>Kredi nedir?</span>{" "}
                   {creditNote}
                 </p>
               )}

@@ -3,10 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { AnimatedAuthPanel } from "@/components/auth/AnimatedAuthPanel";
+import { PBtn } from "@/components/landing/poster-ui";
+import {
+  PosterAuthShell,
+  PosterInput,
+  PosterLabel,
+  PosterAlert,
+} from "@/components/auth/PosterAuthShell";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -44,97 +47,170 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      {/* Left Content Section */}
-      <AnimatedAuthPanel
-        showPassword={false}
-        passwordLength={0}
-        heading="Şifreni mi unuttun?"
-        subheading="Endişelenme, email adresine güvenli bir sıfırlama linki gönderelim."
-      />
-
-      {/* Right Content Section */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white text-zinc-900">
-        <div className="w-full max-w-sm">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <Image src="/logo.svg" alt="LudenLab" width={200} height={72} className="h-14 w-auto mx-auto" />
-          </div>
-
-          <div className="mb-8">
-            {!sent ? (
-              <>
-                <h1 className="text-2xl font-bold text-zinc-900">Şifremi Unuttum</h1>
-                <p className="mt-1 text-sm text-zinc-500">
-                  Email adresinizi girin, sıfırlama linki gönderelim.
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#023435]/10 mb-4">
-                  <svg className="h-7 w-7 text-[#023435] dark:text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h1 className="text-xl font-bold text-zinc-900">E-postanızı kontrol edin</h1>
-                <p className="mt-2 text-sm text-zinc-500">
-                  Eğer <strong className="text-zinc-700">{email}</strong> ile kayıtlı bir hesap varsa, şifre sıfırlama linki gönderildi.
-                </p>
-                <p className="mt-2 text-xs text-zinc-400">
-                  Email gelmezse spam klasörünü kontrol edin.
-                </p>
-              </>
-            )}
-          </div>
-
-          {!sent ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="ad@klinik.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoFocus
-                  autoComplete="email"
-                  className="h-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
-                />
-              </div>
-
-              {error && (
-                <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
-                  {error}
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-10 bg-[#023435] hover:bg-[#023435]/90 text-white"
-              >
-                {loading ? "Gönderiliyor…" : "Sıfırlama Linki Gönder"}
-              </Button>
-            </form>
-          ) : (
-            <button
-              type="button"
-              onClick={handleTryAnotherEmail}
-              className="w-full h-10 rounded-md border border-zinc-200 bg-white text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
-            >
-              Farklı bir email dene
-            </button>
-          )}
-
-          <p className="mt-6 text-center text-sm text-zinc-500">
-            <Link href="/login" className="font-medium text-[#FE703A] hover:underline">
-              ← Giriş sayfasına dön
-            </Link>
-          </p>
-        </div>
+    <PosterAuthShell
+      heading="Şifreni mi unuttun?"
+      subheading="Endişelenme, email adresine güvenli bir sıfırlama linki gönderelim."
+      eyebrow="Şifre sıfırlama"
+    >
+      <div style={{ textAlign: "center", marginBottom: 24 }} className="poster-mobile-logo">
+        <Link href="/">
+          <Image
+            src="/logo.svg"
+            alt="Terapimat"
+            width={200}
+            height={72}
+            style={{ height: 48, width: "auto", margin: "0 auto" }}
+          />
+        </Link>
       </div>
-    </div>
+
+      <div style={{ marginBottom: 28 }}>
+        {!sent ? (
+          <>
+            <h1
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 700,
+                fontSize: 30,
+                letterSpacing: "-.02em",
+                color: "var(--poster-ink)",
+                margin: 0,
+              }}
+            >
+              Şifremi Unuttum
+            </h1>
+            <p
+              style={{
+                marginTop: 6,
+                fontSize: 14,
+                color: "var(--poster-ink-2)",
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              Email adresinizi girin, sıfırlama linki gönderelim.
+            </p>
+          </>
+        ) : (
+          <>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: 56,
+                width: 56,
+                borderRadius: 16,
+                background: "var(--poster-green)",
+                border: "2px solid var(--poster-ink)",
+                boxShadow: "0 4px 0 var(--poster-ink)",
+                marginBottom: 16,
+                color: "#fff",
+              }}
+            >
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h1
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 700,
+                fontSize: 26,
+                letterSpacing: "-.02em",
+                color: "var(--poster-ink)",
+                margin: 0,
+              }}
+            >
+              E-postanızı kontrol edin
+            </h1>
+            <p
+              style={{
+                marginTop: 8,
+                fontSize: 14,
+                color: "var(--poster-ink-2)",
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              Eğer <strong style={{ color: "var(--poster-ink)" }}>{email}</strong> ile kayıtlı bir hesap varsa, şifre sıfırlama linki gönderildi.
+            </p>
+            <p
+              style={{
+                marginTop: 8,
+                fontSize: 12,
+                color: "var(--poster-ink-3)",
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              Email gelmezse spam klasörünü kontrol edin.
+            </p>
+          </>
+        )}
+      </div>
+
+      {!sent ? (
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div>
+            <PosterLabel htmlFor="email">Email</PosterLabel>
+            <PosterInput
+              id="email"
+              type="email"
+              placeholder="ad@klinik.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+              autoComplete="email"
+            />
+          </div>
+
+          {error && <PosterAlert tone="error">{error}</PosterAlert>}
+
+          <PBtn
+            type="submit"
+            variant="dark"
+            size="md"
+            disabled={loading}
+            style={{ width: "100%", marginTop: 4, opacity: loading ? 0.8 : 1 }}
+          >
+            {loading ? "Gönderiliyor…" : "Sıfırlama Linki Gönder"}
+          </PBtn>
+        </form>
+      ) : (
+        <PBtn
+          type="button"
+          variant="white"
+          size="md"
+          onClick={handleTryAnotherEmail}
+          style={{ width: "100%" }}
+        >
+          Farklı bir email dene
+        </PBtn>
+      )}
+
+      <p
+        style={{
+          marginTop: 24,
+          textAlign: "center",
+          fontSize: 14,
+          color: "var(--poster-ink-2)",
+          fontFamily: "var(--font-display)",
+        }}
+      >
+        <Link
+          href="/login"
+          style={{ fontWeight: 700, color: "var(--poster-accent)", textDecoration: "underline" }}
+        >
+          ← Giriş sayfasına dön
+        </Link>
+      </p>
+
+      <style jsx>{`
+        @media (min-width: 1024px) {
+          :global(.poster-mobile-logo) {
+            display: none !important;
+          }
+        }
+      `}</style>
+    </PosterAuthShell>
   );
 }

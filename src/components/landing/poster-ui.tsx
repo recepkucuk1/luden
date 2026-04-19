@@ -1,0 +1,245 @@
+"use client";
+import * as React from "react";
+
+/**
+ * Poster / neo-brutalist UI primitives — kept local to the landing + auth routes.
+ * Palette and shadow style are intentionally light-mode only.
+ */
+
+export const POSTER_TOKENS = {
+  bg: "#FFF8EC",
+  bg2: "#FDE8C7",
+  panel: "#FFFFFF",
+  ink: "#0E1E26",
+  ink2: "rgba(14,30,38,.7)",
+  ink3: "rgba(14,30,38,.45)",
+  accent: "#FE703A",
+  green: "#2CC069",
+  yellow: "#FFCE52",
+  pink: "#FF6B9D",
+  blue: "#4A90E2",
+};
+
+type BadgeColor =
+  | "accent"
+  | "green"
+  | "yellow"
+  | "pink"
+  | "blue"
+  | "ink"
+  | "soft";
+
+const BADGE_COLORS: Record<BadgeColor, { bg: string; ink: string }> = {
+  accent: { bg: "#FE703A", ink: "#fff" },
+  green: { bg: "#2CC069", ink: "#fff" },
+  yellow: { bg: "#FFCE52", ink: "#3D2900" },
+  pink: { bg: "#FF6B9D", ink: "#fff" },
+  blue: { bg: "#4A90E2", ink: "#fff" },
+  ink: { bg: "#0E1E26", ink: "#fff" },
+  soft: { bg: "rgba(14,30,38,.08)", ink: "#0E1E26" },
+};
+
+export function PBadge({
+  children,
+  color = "green",
+  style,
+}: {
+  children: React.ReactNode;
+  color?: BadgeColor;
+  style?: React.CSSProperties;
+}) {
+  const v = BADGE_COLORS[color];
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 5,
+        padding: "4px 11px",
+        borderRadius: 999,
+        fontSize: 11.5,
+        fontWeight: 600,
+        letterSpacing: ".01em",
+        background: v.bg,
+        color: v.ink,
+        fontFamily: "var(--font-display)",
+        ...style,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+type BtnVariant = "accent" | "green" | "dark" | "white";
+type BtnSize = "sm" | "md" | "lg";
+
+const BTN_VARIANTS: Record<
+  BtnVariant,
+  { bg: string; ink: string; shadow: string; border?: string }
+> = {
+  accent: { bg: "#FE703A", ink: "#fff", shadow: "#D14F1E" },
+  green: { bg: "#2CC069", ink: "#fff", shadow: "#1F8E4A" },
+  dark: { bg: "#0E1E26", ink: "#fff", shadow: "#000" },
+  white: {
+    bg: "#fff",
+    ink: "#0E1E26",
+    shadow: "rgba(14,30,38,.2)",
+    border: "2px solid #0E1E26",
+  },
+};
+
+const BTN_SIZES: Record<
+  BtnSize,
+  { height: number; padding: string; fontSize: number; radius: number; shadowY: number }
+> = {
+  sm: { height: 36, padding: "0 14px", fontSize: 13, radius: 12, shadowY: 3 },
+  md: { height: 48, padding: "0 22px", fontSize: 14.5, radius: 14, shadowY: 4 },
+  lg: { height: 58, padding: "0 28px", fontSize: 16, radius: 16, shadowY: 5 },
+};
+
+type PBtnProps = {
+  variant?: BtnVariant;
+  size?: BtnSize;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  as?: "button" | "a";
+  href?: string;
+  className?: string;
+  style?: React.CSSProperties;
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "style">;
+
+export function PBtn({
+  variant = "accent",
+  size = "lg",
+  children,
+  icon,
+  as = "button",
+  href,
+  style,
+  ...rest
+}: PBtnProps) {
+  const v = BTN_VARIANTS[variant];
+  const s = BTN_SIZES[size];
+  const baseShadow = `0 ${s.shadowY}px 0 ${v.shadow}`;
+
+  const commonStyle: React.CSSProperties = {
+    fontFamily: "var(--font-display)",
+    fontWeight: 700,
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    background: v.bg,
+    color: v.ink,
+    border: v.border || `2px solid ${v.shadow}`,
+    height: s.height,
+    padding: s.padding,
+    fontSize: s.fontSize,
+    borderRadius: s.radius,
+    boxShadow: baseShadow,
+    transition: "transform .08s cubic-bezier(.16,1,.3,1), box-shadow .08s cubic-bezier(.16,1,.3,1)",
+    letterSpacing: "-.005em",
+    textDecoration: "none",
+    ...style,
+  };
+
+  const pressHandlers = {
+    onMouseDown: (e: React.MouseEvent<HTMLElement>) => {
+      e.currentTarget.style.transform = `translateY(${s.shadowY}px)`;
+      e.currentTarget.style.boxShadow = `0 0 0 ${v.shadow}`;
+    },
+    onMouseUp: (e: React.MouseEvent<HTMLElement>) => {
+      e.currentTarget.style.transform = "";
+      e.currentTarget.style.boxShadow = baseShadow;
+    },
+    onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
+      e.currentTarget.style.transform = "";
+      e.currentTarget.style.boxShadow = baseShadow;
+    },
+  };
+
+  if (as === "a") {
+    return (
+      <a href={href} style={commonStyle} {...pressHandlers}>
+        {icon}
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <button {...rest} style={commonStyle} {...pressHandlers}>
+      {icon}
+      {children}
+    </button>
+  );
+}
+
+export function PCard({
+  children,
+  color = "#fff",
+  rotate = 0,
+  rounded = 20,
+  style,
+}: {
+  children: React.ReactNode;
+  color?: string;
+  rotate?: number;
+  rounded?: number;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <div
+      style={{
+        background: color,
+        borderRadius: rounded,
+        border: "2px solid #0E1E26",
+        boxShadow: "0 6px 0 #0E1E26",
+        transform: rotate ? `rotate(${rotate}deg)` : undefined,
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function Blob({
+  color = "#FFCE52",
+  style,
+}: {
+  color?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <svg viewBox="0 0 200 200" style={style} aria-hidden>
+      <path
+        d="M41.8,-69.1C54.9,-62.9,67.3,-53.6,74.4,-41.1C81.5,-28.5,83.3,-12.7,81.8,2.8C80.3,18.3,75.6,33.5,67.2,46.4C58.8,59.3,46.8,70,33,75.8C19.2,81.7,3.6,82.7,-11.8,80.4C-27.3,78.1,-42.6,72.5,-55.5,63.4C-68.4,54.2,-78.9,41.6,-82.9,27C-87,12.4,-84.6,-4.1,-79.1,-19.4C-73.7,-34.6,-65.2,-48.6,-53.1,-56.1C-41.1,-63.6,-25.4,-64.7,-10.8,-64.4C3.7,-64.1,28.8,-75.3,41.8,-69.1Z"
+        transform="translate(100 100)"
+        fill={color}
+      />
+    </svg>
+  );
+}
+
+export function Squiggle({
+  color = "#FE703A",
+  style,
+}: {
+  color?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <svg viewBox="0 0 100 20" preserveAspectRatio="none" style={style} aria-hidden>
+      <path
+        d="M0,10 Q 12.5,0 25,10 T 50,10 T 75,10 T 100,10"
+        fill="none"
+        stroke={color}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}

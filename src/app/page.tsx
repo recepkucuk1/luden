@@ -7,6 +7,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { GlowyWavesHero } from "@/components/ui/glowy-waves-hero-shadcnui";
+import { PosterHero } from "@/components/landing/poster-hero";
+import { PosterHeader } from "@/components/landing/poster-header";
+import { ForceLightTheme } from "@/components/ForceLightTheme";
+import { PosterFooter } from "@/components/landing/poster-footer";
 import { Pricing, type PricingPlan } from "@/components/ui/pricing";
 import {
   IconSparkles,
@@ -44,31 +48,77 @@ const FAQ_ITEMS = [
 function FaqAccordion() {
   const [open, setOpen] = useState<number | null>(null);
   return (
-    <div className="divide-y divide-[#F4B2A6]/30 rounded-2xl border border-[#F4B2A6]/30 bg-white overflow-hidden shadow-sm">
+    <div
+      style={{
+        background: "#fff",
+        border: "2px solid var(--poster-ink)",
+        boxShadow: "0 6px 0 var(--poster-ink)",
+        borderRadius: 20,
+        overflow: "hidden",
+        fontFamily: "var(--font-display)",
+      }}
+    >
       {FAQ_ITEMS.map((item, i) => (
-        <div key={i}>
+        <div
+          key={i}
+          style={{
+            borderBottom:
+              i < FAQ_ITEMS.length - 1 ? "2px solid var(--poster-ink)" : "none",
+          }}
+        >
           <button
             onClick={() => setOpen(open === i ? null : i)}
-            className={cn(
-              "flex w-full items-center justify-between px-6 py-5 text-left text-sm font-medium transition-colors",
-              open === i ? "text-[#023435] dark:text-foreground bg-[#F4B2A6]/5" : "text-zinc-900 hover:bg-[#F4B2A6]/10"
-            )}
+            style={{
+              display: "flex",
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "18px 22px",
+              textAlign: "left",
+              fontSize: 15,
+              fontWeight: 600,
+              color: "var(--poster-ink)",
+              background: open === i ? "#FFF8EC" : "transparent",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-display)",
+            }}
           >
-            <span className="flex items-center gap-3">
-              <span className={cn(
-                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] md:text-[10px] font-bold transition-colors duration-300",
-                open === i ? "bg-[#FE703A] text-white" : "bg-[#F4B2A6]/20 text-[#023435]/40 dark:text-muted-foreground/75"
-              )}>{i + 1}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <span
+                style={{
+                  display: "inline-flex",
+                  height: 28,
+                  width: 28,
+                  flexShrink: 0,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 8,
+                  border: "2px solid var(--poster-ink)",
+                  background: open === i ? "var(--poster-accent)" : "#FFCE52",
+                  color: open === i ? "#fff" : "var(--poster-ink)",
+                  fontSize: 12,
+                  fontWeight: 700,
+                }}
+              >
+                {i + 1}
+              </span>
               {item.q}
             </span>
             <motion.svg
               animate={{ rotate: open === i ? 180 : 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="h-4 w-4 text-zinc-400 shrink-0 ml-4"
+              style={{
+                height: 18,
+                width: 18,
+                flexShrink: 0,
+                marginLeft: 16,
+                color: "var(--poster-ink)",
+              }}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth={2}
+              strokeWidth={2.5}
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </motion.svg>
@@ -81,9 +131,16 @@ function FaqAccordion() {
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="overflow-hidden"
+                style={{ overflow: "hidden" }}
               >
-                <div className="px-6 pb-5 pl-[3.25rem] text-sm text-zinc-500 leading-relaxed">
+                <div
+                  style={{
+                    padding: "0 22px 20px 64px",
+                    fontSize: 14,
+                    color: "var(--poster-ink-2)",
+                    lineHeight: 1.6,
+                  }}
+                >
                   {item.a}
                 </div>
               </motion.div>
@@ -754,7 +811,7 @@ function HowItWorksCarousel() {
   const { Panel } = slides[active];
 
   return (
-    <section ref={sectionRef} id="features" className="py-12 md:py-20 px-4 md:px-6" style={{ background: "#f8fafa" }}>
+    <section ref={sectionRef} id="features" className="px-4 md:px-6" style={{ background: "var(--poster-bg)", padding: "56px 16px 72px", fontFamily: "var(--font-display)" }}>
       <div className="mx-auto max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -762,7 +819,7 @@ function HowItWorksCarousel() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8"
         >
-          <p className="text-xs font-bold uppercase tracking-widest text-[#FE703A] mb-3">NASIL ÇALIŞIR</p>
+          <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".2em", color: "var(--poster-accent)", marginBottom: 12 }}>NASIL ÇALIŞIR</p>
           <AnimatePresence mode="wait">
             <motion.h2
               key={`h-${activeTool}`}
@@ -770,7 +827,7 @@ function HowItWorksCarousel() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25 }}
-              className="text-2xl font-bold text-[#023435] dark:text-foreground mb-2"
+              style={{ fontSize: 36, fontWeight: 700, color: "var(--poster-ink)", marginBottom: 8, letterSpacing: "-.02em", lineHeight: 1.1 }}
             >
               {currentTool.headline}
             </motion.h2>
@@ -782,7 +839,7 @@ function HowItWorksCarousel() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="text-sm text-[rgba(2,52,53,0.5)]"
+              style={{ fontSize: 15, color: "var(--poster-ink-2)" }}
             >
               {currentTool.subtitle}
             </motion.p>
@@ -799,9 +856,20 @@ function HowItWorksCarousel() {
           {FEATURE_PILLS.map((pill) => (
             <span
               key={pill.label}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(2,52,53,0.12)] dark:border-border/80 bg-white px-3 py-1.5 text-xs font-medium text-[#023435]/70 dark:text-foreground/80"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                border: "2px solid var(--poster-ink)",
+                background: "#fff",
+                padding: "6px 12px",
+                borderRadius: 999,
+                fontSize: 12,
+                fontWeight: 600,
+                color: "var(--poster-ink)",
+              }}
             >
-              <span className="text-[#FE703A]">{pill.icon}</span>
+              <span style={{ color: "var(--poster-accent)", display: "inline-flex" }}>{pill.icon}</span>
               {pill.label}
             </span>
           ))}
@@ -814,67 +882,122 @@ function HowItWorksCarousel() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mb-6 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar"
         >
-          {TOOLS_CONFIG.map((tool, i) => (
-            <button
-              key={tool.id}
-              onClick={() => switchTool(i)}
-              className={cn(
-                "flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
-                i === activeTool
-                  ? "bg-[#023435] text-white shadow-sm"
-                  : "border border-[rgba(2,52,53,0.12)] dark:border-border/80 bg-white text-[#023435]/60 dark:text-muted-foreground hover:bg-white hover:text-[#023435] dark:hover:text-foreground dark:text-foreground hover:border-[rgba(2,52,53,0.25)] dark:border-border"
-              )}
-            >
-              <span>{tool.icon}</span>
-              <span>{tool.label}</span>
-            </button>
-          ))}
+          {TOOLS_CONFIG.map((tool, i) => {
+            const isActive = i === activeTool;
+            return (
+              <button
+                key={tool.id}
+                onClick={() => switchTool(i)}
+                style={{
+                  display: "inline-flex",
+                  flexShrink: 0,
+                  alignItems: "center",
+                  gap: 6,
+                  borderRadius: 999,
+                  padding: "8px 16px",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  fontFamily: "var(--font-display)",
+                  border: "2px solid var(--poster-ink)",
+                  background: isActive ? "var(--poster-accent)" : "#fff",
+                  color: isActive ? "#fff" : "var(--poster-ink)",
+                  boxShadow: isActive ? "0 3px 0 var(--poster-ink)" : "none",
+                  transition: "transform .1s, box-shadow .1s",
+                }}
+              >
+                <span>{tool.icon}</span>
+                <span>{tool.label}</span>
+              </button>
+            );
+          })}
         </motion.div>
 
         <div className="flex gap-6">
           {/* Left — Step indicators */}
           <div className="hidden md:flex flex-col gap-2 pt-4 shrink-0 w-48">
-            {slides.map((slide, i) => (
-              <button
-                key={i}
-                onClick={() => goTo(i)}
-                className={cn(
-                  "flex items-start gap-3 rounded-xl px-3 py-3 text-left transition-all duration-300",
-                  i === active
-                    ? "bg-white shadow-sm border border-[rgba(2,52,53,0.1)] dark:border-border/70"
-                    : "hover:bg-white/60 dark:bg-card/60"
-                )}
-              >
-                <span className={cn(
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-colors duration-300",
-                  i === active
-                    ? "bg-[#FE703A] text-white"
-                    : "bg-[rgba(2,52,53,0.08)] dark:bg-card/60 text-[#023435]/40 dark:text-muted-foreground/75"
-                )}>{i + 1}</span>
-                <div>
-                  <p className={cn(
-                    "text-xs font-semibold transition-colors duration-300",
-                    i === active ? "text-[#023435] dark:text-foreground" : "text-[#023435]/50 dark:text-muted-foreground"
-                  )}>{slide.title}</p>
-                  <p className={cn(
-                    "text-xs md:text-[11px] mt-0.5 leading-snug transition-colors duration-300",
-                    i === active ? "text-[rgba(2,52,53,0.55)]" : "text-[rgba(2,52,53,0.3)]"
-                  )}>{slide.desc}</p>
-                </div>
-              </button>
-            ))}
+            {slides.map((slide, i) => {
+              const isActive = i === active;
+              return (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 12,
+                    borderRadius: 14,
+                    padding: 12,
+                    textAlign: "left",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-display)",
+                    border: isActive ? "2px solid var(--poster-ink)" : "2px solid transparent",
+                    background: isActive ? "#fff" : "transparent",
+                    boxShadow: isActive ? "0 4px 0 var(--poster-ink)" : "none",
+                    transition: "all .15s",
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      height: 28,
+                      width: 28,
+                      flexShrink: 0,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: 8,
+                      border: "2px solid var(--poster-ink)",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      background: isActive ? "var(--poster-accent)" : "#FFCE52",
+                      color: isActive ? "#fff" : "var(--poster-ink)",
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                  <div>
+                    <p
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: isActive ? "var(--poster-ink)" : "var(--poster-ink-2)",
+                        margin: 0,
+                      }}
+                    >
+                      {slide.title}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 11,
+                        color: isActive ? "var(--poster-ink-2)" : "var(--poster-ink-3)",
+                        marginTop: 2,
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {slide.desc}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
           {/* Right — Slide panel */}
           <div
-            className="relative flex-1 bg-white rounded-2xl border border-[rgba(2,52,53,0.1)] dark:border-border/70 shadow-sm overflow-hidden"
+            className="relative flex-1 overflow-hidden"
+            style={{
+              background: "#fff",
+              borderRadius: 20,
+              border: "2px solid var(--poster-ink)",
+              boxShadow: "0 6px 0 var(--poster-ink)",
+            }}
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
           >
             {/* Progress bar */}
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[rgba(2,52,53,0.06)] dark:bg-card/50 z-10">
+            <div className="absolute top-0 left-0 right-0 z-10" style={{ height: 3, background: "rgba(14,30,38,.08)" }}>
               <motion.div
-                className="h-full bg-[#FE703A]"
+                style={{ height: "100%", background: "var(--poster-accent)" }}
                 animate={{ width: `${((active + 1) / count) * 100}%` }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
               />
@@ -900,17 +1023,30 @@ function HowItWorksCarousel() {
             {/* Bottom bar — mobile nav */}
             <div className="flex items-end justify-between gap-4 px-7 pb-6 md:px-10 md:pb-8">
               <div className="md:hidden">
-                <p className="text-sm font-semibold text-[#023435] dark:text-foreground">{slides[active].title}</p>
-                <p className="text-xs text-[rgba(2,52,53,0.45)] mt-0.5">{slides[active].desc}</p>
+                <p style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink)", margin: 0 }}>{slides[active].title}</p>
+                <p style={{ fontSize: 12, color: "var(--poster-ink-3)", marginTop: 2 }}>{slides[active].desc}</p>
               </div>
               <div className="hidden md:block" />
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => { setDirection(-1); setActive((a) => (a - 1 + count) % count); }}
-                  className="h-10 w-10 md:h-8 md:w-8 shrink-0 rounded-[9px] bg-white border border-[rgba(2,52,53,0.2)] dark:border-border flex items-center justify-center text-[#023435]/50 dark:text-muted-foreground hover:bg-[#023435] hover:text-white hover:border-[#023435] transition-colors"
                   aria-label="Önceki"
+                  style={{
+                    height: 36,
+                    width: 36,
+                    flexShrink: 0,
+                    borderRadius: 10,
+                    background: "#fff",
+                    border: "2px solid var(--poster-ink)",
+                    boxShadow: "0 3px 0 var(--poster-ink)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--poster-ink)",
+                    cursor: "pointer",
+                  }}
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
@@ -918,19 +1054,37 @@ function HowItWorksCarousel() {
                   <button
                     key={i}
                     onClick={() => goTo(i)}
-                    className={cn(
-                      "h-2 rounded-full transition-all duration-300",
-                      i === active ? "w-6 bg-[#FE703A]" : "w-2 bg-[rgba(2,52,53,0.2)] dark:bg-card hover:bg-[rgba(2,52,53,0.4)] dark:bg-card"
-                    )}
                     aria-label={`Slayt ${i + 1}`}
+                    style={{
+                      height: 10,
+                      width: i === active ? 28 : 10,
+                      borderRadius: 999,
+                      border: "2px solid var(--poster-ink)",
+                      background: i === active ? "var(--poster-accent)" : "#fff",
+                      transition: "all .25s",
+                      cursor: "pointer",
+                    }}
                   />
                 ))}
                 <button
                   onClick={() => { setDirection(1); setActive((a) => (a + 1) % count); }}
-                  className="h-10 w-10 md:h-8 md:w-8 shrink-0 rounded-[9px] bg-white border border-[rgba(2,52,53,0.2)] dark:border-border flex items-center justify-center text-[#023435]/50 dark:text-muted-foreground hover:bg-[#023435] hover:text-white hover:border-[#023435] transition-colors"
                   aria-label="Sonraki"
+                  style={{
+                    height: 36,
+                    width: 36,
+                    flexShrink: 0,
+                    borderRadius: 10,
+                    background: "#fff",
+                    border: "2px solid var(--poster-ink)",
+                    boxShadow: "0 3px 0 var(--poster-ink)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--poster-ink)",
+                    cursor: "pointer",
+                  }}
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
@@ -959,17 +1113,53 @@ function FaqSection() {
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section ref={ref} id="faq" className="px-4 md:px-6 py-12 md:py-20 bg-[#F4B2A6]/10">
-      <div className="mx-auto max-w-2xl">
+    <section
+      ref={ref}
+      id="faq"
+      style={{ background: "var(--poster-bg)", padding: "56px 16px 72px" }}
+    >
+      <div className="mx-auto max-w-2xl" style={{ padding: "0 8px" }}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10"
+          style={{ textAlign: "center", marginBottom: 40 }}
         >
-          <p className="text-xs font-bold uppercase tracking-widest text-[#FE703A] mb-3">SSS</p>
-          <h2 className="text-2xl font-bold text-zinc-900 mb-3">Sık sorulan sorular</h2>
-          <p className="text-sm text-zinc-500">Aklınızdaki soruların cevabı burada.</p>
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: ".2em",
+              color: "var(--poster-accent)",
+              marginBottom: 12,
+              fontFamily: "var(--font-display)",
+            }}
+          >
+            SSS
+          </p>
+          <h2
+            style={{
+              fontSize: 40,
+              fontWeight: 700,
+              color: "var(--poster-ink)",
+              marginBottom: 12,
+              fontFamily: "var(--font-display)",
+              letterSpacing: "-.02em",
+              lineHeight: 1.05,
+            }}
+          >
+            Sık sorulan sorular
+          </h2>
+          <p
+            style={{
+              fontSize: 15,
+              color: "var(--poster-ink-2)",
+              fontFamily: "var(--font-display)",
+            }}
+          >
+            Aklınızdaki soruların cevabı burada.
+          </p>
         </motion.div>
         <FaqAccordion />
 
@@ -978,15 +1168,42 @@ function FaqSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-10 rounded-2xl bg-white border border-[#F4B2A6]/30 p-6 text-center shadow-sm"
+          style={{
+            marginTop: 40,
+            background: "#fff",
+            border: "2px solid var(--poster-ink)",
+            boxShadow: "0 6px 0 var(--poster-ink)",
+            borderRadius: 20,
+            padding: "28px 24px",
+            textAlign: "center",
+            fontFamily: "var(--font-display)",
+          }}
         >
-          <p className="text-sm font-medium text-zinc-700 mb-1">Sorunuzu bulamadınız mı?</p>
-          <p className="text-xs text-zinc-400 mb-4">Bize yazın, en kısa sürede yanıt verelim.</p>
+          <p style={{ fontSize: 15, fontWeight: 600, color: "var(--poster-ink)", marginBottom: 4 }}>
+            Sorunuzu bulamadınız mı?
+          </p>
+          <p style={{ fontSize: 13, color: "var(--poster-ink-3)", marginBottom: 20 }}>
+            Bize yazın, en kısa sürede yanıt verelim.
+          </p>
           <a
             href="mailto:info@ludenlab.com"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#023435] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#023435]/90 transition-colors"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: "var(--poster-ink)",
+              color: "#fff",
+              padding: "12px 22px",
+              borderRadius: 14,
+              border: "2px solid var(--poster-ink)",
+              boxShadow: "0 4px 0 #000",
+              fontSize: 14,
+              fontWeight: 700,
+              textDecoration: "none",
+              fontFamily: "var(--font-display)",
+            }}
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
             Bize Yazın
@@ -1105,21 +1322,28 @@ function SocialProofBand() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
 
-  const stats = [
-    { value: 500, suffix: "+", label: "Aktif Uzman" },
-    { value: 12000, suffix: "+", label: "Üretilen Kart" },
-    { value: 98, suffix: "%", label: "Memnuniyet" },
-    { value: 50, suffix: "+", label: "Klinik" },
+  const stats: { value: number; suffix: string; label: string; color: string }[] = [
+    { value: 500, suffix: "+", label: "Aktif Uzman", color: "#FFCE52" },
+    { value: 12000, suffix: "+", label: "Üretilen Kart", color: "#FF6B9D" },
+    { value: 98, suffix: "%", label: "Memnuniyet", color: "#4A90E2" },
+    { value: 50, suffix: "+", label: "Klinik", color: "#2CC069" },
   ];
 
   return (
-    <section ref={ref} className="relative bg-[#023435] border-t border-white/5">
-      <div className="mx-auto max-w-5xl px-6 py-8">
+    <section
+      ref={ref}
+      style={{
+        background: "var(--poster-bg)",
+        borderTop: "2px solid var(--poster-ink)",
+        borderBottom: "2px solid var(--poster-ink)",
+      }}
+    >
+      <div className="mx-auto max-w-5xl px-6 py-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, staggerChildren: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center"
+          className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
         >
           {stats.map((stat, i) => (
             <motion.div
@@ -1127,12 +1351,37 @@ function SocialProofBand() {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="flex flex-col items-center"
+              style={{
+                background: stat.color,
+                border: "2px solid var(--poster-ink)",
+                boxShadow: "0 4px 0 var(--poster-ink)",
+                borderRadius: 14,
+                padding: "14px 16px",
+                fontFamily: "var(--font-display)",
+              }}
             >
-              <span className="text-2xl md:text-3xl font-bold text-white">
+              <div
+                style={{
+                  fontSize: 28,
+                  fontWeight: 700,
+                  color: "var(--poster-ink)",
+                  lineHeight: 1,
+                }}
+              >
                 <CountUp target={stat.value} suffix={stat.suffix} />
-              </span>
-              <span className="text-xs text-white/50 mt-1 font-medium">{stat.label}</span>
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "var(--poster-ink)",
+                  textTransform: "uppercase",
+                  letterSpacing: ".06em",
+                  marginTop: 6,
+                }}
+              >
+                {stat.label}
+              </div>
             </motion.div>
           ))}
         </motion.div>
@@ -1145,26 +1394,12 @@ function SocialProofBand() {
 export default function LandingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const NAV_LINKS = [
-    { href: "#features", label: "Özellikler" },
-    { href: "#pricing", label: "Fiyatlandırma" },
-    { href: "#faq", label: "SSS" },
-  ];
 
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
       router.replace("/dashboard");
     }
   }, [status, session, router]);
-
-  useEffect(() => {
-    function onScroll() { setScrolled(window.scrollY > 40); }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   if (status === "loading" || (status === "authenticated")) {
     return (
@@ -1175,95 +1410,12 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900">
-      {/* ── Header ── */}
-      <header className={cn(
-        "sticky top-0 z-40 px-6 transition-all duration-300 bg-[#023435]",
-        scrolled ? "py-2 shadow-lg shadow-black/20" : "py-3"
-      )}>
-        <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
-          <Link href="/" className="shrink-0">
-            <Image
-              src="/logo.svg"
-              alt="LudenLab"
-              width={200}
-              height={72}
-              className={cn("w-auto brightness-0 invert transition-all duration-300", scrolled ? "h-10 sm:h-12" : "h-12 sm:h-16")}
-              priority
-            />
-          </Link>
-
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <Link
-              href="/login"
-              className="rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              Giriş Yap
-            </Link>
-            <Link
-              href="/register"
-              className="rounded-lg bg-[#FE703A] px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-white hover:bg-[#FE703A]/90 transition-colors"
-            >
-              Ücretsiz Başla
-            </Link>
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden flex items-center justify-center h-8 w-8 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-              aria-label="Menü"
-            >
-              <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                {mobileMenuOpen
-                  ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                }
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile dropdown */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="md:hidden overflow-hidden"
-            >
-              <nav className="flex flex-col gap-1 pt-3 pb-2 border-t border-white/10 mt-3">
-                {NAV_LINKS.map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
+    <div className="poster-scope" style={{ minHeight: "100vh" }}>
+      <ForceLightTheme />
+      <PosterHeader />
 
       {/* ── Hero ── */}
-      <GlowyWavesHero />
+      <PosterHero />
 
       {/* ── Social Proof ── */}
       <SocialProofBand />
@@ -1273,7 +1425,7 @@ export default function LandingPage() {
 
 
       {/* ── Pricing ── */}
-      <section id="pricing" className="bg-zinc-50">
+      <section id="pricing" style={{ background: "var(--poster-bg-2)", borderTop: "2px solid var(--poster-ink)", borderBottom: "2px solid var(--poster-ink)" }}>
         <Pricing plans={PLANS} creditNote={CREDIT_NOTE} />
         <div className="flex flex-col items-center gap-2 mt-8 pb-10">
           <p className="text-sm text-[#023435]/50 dark:text-muted-foreground">
@@ -1293,110 +1445,7 @@ export default function LandingPage() {
       <FaqSection />
 
       {/* ── Footer ── */}
-      <footer className="bg-[#023435] px-4 md:px-6 py-8 md:py-12">
-        <div className="mx-auto max-w-5xl">
-          <div className="grid gap-8 sm:grid-cols-3">
-            {/* Sol: Logo + açıklama */}
-            <div>
-              <Image
-                src="/logo.svg"
-                alt="LudenLab"
-                width={200}
-                height={72}
-                className="h-14 w-auto mb-3 brightness-0 invert"
-              />
-              <p className="text-xs text-white/60 leading-relaxed max-w-[200px]">
-                Dil, konuşma ve işitme uzmanları için AI destekli öğrenme kartı platformu.
-              </p>
-            </div>
-
-            {/* Orta: Linkler */}
-            <div>
-              <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">Platform</p>
-              <ul className="grid grid-rows-5 grid-flow-col gap-x-4 gap-y-2">
-                {[
-                  { href: "/register", label: "Kayıt Ol" },
-                  { href: "/login", label: "Giriş Yap" },
-                  { href: "#features", label: "Özellikler" },
-                  { href: "#pricing", label: "Fiyatlandırma" },
-                  { href: "#faq", label: "SSS" },
-                  { href: "/delivery-return", label: "Teslimat ve İade" },
-                  { href: "/privacy", label: "Gizlilik Politikası" },
-                  { href: "/cookie-policy", label: "Çerez Politikası" },
-                  { href: "/terms", label: "Kullanım Koşulları" },
-                  { href: "/about", label: "Hakkımızda" },
-                ].map((l) => (
-                  <li key={l.label}>
-                    <a
-                      href={l.href}
-                      className="text-sm text-white/60 hover:text-white transition-colors"
-                    >
-                      {l.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Sağ: İletişim */}
-            <div>
-              <p className="text-xs font-semibold text-white uppercase tracking-wide mb-4">İletişim</p>
-              <a
-                href="mailto:info@ludenlab.com"
-                className="text-sm text-white/60 hover:text-white transition-colors block mb-2"
-              >
-                info@ludenlab.com
-              </a>
-              <a
-                href="tel:+905308866782"
-                className="text-sm text-white/60 hover:text-white transition-colors block mb-4"
-              >
-                0530 886 67 82
-              </a>
-              <div className="flex items-center gap-3">
-                {/* Instagram */}
-                <a
-                  href="https://instagram.com/ludenlab"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/60 hover:text-white hover:border-white/40 dark:border-border/60 transition-colors"
-                  aria-label="Instagram"
-                >
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-                  </svg>
-                </a>
-                {/* LinkedIn */}
-                <a
-                  href="https://linkedin.com/company/ludenlab"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/60 hover:text-white hover:border-white/40 dark:border-border/60 transition-colors"
-                  aria-label="LinkedIn"
-                >
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center gap-2 py-4 border-t border-white/10 mt-10">
-            <span className="text-xs text-white/40">Güvenli Ödeme</span>
-            <Image
-              src="/images/payment/logo_band_white.svg"
-              alt="iyzico ile Öde - Visa, Mastercard, Troy"
-              width={280}
-              height={24}
-              className="opacity-60 hover:opacity-100 transition-opacity"
-            />
-          </div>
-          <div className="pt-4 pb-2 text-center text-xs text-white/40">
-            © {new Date().getFullYear()} LudenLab. Tüm hakları saklıdır.
-          </div>
-        </div>
-      </footer>
+      <PosterFooter />
     </div>
   );
 }

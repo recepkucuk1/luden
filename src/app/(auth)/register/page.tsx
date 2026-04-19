@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Check, X } from "lucide-react";
-import { AnimatedAuthPanel } from "@/components/auth/AnimatedAuthPanel";
+import { PBtn } from "@/components/landing/poster-ui";
+import {
+  PosterAuthShell,
+  PosterInput,
+  PosterLabel,
+  PosterAlert,
+} from "@/components/auth/PosterAuthShell";
 import { PasswordStrengthBar } from "@/components/auth/PasswordStrengthBar";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -30,7 +33,6 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
-  // Real-time password match
   const passwordsMismatch =
     passwordConfirm.length > 0 && password !== passwordConfirm;
   const passwordsMatch =
@@ -70,158 +72,245 @@ export default function RegisterPage() {
       return;
     }
 
-    // Kayıt başarılı — email doğrulama sayfasına yönlendir
     router.push(`/verify-email?email=${encodeURIComponent(email)}`);
   }
 
-  const isAnyPasswordVisible = (password.length > 0 && showPassword) || (passwordConfirm.length > 0 && showPasswordConfirm);
-  const combinedPasswordLength = password.length > 0 ? password.length : passwordConfirm.length;
-
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      {/* Left Content Section */}
-      <AnimatedAuthPanel
-        showPassword={isAnyPasswordVisible}
-        passwordLength={combinedPasswordLength}
-        heading="Aramıza katıl"
-        subheading="Ücretsiz hesap oluştur, öğrenci takibi ve kişiselleştirilmiş materyaller üretmeye başla."
-      />
-
-      {/* Right Content Section */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white text-zinc-900">
-        <div className="w-full max-w-sm">
-          {/* Mobil logo */}
-          <div className="lg:hidden text-center mb-8">
-            <Image src="/logo.svg" alt="Luden" width={200} height={72} className="h-14 w-auto mx-auto" />
-          </div>
-
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-zinc-900">Hesap Oluştur</h1>
-            <p className="mt-1 text-sm text-zinc-500">Luden&apos;a ücretsiz kaydol</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-sm font-medium">Ad Soyad</Label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                placeholder="Dr. Ayşe Yılmaz"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                autoComplete="name"
-                className="h-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="ad@klinik.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="h-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-sm font-medium">Şifre</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="En az 8 karakter"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                  className="h-10 pr-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-                </button>
-              </div>
-              <PasswordStrengthBar password={password} />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="passwordConfirm" className="text-sm font-medium">Şifre Tekrar</Label>
-              <div className="relative">
-                <Input
-                  id="passwordConfirm"
-                  name="passwordConfirm"
-                  type={showPasswordConfirm ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={passwordConfirm}
-                  onChange={(e) => setPasswordConfirm(e.target.value)}
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                  className="h-10 pr-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
-                >
-                  {showPasswordConfirm ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-                </button>
-              </div>
-              {passwordsMismatch && (
-                <p className="flex items-center gap-1 text-xs text-red-600">
-                  <X className="size-3" /> Şifreler eşleşmiyor
-                </p>
-              )}
-              {passwordsMatch && (
-                <p className="flex items-center gap-1 text-xs text-green-600">
-                  <Check className="size-3" /> Şifreler eşleşiyor
-                </p>
-              )}
-            </div>
-
-            {!isDev && (
-              <HCaptcha
-                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? ""}
-                onVerify={setCaptchaToken}
-                onError={(err) => console.error("[hCaptcha] error:", err)}
-                onExpire={() => { console.warn("[hCaptcha] expired"); setCaptchaToken(null); }}
-                ref={captchaRef}
-                theme="light"
-              />
-            )}
-
-            {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
-                {error}
-              </div>
-            )}
-
-            <Button type="submit" disabled={loading || (!isDev && !captchaToken)} className="w-full h-10 bg-[#023435] text-white hover:bg-[#023435]/90">
-              {loading ? "Hesap oluşturuluyor…" : "Kayıt Ol"}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-zinc-500">
-            Zaten hesabın var mı?{" "}
-            <Link href="/login" className="font-medium text-[#FE703A] hover:underline">
-              Giriş yap
-            </Link>
-          </p>
-        </div>
+    <PosterAuthShell
+      heading="Aramıza katıl."
+      subheading="Ücretsiz hesap oluştur, öğrenci takibi ve kişiselleştirilmiş materyaller üretmeye başla."
+      eyebrow="Kayıt"
+    >
+      <div style={{ textAlign: "center", marginBottom: 24 }} className="poster-mobile-logo">
+        <Link href="/">
+          <Image
+            src="/logo.svg"
+            alt="Terapimat"
+            width={200}
+            height={72}
+            style={{ height: 48, width: "auto", margin: "0 auto" }}
+          />
+        </Link>
       </div>
-    </div>
+
+      <div style={{ marginBottom: 28 }}>
+        <h1
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            fontSize: 30,
+            letterSpacing: "-.02em",
+            color: "var(--poster-ink)",
+            margin: 0,
+          }}
+        >
+          Hesap Oluştur
+        </h1>
+        <p
+          style={{
+            marginTop: 6,
+            fontSize: 14,
+            color: "var(--poster-ink-2)",
+            fontFamily: "var(--font-display)",
+          }}
+        >
+          Terapimat&apos;a ücretsiz kaydol
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div>
+          <PosterLabel htmlFor="name">Ad Soyad</PosterLabel>
+          <PosterInput
+            id="name"
+            name="name"
+            type="text"
+            placeholder="Dr. Ayşe Yılmaz"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            autoComplete="name"
+          />
+        </div>
+
+        <div>
+          <PosterLabel htmlFor="email">Email</PosterLabel>
+          <PosterInput
+            id="email"
+            name="email"
+            type="email"
+            placeholder="ad@klinik.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+          />
+        </div>
+
+        <div>
+          <PosterLabel htmlFor="password">Şifre</PosterLabel>
+          <div style={{ position: "relative" }}>
+            <PosterInput
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="En az 8 karakter"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              style={{ paddingRight: 44 }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
+              style={{
+                position: "absolute",
+                right: 10,
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--poster-ink-2)",
+                display: "inline-flex",
+                padding: 6,
+              }}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <PasswordStrengthBar password={password} />
+          </div>
+        </div>
+
+        <div>
+          <PosterLabel htmlFor="passwordConfirm">Şifre Tekrar</PosterLabel>
+          <div style={{ position: "relative" }}>
+            <PosterInput
+              id="passwordConfirm"
+              name="passwordConfirm"
+              type={showPasswordConfirm ? "text" : "password"}
+              placeholder="••••••••"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              invalid={passwordsMismatch}
+              style={{ paddingRight: 44 }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+              aria-label={showPasswordConfirm ? "Şifreyi gizle" : "Şifreyi göster"}
+              style={{
+                position: "absolute",
+                right: 10,
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--poster-ink-2)",
+                display: "inline-flex",
+                padding: 6,
+              }}
+            >
+              {showPasswordConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+          {passwordsMismatch && (
+            <p
+              style={{
+                marginTop: 6,
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                fontSize: 12,
+                color: "#c53030",
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              <X size={14} /> Şifreler eşleşmiyor
+            </p>
+          )}
+          {passwordsMatch && (
+            <p
+              style={{
+                marginTop: 6,
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                fontSize: 12,
+                color: "var(--poster-green)",
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              <Check size={14} /> Şifreler eşleşiyor
+            </p>
+          )}
+        </div>
+
+        {!isDev && (
+          <HCaptcha
+            sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? ""}
+            onVerify={setCaptchaToken}
+            onError={(err) => console.error("[hCaptcha] error:", err)}
+            onExpire={() => {
+              console.warn("[hCaptcha] expired");
+              setCaptchaToken(null);
+            }}
+            ref={captchaRef}
+            theme="light"
+          />
+        )}
+
+        {error && <PosterAlert tone="error">{error}</PosterAlert>}
+
+        <PBtn
+          type="submit"
+          variant="dark"
+          size="md"
+          disabled={loading || (!isDev && !captchaToken)}
+          style={{
+            width: "100%",
+            marginTop: 4,
+            opacity: loading || (!isDev && !captchaToken) ? 0.7 : 1,
+          }}
+        >
+          {loading ? "Hesap oluşturuluyor…" : "Kayıt Ol"}
+        </PBtn>
+      </form>
+
+      <p
+        style={{
+          marginTop: 24,
+          textAlign: "center",
+          fontSize: 14,
+          color: "var(--poster-ink-2)",
+          fontFamily: "var(--font-display)",
+        }}
+      >
+        Zaten hesabın var mı?{" "}
+        <Link
+          href="/login"
+          style={{ fontWeight: 700, color: "var(--poster-accent)", textDecoration: "underline" }}
+        >
+          Giriş yap
+        </Link>
+      </p>
+
+      <style jsx>{`
+        @media (min-width: 1024px) {
+          :global(.poster-mobile-logo) {
+            display: none !important;
+          }
+        }
+      `}</style>
+    </PosterAuthShell>
   );
 }

@@ -1,11 +1,22 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Space_Grotesk, Instrument_Serif } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import { CookieBanner } from "@/components/cookie-banner";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] });
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -33,7 +44,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr" suppressHydrationWarning>
-      <body className={`${jakarta.variable} antialiased`}>
+      <body className={`${jakarta.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} antialiased`}>
         {/*
           Blocking inline script — JS yüklenmeden önce çalışır, FOUC'u önler.
           localStorage'daki tercih yoksa sistem dark mode'una uyar.
