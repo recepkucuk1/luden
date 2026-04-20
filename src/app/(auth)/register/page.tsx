@@ -304,9 +304,9 @@ export default function RegisterPage() {
         </Link>
       </p>
 
-      <style jsx>{`
+      <style>{`
         @media (min-width: 1024px) {
-          :global(.poster-mobile-logo) {
+          .poster-mobile-logo {
             display: none !important;
           }
         }

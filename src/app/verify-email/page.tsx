@@ -205,7 +205,7 @@ function VerifyEmailContent() {
           <p style={{ fontSize: 14, fontWeight: 600, color: "var(--poster-ink-2)", fontFamily: "var(--font-display)" }}>
             Email doğrulanıyor…
           </p>
-          <style jsx>{`
+          <style>{`
             @keyframes spin { to { transform: rotate(360deg); } }
           `}</style>
         </div>
@@ -231,7 +231,7 @@ function VerifyEmailContent() {
           <p style={{ marginTop: 4, fontSize: 12, color: "var(--poster-ink-3)", fontFamily: "var(--font-display)" }}>
             Seni yönlendiriyoruz.
           </p>
-          <style jsx>{`
+          <style>{`
             @keyframes spin { to { transform: rotate(360deg); } }
           `}</style>
         </div>

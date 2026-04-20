@@ -123,7 +123,7 @@ export default function ResetPasswordPage({
           >
             Link doğrulanıyor…
           </p>
-          <style jsx>{`
+          <style>{`
             @keyframes poster-spin {
               to {
                 transform: rotate(360deg);
@@ -373,9 +373,9 @@ export default function ResetPasswordPage({
         </>
       )}
 
-      <style jsx>{`
+      <style>{`
         @media (min-width: 1024px) {
-          :global(.poster-mobile-logo) {
+          .poster-mobile-logo {
             display: none !important;
           }
         }
