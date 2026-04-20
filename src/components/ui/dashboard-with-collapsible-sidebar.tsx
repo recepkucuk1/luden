@@ -24,6 +24,7 @@ export const Sidebar = () => {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [planLabel, setPlanLabel] = useState<string>("");
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -32,6 +33,16 @@ export const Sidebar = () => {
         .then((data) => {
           if (data.therapist?.avatarUrl) {
             setAvatarUrl(data.therapist.avatarUrl);
+          }
+          const pt: string | undefined = data.therapist?.planType;
+          if (pt) {
+            const label =
+              pt === "FREE" ? "Ücretsiz"
+              : pt === "PRO" ? "Pro Plan"
+              : pt === "ADVANCED" ? "Advanced Plan"
+              : pt === "ENTERPRISE" ? "Enterprise"
+              : pt;
+            setPlanLabel(label);
           }
         })
         .catch(console.error);
@@ -136,7 +147,7 @@ export const Sidebar = () => {
           flexDirection: "column",
         }}
       >
-        <TitleSection open={open} userName={session?.user?.name || "Kullanıcı"} userImage={avatarUrl || session?.user?.image} />
+        <TitleSection open={open} userName={session?.user?.name || "Kullanıcı"} userImage={avatarUrl || session?.user?.image} planLabel={planLabel} />
 
         <div
           className="no-scrollbar"
@@ -275,7 +286,7 @@ const Option = ({ Icon, title, href, currentPath, open }: OptionProps) => {
   );
 };
 
-const TitleSection = ({ open, userName, userImage }: { open: boolean; userName: string; userImage?: string | null }) => {
+const TitleSection = ({ open, userName, userImage, planLabel }: { open: boolean; userName: string; userImage?: string | null; planLabel?: string }) => {
   return (
     <div style={{ marginBottom: 14, borderBottom: "2px solid var(--poster-ink)", paddingBottom: 12 }}>
       <Link
@@ -323,7 +334,7 @@ const TitleSection = ({ open, userName, userImage }: { open: boolean; userName: 
               {userName}
             </span>
             <span style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--poster-ink-3)" }}>
-              Pro Plan
+              {planLabel || "—"}
             </span>
           </div>
         )}

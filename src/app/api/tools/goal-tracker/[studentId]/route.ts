@@ -29,10 +29,23 @@ export async function GET(
 
     const curricula = await prisma.curriculum.findMany({
       where: { id: { in: student.curriculumIds } },
-      include: {
-        goals: { orderBy: [{ isMainGoal: "desc" }, { code: "asc" }] },
-      },
+      include: { goals: true },
     });
+
+    const parseCode = (code: string): [number, number] => {
+      const parts = code.split(".");
+      const a = Number.parseInt(parts[0] ?? "", 10);
+      const b = Number.parseInt(parts[1] ?? "", 10);
+      return [Number.isFinite(a) ? a : 0, Number.isFinite(b) ? b : 0];
+    };
+    for (const c of curricula) {
+      c.goals.sort((x, y) => {
+        const [xa, xb] = parseCode(x.code);
+        const [ya, yb] = parseCode(y.code);
+        if (xa !== ya) return xa - ya;
+        return xb - yb;
+      });
+    }
 
     const allGoalIds = curricula.flatMap(c => c.goals.map(g => g.id));
 

@@ -72,12 +72,23 @@ interface TrackerData {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const STATUS_OPTIONS = [
-  { value: "not_started",   label: "Başlanmamış"    },
-  { value: "in_progress",   label: "Devam Ediyor"   },
-  { value: "consolidating", label: "Pekiştiriliyor" },
-  { value: "mastered",      label: "Kazanıldı"      },
+const STATUS_OPTIONS: Array<{ value: string; label: string; color: string; short: string }> = [
+  { value: "not_started",   label: "Başlanmamış",    color: "#fff",                short: "B" },
+  { value: "in_progress",   label: "Devam Ediyor",   color: "var(--poster-accent)", short: "D" },
+  { value: "consolidating", label: "Pekiştiriliyor", color: "var(--poster-yellow)", short: "P" },
+  { value: "mastered",      label: "Kazanıldı",      color: "var(--poster-green)",  short: "K" },
 ];
+
+const STATUS_ORDER: Record<string, number> = {
+  not_started:   0,
+  in_progress:   1,
+  consolidating: 2,
+  mastered:      3,
+  completed:     3,
+};
+
+type SortKey = "code" | "status" | "updatedAt";
+type SortDir = "asc" | "desc";
 
 const STATUS_META: Record<string, { label: string; color: "soft" | "accent" | "yellow" | "ink" | "green" }> = {
   not_started:   { label: "Başlanmamış",    color: "soft"   },
@@ -218,6 +229,51 @@ async function downloadGoalTrackerPDF(data: TrackerData) {
   doc.save(`Hedef_Takip_${data.student.name.replace(/\s+/g, "_")}.pdf`);
 }
 
+// ─── Sortable header ──────────────────────────────────────────────────────────
+
+function SortableTh({
+  label, sortKey: key, current, dir, onClick, width,
+}: {
+  label: string;
+  sortKey: SortKey;
+  current: SortKey;
+  dir: SortDir;
+  onClick: (k: SortKey) => void;
+  width?: number;
+}) {
+  const active = current === key;
+  return (
+    <th style={{ padding: 0, textAlign: "left", width }}>
+      <button
+        type="button"
+        onClick={() => onClick(key)}
+        style={{
+          width: "100%",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 4,
+          padding: "8px 12px",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          fontFamily: "inherit",
+          fontWeight: 800,
+          fontSize: 10,
+          textTransform: "uppercase",
+          letterSpacing: ".05em",
+          color: active ? "var(--poster-ink)" : "var(--poster-ink-2)",
+          textAlign: "left" as const,
+        }}
+      >
+        {label}
+        <span style={{ fontSize: 10, opacity: active ? 1 : 0.35 }}>
+          {active ? (dir === "asc" ? "▲" : "▼") : "▲"}
+        </span>
+      </button>
+    </th>
+  );
+}
+
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
 function StatCard({
@@ -267,6 +323,51 @@ export default function GoalTrackerPage() {
   const [noteInputs,    setNoteInputs]    = useState<Record<string, string>>({});
   const [savingNote,    setSavingNote]    = useState<string | null>(null);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
+  const [sortKey,       setSortKey]       = useState<SortKey>("code");
+  const [sortDir,       setSortDir]       = useState<SortDir>("asc");
+
+  function toggleSort(k: SortKey) {
+    if (k === sortKey) {
+      setSortDir(d => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(k);
+      setSortDir(k === "updatedAt" ? "desc" : "asc");
+    }
+  }
+
+  function sortGoals(goals: GoalItem[]): GoalItem[] {
+    const parseCode = (code: string): [number, number] => {
+      const parts = code.split(".");
+      const a = Number.parseInt(parts[0] ?? "", 10);
+      const b = Number.parseInt(parts[1] ?? "", 10);
+      return [Number.isFinite(a) ? a : 0, Number.isFinite(b) ? b : 0];
+    };
+    const sign = sortDir === "asc" ? 1 : -1;
+    return [...goals].sort((x, y) => {
+      if (sortKey === "code") {
+        const [xa, xb] = parseCode(x.goal.code);
+        const [ya, yb] = parseCode(y.goal.code);
+        if (xa !== ya) return (xa - ya) * sign;
+        return (xb - yb) * sign;
+      }
+      if (sortKey === "status") {
+        const xs = STATUS_ORDER[x.progress?.status ?? "not_started"] ?? 0;
+        const ys = STATUS_ORDER[y.progress?.status ?? "not_started"] ?? 0;
+        if (xs !== ys) return (xs - ys) * sign;
+        const [xa, xb] = parseCode(x.goal.code);
+        const [ya, yb] = parseCode(y.goal.code);
+        if (xa !== ya) return xa - ya;
+        return xb - yb;
+      }
+      const xt = x.progress?.updatedAt ? new Date(x.progress.updatedAt).getTime() : 0;
+      const yt = y.progress?.updatedAt ? new Date(y.progress.updatedAt).getTime() : 0;
+      if (xt !== yt) return (xt - yt) * sign;
+      const [xa, xb] = parseCode(x.goal.code);
+      const [ya, yb] = parseCode(y.goal.code);
+      if (xa !== ya) return xa - ya;
+      return xb - yb;
+    });
+  }
 
   useEffect(() => {
     fetch("/api/students")
@@ -573,19 +674,30 @@ export default function GoalTrackerPage() {
                   </>
                 )}
               </div>
-              <div style={{ marginTop: 8, display: "flex", gap: 14, flexWrap: "wrap", fontSize: 11, fontWeight: 700, color: "var(--poster-ink-2)" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--poster-green)", border: "1.5px solid var(--poster-ink)" }} />
-                  Kazanıldı
-                </span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--poster-accent)", border: "1.5px solid var(--poster-ink)" }} />
-                  Devam Ediyor
-                </span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#fff", border: "1.5px solid var(--poster-ink)" }} />
-                  Başlanmamış
-                </span>
+              <div style={{ marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap", fontSize: 11, fontWeight: 700, color: "var(--poster-ink-2)", alignItems: "center" }}>
+                {STATUS_OPTIONS.map(opt => (
+                  <span key={opt.value} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <span
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 6,
+                        background: opt.color,
+                        border: "2px solid var(--poster-ink)",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontFamily: "inherit",
+                        fontSize: 10,
+                        fontWeight: 800,
+                        color: "var(--poster-ink)",
+                      }}
+                    >
+                      {opt.short}
+                    </span>
+                    {opt.label}
+                  </span>
+                ))}
               </div>
             </PCard>
 
@@ -647,18 +759,18 @@ export default function GoalTrackerPage() {
 
                     {isOpen && (
                       <div style={{ borderTop: "2px solid var(--poster-ink)", overflowX: "auto" }}>
-                        <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse", minWidth: 640 }}>
+                        <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse", minWidth: 720 }}>
                           <thead>
                             <tr style={{ background: "var(--poster-bg-2)", borderBottom: "2px solid var(--poster-ink)" }}>
-                              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 800, color: "var(--poster-ink-2)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".05em", width: 56 }}>Kod</th>
+                              <SortableTh label="Kod"        sortKey="code"      current={sortKey} dir={sortDir} onClick={toggleSort} width={64} />
                               <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 800, color: "var(--poster-ink-2)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".05em" }}>Hedef</th>
-                              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 800, color: "var(--poster-ink-2)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".05em", width: 160 }}>Durum</th>
+                              <SortableTh label="Durum"      sortKey="status"    current={sortKey} dir={sortDir} onClick={toggleSort} width={200} />
                               <th style={{ padding: "8px 12px", textAlign: "center", fontWeight: 800, color: "var(--poster-ink-2)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".05em", width: 48 }}>Not</th>
-                              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 800, color: "var(--poster-ink-2)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".05em", width: 96 }}>Güncelleme</th>
+                              <SortableTh label="Güncelleme" sortKey="updatedAt" current={sortKey} dir={sortDir} onClick={toggleSort} width={112} />
                             </tr>
                           </thead>
                           <tbody>
-                            {mod.goals.map(({ goal, progress }) => {
+                            {sortGoals(mod.goals).map(({ goal, progress }) => {
                               const status   = progress?.status ?? "not_started";
                               const isSaving = savingGoal === goal.id;
                               const noteOpen = editNote === goal.id;
@@ -679,25 +791,42 @@ export default function GoalTrackerPage() {
                                       {isSaving ? (
                                         <Loader2 style={{ width: 14, height: 14, color: "var(--poster-ink-3)", animation: "spin 1s linear infinite" }} />
                                       ) : (
-                                        <select
-                                          value={status}
-                                          onChange={e => updateStatus(goal.id, e.target.value)}
-                                          style={{
-                                            padding: "4px 8px",
-                                            border: "2px solid var(--poster-ink)",
-                                            borderRadius: 8,
-                                            background: "#fff",
-                                            color: "var(--poster-ink)",
-                                            fontFamily: "inherit",
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            cursor: "pointer",
-                                          }}
-                                        >
-                                          {STATUS_OPTIONS.map(opt => (
-                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                          ))}
-                                        </select>
+                                        <div style={{ display: "inline-flex", gap: 4 }}>
+                                          {STATUS_OPTIONS.map(opt => {
+                                            const active = status === opt.value || (opt.value === "mastered" && status === "completed");
+                                            return (
+                                              <button
+                                                key={opt.value}
+                                                type="button"
+                                                onClick={() => updateStatus(goal.id, opt.value)}
+                                                title={opt.label}
+                                                aria-label={opt.label}
+                                                aria-pressed={active}
+                                                style={{
+                                                  width: 26,
+                                                  height: 26,
+                                                  borderRadius: 8,
+                                                  border: "2px solid var(--poster-ink)",
+                                                  background: opt.color,
+                                                  color: "var(--poster-ink)",
+                                                  fontFamily: "inherit",
+                                                  fontSize: 11,
+                                                  fontWeight: 800,
+                                                  cursor: "pointer",
+                                                  display: "inline-flex",
+                                                  alignItems: "center",
+                                                  justifyContent: "center",
+                                                  boxShadow: active ? "2px 2px 0 var(--poster-ink)" : "none",
+                                                  opacity: active ? 1 : 0.55,
+                                                  transform: active ? "translate(-1px, -1px)" : "none",
+                                                  transition: "opacity .1s, transform .1s, box-shadow .1s",
+                                                }}
+                                              >
+                                                {opt.short}
+                                              </button>
+                                            );
+                                          })}
+                                        </div>
                                       )}
                                     </td>
                                     <td style={{ padding: "10px 12px", textAlign: "center" }}>
