@@ -1,7 +1,33 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-export const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+/**
+ * Anthropic client'ı modül yüklenirken değil, ilk kullanımda oluştur.
+ * Böylece ANTHROPIC_API_KEY build time'da yoksa (örn. client bundle'a
+ * yanlışlıkla sızmışsa veya env set edilmeden build alınırsa) patlamaz.
+ */
+let _client: Anthropic | null = null;
+
+function getClient(): Anthropic {
+  if (!_client) {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      throw new Error("ANTHROPIC_API_KEY tanımlı değil.");
+    }
+    _client = new Anthropic({ apiKey });
+  }
+  return _client;
+}
+
+/**
+ * Proxy ile lazy client. İçe aktarım noktası değişmeden eski kullanım
+ * (`anthropic.messages.create(...)`) çalışmaya devam eder.
+ */
+export const anthropic = new Proxy({} as Anthropic, {
+  get(_target, prop, receiver) {
+    const client = getClient();
+    const value = Reflect.get(client, prop, receiver);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
 });
 
 export const MODEL = "claude-sonnet-4-6";

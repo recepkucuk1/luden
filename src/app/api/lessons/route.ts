@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 import { logError } from "@/lib/utils";
 import { z } from "zod";
+
+const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
+const DATE_RE  = /^\d{4}-\d{2}-\d{2}$/;
 
 const createSchema = z.object({
   studentId:    z.string().min(1),
@@ -29,8 +33,16 @@ export async function GET(request: NextRequest) {
     const upcoming   = searchParams.get("upcoming") === "true";
     const therapistId = session.user.id;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {
+    // Query parametrelerini katı formatla doğrula — geçersiz girdide
+    // Date() fallback'lerine güvenmek yerine 400 döndür.
+    if (month && !MONTH_RE.test(month)) {
+      return NextResponse.json({ error: "Geçersiz month (YYYY-MM)" }, { status: 400 });
+    }
+    if (week && !DATE_RE.test(week)) {
+      return NextResponse.json({ error: "Geçersiz week (YYYY-MM-DD)" }, { status: 400 });
+    }
+
+    const where: Prisma.LessonWhereInput = {
       therapistId,
       ...(studentId ? { studentId } : {}),
     };
@@ -47,7 +59,10 @@ export async function GET(request: NextRequest) {
         { isRecurring: true },
       ];
     } else if (week) {
-      const d = new Date(week);
+      const d = new Date(`${week}T00:00:00`);
+      if (Number.isNaN(d.getTime())) {
+        return NextResponse.json({ error: "Geçersiz tarih" }, { status: 400 });
+      }
       const day = d.getDay();
       const diff = day === 0 ? -6 : 1 - day;
       const weekStart = new Date(d);

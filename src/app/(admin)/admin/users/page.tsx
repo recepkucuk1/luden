@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, Filter, MoreVertical, X } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, Filter, MoreVertical } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { PBtn, PCard, PBadge, PInput, PSelect, PModal } from "@/components/poster";
 
@@ -47,6 +47,32 @@ const PLAN_COLOR: Record<PlanType, "soft" | "blue" | "accent" | "pink"> = {
   ADVANCED: "accent",
   ENTERPRISE: "pink",
 };
+
+type SortDir = "asc" | "desc";
+
+/**
+ * Tablo başlığındaki sort göstergesi. Stabil referans için modül
+ * kapsamında — component içinde tanımlanırsa her render'da yeni tip
+ * oluşur (react-hooks/static-components).
+ */
+function SortIcon({
+  columnKey,
+  activeKey,
+  dir,
+}: {
+  columnKey: string;
+  activeKey: string;
+  dir: SortDir;
+}) {
+  if (activeKey !== columnKey) {
+    return <ChevronsUpDown style={{ marginLeft: 4, width: 12, height: 12, opacity: 0.3 }} />;
+  }
+  return dir === "asc" ? (
+    <ChevronUp style={{ marginLeft: 4, width: 12, height: 12, color: "var(--poster-accent)" }} />
+  ) : (
+    <ChevronDown style={{ marginLeft: 4, width: 12, height: 12, color: "var(--poster-accent)" }} />
+  );
+}
 
 const PLAN_LABEL: Record<PlanType, string> = {
   FREE: "Free",
@@ -420,7 +446,6 @@ function ActionDropdown({
 }
 
 type SortKey = "name" | "planType" | "credits" | "currentPeriodEnd" | "students" | "lastLogin" | "createdAt" | "cards" | "lessons" | "monthlyUsageUsd";
-type SortDir = "asc" | "desc";
 
 export default function AdminUsersPage() {
   const { data: session, status } = useSession();
@@ -497,7 +522,7 @@ export default function AdminUsersPage() {
 
   async function handleDelete(id: string) {
     setDeleting(true);
-    const res = await fetch(`/api/admin/users?id=${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/admin/users?id=${id}&confirm=true`, { method: "DELETE" });
     if (res.ok) {
       setUsers((prev) => prev.filter((u) => u.id !== id));
       toast.success("Hesap silindi");
@@ -522,8 +547,11 @@ export default function AdminUsersPage() {
 
   const sortedUsers = useMemo(() => {
     return filteredUsers.sort((a, b) => {
-      let valA: any = a[sortKey as keyof UserRow];
-      let valB: any = b[sortKey as keyof UserRow];
+      // Tüm sıralanabilir kolonlar string veya number üretiyor;
+      // karşılaştırma altında birleşik tip yeterli.
+      type SortVal = string | number | null;
+      let valA: SortVal = (a as unknown as Record<string, SortVal>)[sortKey];
+      let valB: SortVal = (b as unknown as Record<string, SortVal>)[sortKey];
 
       if (sortKey === "students") {
         valA = a._count.students;
@@ -562,9 +590,15 @@ export default function AdminUsersPage() {
     return sortedUsers.slice(start, start + perPage);
   }, [sortedUsers, currentPage, perPage]);
 
-  useEffect(() => {
+  // Filtreler değişince sayfayı 1'e al — React'in "reset state on props
+  // change" pattern'i: render sırasında değişikliği tespit edip setState
+  // çağrılır, useEffect ile gecikmez.
+  const filterKey = `${search}|${filterPlan}|${filterStatus}|${perPage}`;
+  const [lastFilterKey, setLastFilterKey] = useState(filterKey);
+  if (lastFilterKey !== filterKey) {
+    setLastFilterKey(filterKey);
     setPage(1);
-  }, [search, filterPlan, filterStatus, perPage]);
+  }
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc");
@@ -574,14 +608,6 @@ export default function AdminUsersPage() {
     }
   };
 
-  const SortIcon = ({ columnKey }: { columnKey: SortKey }) => {
-    if (sortKey !== columnKey) return <ChevronsUpDown style={{ marginLeft: 4, width: 12, height: 12, opacity: 0.3 }} />;
-    return sortDir === "asc" ? (
-      <ChevronUp style={{ marginLeft: 4, width: 12, height: 12, color: "var(--poster-accent)" }} />
-    ) : (
-      <ChevronDown style={{ marginLeft: 4, width: 12, height: 12, color: "var(--poster-accent)" }} />
-    );
-  };
 
   const th: React.CSSProperties = {
     textAlign: "left",
@@ -693,7 +719,7 @@ export default function AdminUsersPage() {
 
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Filter style={{ width: 14, height: 14, color: "var(--poster-ink-3)" }} />
-            <PSelect value={filterPlan} onChange={(e) => setFilterPlan(e.target.value as any)} style={{ width: "auto", minWidth: 140 }}>
+            <PSelect value={filterPlan} onChange={(e) => setFilterPlan(e.target.value as PlanType | "ALL")} style={{ width: "auto", minWidth: 140 }}>
               <option value="ALL">Tüm Planlar</option>
               <option value="FREE">Free</option>
               <option value="PRO">Pro</option>
@@ -702,7 +728,7 @@ export default function AdminUsersPage() {
             </PSelect>
           </div>
 
-          <PSelect value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as any)} style={{ width: "auto", minWidth: 170 }}>
+          <PSelect value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as "ALL" | "ADMIN" | "SUSPENDED")} style={{ width: "auto", minWidth: 170 }}>
             <option value="ALL">Tüm Durumlar</option>
             <option value="ADMIN">Sadece Adminler</option>
             <option value="SUSPENDED">Askıya Alınanlar</option>
@@ -723,31 +749,31 @@ export default function AdminUsersPage() {
             <thead>
               <tr>
                 <th style={th} onClick={() => toggleSort("name")}>
-                  <div style={{ display: "flex", alignItems: "center" }}>Ad / Email <SortIcon columnKey="name" /></div>
+                  <div style={{ display: "flex", alignItems: "center" }}>Ad / Email <SortIcon columnKey="name" activeKey={sortKey} dir={sortDir} /></div>
                 </th>
                 <th style={th} onClick={() => toggleSort("planType")}>
-                  <div style={{ display: "flex", alignItems: "center" }}>Plan <SortIcon columnKey="planType" /></div>
+                  <div style={{ display: "flex", alignItems: "center" }}>Plan <SortIcon columnKey="planType" activeKey={sortKey} dir={sortDir} /></div>
                 </th>
                 <th style={th} onClick={() => toggleSort("credits")}>
-                  <div style={{ display: "flex", alignItems: "center" }}>Kredi <SortIcon columnKey="credits" /></div>
+                  <div style={{ display: "flex", alignItems: "center" }}>Kredi <SortIcon columnKey="credits" activeKey={sortKey} dir={sortDir} /></div>
                 </th>
                 <th style={th} onClick={() => toggleSort("currentPeriodEnd")}>
-                  <div style={{ display: "flex", alignItems: "center" }}>Üyelik Bitiş <SortIcon columnKey="currentPeriodEnd" /></div>
+                  <div style={{ display: "flex", alignItems: "center" }}>Üyelik Bitiş <SortIcon columnKey="currentPeriodEnd" activeKey={sortKey} dir={sortDir} /></div>
                 </th>
                 <th style={{ ...th, textAlign: "center" }} onClick={() => toggleSort("cards")}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>Materyal <SortIcon columnKey="cards" /></div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>Materyal <SortIcon columnKey="cards" activeKey={sortKey} dir={sortDir} /></div>
                 </th>
                 <th style={{ ...th, textAlign: "center" }} onClick={() => toggleSort("students")}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>Öğrenci <SortIcon columnKey="students" /></div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>Öğrenci <SortIcon columnKey="students" activeKey={sortKey} dir={sortDir} /></div>
                 </th>
                 <th style={{ ...th, textAlign: "center" }} onClick={() => toggleSort("lessons")}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>Randevu <SortIcon columnKey="lessons" /></div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>Randevu <SortIcon columnKey="lessons" activeKey={sortKey} dir={sortDir} /></div>
                 </th>
                 <th style={{ ...th, textAlign: "center" }} onClick={() => toggleSort("monthlyUsageUsd")}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>AI Maliyet <SortIcon columnKey="monthlyUsageUsd" /></div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>AI Maliyet <SortIcon columnKey="monthlyUsageUsd" activeKey={sortKey} dir={sortDir} /></div>
                 </th>
                 <th style={th} onClick={() => toggleSort("lastLogin")}>
-                  <div style={{ display: "flex", alignItems: "center" }}>Son Giriş <SortIcon columnKey="lastLogin" /></div>
+                  <div style={{ display: "flex", alignItems: "center" }}>Son Giriş <SortIcon columnKey="lastLogin" activeKey={sortKey} dir={sortDir} /></div>
                 </th>
                 <th style={{ ...th, cursor: "default" }} />
               </tr>
