@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Lightbulb, Home, RefreshCw, Library } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
+import { Lightbulb, Home, RefreshCw, Library } from "lucide-react";
+import { WORK_AREA_LABEL, calcAge } from "@/lib/constants";
+import { PBtn, PCard, PBadge, PSelect, PLabel } from "@/components/poster";
+import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -37,6 +37,14 @@ interface DrillResult {
   cueTypes?: string[];
   homeGuidance?: string;
 }
+
+type BadgeColor = "accent" | "green" | "yellow" | "pink" | "blue" | "ink" | "soft";
+
+const WORK_AREA_BADGE: Record<string, BadgeColor> = {
+  speech: "yellow",
+  language: "accent",
+  hearing: "blue",
+};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -101,7 +109,6 @@ const LOADING_MSGS = [
 
 function highlightSound(text: string, sounds: string[]) {
   if (!sounds.length) return <span>{text}</span>;
-  // Strip slashes for matching: /s/ → s
   const letters = sounds.map((s) => s.replace(/\//g, "")).filter(Boolean);
   const pattern = new RegExp(`(${letters.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
   const parts = text.split(pattern);
@@ -109,7 +116,7 @@ function highlightSound(text: string, sounds: string[]) {
     <>
       {parts.map((part, i) =>
         pattern.test(part) ? (
-          <span key={i} className="font-bold text-[#FE703A]">{part}</span>
+          <span key={i} style={{ fontWeight: 800, color: "var(--poster-accent)" }}>{part}</span>
         ) : (
           <span key={i}>{part}</span>
         )
@@ -140,14 +147,17 @@ function LoadingMessages() {
   }, []);
 
   return (
-    <div className="flex h-10 items-center justify-center">
-      <p
-        className="text-sm text-zinc-500 transition-opacity duration-300 text-center"
-        style={{ opacity: visible ? 1 : 0 }}
-      >
-        {LOADING_MSGS[index]}
-      </p>
-    </div>
+    <p
+      style={{
+        fontSize: 13,
+        color: "var(--poster-ink-2)",
+        transition: "opacity .3s",
+        opacity: visible ? 1 : 0,
+        margin: 0,
+      }}
+    >
+      {LOADING_MSGS[index]}
+    </p>
   );
 }
 
@@ -155,11 +165,23 @@ function LoadingMessages() {
 
 function IsolatedView({ items }: { items: DrillItem[] }) {
   return (
-    <ul className="space-y-2">
+    <ul style={{ display: "flex", flexDirection: "column", gap: 8, margin: 0, padding: 0, listStyle: "none" }}>
       {items.map((item, i) => (
-        <li key={i} className="flex items-center gap-3 rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-2.5">
-          <span className="text-xs font-semibold text-zinc-400 w-5">{i + 1}.</span>
-          <span className="text-sm text-zinc-800">{item.word}</span>
+        <li
+          key={i}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "10px 14px",
+            background: "var(--poster-bg-2)",
+            border: "2px solid var(--poster-ink)",
+            borderRadius: 10,
+            boxShadow: "0 2px 0 var(--poster-ink)",
+          }}
+        >
+          <span style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-3)", width: 22 }}>{i + 1}.</span>
+          <span style={{ fontSize: 14, color: "var(--poster-ink)" }}>{item.word}</span>
         </li>
       ))}
     </ul>
@@ -168,13 +190,23 @@ function IsolatedView({ items }: { items: DrillItem[] }) {
 
 function SyllableView({ items }: { items: DrillItem[] }) {
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8 }}>
       {items.map((item, i) => (
         <div
           key={i}
-          className="rounded-lg border border-[#107996]/20 bg-[#107996]/5 px-3 py-2.5 text-center"
+          style={{
+            padding: "10px 12px",
+            background: "var(--poster-panel)",
+            border: "2px solid var(--poster-ink)",
+            borderRadius: 10,
+            boxShadow: "0 2px 0 var(--poster-ink)",
+            textAlign: "center",
+            fontSize: 14,
+            fontWeight: 700,
+            color: "var(--poster-ink)",
+          }}
         >
-          <span className="text-sm font-semibold text-[#107996]">{item.word}</span>
+          {item.word}
         </div>
       ))}
     </div>
@@ -183,26 +215,32 @@ function SyllableView({ items }: { items: DrillItem[] }) {
 
 function WordView({ items, sounds }: { items: DrillItem[]; sounds: string[] }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+    <div
+      style={{
+        background: "var(--poster-panel)",
+        border: "2px solid var(--poster-ink)",
+        borderRadius: 12,
+        boxShadow: "0 3px 0 var(--poster-ink)",
+        overflow: "hidden",
+      }}
+    >
+      <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
         <thead>
-          <tr className="border-b border-zinc-200">
-            <th className="pb-2 text-left text-xs font-semibold text-zinc-400 w-8">#</th>
-            <th className="pb-2 text-left text-xs font-semibold text-zinc-400">Kelime</th>
-            <th className="pb-2 text-left text-xs font-semibold text-zinc-400">Heceler</th>
-            <th className="pb-2 text-left text-xs font-semibold text-zinc-400">Pozisyon</th>
+          <tr style={{ background: "var(--poster-bg-2)", borderBottom: "2px solid var(--poster-ink)" }}>
+            <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 10, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", width: 36 }}>#</th>
+            <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 10, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em" }}>Kelime</th>
+            <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 10, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em" }}>Heceler</th>
+            <th style={{ padding: "8px 12px", textAlign: "left", fontSize: 10, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em" }}>Pozisyon</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, i) => (
-            <tr key={i} className={cn("border-b border-zinc-100", i % 2 === 0 ? "bg-white" : "bg-zinc-50")}>
-              <td className="py-2 text-xs text-zinc-400">{i + 1}</td>
-              <td className="py-2 font-medium text-zinc-800">{highlightSound(item.word, sounds)}</td>
-              <td className="py-2 text-zinc-500">{item.syllableBreak}</td>
-              <td className="py-2">
-                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500">
-                  {POSITION_LABEL[item.position] ?? item.position}
-                </span>
+            <tr key={i} style={{ borderTop: i === 0 ? "none" : "2px dashed var(--poster-ink-faint)" }}>
+              <td style={{ padding: "10px 12px", fontSize: 11, color: "var(--poster-ink-3)" }}>{i + 1}</td>
+              <td style={{ padding: "10px 12px", fontWeight: 600, color: "var(--poster-ink)" }}>{highlightSound(item.word, sounds)}</td>
+              <td style={{ padding: "10px 12px", color: "var(--poster-ink-2)" }}>{item.syllableBreak}</td>
+              <td style={{ padding: "10px 12px" }}>
+                <PBadge color="soft">{POSITION_LABEL[item.position] ?? item.position}</PBadge>
               </td>
             </tr>
           ))}
@@ -214,14 +252,23 @@ function WordView({ items, sounds }: { items: DrillItem[]; sounds: string[] }) {
 
 function SentenceView({ items, sounds }: { items: DrillItem[]; sounds: string[] }) {
   return (
-    <div className="space-y-2.5">
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {items.map((item, i) => (
-        <div key={i} className="rounded-lg border border-zinc-100 bg-zinc-50 p-3">
-          <p className="text-sm font-semibold text-zinc-800 mb-1">
+        <div
+          key={i}
+          style={{
+            padding: 12,
+            background: "var(--poster-bg-2)",
+            border: "2px solid var(--poster-ink)",
+            borderRadius: 12,
+            boxShadow: "0 2px 0 var(--poster-ink)",
+          }}
+        >
+          <p style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink)", margin: "0 0 4px" }}>
             {highlightSound(item.word, sounds)}
           </p>
           {item.sentence && (
-            <p className="text-xs text-zinc-600 leading-relaxed">
+            <p style={{ fontSize: 12, color: "var(--poster-ink-2)", lineHeight: 1.5, margin: 0 }}>
               {highlightSound(item.sentence, sounds)}
             </p>
           )}
@@ -233,15 +280,24 @@ function SentenceView({ items, sounds }: { items: DrillItem[]; sounds: string[] 
 
 function ContextualView({ items, sounds }: { items: DrillItem[]; sounds: string[] }) {
   return (
-    <div className="space-y-3">
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {items.map((item, i) => (
-        <div key={i} className="rounded-lg border border-zinc-200 bg-white p-4">
+        <div
+          key={i}
+          style={{
+            padding: 14,
+            background: "var(--poster-panel)",
+            border: "2px solid var(--poster-ink)",
+            borderRadius: 12,
+            boxShadow: "0 2px 0 var(--poster-ink)",
+          }}
+        >
           {item.sentence ? (
-            <p className="text-sm text-zinc-700 leading-loose">
+            <p style={{ fontSize: 13, color: "var(--poster-ink)", lineHeight: 1.8, margin: 0 }}>
               {highlightSound(item.sentence, sounds)}
             </p>
           ) : (
-            <p className="text-sm font-medium text-zinc-800">
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--poster-ink)", margin: 0 }}>
               {highlightSound(item.word, sounds)}
             </p>
           )}
@@ -255,31 +311,23 @@ function DrillResultView({ drill }: { drill: DrillResult }) {
   const sounds = drill.targetSounds ?? [];
 
   return (
-    <div className="space-y-5">
-      {/* Header badges */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div>
-        <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-3">{drill.title}</h2>
-        <div className="flex flex-wrap gap-1.5">
+        <h2 style={{ fontSize: 18, fontWeight: 800, color: "var(--poster-ink)", margin: "0 0 10px", letterSpacing: "-.01em" }}>
+          {drill.title}
+        </h2>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
           {sounds.map((s) => (
-            <span key={s} className="rounded-full bg-[#107996]/10 border border-[#107996]/20 px-2.5 py-0.5 text-xs font-semibold text-[#107996]">
-              {s}
-            </span>
+            <PBadge key={s} color="blue">{s}</PBadge>
           ))}
           {(drill.positions ?? []).map((p) => (
-            <span key={p} className="rounded-full bg-zinc-100 border border-zinc-200 px-2.5 py-0.5 text-xs text-zinc-600">
-              {POSITION_LABEL[p] ?? p}
-            </span>
+            <PBadge key={p} color="soft">{POSITION_LABEL[p] ?? p}</PBadge>
           ))}
-          <span className="rounded-full bg-[#FE703A]/10 border border-[#FE703A]/20 px-2.5 py-0.5 text-xs text-[#FE703A]">
-            {LEVEL_LABEL[drill.level] ?? drill.level}
-          </span>
-          <span className="rounded-full bg-zinc-100 border border-zinc-200 px-2.5 py-0.5 text-xs text-zinc-600">
-            {drill.items?.length ?? 0} öğe
-          </span>
+          <PBadge color="accent">{LEVEL_LABEL[drill.level] ?? drill.level}</PBadge>
+          <PBadge color="soft">{drill.items?.length ?? 0} öğe</PBadge>
         </div>
       </div>
 
-      {/* Items */}
       <div>
         {drill.level === "isolated"   && <IsolatedView   items={drill.items} />}
         {drill.level === "syllable"   && <SyllableView   items={drill.items} />}
@@ -288,39 +336,52 @@ function DrillResultView({ drill }: { drill: DrillResult }) {
         {drill.level === "contextual" && <ContextualView items={drill.items} sounds={sounds} />}
       </div>
 
-      {/* Cue Types */}
       {drill.cueTypes?.length ? (
         <div>
-          <p className="text-xs font-semibold text-zinc-500 mb-2">İpucu Türleri</p>
-          <div className="flex flex-wrap gap-2">
+          <p style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: "0 0 8px" }}>
+            İpucu Türleri
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {drill.cueTypes.map((c, i) => (
-              <span key={i} className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs text-zinc-600">
-                {c}
-              </span>
+              <PBadge key={i} color="soft">{c}</PBadge>
             ))}
           </div>
         </div>
       ) : null}
 
-      {/* Expert Notes */}
       {drill.expertNotes && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Lightbulb className="h-4 w-4 text-amber-600 shrink-0" />
-            <span className="text-xs font-semibold text-amber-800">Uzman Notları</span>
+        <div
+          style={{
+            padding: 14,
+            background: "#fff3d1",
+            border: "2px solid #b7791f",
+            borderRadius: 12,
+            boxShadow: "0 3px 0 #b7791f",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <Lightbulb style={{ width: 16, height: 16, color: "#b7791f" }} />
+            <span style={{ fontSize: 12, fontWeight: 800, color: "#5a3d05" }}>Uzman Notları</span>
           </div>
-          <p className="text-xs text-amber-700 leading-relaxed">{drill.expertNotes}</p>
+          <p style={{ fontSize: 12, color: "#5a3d05", lineHeight: 1.6, margin: 0 }}>{drill.expertNotes}</p>
         </div>
       )}
 
-      {/* Home Guidance */}
       {drill.homeGuidance && (
-        <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Home className="h-4 w-4 text-blue-600 shrink-0" />
-            <span className="text-xs font-semibold text-blue-800">Veli Rehberi</span>
+        <div
+          style={{
+            padding: 14,
+            background: "#e0ecfb",
+            border: "2px solid var(--poster-blue)",
+            borderRadius: 12,
+            boxShadow: "0 3px 0 var(--poster-blue)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <Home style={{ width: 16, height: 16, color: "var(--poster-blue)" }} />
+            <span style={{ fontSize: 12, fontWeight: 800, color: "#0e3a6b" }}>Veli Rehberi</span>
           </div>
-          <p className="text-xs text-blue-700 leading-relaxed">{drill.homeGuidance}</p>
+          <p style={{ fontSize: 12, color: "#0e3a6b", lineHeight: 1.6, margin: 0 }}>{drill.homeGuidance}</p>
         </div>
       )}
     </div>
@@ -330,10 +391,9 @@ function DrillResultView({ drill }: { drill: DrillResult }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function ArticulationPage() {
-  const [students, setStudents]           = useState<Student[]>([]);
+  const [students, setStudents]               = useState<Student[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
 
-  // Form state
   const [studentId,      setStudentId]      = useState("");
   const [selectedSounds, setSelectedSounds] = useState<string[]>([]);
   const [positions,      setPositions]      = useState<string[]>(["initial"]);
@@ -342,7 +402,6 @@ export default function ArticulationPage() {
   const [theme,          setTheme]          = useState("none");
   const [formKey,        setFormKey]        = useState(0);
 
-  // Result state
   const [loading,     setLoading]     = useState(false);
   const [drill,       setDrill]       = useState<DrillResult | null>(null);
   const [savedCardId, setSavedCardId] = useState<string | null>(null);
@@ -419,270 +478,255 @@ export default function ArticulationPage() {
     setTheme("none");
   }
 
-  const inputCls = "w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30 dark:text-muted-foreground/60";
-  const labelCls = "block text-xs font-bold text-[#023435]/70 dark:text-foreground/80 mb-1.5 uppercase tracking-wide";
+  // ── Button helpers ───────────────────────────────────────────────────────────
+  const pillStyle = (active: boolean): React.CSSProperties => ({
+    padding: "6px 12px",
+    background: active ? "var(--poster-ink)" : "var(--poster-panel)",
+    color: active ? "#fff" : "var(--poster-ink)",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 999,
+    boxShadow: active ? "0 2px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+    fontSize: 12,
+    fontWeight: 700,
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+  });
 
-  return (
-    <div
-      className="w-full flex flex-col relative md:h-[calc(100vh-0px)] md:overflow-hidden"
-      style={{ background: "var(--surface-page-gradient)" }}
-    >
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
-    <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:h-full flex flex-col">
-      {/* Header */}
-      <div className="mb-5 shrink-0 bg-white/50 dark:bg-card/50 backdrop-blur-xl rounded-2xl border border-white/70 dark:border-border/60 px-5 py-4 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
-        <Link
-          href="/tools"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Araçlara Dön
-        </Link>
-        <h1 className="text-xl font-extrabold text-[#023435] dark:text-foreground tracking-tight">Artikülasyon Alıştırma Üretici</h1>
-        <p className="text-sm text-[#023435]/60 dark:text-muted-foreground mt-0.5">
-          Konuşma sesi bozuklukları için hedef ses bazlı, kişiselleştirilmiş alıştırma materyalleri üretin.
-        </p>
-      </div>
+  const chipStyle = (active: boolean): React.CSSProperties => ({
+    padding: "8px 14px",
+    background: active ? "var(--poster-accent)" : "var(--poster-panel)",
+    color: active ? "#fff" : "var(--poster-ink)",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 10,
+    boxShadow: active ? "0 2px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+    fontSize: 12,
+    fontWeight: 700,
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+  });
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[400px_1fr] md:flex-1 md:min-h-0">
-        {/* ── Sol: Form ── */}
-        <div className="flex flex-col md:min-h-0">
-          <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
-            <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
+  const rowStyle = (active: boolean): React.CSSProperties => ({
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "10px 12px",
+    background: active ? "var(--poster-accent)" : "var(--poster-panel)",
+    color: active ? "#fff" : "var(--poster-ink)",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 10,
+    boxShadow: active ? "0 2px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+    textAlign: "left",
+  });
 
-              {/* Öğrenci */}
-              <div>
-                <label className={labelCls}>Öğrenci</label>
-                <select
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  className={inputCls}
-                  required
-                >
-                  <option value="">
-                    {studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}
-                  </option>
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-                {selectedStudent && (
-                  <div className="mt-2 rounded-xl border border-white/80 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm px-3 py-2.5 flex flex-wrap gap-1.5">
-                    {selectedStudent.birthDate && (
-                      <span className="rounded-full bg-white border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600">
-                        {calcAge(selectedStudent.birthDate)}
-                      </span>
-                    )}
-                    <span className={cn("rounded-full px-2 py-0.5 text-xs border", WORK_AREA_COLOR[selectedStudent.workArea] ?? "bg-zinc-100 text-zinc-600")}>
-                      {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
-                    </span>
-                    {selectedStudent.diagnosis && (
-                      <span className="rounded-full bg-white border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600 truncate max-w-full">
-                        {selectedStudent.diagnosis}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
+  const countStyle = (active: boolean): React.CSSProperties => ({
+    flex: 1,
+    padding: "8px 0",
+    background: active ? "var(--poster-ink)" : "var(--poster-panel)",
+    color: active ? "#fff" : "var(--poster-ink)",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 10,
+    boxShadow: active ? "0 2px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+    fontSize: 13,
+    fontWeight: 800,
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+  });
 
-              {/* Hedef sesler */}
-              <div>
-                <label className={labelCls}>
-                  Hedef Ses(ler)
-                  {selectedSounds.length > 0 && (
-                    <span className="ml-2 text-[#107996] font-normal">
-                      ({selectedSounds.join(", ")} seçili)
-                    </span>
-                  )}
-                </label>
-                <div className="space-y-2.5">
-                  {SOUND_GROUPS.map((group) => (
-                    <div key={group.label}>
-                      <p className="text-[10px] text-zinc-400 mb-1">{group.label}</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {group.sounds.map((sound) => (
-                          <button
-                            key={sound}
-                            type="button"
-                            onClick={() => toggleSound(sound)}
-                            className={cn(
-                              "rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
-                              selectedSounds.includes(sound)
-                                ? "border-[#107996] bg-[#107996] text-white"
-                                : "border-zinc-200 bg-white text-zinc-600 hover:border-[#107996]/40 hover:bg-[#107996]/5"
-                            )}
-                          >
-                            {sound}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+  const submitStyle: React.CSSProperties = {
+    width: "100%",
+    height: 44,
+    background: "var(--poster-accent)",
+    color: "#fff",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 12,
+    boxShadow: "0 3px 0 var(--poster-ink)",
+    fontSize: 14,
+    fontWeight: 800,
+    cursor: loading ? "not-allowed" : "pointer",
+    opacity: loading ? 0.6 : 1,
+    fontFamily: "var(--font-display)",
+  };
 
-              {/* Ses pozisyonu */}
-              <div>
-                <label className={labelCls}>Ses Pozisyonu</label>
-                <div className="flex flex-wrap gap-2">
-                  {POSITION_OPTIONS.map((p) => (
-                    <button
-                      key={p.value}
-                      type="button"
-                      onClick={() => togglePosition(p.value)}
-                      className={cn(
-                        "rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                        positions.includes(p.value)
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      {p.label}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => togglePosition("all")}
-                    className={cn(
-                      "rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                      positions.length === 3
-                        ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                        : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                    )}
-                  >
-                    Tümü
-                  </button>
-                </div>
-              </div>
-
-              {/* Alıştırma seviyesi */}
-              <div>
-                <label className={labelCls}>Alıştırma Seviyesi</label>
-                <div className="space-y-1.5">
-                  {LEVEL_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setLevel(opt.value)}
-                      className={cn(
-                        "w-full flex items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors",
-                        level === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      <span className="text-xs font-semibold">{opt.label}</span>
-                      <span className="text-[10px] text-zinc-400">{opt.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Kelime sayısı */}
-              <div>
-                <label className={labelCls}>Kelime / Öğe Sayısı</label>
-                <div className="flex gap-2">
-                  {ITEM_COUNTS.map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => setItemCount(n)}
-                      className={cn(
-                        "flex-1 rounded-lg border py-2 text-xs font-semibold transition-colors",
-                        itemCount === n
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tema */}
-              <div>
-                <label className={labelCls}>Tema <span className="font-normal text-zinc-400">(opsiyonel)</span></label>
-                <select
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
-                  className={inputCls}
-                >
-                  {THEMES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-lg bg-[#FE703A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? "Üretiliyor..." : "Alıştırma Üret"}
-              </button>
-
-              <p className="text-center text-xs text-zinc-400">15 kredi kullanılacak</p>
-            </form>
-          </div>
-        </div>
-
-        {/* ── Sağ: Sonuç ── */}
-        <div className="flex flex-col md:min-h-0">
-          <div className="overflow-y-auto no-scrollbar flex flex-col md:flex-1 md:min-h-0">
-            {loading ? (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-                <div className="text-center space-y-4 px-8">
-                  <div className="mx-auto h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
-                  <LoadingMessages />
-                </div>
-              </div>
-            ) : drill ? (
-              <div className="flex flex-col gap-4 md:flex-1 md:min-h-0">
-                <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
-                  <DrillResultView drill={drill} />
-                </div>
-
-                {/* Aksiyon butonları */}
-                <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)] shrink-0">
-                  <p className="text-xs font-semibold text-zinc-400 mb-3">Sonraki adım</p>
-                  <div className="flex flex-wrap gap-2">
-                    {savedCardId && (
-                      <Link
-                        href="/cards"
-                        className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
-                      >
-                        <Library className="h-4 w-4" />
-                        Kütüphaneye Git
-                      </Link>
-                    )}
-                    <button
-                      onClick={handleReset}
-                      className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-500 hover:bg-zinc-50 transition-colors"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                      Yeni Alıştırma Üret
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-[#023435]/15 bg-white/40 dark:bg-card/40 backdrop-blur-xl">
-                <div className="text-center space-y-2 px-8">
-                  <div className="text-4xl">🎤</div>
-                  <p className="text-sm font-medium text-zinc-500">Henüz alıştırma üretilmedi</p>
-                  <p className="text-xs text-zinc-400">
-                    Sol taraftan hedef sesleri ve parametreleri seçip &quot;Alıştırma Üret&quot; butonuna bas.
-                  </p>
-                </div>
-              </div>
+  const form = (
+    <form key={formKey} onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      {/* Öğrenci */}
+      <div>
+        <PLabel>Öğrenci</PLabel>
+        <PSelect value={studentId} onChange={(e) => setStudentId(e.target.value)} required>
+          <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
+          {students.map((s) => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </PSelect>
+        {selectedStudent && (
+          <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {selectedStudent.birthDate && (
+              <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>
+            )}
+            <PBadge color={WORK_AREA_BADGE[selectedStudent.workArea] ?? "soft"}>
+              {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
+            </PBadge>
+            {selectedStudent.diagnosis && (
+              <PBadge color="soft">{selectedStudent.diagnosis}</PBadge>
             )}
           </div>
+        )}
+      </div>
+
+      {/* Hedef sesler */}
+      <div>
+        <PLabel>
+          Hedef Ses(ler){" "}
+          {selectedSounds.length > 0 && (
+            <span style={{ color: "var(--poster-blue)", fontWeight: 600 }}>
+              ({selectedSounds.join(", ")} seçili)
+            </span>
+          )}
+        </PLabel>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {SOUND_GROUPS.map((group) => (
+            <div key={group.label}>
+              <p style={{ fontSize: 10, color: "var(--poster-ink-3)", margin: "0 0 4px", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".08em" }}>
+                {group.label}
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {group.sounds.map((sound) => (
+                  <button
+                    key={sound}
+                    type="button"
+                    onClick={() => toggleSound(sound)}
+                    style={pillStyle(selectedSounds.includes(sound))}
+                  >
+                    {sound}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-    </main>
-    </div>
+
+      {/* Ses pozisyonu */}
+      <div>
+        <PLabel>Ses Pozisyonu</PLabel>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {POSITION_OPTIONS.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              onClick={() => togglePosition(p.value)}
+              style={chipStyle(positions.includes(p.value))}
+            >
+              {p.label}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => togglePosition("all")}
+            style={chipStyle(positions.length === 3)}
+          >
+            Tümü
+          </button>
+        </div>
+      </div>
+
+      {/* Alıştırma seviyesi */}
+      <div>
+        <PLabel>Alıştırma Seviyesi</PLabel>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {LEVEL_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setLevel(opt.value)}
+              style={rowStyle(level === opt.value)}
+            >
+              <span style={{ fontSize: 13, fontWeight: 700 }}>{opt.label}</span>
+              <span style={{ fontSize: 10, opacity: 0.75 }}>{opt.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Öğe sayısı */}
+      <div>
+        <PLabel>Kelime / Öğe Sayısı</PLabel>
+        <div style={{ display: "flex", gap: 6 }}>
+          {ITEM_COUNTS.map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => setItemCount(n)}
+              style={countStyle(itemCount === n)}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tema */}
+      <div>
+        <PLabel>Tema <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(opsiyonel)</span></PLabel>
+        <PSelect value={theme} onChange={(e) => setTheme(e.target.value)}>
+          {THEMES.map((t) => (
+            <option key={t.value} value={t.value}>{t.label}</option>
+          ))}
+        </PSelect>
+      </div>
+
+      <button type="submit" disabled={loading} style={submitStyle}>
+        {loading ? "Üretiliyor..." : "Alıştırma Üret"}
+      </button>
+      <p style={{ textAlign: "center", fontSize: 11, color: "var(--poster-ink-3)", margin: 0 }}>
+        15 kredi kullanılacak
+      </p>
+    </form>
+  );
+
+  const result = loading ? (
+    <ToolLoadingCard>
+      <LoadingMessages />
+    </ToolLoadingCard>
+  ) : drill ? (
+    <>
+      <PCard rounded={18} style={{ padding: 18, background: "var(--poster-panel)" }}>
+        <DrillResultView drill={drill} />
+      </PCard>
+      <PCard rounded={14} style={{ padding: 14, background: "var(--poster-panel)" }}>
+        <p style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: "0 0 10px" }}>
+          Sonraki adım
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {savedCardId && (
+            <PBtn as="a" href="/cards" variant="white" size="md" icon={<Library style={{ width: 16, height: 16 }} />} style={{ flex: 1, minWidth: 140 }}>
+              Kütüphaneye Git
+            </PBtn>
+          )}
+          <PBtn as="button" variant="white" size="md" onClick={handleReset} icon={<RefreshCw style={{ width: 16, height: 16 }} />} style={{ flex: 1, minWidth: 140 }}>
+            Yeni Alıştırma Üret
+          </PBtn>
+        </div>
+      </PCard>
+    </>
+  ) : (
+    <ToolEmptyState
+      icon="🎤"
+      title="Henüz alıştırma üretilmedi"
+      hint='Sol taraftan hedef sesleri ve parametreleri seçip "Alıştırma Üret" butonuna bas.'
+    />
+  );
+
+  return (
+    <ToolShell
+      title="Artikülasyon Alıştırma Üretici"
+      description="Konuşma sesi bozuklukları için hedef ses bazlı, kişiselleştirilmiş alıştırma materyalleri üretin."
+      form={form}
+      result={result}
+      formWidth={400}
+    />
   );
 }

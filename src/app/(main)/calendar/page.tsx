@@ -1,16 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { cn, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { GlassCalendar } from "@/components/ui/glass-calendar";
-import { ModalPortal } from "@/components/ui/modal-portal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PBtn, PCard, PBadge, PSelect, PInput, PTextarea, PLabel, PModal, PCheckbox } from "@/components/poster";
 import useSWR from "swr";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Check, X as XIcon, RotateCcw, Trash2, Repeat } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type LessonStatus = "PLANNED" | "COMPLETED" | "CANCELLED";
 
@@ -55,9 +54,7 @@ interface Student {
   name: string;
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const DAY_LABELS   = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+const DAY_LABELS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 const MONTH_LABELS = [
   "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
   "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık",
@@ -69,27 +66,30 @@ const RECURRING_DAYS = [
   { label: "Paz", value: 0 },
 ];
 
-const START_HOUR  = 8;
-const END_HOUR    = 20;
+const START_HOUR = 8;
+const END_HOUR = 20;
 const HOUR_HEIGHT = 48;
 
-const STATUS_PILL: Record<LessonStatus, string> = {
-  PLANNED:   "bg-[rgba(16,121,150,0.12)] text-[#107996] dark:text-[#90DDF0] border-[#107996]/25 dark:border-[#90DDF0]/25",
-  COMPLETED: "bg-[rgba(2,52,53,0.1)] dark:bg-card/70 text-[#023435] dark:text-emerald-400 border-[rgba(2,52,53,0.2)] dark:border-emerald-400/20",
-  CANCELLED: "bg-[rgba(105,33,55,0.1)] text-[#692137] dark:text-red-400 border-[rgba(105,33,55,0.2)] dark:border-red-400/20",
+const STATUS_COLOR: Record<LessonStatus, "blue" | "green" | "pink"> = {
+  PLANNED: "blue",
+  COMPLETED: "green",
+  CANCELLED: "pink",
 };
+
+const STATUS_VAR: Record<LessonStatus, string> = {
+  PLANNED: "var(--poster-blue)",
+  COMPLETED: "var(--poster-green)",
+  CANCELLED: "var(--poster-danger)",
+};
+
 const STATUS_LABEL: Record<LessonStatus, string> = {
-  PLANNED:   "Planlandı",
+  PLANNED: "Planlandı",
   COMPLETED: "Tamamlandı",
   CANCELLED: "İptal Edildi",
 };
 
-const GLASS = "bg-[rgba(2,52,53,0.06)] dark:bg-white/5 border border-[rgba(2,52,53,0.12)] dark:border-white/10 backdrop-blur-[12px]";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function getWeekStart(date: Date): Date {
-  const d   = new Date(date);
+  const d = new Date(date);
   const day = d.getDay();
   d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
   d.setHours(0, 0, 0, 0);
@@ -97,13 +97,8 @@ function getWeekStart(date: Date): Date {
 }
 
 function isSameDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth()    === b.getMonth()    &&
-    a.getDate()     === b.getDate()
-  );
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
-
 
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(":").map(Number);
@@ -124,24 +119,25 @@ function expandLessons(lessons: Lesson[], startDate: Date, endDate: Date): Displ
       while (d <= endDate) {
         if (d >= recurStart && d.getDay() === lesson.recurringDay) {
           const currentDateStr = new Date(d).toISOString().split("T")[0];
-          const exception = lesson.exceptions?.find(ex => ex.originalDate.startsWith(currentDateStr));
-          
+          const exception = lesson.exceptions?.find((ex) => ex.originalDate.startsWith(currentDateStr));
+
           if (exception?.status === "CANCELLED") {
-            // Cancelled exception means it's deleted for this instance
             d.setDate(d.getDate() + 1);
             continue;
           }
 
           result.push({
-            ...lesson, 
+            ...lesson,
             displayDate: new Date(d),
-            ...(exception ? {
-              title: exception.title ?? lesson.title,
-              startTime: exception.startTime ?? lesson.startTime,
-              endTime: exception.endTime ?? lesson.endTime,
-              status: exception.status ?? lesson.status,
-              note: exception.note ?? lesson.note,
-            } : {})
+            ...(exception
+              ? {
+                  title: exception.title ?? lesson.title,
+                  startTime: exception.startTime ?? lesson.startTime,
+                  endTime: exception.endTime ?? lesson.endTime,
+                  status: exception.status ?? lesson.status,
+                  note: exception.note ?? lesson.note,
+                }
+              : {}),
           });
         }
         d.setDate(d.getDate() + 1);
@@ -154,50 +150,52 @@ function expandLessons(lessons: Lesson[], startDate: Date, endDate: Date): Displ
   });
 }
 
-// Collect all dates that have at least one lesson (for GlassCalendar dots)
 function collectLessonDates(lessons: Lesson[], year: number, month: number): Date[] {
   const start = new Date(year, month - 1, 1);
-  const end   = new Date(year, month + 1, 0);
+  const end = new Date(year, month + 1, 0);
   return expandLessons(lessons, start, end).map((l) => l.displayDate);
 }
 
-// ─── 24-saat TimeSelect ───────────────────────────────────────────────────────
-
-const HOURS   = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
 const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
 
-function TimeSelect({ value, onChange, inputCls }: {
-  value: string;
-  onChange: (v: string) => void;
-  inputCls: string;
-}) {
+function TimeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [hh, mm] = value.split(":").map((p) => p.padStart(2, "0"));
-  const selectCls = inputCls + " cursor-pointer";
   return (
-    <div className="flex items-center gap-1.5">
-      <select
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <PSelect
         value={hh ?? "09"}
         onChange={(e) => onChange(`${e.target.value}:${mm ?? "00"}`)}
-        className={cn(selectCls, "w-20 text-center")}
+        style={{ width: 80, textAlign: "center", padding: "0 30px 0 10px", height: 40 }}
       >
-        {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
-      </select>
-      <span className="text-[#023435]/50 dark:text-muted-foreground font-semibold select-none">:</span>
-      <select
+        {HOURS.map((h) => (
+          <option key={h} value={h}>
+            {h}
+          </option>
+        ))}
+      </PSelect>
+      <span style={{ fontWeight: 800, color: "var(--poster-ink-3)" }}>:</span>
+      <PSelect
         value={mm ?? "00"}
         onChange={(e) => onChange(`${hh ?? "09"}:${e.target.value}`)}
-        className={cn(selectCls, "w-20 text-center")}
+        style={{ width: 80, textAlign: "center", padding: "0 30px 0 10px", height: 40 }}
       >
-        {MINUTES.map((m) => <option key={m} value={m}>{m}</option>)}
-      </select>
+        {MINUTES.map((m) => (
+          <option key={m} value={m}>
+            {m}
+          </option>
+        ))}
+      </PSelect>
     </div>
   );
 }
 
-// ─── Add/Edit Modal ───────────────────────────────────────────────────────────
-
 function LessonModal({
-  students, initialDate, lesson, onClose, onSave,
+  students,
+  initialDate,
+  lesson,
+  onClose,
+  onSave,
 }: {
   students: Student[];
   initialDate?: Date;
@@ -206,25 +204,24 @@ function LessonModal({
   onSave: (data: Lesson) => void;
 }) {
   const isEdit = !!lesson;
-  const [studentId,    setStudentId]    = useState(lesson?.studentId ?? "");
-  const [title,        setTitle]        = useState(lesson?.title ?? "");
+  const [studentId, setStudentId] = useState(lesson?.studentId ?? "");
+  const [title, setTitle] = useState(lesson?.title ?? "");
 
-  // Tarih: 3 ayrı alan (GG / AA / YYYY)
-  const _initDate = lesson ? lesson.date.slice(0, 10) : (initialDate ? initialDate.toISOString().slice(0, 10) : "");
-  const [dayStr,   setDayStr]   = useState(_initDate ? String(parseInt(_initDate.slice(8, 10), 10)) : "");
-  const [monthStr, setMonthStr] = useState(_initDate ? String(parseInt(_initDate.slice(5, 7), 10))  : "");
-  const [yearStr,  setYearStr]  = useState(_initDate ? _initDate.slice(0, 4) : "");
-  // YYYY-MM-DD formatında birleştirilmiş değer
-  const date = (dayStr && monthStr && yearStr && yearStr.length === 4)
-    ? `${yearStr}-${monthStr.padStart(2, "0")}-${dayStr.padStart(2, "0")}`
-    : "";
+  const _initDate = lesson ? lesson.date.slice(0, 10) : initialDate ? initialDate.toISOString().slice(0, 10) : "";
+  const [dayStr, setDayStr] = useState(_initDate ? String(parseInt(_initDate.slice(8, 10), 10)) : "");
+  const [monthStr, setMonthStr] = useState(_initDate ? String(parseInt(_initDate.slice(5, 7), 10)) : "");
+  const [yearStr, setYearStr] = useState(_initDate ? _initDate.slice(0, 4) : "");
+  const date =
+    dayStr && monthStr && yearStr && yearStr.length === 4
+      ? `${yearStr}-${monthStr.padStart(2, "0")}-${dayStr.padStart(2, "0")}`
+      : "";
 
-  const [startTime,    setStartTime]    = useState(lesson?.startTime ?? "09:00");
-  const [endTime,      setEndTime]      = useState(lesson?.endTime   ?? "10:00");
-  const [note,         setNote]         = useState(lesson?.note ?? "");
-  const [isRecurring,  setIsRecurring]  = useState(lesson?.isRecurring ?? false);
+  const [startTime, setStartTime] = useState(lesson?.startTime ?? "09:00");
+  const [endTime, setEndTime] = useState(lesson?.endTime ?? "10:00");
+  const [note, setNote] = useState(lesson?.note ?? "");
+  const [isRecurring, setIsRecurring] = useState(lesson?.isRecurring ?? false);
   const [recurringDay, setRecurringDay] = useState<number>(lesson?.recurringDay ?? 1);
-  const [saving,       setSaving]       = useState(false);
+  const [saving, setSaving] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
@@ -246,16 +243,21 @@ function LessonModal({
     setSaving(true);
     try {
       const body = {
-        studentId, title, date, startTime, endTime,
+        studentId,
+        title,
+        date,
+        startTime,
+        endTime,
         note: note || undefined,
         isRecurring,
         recurringDay: isRecurring ? recurringDay : undefined,
         ...(isEdit ? { status: lesson!.status } : {}),
       };
-      const res  = await fetch(
-        isEdit ? `/api/lessons/${lesson!.id}` : "/api/lessons",
-        { method: isEdit ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
-      );
+      const res = await fetch(isEdit ? `/api/lessons/${lesson!.id}` : "/api/lessons", {
+        method: isEdit ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Hata");
       toast.success(isEdit ? "Ders güncellendi" : "Ders eklendi");
@@ -267,161 +269,210 @@ function LessonModal({
     }
   }
 
-  const inputCls = "w-full rounded-xl border border-[rgba(2,52,53,0.15)] dark:border-border bg-[#f8fafa] dark:bg-muted/20 px-3 py-2 text-sm text-[#023435] dark:text-foreground placeholder-[#023435]/40 dark:placeholder-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/40";
-  const labelCls = "mb-1.5 block text-xs font-medium text-[#023435]/60 dark:text-muted-foreground";
-
   return (
-    <ModalPortal>
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{ background: "rgba(2,52,53,0.4)", backdropFilter: "blur(4px)" }}
-      onClick={onClose}
+    <PModal
+      open
+      onClose={onClose}
+      title={isEdit ? "Dersi Düzenle" : "Yeni Ders Ekle"}
+      width={460}
+      footer={
+        <>
+          <PBtn onClick={onClose} variant="white" size="md">
+            İptal
+          </PBtn>
+          <PBtn onClick={handleSave} disabled={saving} variant="accent" size="md">
+            {saving ? "Kaydediliyor..." : "Kaydet"}
+          </PBtn>
+        </>
+      }
     >
-      <div
-        className="w-full max-w-md rounded-2xl shadow-2xl bg-white dark:bg-popover border border-[rgba(2,52,53,0.12)] dark:border-border/80"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.1)] dark:border-border/70 px-5 py-4">
-          <h2 className="text-sm font-semibold text-[#023435] dark:text-foreground">{isEdit ? "Dersi Düzenle" : "Yeni Ders Ekle"}</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-[#023435]/40 dark:text-muted-foreground/75 hover:bg-[#023435]/8 dark:hover:bg-accent/40 hover:text-[#023435]/80 dark:hover:text-foreground dark:text-foreground/90 transition-colors">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div>
+          <PLabel htmlFor="student">Öğrenci</PLabel>
+          <PSelect id="student" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+            <option value="">Öğrenci seçin</option>
+            {students.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </PSelect>
         </div>
 
-        <div className="px-5 py-4 space-y-4">
-          <div>
-            <label className={labelCls}>Öğrenci</label>
-            <select value={studentId} onChange={(e) => setStudentId(e.target.value)} className={inputCls} style={{ colorScheme: "light" }}>
-              <option value="">Öğrenci seçin</option>
-              {students.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className={labelCls}>Başlık</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ders başlığı" className={inputCls} />
-          </div>
-          <div>
-            <label className={labelCls}>Tarih</label>
-            <div className="relative mt-1">
-              <div className="flex items-center gap-2">
-                <input value={dayStr} onChange={(e) => setDayStr(e.target.value)} placeholder="GG" className={cn(inputCls, "w-16 text-center")} maxLength={2} />
-                <span className="text-[#023435]/30 dark:text-muted-foreground/60 hidden sm:inline">/</span>
-                <input value={monthStr} onChange={(e) => setMonthStr(e.target.value)} placeholder="AA" className={cn(inputCls, "w-16 text-center")} maxLength={2} />
-                <span className="text-[#023435]/30 dark:text-muted-foreground/60 hidden sm:inline">/</span>
-                <input value={yearStr} onChange={(e) => setYearStr(e.target.value)} placeholder="YYYY" className={cn(inputCls, "w-20 text-center")} maxLength={4} />
-                
-                <button
-                  type="button"
-                  onClick={() => setShowCalendar(!showCalendar)}
-                  className="ml-auto w-11 h-11 flex items-center justify-center rounded-xl bg-[rgba(2,52,53,0.04)] dark:bg-card/40 hover:bg-[#FE703A]/10 text-[#023435]/60 dark:text-muted-foreground hover:text-[#FE703A] transition-colors border border-transparent shadow-[0_2px_4px_rgba(2,52,53,0.02)]"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </button>
+        <div>
+          <PLabel htmlFor="title">Başlık</PLabel>
+          <PInput id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ders başlığı" />
+        </div>
+
+        <div>
+          <PLabel>Tarih</PLabel>
+          <div style={{ position: "relative" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <PInput
+                value={dayStr}
+                onChange={(e) => setDayStr(e.target.value)}
+                placeholder="GG"
+                maxLength={2}
+                style={{ width: 70, textAlign: "center" }}
+              />
+              <span style={{ color: "var(--poster-ink-3)" }}>/</span>
+              <PInput
+                value={monthStr}
+                onChange={(e) => setMonthStr(e.target.value)}
+                placeholder="AA"
+                maxLength={2}
+                style={{ width: 70, textAlign: "center" }}
+              />
+              <span style={{ color: "var(--poster-ink-3)" }}>/</span>
+              <PInput
+                value={yearStr}
+                onChange={(e) => setYearStr(e.target.value)}
+                placeholder="YYYY"
+                maxLength={4}
+                style={{ width: 90, textAlign: "center" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowCalendar(!showCalendar)}
+                style={{
+                  marginLeft: "auto",
+                  width: 46,
+                  height: 46,
+                  display: "grid",
+                  placeItems: "center",
+                  borderRadius: 12,
+                  border: "2px solid var(--poster-ink)",
+                  background: showCalendar ? "var(--poster-accent)" : "var(--poster-panel)",
+                  color: showCalendar ? "#fff" : "var(--poster-ink)",
+                  cursor: "pointer",
+                  boxShadow: "var(--poster-shadow-sm)",
+                }}
+              >
+                <CalendarIcon style={{ width: 18, height: 18 }} />
+              </button>
+            </div>
+
+            {showCalendar && (
+              <div style={{ position: "absolute", top: 56, left: 0, right: 0, zIndex: 50 }}>
+                <GlassCalendar
+                  selectedDate={(() => {
+                    const d = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr));
+                    return isNaN(d.getTime()) ? new Date() : d;
+                  })()}
+                  onSelectDate={(newDate) => {
+                    setDayStr(String(newDate.getDate()).padStart(2, "0"));
+                    setMonthStr(String(newDate.getMonth() + 1).padStart(2, "0"));
+                    setYearStr(String(newDate.getFullYear()));
+                    setShowCalendar(false);
+                  }}
+                />
               </div>
-              
-              {showCalendar && (
-                <div className="absolute top-[52px] left-0 right-0 z-50 bg-white dark:bg-popover shadow-[0_8px_32px_rgba(2,52,53,0.12)] rounded-3xl border border-[rgba(2,52,53,0.08)] dark:border-border/60 overflow-hidden">
-                  <GlassCalendar
-                    selectedDate={(() => {
-                      const d = new Date(parseInt(yearStr), parseInt(monthStr) - 1, parseInt(dayStr));
-                      return isNaN(d.getTime()) ? new Date() : d;
-                    })()}
-                    onSelectDate={(newDate) => {
-                      setDayStr(String(newDate.getDate()).padStart(2, "0"));
-                      setMonthStr(String(newDate.getMonth() + 1).padStart(2, "0"));
-                      setYearStr(String(newDate.getFullYear()));
-                      setShowCalendar(false);
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+            )}
           </div>
-        <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelCls}>Başlangıç</label>
-              <TimeSelect value={startTime} onChange={setStartTime} inputCls={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>Bitiş</label>
-              <TimeSelect value={endTime} onChange={setEndTime} inputCls={inputCls} />
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] text-[#023435]/40 dark:text-muted-foreground/75 font-medium">Süre:</span>
-            {[30, 40, 45, 60].map((m) => {
-              const st = timeToMinutes(startTime);
-              const end = st + m;
-              const endStr = `${String(Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`;
-              const isActive = endTime === endStr;
-              return (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setEndTime(endStr)}
-                  className={cn(
-                    "rounded-lg px-2.5 py-1 text-[11px] font-semibold border transition-colors",
-                    isActive
-                      ? "bg-[#FE703A] text-white border-[#FE703A]"
-                      : "border-[rgba(2,52,53,0.15)] dark:border-border text-[#023435]/50 dark:text-muted-foreground hover:border-[#FE703A]/50"
-                  )}
-                >
-                  {m}dk
-                </button>
-              );
-            })}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div>
+            <PLabel>Başlangıç</PLabel>
+            <TimeSelect value={startTime} onChange={setStartTime} />
           </div>
           <div>
-            <label className="flex items-center gap-2.5 cursor-pointer">
-              <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} className="h-4 w-4 rounded accent-[#FE703A]" />
-              <span className="text-sm font-medium text-[#023435]/70 dark:text-foreground/80">Haftalık tekrarlayan ders</span>
-            </label>
-            {isRecurring && (
-              <div className="mt-2.5 flex gap-1.5 flex-wrap">
-                {RECURRING_DAYS.map((d) => (
+            <PLabel>Bitiş</PLabel>
+            <TimeSelect value={endTime} onChange={setEndTime} />
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--poster-ink-3)" }}>Süre:</span>
+          {[30, 40, 45, 60].map((m) => {
+            const st = timeToMinutes(startTime);
+            const end = st + m;
+            const endStr = `${String(Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`;
+            const isActive = endTime === endStr;
+            return (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setEndTime(endStr)}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: 10,
+                  border: "2px solid var(--poster-ink)",
+                  background: isActive ? "var(--poster-accent)" : "var(--poster-panel)",
+                  color: isActive ? "#fff" : "var(--poster-ink)",
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 700,
+                  fontSize: 11,
+                  cursor: "pointer",
+                  boxShadow: isActive ? "2px 2px 0 var(--poster-ink)" : "none",
+                }}
+              >
+                {m}dk
+              </button>
+            );
+          })}
+        </div>
+
+        <div>
+          <PCheckbox
+            id="recurring"
+            checked={isRecurring}
+            onChange={(e) => setIsRecurring(e.target.checked)}
+            label="Haftalık tekrarlayan ders"
+          />
+          {isRecurring && (
+            <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {RECURRING_DAYS.map((d) => {
+                const active = recurringDay === d.value;
+                return (
                   <button
                     key={d.value}
                     type="button"
                     onClick={() => setRecurringDay(d.value)}
-                    className={cn(
-                      "rounded-lg px-3 py-1.5 text-xs font-semibold border transition-colors",
-                      recurringDay === d.value
-                        ? "bg-[#FE703A] text-white border-[#FE703A]"
-                        : "border-[rgba(2,52,53,0.2)] dark:border-border text-[#023435]/50 dark:text-muted-foreground hover:border-[#FE703A]/50 hover:text-[#023435]/80 dark:hover:text-foreground dark:text-foreground/90"
-                    )}
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: 10,
+                      border: "2px solid var(--poster-ink)",
+                      background: active ? "var(--poster-accent)" : "var(--poster-panel)",
+                      color: active ? "#fff" : "var(--poster-ink)",
+                      fontFamily: "var(--font-display)",
+                      fontWeight: 700,
+                      fontSize: 12,
+                      cursor: "pointer",
+                      boxShadow: active ? "2px 2px 0 var(--poster-ink)" : "none",
+                    }}
                   >
                     {d.label}
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div>
-            <label className={labelCls}>Not <span className="text-[#023435]/30 dark:text-muted-foreground/60">(isteğe bağlı)</span></label>
-            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="Ders notu..." className={cn(inputCls, "resize-none")} />
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <div className="border-t border-[rgba(2,52,53,0.1)] dark:border-border/70 px-5 py-4 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl border border-[rgba(2,52,53,0.15)] dark:border-border px-4 py-2 text-sm text-[#023435]/60 dark:text-muted-foreground hover:bg-[#023435]/5 dark:hover:bg-accent/30 transition-colors">İptal</button>
-          <button onClick={handleSave} disabled={saving} className="rounded-xl bg-[#FE703A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-50 transition-colors">
-            {saving ? "Kaydediliyor..." : "Kaydet"}
-          </button>
+        <div>
+          <PLabel htmlFor="note">
+            Not <span style={{ color: "var(--poster-ink-3)", fontWeight: 500 }}>(isteğe bağlı)</span>
+          </PLabel>
+          <PTextarea
+            id="note"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={2}
+            placeholder="Ders notu..."
+          />
         </div>
       </div>
-    </div>
-    </ModalPortal>
+    </PModal>
   );
 }
 
-// ─── Lesson Detail Modal ──────────────────────────────────────────────────────
-
 function LessonDetailModal({
-  lesson, displayDate, onClose, onUpdate, onDelete,
+  lesson,
+  displayDate,
+  onClose,
+  onUpdate,
+  onDelete,
 }: {
   lesson: Lesson;
   displayDate: Date;
@@ -429,11 +480,11 @@ function LessonDetailModal({
   onUpdate: (updated: Lesson) => void;
   onDelete: (id: string) => void;
 }) {
-  const [note,        setNote]        = useState(lesson.note ?? "");
-  const [saving,      setSaving]      = useState(false);
-  const [deleting,    setDeleting]    = useState(false);
+  const [note, setNote] = useState(lesson.note ?? "");
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [editingNote, setEditingNote] = useState(false);
-  const [scope,       setScope]       = useState<"this" | "all">("this");
+  const [scope, setScope] = useState<"this" | "all">("this");
 
   const dateStr = formatDate(displayDate, "long");
   const originalDateStr = displayDate.toISOString().split("T")[0];
@@ -442,33 +493,41 @@ function LessonDetailModal({
     setSaving(true);
     try {
       const qs = lesson.isRecurring ? `?scope=${scope}&date=${originalDateStr}` : "";
-      const res  = await fetch(`/api/lessons/${lesson.id}${qs}`, {
-        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }),
+      const res = await fetch(`/api/lessons/${lesson.id}${qs}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       toast.success("Durum güncellendi");
       onUpdate(data.lesson);
-      // Wait here, if scope was "this", the server returns updated original lesson which has exceptions. 
-      // This is handled by onUpdate at the top level
-    } catch { toast.error("Güncelleme başarısız"); }
-    finally   { setSaving(false); }
+    } catch {
+      toast.error("Güncelleme başarısız");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function saveNote() {
     setSaving(true);
     try {
       const qs = lesson.isRecurring ? `?scope=${scope}&date=${originalDateStr}` : "";
-      const res  = await fetch(`/api/lessons/${lesson.id}${qs}`, {
-        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: note || null }),
+      const res = await fetch(`/api/lessons/${lesson.id}${qs}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note: note || null }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       toast.success("Not kaydedildi");
       onUpdate(data.lesson);
       setEditingNote(false);
-    } catch { toast.error("Not kaydedilemedi"); }
-    finally   { setSaving(false); }
+    } catch {
+      toast.error("Not kaydedilemedi");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleDelete() {
@@ -480,139 +539,231 @@ function LessonDetailModal({
       if (!res.ok) throw new Error("Silinemedi");
       toast.success("Ders silindi");
       if (data.scope === "this") {
-        // We shouldn't physically delete the lesson, just trigger an update so UI refreshes to show it cancelled
-        // Wait, the API doesn't return the lesson object on DELETE.
-        // Actually, for "this", we created an exception with status CANCELLED.
-        // Easiest is to just reload page or tell caller to fetch again.
-        // For now, let's call onUpdate with original lesson but changed so the effect applies.
-        // But we don't have the updated lesson. Better: fetch it.
-        const freshRes = await fetch(`/api/calendar?month=xx`); // no, we don't have this
-        // Just reload window for now or trigger a refresh via custom event. Let's just reload.
         window.location.reload();
       } else {
         onDelete(lesson.id);
       }
-    } catch { toast.error("Silme başarısız"); setDeleting(false); }
+    } catch {
+      toast.error("Silme başarısız");
+      setDeleting(false);
+    }
   }
 
   return (
-    <ModalPortal>
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{ background: "rgba(2,52,53,0.4)", backdropFilter: "blur(4px)" }}
-      onClick={onClose}
+    <PModal
+      open
+      onClose={onClose}
+      title={lesson.title}
+      width={420}
+      footer={
+        <PBtn onClick={handleDelete} disabled={deleting} variant="white" size="sm">
+          <Trash2 style={{ width: 12, height: 12, marginRight: 4 }} />
+          {deleting ? "Siliniyor..." : "Dersi Sil"}
+        </PBtn>
+      }
     >
-      <div
-        className="w-full max-w-sm rounded-2xl shadow-2xl bg-white dark:bg-zinc-900 border border-[rgba(2,52,53,0.12)] dark:border-white/10"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="border-b border-[rgba(2,52,53,0.1)] dark:border-white/10 px-5 py-4">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <p className="text-xs text-[#023435]/40 dark:text-zinc-500 mb-0.5">{lesson.student.name}</p>
-              <h2 className="text-sm font-semibold text-[#023435] dark:text-zinc-100">{lesson.title}</h2>
-              {lesson.isRecurring && (
-                <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-[#FE703A]/80">↺ Haftalık tekrarlayan</span>
-              )}
-            </div>
-            <button onClick={onClose} className="shrink-0 rounded-lg p-1 text-[#023435]/30 dark:text-zinc-500 hover:bg-[#023435]/8 dark:hover:bg-white/10 hover:text-[#023435]/70 dark:hover:text-foreground/90 dark:text-foreground/80 dark:hover:text-zinc-300 transition-colors">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div>
+          <p style={{ margin: 0, fontSize: 11, color: "var(--poster-ink-3)", fontWeight: 700 }}>{lesson.student.name}</p>
+          {lesson.isRecurring && (
+            <span
+              style={{
+                marginTop: 4,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+                fontSize: 10,
+                fontWeight: 700,
+                color: "var(--poster-accent)",
+              }}
+            >
+              <Repeat style={{ width: 10, height: 10 }} /> Haftalık tekrarlayan
+            </span>
+          )}
         </div>
 
-        <div className="px-5 py-4 space-y-3">
-          <div className="rounded-xl bg-[rgba(2,52,53,0.05)] dark:bg-white/5 border border-[rgba(2,52,53,0.1)] dark:border-white/10 px-4 py-3 space-y-1">
-            <p className="text-xs font-medium text-[#023435]/50 dark:text-zinc-400 capitalize">{dateStr}</p>
-            <p className="text-sm font-semibold text-[#023435] dark:text-zinc-100">{lesson.startTime} – {lesson.endTime}</p>
-          </div>
+        <PCard rounded={12} style={{ padding: 12, background: "var(--poster-bg-2)" }}>
+          <p
+            style={{
+              margin: 0,
+              fontSize: 11,
+              fontWeight: 700,
+              color: "var(--poster-ink-3)",
+              textTransform: "capitalize",
+            }}
+          >
+            {dateStr}
+          </p>
+          <p style={{ margin: "2px 0 0", fontSize: 15, fontWeight: 800, color: "var(--poster-ink)" }}>
+            {lesson.startTime} – {lesson.endTime}
+          </p>
+        </PCard>
 
-          {lesson.isRecurring && (
-            <div className="flex bg-[rgba(2,52,53,0.04)] dark:bg-white/5 rounded-lg p-1 border border-[rgba(2,52,53,0.08)] dark:border-white/10">
-              <button
-                onClick={() => setScope("this")}
-                className={cn("flex-1 text-[11px] font-semibold py-1.5 rounded-md transition-colors", scope === "this" ? "bg-white dark:bg-zinc-800 shadow-sm text-[#023435] dark:text-zinc-100" : "text-[#023435]/50 dark:text-zinc-500")}
-              >
-                Sadece Bu Ders
-              </button>
-              <button
-                onClick={() => setScope("all")}
-                className={cn("flex-1 text-[11px] font-semibold py-1.5 rounded-md transition-colors", scope === "all" ? "bg-white dark:bg-zinc-800 shadow-sm text-[#023435] dark:text-zinc-100" : "text-[#023435]/50 dark:text-zinc-500")}
-              >
-                Tüm Seri
-              </button>
-            </div>
-          )}
-
-          <span className={cn("inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium", STATUS_PILL[lesson.status])}>
-            {STATUS_LABEL[lesson.status]}
-          </span>
-
-          {lesson.status !== "CANCELLED" && (
-            <div className="flex gap-2">
-              {lesson.status !== "COMPLETED" && (
-                <button onClick={() => changeStatus("COMPLETED")} disabled={saving}
-                  className="flex-1 rounded-xl border border-[rgba(2,52,53,0.25)] dark:border-white/20 bg-[rgba(2,52,53,0.08)] dark:bg-white/5 py-2 text-xs font-semibold text-[#023435] dark:text-zinc-300 hover:bg-[rgba(2,52,53,0.15)] dark:bg-card/80 dark:hover:bg-white/10 disabled:opacity-50 transition-colors">
-                  ✓ Tamamlandı
+        {lesson.isRecurring && (
+          <div
+            style={{
+              display: "flex",
+              padding: 3,
+              borderRadius: 10,
+              border: "2px solid var(--poster-ink)",
+              background: "var(--poster-panel)",
+              boxShadow: "var(--poster-shadow-sm)",
+            }}
+          >
+            {(["this", "all"] as const).map((s) => {
+              const active = scope === s;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setScope(s)}
+                  style={{
+                    flex: 1,
+                    padding: "6px 10px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: active ? "var(--poster-ink)" : "transparent",
+                    color: active ? "#fff" : "var(--poster-ink-3)",
+                    fontFamily: "var(--font-display)",
+                    fontWeight: 700,
+                    fontSize: 11,
+                    cursor: "pointer",
+                  }}
+                >
+                  {s === "this" ? "Sadece Bu Ders" : "Tüm Seri"}
                 </button>
-              )}
-              <button onClick={() => changeStatus("CANCELLED")} disabled={saving}
-                className="flex-1 rounded-xl border border-[rgba(105,33,55,0.25)] dark:border-red-500/30 bg-[rgba(105,33,55,0.08)] dark:bg-red-500/10 py-2 text-xs font-semibold text-[#692137] dark:text-red-400 hover:bg-[rgba(105,33,55,0.15)] dark:hover:bg-red-500/20 disabled:opacity-50 transition-colors">
-                ✕ İptal Et
-              </button>
-            </div>
-          )}
-          {lesson.status === "CANCELLED" && (
-            <button onClick={() => changeStatus("PLANNED")} disabled={saving}
-              className="w-full rounded-xl border border-[#107996]/30 dark:border-[#90DDF0]/30 bg-[rgba(16,121,150,0.1)] dark:bg-[#90DDF0]/10 py-2 text-xs font-semibold text-[#107996] dark:text-[#90DDF0] hover:bg-[rgba(16,121,150,0.18)] dark:hover:bg-[#90DDF0]/20 disabled:opacity-50 transition-colors">
-              ↺ Yeniden Planla
-            </button>
-          )}
+              );
+            })}
+          </div>
+        )}
 
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <p className="text-xs font-medium text-[#023435]/50 dark:text-zinc-500">Not</p>
-              {!editingNote && (
-                <button onClick={() => setEditingNote(true)} className="text-[10px] text-[#FE703A]/80 hover:text-[#FE703A] transition-colors">Düzenle</button>
-              )}
-            </div>
-            {editingNote ? (
-              <div className="space-y-2">
-                <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3}
-                  className="w-full resize-none rounded-xl border border-[rgba(2,52,53,0.15)] dark:border-white/10 bg-[#f8fafa] dark:bg-zinc-800/50 px-3 py-2 text-sm text-[#023435] dark:text-zinc-100 placeholder-[#023435]/40 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/40" />
-                <div className="flex gap-3">
-                  <button onClick={() => setEditingNote(false)} className="text-xs text-[#023435]/30 dark:text-zinc-500 hover:text-[#023435]/60 dark:text-muted-foreground dark:hover:text-zinc-300 transition-colors">İptal</button>
-                  <button onClick={saveNote} disabled={saving} className="text-xs font-semibold text-[#FE703A] disabled:opacity-50 transition-colors">
-                    {saving ? "Kaydediliyor..." : "Kaydet"}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-[#023435]/60 dark:text-zinc-400 rounded-xl bg-[rgba(2,52,53,0.04)] dark:bg-white/5 border border-[rgba(2,52,53,0.08)] dark:border-white/10 px-3 py-2 min-h-[2.5rem]">
-                {lesson.note || <span className="text-[#023435]/25 dark:text-zinc-600">Not eklenmemiş</span>}
-              </p>
+        <div>
+          <PBadge color={STATUS_COLOR[lesson.status]}>{STATUS_LABEL[lesson.status]}</PBadge>
+        </div>
+
+        {lesson.status !== "CANCELLED" && (
+          <div style={{ display: "flex", gap: 8 }}>
+            {lesson.status !== "COMPLETED" && (
+              <PBtn onClick={() => changeStatus("COMPLETED")} disabled={saving} variant="green" size="sm" style={{ flex: 1 }}>
+                <Check style={{ width: 12, height: 12, marginRight: 4 }} />
+                Tamamlandı
+              </PBtn>
+            )}
+            <button
+              type="button"
+              onClick={() => changeStatus("CANCELLED")}
+              disabled={saving}
+              style={{
+                flex: 1,
+                padding: "8px 12px",
+                borderRadius: 10,
+                border: "2px solid var(--poster-ink)",
+                background: "var(--poster-danger)",
+                color: "#fff",
+                fontFamily: "var(--font-display)",
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: "pointer",
+                boxShadow: "2px 2px 0 var(--poster-ink)",
+                opacity: saving ? 0.5 : 1,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 4,
+              }}
+            >
+              <XIcon style={{ width: 12, height: 12 }} />
+              İptal Et
+            </button>
+          </div>
+        )}
+        {lesson.status === "CANCELLED" && (
+          <PBtn onClick={() => changeStatus("PLANNED")} disabled={saving} variant="accent" size="sm" style={{ width: "100%" }}>
+            <RotateCcw style={{ width: 12, height: 12, marginRight: 4 }} />
+            Yeniden Planla
+          </PBtn>
+        )}
+
+        <div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-3)", textTransform: "uppercase", letterSpacing: ".08em" }}>
+              Not
+            </span>
+            {!editingNote && (
+              <button
+                type="button"
+                onClick={() => setEditingNote(true)}
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "var(--poster-accent)",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                Düzenle
+              </button>
             )}
           </div>
-        </div>
-
-        <div className="border-t border-[rgba(2,52,53,0.1)] dark:border-border/70 px-5 py-3 flex justify-end">
-          <button onClick={handleDelete} disabled={deleting}
-            className="text-xs font-medium text-[#692137]/60 hover:text-[#692137] disabled:opacity-50 transition-colors">
-            {deleting ? "Siliniyor..." : "Dersi Sil"}
-          </button>
+          {editingNote ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <PTextarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
+              <div style={{ display: "flex", gap: 12 }}>
+                <button
+                  type="button"
+                  onClick={() => setEditingNote(false)}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: "var(--poster-ink-3)",
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-display)",
+                  }}
+                >
+                  İptal
+                </button>
+                <button
+                  type="button"
+                  onClick={saveNote}
+                  disabled={saving}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    color: "var(--poster-accent)",
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-display)",
+                    opacity: saving ? 0.5 : 1,
+                  }}
+                >
+                  {saving ? "Kaydediliyor..." : "Kaydet"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <PCard rounded={10} style={{ padding: "8px 12px", minHeight: 40, background: "var(--poster-bg-2)" }}>
+              <p style={{ margin: 0, fontSize: 13, color: lesson.note ? "var(--poster-ink-2)" : "var(--poster-ink-faint)" }}>
+                {lesson.note || "Not eklenmemiş"}
+              </p>
+            </PCard>
+          )}
         </div>
       </div>
-    </div>
-    </ModalPortal>
+    </PModal>
   );
 }
 
-// ─── Day Lessons List ─────────────────────────────────────────────────────────
-
 function DayLessonList({
-  date, lessons, allLessons, onLessonClick, onAddClick,
+  date,
+  lessons,
+  allLessons,
+  onLessonClick,
+  onAddClick,
 }: {
   date: Date;
   lessons: DisplayLesson[];
@@ -622,78 +773,136 @@ function DayLessonList({
 }) {
   const dateStr = formatDate(date, "long");
 
-  // Weekly stats
   const planned = allLessons.filter((l) => l.status === "PLANNED").length;
   const completed = allLessons.filter((l) => l.status === "COMPLETED").length;
   const cancelled = allLessons.filter((l) => l.status === "CANCELLED").length;
 
-  // Upcoming lessons (next ones from today)
   const now = new Date();
-  const upcoming = allLessons
-    .filter((l) => l.displayDate >= now && l.status === "PLANNED")
-    .slice(0, 3);
+  const upcoming = allLessons.filter((l) => l.displayDate >= now && l.status === "PLANNED").slice(0, 3);
 
   return (
-    <div className={cn("rounded-2xl", GLASS)}>
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.1)] dark:border-white/10 px-5 py-4">
+    <PCard rounded={18} style={{ padding: 0, overflow: "hidden" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "14px 18px",
+          borderBottom: "2px solid var(--poster-ink)",
+          background: "var(--poster-bg-2)",
+        }}
+      >
         <div>
-          <p className="text-xs text-[rgba(2,52,53,0.4)] dark:text-zinc-500">Seçilen gün</p>
-          <p className="text-sm font-semibold text-[#023435] dark:text-zinc-100 capitalize">{dateStr}</p>
+          <p style={{ margin: 0, fontSize: 11, color: "var(--poster-ink-3)", fontWeight: 700 }}>Seçilen gün</p>
+          <p
+            style={{
+              margin: "2px 0 0",
+              fontSize: 14,
+              fontWeight: 800,
+              color: "var(--poster-ink)",
+              textTransform: "capitalize",
+            }}
+          >
+            {dateStr}
+          </p>
         </div>
-        <button
-          onClick={onAddClick}
-          className="rounded-xl bg-[#FE703A] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors"
-        >
+        <PBtn onClick={onAddClick} variant="accent" size="sm">
           + Ekle
-        </button>
+        </PBtn>
       </div>
 
-      {/* Weekly summary */}
       {allLessons.length > 0 && (
-        <div className="px-5 py-3 border-b border-[rgba(2,52,53,0.08)] dark:border-white/10 flex items-center gap-4">
-          <span className="text-[10px] text-[#023435]/40 dark:text-zinc-500 font-medium">Bu ay:</span>
-          <span className="text-[11px] font-semibold text-[#107996] dark:text-[#90DDF0]">{planned} planlandı</span>
-          <span className="text-[11px] font-semibold text-[#023435] dark:text-emerald-400">{completed} tamamlandı</span>
-          {cancelled > 0 && <span className="text-[11px] font-semibold text-[#692137]">{cancelled} iptal</span>}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+            padding: "10px 18px",
+            borderBottom: "2px dashed var(--poster-ink-faint)",
+          }}
+        >
+          <span style={{ fontSize: 10, fontWeight: 800, color: "var(--poster-ink-3)", textTransform: "uppercase", letterSpacing: ".08em" }}>
+            Bu ay:
+          </span>
+          <span style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-blue)" }}>{planned} planlandı</span>
+          <span style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-green)" }}>{completed} tamamlandı</span>
+          {cancelled > 0 && <span style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-danger)" }}>{cancelled} iptal</span>}
         </div>
       )}
 
-      {/* Lessons Timeline */}
-      <div className="p-5 pl-4 relative">
+      <div style={{ padding: 18, position: "relative" }}>
         {lessons.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="mb-3 text-3xl opacity-20">📅</div>
-            <p className="text-sm font-medium text-[#023435]/40 dark:text-zinc-500">Bu güne ait ders yok</p>
-            <button
-              onClick={onAddClick}
-              className="mt-3 rounded-lg border border-[rgba(2,52,53,0.1)] dark:border-white/10 px-4 py-1.5 text-xs font-semibold text-[#FE703A] hover:bg-[#FE703A]/10 transition-colors"
-            >
-              + Yeni Ders Ekle
-            </button>
-            {/* Upcoming Timeline Empty State */}
+          <div style={{ textAlign: "center", padding: "24px 0" }}>
+            <div style={{ fontSize: 28, opacity: 0.25, marginBottom: 10 }}>📅</div>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "var(--poster-ink-3)" }}>Bu güne ait ders yok</p>
+            <div style={{ marginTop: 12 }}>
+              <PBtn onClick={onAddClick} variant="white" size="sm">
+                + Yeni Ders Ekle
+              </PBtn>
+            </div>
+
             {upcoming.length > 0 && (
-              <div className="mt-8 relative text-left">
-                <div className="flex items-center gap-2 mb-4 pl-1">
-                  <div className="h-1.5 w-1.5 rounded-full bg-[#FE703A] animate-ping" />
-                  <p className="text-[10px] font-bold text-[#023435]/40 dark:text-zinc-500 uppercase tracking-widest">Yaklaşandaki Oturumlar</p>
+              <div style={{ marginTop: 28, textAlign: "left" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <div
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: 999,
+                      background: "var(--poster-accent)",
+                      border: "1.5px solid var(--poster-ink)",
+                    }}
+                  />
+                  <p style={{ margin: 0, fontSize: 10, fontWeight: 800, color: "var(--poster-ink-3)", textTransform: "uppercase", letterSpacing: ".08em" }}>
+                    Yaklaşandaki Oturumlar
+                  </p>
                 </div>
-                <div className="ml-[7px] border-l border-dashed border-[#FE703A]/30 pb-2 space-y-4">
+                <div
+                  style={{
+                    marginLeft: 4,
+                    borderLeft: "2px dashed var(--poster-accent)",
+                    paddingBottom: 8,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
+                  }}
+                >
                   {upcoming.map((l, i) => (
-                    <div key={i} className="relative pl-6">
-                      <div className="absolute -left-[4.5px] top-[14px] h-2 w-2 rounded-full bg-white border-2 border-[#FE703A]" />
+                    <div key={i} style={{ position: "relative", paddingLeft: 18 }}>
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: -5,
+                          top: 14,
+                          height: 8,
+                          width: 8,
+                          borderRadius: 999,
+                          background: "#fff",
+                          border: "2px solid var(--poster-accent)",
+                        }}
+                      />
                       <button
+                        type="button"
                         onClick={() => onLessonClick(l, l.displayDate)}
-                        className="w-full text-left rounded-xl p-3 bg-white dark:bg-card hover:bg-[rgba(2,121,150,0.03)] dark:hover:bg-accent/50 border border-[rgba(2,52,53,0.05)] dark:border-border/40 hover:border-[#107996]/20 transition-all shadow-sm group"
+                        style={{
+                          width: "100%",
+                          textAlign: "left",
+                          padding: 12,
+                          borderRadius: 12,
+                          border: "2px solid var(--poster-ink)",
+                          background: "var(--poster-panel)",
+                          cursor: "pointer",
+                          fontFamily: "var(--font-display)",
+                          boxShadow: "var(--poster-shadow-sm)",
+                        }}
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="text-[10px] font-bold text-[#107996]">
-                            {formatDate(l.displayDate, "short")} · {l.startTime}
-                          </p>
-                          <span className="text-[9px] font-bold text-[#FE703A] opacity-0 group-hover:opacity-100 transition-opacity">İNCELE →</span>
-                        </div>
-                        <p className="text-sm font-extrabold text-[#023435] dark:text-foreground">{l.student.name}</p>
-                        {l.title && <p className="text-[10px] text-[#023435]/50 dark:text-muted-foreground truncate mt-0.5 font-medium">{l.title}</p>}
+                        <p style={{ margin: 0, fontSize: 10, fontWeight: 800, color: "var(--poster-blue)" }}>
+                          {formatDate(l.displayDate, "short")} · {l.startTime}
+                        </p>
+                        <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 800, color: "var(--poster-ink)" }}>{l.student.name}</p>
+                        {l.title && (
+                          <p style={{ margin: "2px 0 0", fontSize: 11, color: "var(--poster-ink-3)", fontWeight: 600 }}>{l.title}</p>
+                        )}
                       </button>
                     </div>
                   ))}
@@ -702,68 +911,103 @@ function DayLessonList({
             )}
           </div>
         ) : (
-          <div className="relative border-l-2 border-[rgba(2,52,53,0.1)] dark:border-border/70 ml-[48px] pb-4 space-y-6">
+          <div
+            style={{
+              position: "relative",
+              borderLeft: "2px solid var(--poster-ink-faint)",
+              marginLeft: 48,
+              paddingBottom: 4,
+              display: "flex",
+              flexDirection: "column",
+              gap: 20,
+            }}
+          >
             {lessons.map((l, i) => {
-              // Check if lesson is active right now
               const isToday = l.displayDate.toDateString() === now.toDateString();
-              const lStart = parseInt(l.startTime.split(":")[0]) * 60 + parseInt(l.startTime.split(":")[1]);
-              const lEnd = parseInt(l.endTime.split(":")[0]) * 60 + parseInt(l.endTime.split(":")[1]);
+              const lStart = timeToMinutes(l.startTime);
+              const lEnd = timeToMinutes(l.endTime);
               const currentMin = now.getHours() * 60 + now.getMinutes();
               const isActiveNow = isToday && currentMin >= lStart && currentMin <= lEnd;
+              const dotColor = isActiveNow
+                ? "var(--poster-accent)"
+                : l.status === "COMPLETED"
+                ? "var(--poster-green)"
+                : l.status === "CANCELLED"
+                ? "var(--poster-danger)"
+                : "var(--poster-blue)";
 
               return (
-                <div key={i} className="relative pl-6">
-                  {/* Time Axis Label */}
-                  <div className="absolute -left-[58px] top-1.5 w-12 text-right">
-                    <p className={cn("text-[11px] font-bold", isActiveNow ? "text-[#FE703A]" : "text-[#023435]/60 dark:text-muted-foreground")}>
+                <div key={i} style={{ position: "relative", paddingLeft: 24 }}>
+                  <div style={{ position: "absolute", left: -58, top: 6, width: 48, textAlign: "right" }}>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 11,
+                        fontWeight: 800,
+                        color: isActiveNow ? "var(--poster-accent)" : "var(--poster-ink-3)",
+                      }}
+                    >
                       {l.startTime}
                     </p>
                   </div>
-                  
-                  {/* Timeline Dot */}
-                  <div className={cn(
-                    "absolute -left-[5px] top-[10px] h-2 w-2 rounded-full ring-4 ring-white dark:ring-zinc-950",
-                    isActiveNow ? "bg-[#FE703A] animate-pulse ring-[#FE703A]/20" : 
-                    l.status === "COMPLETED" ? "bg-[#023435]" : 
-                    l.status === "CANCELLED" ? "bg-[#692137]" : "bg-[#107996]"
-                  )} />
-
-                  {/* Class Card */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: -5,
+                      top: 10,
+                      height: 10,
+                      width: 10,
+                      borderRadius: 999,
+                      background: dotColor,
+                      border: "2px solid var(--poster-ink)",
+                    }}
+                  />
                   <button
+                    type="button"
                     onClick={() => onLessonClick(l, l.displayDate)}
-                    className={cn(
-                      "w-full text-left cursor-pointer rounded-xl border p-3.5 transition-all hover:-translate-y-0.5 hover:shadow-md",
-                      isActiveNow ? "bg-white dark:bg-card shadow-sm border-[#FE703A]/30 ring-1 ring-[#FE703A]/10" : STATUS_PILL[l.status]
-                    )}
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      padding: 12,
+                      borderRadius: 12,
+                      border: "2px solid var(--poster-ink)",
+                      background: isActiveNow ? "color-mix(in srgb, var(--poster-accent) 10%, var(--poster-panel))" : "var(--poster-panel)",
+                      cursor: "pointer",
+                      boxShadow: isActiveNow ? "3px 3px 0 var(--poster-accent)" : "var(--poster-shadow-sm)",
+                      fontFamily: "var(--font-display)",
+                    }}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className={cn("text-sm font-bold truncate", isActiveNow ? "text-[#023435] dark:text-foreground" : "dark:text-zinc-100")}>
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 800, color: "var(--poster-ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {l.student.name}
                         </p>
-                        <p className={cn("text-[11px] font-medium mt-0.5 truncate", isActiveNow ? "text-[#023435]/60 dark:text-muted-foreground" : "opacity-70 dark:text-zinc-300")}>
+                        <p style={{ margin: "2px 0 0", fontSize: 11, color: "var(--poster-ink-3)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {l.title}
                         </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className={cn(
-                            "inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
-                            isActiveNow ? "bg-[#FE703A]/10 text-[#FE703A]" : "bg-black/5"
-                          )}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
+                          <span
+                            style={{
+                              fontSize: 9,
+                              fontWeight: 800,
+                              textTransform: "uppercase",
+                              letterSpacing: ".08em",
+                              padding: "2px 6px",
+                              borderRadius: 6,
+                              background: "var(--poster-bg-2)",
+                              color: "var(--poster-ink-2)",
+                            }}
+                          >
                             {l.startTime} - {l.endTime}
                           </span>
-                          {l.isRecurring && <span className="text-[10px] opacity-50" title="Tekrarlayan" >↺</span>}
+                          {l.isRecurring && (
+                            <Repeat style={{ width: 10, height: 10, color: "var(--poster-ink-3)" }} />
+                          )}
                         </div>
                       </div>
-                      <div className="shrink-0 text-right mt-0.5">
-                        <span className={cn(
-                          "text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md",
-                          l.status === "PLANNED" ? "text-[#107996] dark:text-[#90DDF0] bg-[#107996]/10 border border-[#107996]/10" :
-                          l.status === "COMPLETED" ? "text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-400/10 border border-emerald-200 dark:border-emerald-400/20" :
-                          "text-[#692137] dark:text-red-400 bg-red-100 dark:bg-red-400/10 border border-red-200 dark:border-red-400/20"
-                        )}>
-                          {isActiveNow && l.status === "PLANNED" ? "ŞİMDİ" : STATUS_LABEL[l.status]}
-                        </span>
-                      </div>
+                      <PBadge color={isActiveNow && l.status === "PLANNED" ? "accent" : STATUS_COLOR[l.status]}>
+                        {isActiveNow && l.status === "PLANNED" ? "ŞİMDİ" : STATUS_LABEL[l.status]}
+                      </PBadge>
                     </div>
                   </button>
                 </div>
@@ -772,14 +1016,16 @@ function DayLessonList({
           </div>
         )}
       </div>
-    </div>
+    </PCard>
   );
 }
 
-// ─── Week View ────────────────────────────────────────────────────────────────
-
 function WeekView({
-  weekStart, lessons, onLessonClick, onSlotClick, onDropLesson,
+  weekStart,
+  lessons,
+  onLessonClick,
+  onSlotClick,
+  onDropLesson,
 }: {
   weekStart: Date;
   lessons: Lesson[];
@@ -797,13 +1043,12 @@ function WeekView({
     return d;
   });
 
-  const today       = new Date();
-  const hours       = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
+  const today = new Date();
+  const hours = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
   const totalHeight = (END_HOUR - START_HOUR) * HOUR_HEIGHT;
 
-  // Current time indicator position
   const nowMinutes = today.getHours() * 60 + today.getMinutes();
-  const nowTop = (nowMinutes - START_HOUR * 60) / 60 * HOUR_HEIGHT;
+  const nowTop = ((nowMinutes - START_HOUR * 60) / 60) * HOUR_HEIGHT;
   const showNowLine = nowMinutes >= START_HOUR * 60 && nowMinutes <= END_HOUR * 60;
 
   function lessonsForDay(date: Date): DisplayLesson[] {
@@ -811,90 +1056,165 @@ function WeekView({
   }
 
   function lessonStyle(l: DisplayLesson): React.CSSProperties {
-    const top    = (timeToMinutes(l.startTime) - START_HOUR * 60) / 60 * HOUR_HEIGHT;
-    const height = Math.max((timeToMinutes(l.endTime) - timeToMinutes(l.startTime)) / 60 * HOUR_HEIGHT, 24);
+    const top = ((timeToMinutes(l.startTime) - START_HOUR * 60) / 60) * HOUR_HEIGHT;
+    const height = Math.max(((timeToMinutes(l.endTime) - timeToMinutes(l.startTime)) / 60) * HOUR_HEIGHT, 24);
     return { top, height, left: 2, right: 2, position: "absolute" };
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div style={{ overflowX: "auto", fontFamily: "var(--font-display)" }}>
       <div
-        className="flex border-b border-[rgba(2,52,53,0.1)] dark:border-border/70 sticky top-0 z-10"
-        style={{ background: "rgba(240,247,247,0.92)", backdropFilter: "blur(12px)" }}
+        style={{
+          display: "flex",
+          borderBottom: "2px solid var(--poster-ink)",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          background: "var(--poster-panel)",
+        }}
       >
-        <div className="w-14 shrink-0" />
+        <div style={{ width: 56, flexShrink: 0 }} />
         {weekDays.map((d, i) => {
-          const isToday = isSameDay(d, today);
+          const isTodayCol = isSameDay(d, today);
           return (
-            <div key={i} className={cn("flex-1 min-w-[100px] py-2 text-center border-l border-[rgba(2,52,53,0.08)] dark:border-border/60", isToday && "bg-[#FE703A]/5")}>
-              <p className="text-[11px] font-medium text-[rgba(2,52,53,0.4)]">{DAY_LABELS[i]}</p>
-              <p className={cn("text-sm font-bold mt-0.5", isToday ? "text-[#FE703A]" : "text-[#023435]/70 dark:text-foreground/80")}>{d.getDate()}</p>
+            <div
+              key={i}
+              style={{
+                flex: 1,
+                minWidth: 100,
+                padding: "8px 0",
+                textAlign: "center",
+                borderLeft: "2px solid var(--poster-ink-faint)",
+                background: isTodayCol ? "color-mix(in srgb, var(--poster-accent) 8%, transparent)" : "transparent",
+              }}
+            >
+              <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: "var(--poster-ink-3)" }}>{DAY_LABELS[i]}</p>
+              <p
+                style={{
+                  margin: "2px 0 0",
+                  fontSize: 14,
+                  fontWeight: 800,
+                  color: isTodayCol ? "var(--poster-accent)" : "var(--poster-ink)",
+                }}
+              >
+                {d.getDate()}
+              </p>
             </div>
           );
         })}
       </div>
 
-      <div className="flex relative" style={{ height: totalHeight + 24 }}>
-        <div className="w-14 shrink-0 relative">
+      <div style={{ display: "flex", position: "relative", height: totalHeight + 24 }}>
+        <div style={{ width: 56, flexShrink: 0, position: "relative" }}>
           {hours.map((h) => (
-            <div key={h} className="absolute w-full pr-2 text-right" style={{ top: (h - START_HOUR) * HOUR_HEIGHT - 8 }}>
-              <span className="text-[10px] text-[rgba(2,52,53,0.35)]">{String(h).padStart(2, "0")}:00</span>
+            <div
+              key={h}
+              style={{
+                position: "absolute",
+                width: "100%",
+                paddingRight: 8,
+                textAlign: "right",
+                top: (h - START_HOUR) * HOUR_HEIGHT - 8,
+              }}
+            >
+              <span style={{ fontSize: 10, color: "var(--poster-ink-faint)", fontWeight: 700 }}>
+                {String(h).padStart(2, "0")}:00
+              </span>
             </div>
           ))}
         </div>
         {weekDays.map((day, i) => {
           const dayLessons = lessonsForDay(day);
-          const isToday    = isSameDay(day, today);
+          const isTodayCol = isSameDay(day, today);
 
           return (
             <div
               key={i}
-              className={cn("flex-1 min-w-[100px] relative border-l border-[rgba(2,52,53,0.08)] dark:border-border/60", isToday && "border-l-2 border-l-[#FE703A]/30")}
-              style={{ height: "100%", background: isToday ? "rgba(254,112,58,0.04)" : undefined }}
+              style={{
+                flex: 1,
+                minWidth: 100,
+                position: "relative",
+                borderLeft: "2px solid var(--poster-ink-faint)",
+                height: "100%",
+                background: isTodayCol ? "color-mix(in srgb, var(--poster-accent) 4%, transparent)" : undefined,
+              }}
             >
               {hours.map((h) => (
                 <div
                   key={h}
-                  className="absolute w-full border-t border-[rgba(2,52,53,0.06)] dark:border-border/50 group/slot cursor-pointer"
-                  style={{ top: (h - START_HOUR) * HOUR_HEIGHT, height: HOUR_HEIGHT }}
+                  style={{
+                    position: "absolute",
+                    width: "100%",
+                    borderTop: "1px dashed var(--poster-ink-faint)",
+                    top: (h - START_HOUR) * HOUR_HEIGHT,
+                    height: HOUR_HEIGHT,
+                    cursor: "pointer",
+                  }}
                   onClick={() => onSlotClick?.(day, h)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => {
                     e.preventDefault();
                     const lessonId = e.dataTransfer.getData("lessonId");
-                    if (lessonId && onDropLesson) {
-                      onDropLesson(lessonId, day, h);
-                    }
+                    if (lessonId && onDropLesson) onDropLesson(lessonId, day, h);
                   }}
-                >
-                  <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/slot:opacity-100 transition-opacity text-[#FE703A]/40 text-lg font-light pointer-events-none">+</span>
-                </div>
+                />
               ))}
-              {/* Current time indicator */}
-              {isToday && showNowLine && (
-                <div className="absolute w-full z-20 pointer-events-none" style={{ top: nowTop }}>
-                  <div className="flex items-center">
-                    <div className="h-2.5 w-2.5 rounded-full bg-[#FE703A] -ml-[5px] shrink-0" />
-                    <div className="flex-1 h-[2px] bg-[#FE703A]" />
+              {isTodayCol && showNowLine && (
+                <div style={{ position: "absolute", width: "100%", zIndex: 20, pointerEvents: "none", top: nowTop }}>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <div
+                      style={{
+                        height: 10,
+                        width: 10,
+                        borderRadius: 999,
+                        background: "var(--poster-accent)",
+                        border: "2px solid var(--poster-ink)",
+                        marginLeft: -5,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div style={{ flex: 1, height: 2, background: "var(--poster-accent)" }} />
                   </div>
                 </div>
               )}
-              {dayLessons.map((l, j) => (
-                <div
-                  key={j}
-                  draggable
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData("lessonId", l.id);
-                    e.dataTransfer.effectAllowed = "move";
-                  }}
-                  onClick={(e) => { e.stopPropagation(); onLessonClick(l, l.displayDate); }}
-                  style={lessonStyle(l)}
-                  className={cn("cursor-pointer rounded-lg border px-1.5 py-1 text-[10px] overflow-hidden hover:opacity-75 transition-opacity z-10", STATUS_PILL[l.status])}
-                >
-                  <p className="font-semibold leading-tight truncate">{l.startTime} {l.student.name}</p>
-                  <p className="leading-tight truncate opacity-70">{l.title}</p>
-                </div>
-              ))}
+              {dayLessons.map((l, j) => {
+                const color = STATUS_VAR[l.status];
+                return (
+                  <div
+                    key={j}
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("lessonId", l.id);
+                      e.dataTransfer.effectAllowed = "move";
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onLessonClick(l, l.displayDate);
+                    }}
+                    style={{
+                      ...lessonStyle(l),
+                      cursor: "pointer",
+                      borderRadius: 10,
+                      border: `2px solid var(--poster-ink)`,
+                      background: `color-mix(in srgb, ${color} 18%, var(--poster-panel))`,
+                      padding: "4px 6px",
+                      fontSize: 10,
+                      overflow: "hidden",
+                      zIndex: 10,
+                      boxShadow: "1.5px 1.5px 0 var(--poster-ink)",
+                      fontFamily: "var(--font-display)",
+                      color: "var(--poster-ink)",
+                    }}
+                  >
+                    <p style={{ margin: 0, fontWeight: 800, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {l.startTime} {l.student.name}
+                    </p>
+                    <p style={{ margin: 0, lineHeight: 1.2, color: "var(--poster-ink-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {l.title}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           );
         })}
@@ -903,23 +1223,22 @@ function WeekView({
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
 export default function CalendarPage() {
   const today = new Date();
 
-  const [view,           setView]           = useState<"month" | "week">("month");
-  const [currentDate,    setCurrentDate]    = useState(new Date(today.getFullYear(), today.getMonth(), 1));
-  const [weekStart,      setWeekStart]      = useState(() => getWeekStart(today));
-  const [selectedDay,    setSelectedDay]    = useState<Date>(() => {
+  const [view, setView] = useState<"month" | "week">("month");
+  const [currentDate, setCurrentDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(today));
+  const [selectedDay, setSelectedDay] = useState<Date>(() => {
     const d = new Date(today);
     d.setHours(0, 0, 0, 0);
     return d;
   });
-  
-  const query = view === "month"
-    ? `month=${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`
-    : `week=${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
+
+  const query =
+    view === "month"
+      ? `month=${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`
+      : `week=${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, "0")}-${String(weekStart.getDate()).padStart(2, "0")}`;
 
   const { data: studentsData } = useSWR("/api/students", fetcher);
   const { data: lessonsData, mutate: mutateLessons, isLoading } = useSWR(`/api/lessons?${query}`, fetcher);
@@ -928,36 +1247,31 @@ export default function CalendarPage() {
   const lessons: Lesson[] = lessonsData?.lessons ?? [];
   const loading = isLoading;
 
-  const [showAddModal,   setShowAddModal]   = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [addInitialDate, setAddInitialDate] = useState<Date | undefined>();
   const [selectedLesson, setSelectedLesson] = useState<{ lesson: Lesson; date: Date } | null>(null);
   const [selectedStudentFilter, setSelectedStudentFilter] = useState<string>("");
 
   useEffect(() => {
-    // Request notification permission for upcoming lesson alerts
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
   }, []);
 
-  // Simple Notification Polling (check every minute)
   useEffect(() => {
     if (!("Notification" in window) || Notification.permission !== "granted") return;
-    
+
     const interval = setInterval(() => {
       const now = new Date();
       const currentMin = now.getHours() * 60 + now.getMinutes();
-      
-      // Expand lessons for today to correctly handle recurring ones
       const todaysLessons = expandLessons(lessons, now, now);
-      
-      // Look for lessons starting in exactly 15 minutes today
-      todaysLessons.forEach(l => {
+
+      todaysLessons.forEach((l) => {
         const startMin = timeToMinutes(l.startTime);
         if (startMin - currentMin === 15) {
           new Notification("Yaklaşan Ders", {
             body: `${l.startTime}'da ${l.student.name} ile dersiniz başlayacak.`,
-            icon: "/favicon.ico"
+            icon: "/favicon.ico",
           });
         }
       });
@@ -966,18 +1280,27 @@ export default function CalendarPage() {
     return () => clearInterval(interval);
   }, [lessons]);
 
-  // When GlassCalendar selects a date in another month → update currentDate for API
   function handleSelectDate(date: Date) {
     setSelectedDay(date);
     setCurrentDate(new Date(date.getFullYear(), date.getMonth(), 1));
   }
 
   function prevPeriod() {
-    if (view === "week") setWeekStart((d) => { const n = new Date(d); n.setDate(d.getDate() - 7); return n; });
+    if (view === "week")
+      setWeekStart((d) => {
+        const n = new Date(d);
+        n.setDate(d.getDate() - 7);
+        return n;
+      });
     else setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
   }
   function nextPeriod() {
-    if (view === "week") setWeekStart((d) => { const n = new Date(d); n.setDate(d.getDate() + 7); return n; });
+    if (view === "week")
+      setWeekStart((d) => {
+        const n = new Date(d);
+        n.setDate(d.getDate() + 7);
+        return n;
+      });
     else setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
   }
   function goToday() {
@@ -992,7 +1315,11 @@ export default function CalendarPage() {
     mutateLessons((data: any) => {
       const prev = data?.lessons ?? [];
       const idx = prev.findIndex((l: Lesson) => l.id === lesson.id);
-      if (idx >= 0) { const n = [...prev]; n[idx] = lesson; return { ...data, lessons: n }; }
+      if (idx >= 0) {
+        const n = [...prev];
+        n[idx] = lesson;
+        return { ...data, lessons: n };
+      }
       return { ...data, lessons: [...prev, lesson] };
     }, false);
     setShowAddModal(false);
@@ -1006,41 +1333,26 @@ export default function CalendarPage() {
     setSelectedLesson(null);
   }
 
-  // Apply student filter
   const filteredLessons = useMemo(() => {
     if (!selectedStudentFilter) return lessons;
-    return lessons.filter(l => l.studentId === selectedStudentFilter);
+    return lessons.filter((l) => l.studentId === selectedStudentFilter);
   }, [lessons, selectedStudentFilter]);
 
-  // Derive lesson dots for GlassCalendar
-  const lessonDotDates = collectLessonDates(
-    filteredLessons,
-    currentDate.getFullYear(),
-    currentDate.getMonth() + 1
-  );
-
-  // Lessons for selected day
+  const lessonDotDates = collectLessonDates(filteredLessons, currentDate.getFullYear(), currentDate.getMonth() + 1);
   const dayLessons = expandLessons(filteredLessons, selectedDay, selectedDay);
 
-  // All lessons in the current month (for stats)
   const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
   const allMonthLessons = expandLessons(filteredLessons, monthStart, monthEnd);
 
-  // Week period label
   const weekLabel = (() => {
     const end = new Date(weekStart);
     end.setDate(weekStart.getDate() + 6);
     return `${weekStart.getDate()} – ${end.getDate()} ${MONTH_LABELS[end.getMonth()]} ${end.getFullYear()}`;
   })();
 
-  const navBtn = cn(
-    "rounded-lg border border-[rgba(2,52,53,0.15)] dark:border-zinc-800 p-1.5 text-[#023435]/50 dark:text-zinc-400",
-    "hover:bg-[rgba(2,52,53,0.06)] dark:bg-card/50 dark:hover:bg-zinc-800 hover:text-[#023435]/80 dark:hover:text-foreground dark:text-foreground/90 dark:hover:text-zinc-200 transition-colors"
-  );
-
   const handleDropLesson = async (lessonId: string, newDate: Date, newHour: number) => {
-    const lessonToMove = lessons.find(l => l.id === lessonId);
+    const lessonToMove = lessons.find((l) => l.id === lessonId);
     if (!lessonToMove) return;
 
     if (lessonToMove.isRecurring) {
@@ -1053,10 +1365,10 @@ export default function CalendarPage() {
     const oldEn = timeToMinutes(lessonToMove.endTime);
     const dur = oldEn - oldSt;
     const newEn = newHour * 60 + dur;
-    const endH = String(Math.floor(newEn/60)).padStart(2,"0") + ":" + String(newEn%60).padStart(2,"0");
+    const endH = String(Math.floor(newEn / 60)).padStart(2, "0") + ":" + String(newEn % 60).padStart(2, "0");
     const dStr = newDate.toLocaleDateString("en-CA");
 
-    if (newEn > 24*60) {
+    if (newEn > 24 * 60) {
       toast.error("Ders süresi gün sonunu aşıyor");
       return;
     }
@@ -1073,141 +1385,162 @@ export default function CalendarPage() {
       const res = await fetch(`/api/lessons/${lessonId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Taşıma başarısız");
-      
+
       toast.success("Ders başarıyla taşındı");
-      mutateLessons(); // SWR ile yeniden doğrula
+      mutateLessons();
     } catch (e: any) {
       toast.error(e.message || "Bir hata oluştu");
-    } finally {
-      // setLoading(false) gerekmez çünkü SWR bunu asenkron yönetiyor ancak drop için state korundu if necessary
     }
+  };
+
+  const navBtnStyle: React.CSSProperties = {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    border: "2px solid var(--poster-ink)",
+    background: "var(--poster-panel)",
+    color: "var(--poster-ink)",
+    display: "grid",
+    placeItems: "center",
+    cursor: "pointer",
+    boxShadow: "var(--poster-shadow-sm)",
   };
 
   return (
     <main
-      className="flex flex-col dark:bg-gray-900"
-      style={{ minHeight: "100vh", background: "linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%)" }}
+      style={{ minHeight: "100vh", fontFamily: "var(--font-display)" }}
     >
-      <style jsx>{`
-        main {
-          --bg-start: #f0f7f7;
-          --bg-mid: #e8f4f4;
-          --bg-end: #f5fafa;
-        }
-        :global(.dark) main {
-          --bg-start: #111827;
-          --bg-mid: #111827;
-          --bg-end: #111827;
-        }
-      `}</style>
-      <div className="mx-auto max-w-6xl w-full px-4 py-6 flex flex-col flex-1">
-
-        {/* ── Toolbar ── */}
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <button onClick={prevPeriod} className={navBtn}>
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
+      <div style={{ maxWidth: 1200, width: "100%", margin: "0 auto", padding: "24px 16px", display: "flex", flexDirection: "column" }}>
+        <div
+          style={{
+            marginBottom: 20,
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button type="button" onClick={prevPeriod} aria-label="Önceki" style={navBtnStyle}>
+              <ChevronLeft style={{ width: 16, height: 16 }} />
             </button>
-            <button onClick={goToday} className="rounded-lg border border-[rgba(2,52,53,0.15)] dark:border-white/20 px-3 py-1.5 text-xs font-medium text-[#023435]/60 dark:text-zinc-400 hover:bg-[rgba(2,52,53,0.06)] dark:bg-card/50 dark:hover:bg-white/10 hover:text-[#023435]/90 dark:text-foreground/90 dark:hover:text-zinc-200 transition-colors">
+            <PBtn onClick={goToday} variant="white" size="sm">
               Bugün
+            </PBtn>
+            <button type="button" onClick={nextPeriod} aria-label="Sonraki" style={navBtnStyle}>
+              <ChevronRight style={{ width: 16, height: 16 }} />
             </button>
-            <button onClick={nextPeriod} className={navBtn}>
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-            <h1 className="text-base font-semibold text-[#023435] dark:text-zinc-100 ml-1">
+            <h1
+              style={{
+                fontSize: 17,
+                fontWeight: 800,
+                color: "var(--poster-ink)",
+                margin: "0 0 0 8px",
+                letterSpacing: "-.02em",
+              }}
+            >
               {view === "week" ? weekLabel : `${MONTH_LABELS[currentDate.getMonth()]} ${currentDate.getFullYear()}`}
             </h1>
           </div>
 
-          <div className="flex items-center gap-2">
-            <select
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <PSelect
               value={selectedStudentFilter}
               onChange={(e) => setSelectedStudentFilter(e.target.value)}
-              className="rounded-xl border border-[rgba(2,52,53,0.1)] dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 px-3 py-1.5 text-xs font-semibold text-[#023435]/80 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800/80 focus:outline-none focus:ring-2 focus:ring-[#FE703A]/20 transition-all cursor-pointer"
+              style={{ height: 36, fontSize: 13, minWidth: 160 }}
             >
               <option value="">Tüm Öğrenciler</option>
-              {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-
-            <div className={cn("flex rounded-xl p-0.5 border border-[rgba(2,52,53,0.06)] dark:border-border/50 bg-[rgba(2,52,53,0.02)] dark:bg-card/30 shadow-inner", GLASS)}>
-              {(["month", "week"] as const).map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setView(v)}
-                  className={cn(
-                    "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-                    view === v ? "bg-[#023435] dark:bg-white/20 text-white" : "text-[#023435]/40 dark:text-zinc-500 hover:text-[#023435]/70 dark:hover:text-foreground/90 dark:text-foreground/80 dark:hover:text-zinc-300"
-                  )}
-                >
-                  {v === "month" ? "Aylık" : "Haftalık"}
-                </button>
+              {students.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
               ))}
-            </div>
-            <button
-              onClick={() => { setAddInitialDate(view === "month" ? selectedDay : undefined); setShowAddModal(true); }}
-              className="rounded-xl bg-[#FE703A] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors"
+            </PSelect>
+
+            <div
+              style={{
+                display: "flex",
+                padding: 3,
+                background: "var(--poster-panel)",
+                border: "2px solid var(--poster-ink)",
+                borderRadius: 12,
+                boxShadow: "var(--poster-shadow-sm)",
+              }}
             >
-              + Ders Ekle
-            </button>
+              {(["month", "week"] as const).map((v) => {
+                const active = view === v;
+                return (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setView(v)}
+                    style={{
+                      padding: "6px 12px",
+                      fontSize: 12,
+                      fontWeight: 800,
+                      textTransform: "uppercase",
+                      letterSpacing: ".05em",
+                      background: active ? "var(--poster-ink)" : "transparent",
+                      color: active ? "#fff" : "var(--poster-ink-3)",
+                      border: "none",
+                      borderRadius: 8,
+                      cursor: "pointer",
+                      fontFamily: "var(--font-display)",
+                    }}
+                  >
+                    {v === "month" ? "Aylık" : "Haftalık"}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* ── Content ── */}
         {loading ? (
-          <div className="flex flex-1 gap-5 py-4">
-            <div className="w-full lg:w-[380px] h-96">
+          <div style={{ display: "flex", gap: 20, padding: "16px 0" }}>
+            <div style={{ width: 380, height: 384 }}>
               <Skeleton className="w-full h-full rounded-2xl" />
             </div>
-            <div className="hidden lg:flex flex-1 flex-col gap-3">
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
               <Skeleton className="w-full h-20 rounded-xl" />
               <Skeleton className="w-full h-20 rounded-xl" />
               <Skeleton className="w-full h-20 rounded-xl" />
             </div>
           </div>
         ) : view === "month" ? (
-          /* ── Monthly: GlassCalendar + Day lesson list ── */
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-[380px_1fr]">
-            {/* Left: GlassCalendar date picker */}
-            <GlassCalendar
-              selectedDate={selectedDay}
-              onSelectDate={handleSelectDate}
-              lessonDates={lessonDotDates}
-            />
-
-            {/* Right: lessons for selected day */}
+          <div style={{ display: "grid", gridTemplateColumns: "380px 1fr", gap: 20 }} className="calendar-month-grid">
+            <GlassCalendar selectedDate={selectedDay} onSelectDate={handleSelectDate} lessonDates={lessonDotDates} />
             <DayLessonList
               date={selectedDay}
               lessons={dayLessons}
               allLessons={allMonthLessons}
               onLessonClick={(lesson, date) => setSelectedLesson({ lesson, date })}
-              onAddClick={() => { setAddInitialDate(selectedDay); setShowAddModal(true); }}
+              onAddClick={() => {
+                setAddInitialDate(selectedDay);
+                setShowAddModal(true);
+              }}
             />
           </div>
         ) : (
-          /* ── Weekly: full time-grid ── */
-          <div className={cn("rounded-2xl overflow-hidden flex-1", GLASS)} style={{ minHeight: "calc(100vh - 120px)" }}>
+          <PCard rounded={18} style={{ padding: 0, overflow: "hidden", flex: 1, minHeight: "calc(100vh - 120px)" }}>
             <WeekView
               weekStart={weekStart}
               lessons={filteredLessons}
               onLessonClick={(lesson, date) => setSelectedLesson({ lesson, date })}
-              onSlotClick={(date, hour) => {
+              onSlotClick={(date) => {
                 setAddInitialDate(date);
                 setShowAddModal(true);
               }}
               onDropLesson={handleDropLesson}
             />
-          </div>
+          </PCard>
         )}
 
-        {/* ── Modals ── */}
         {showAddModal && (
           <LessonModal
             students={students}
@@ -1226,6 +1559,14 @@ export default function CalendarPage() {
           />
         )}
       </div>
+
+      <style jsx global>{`
+        @media (max-width: 1023px) {
+          .calendar-month-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }

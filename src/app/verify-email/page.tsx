@@ -4,12 +4,9 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Check, X, Mail } from "lucide-react";
-import { AnimatedAuthPanel } from "@/components/auth/AnimatedAuthPanel";
+import { ForceLightTheme } from "@/components/ForceLightTheme";
+import { PosterAuthShell, PBtn, PInput, PLabel, PAlert } from "@/components/poster";
 
 type Status = "pending" | "loading" | "success" | "error" | "signing-in";
 
@@ -19,7 +16,6 @@ function VerifyEmailContent() {
   const token = searchParams.get("token");
   const emailFromUrl = searchParams.get("email");
 
-  // Token yoksa pending (inbox kontrol ekranı); token varsa doğrulama başlat
   const [status, setStatus] = useState<Status>(token ? "loading" : "pending");
   const [message, setMessage] = useState("");
   const [resendEmail, setResendEmail] = useState(emailFromUrl ?? "");
@@ -27,7 +23,6 @@ function VerifyEmailContent() {
   const [resendLoading, setResendLoading] = useState(false);
   const [resendError, setResendError] = useState<string | null>(null);
 
-  // URL'den email geldiyse input'u kitle — kayıt sonrası doğru adres
   const emailLocked = Boolean(emailFromUrl);
 
   async function handleResend() {
@@ -55,14 +50,12 @@ function VerifyEmailContent() {
 
   useEffect(() => {
     if (!token) return;
-
     let cancelled = false;
 
     (async () => {
       try {
         const res = await fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}`);
         const data = await res.json();
-
         if (cancelled) return;
 
         if (!data.success) {
@@ -71,28 +64,22 @@ function VerifyEmailContent() {
           return;
         }
 
-        // Daha önce doğrulanmış — auto-login token yok, sadece login'e yönlendir
         if (data.alreadyVerified) {
           setStatus("success");
           return;
         }
 
-        // Auto-login token geldiyse doğrudan giriş yap
         if (data.autoLoginToken) {
           setStatus("signing-in");
           const result = await signIn("credentials", {
             autoLoginToken: data.autoLoginToken,
             redirect: false,
           });
-
           if (cancelled) return;
-
           if (result?.error) {
-            // Auto-login başarısız — yine de verify başarılı, manuel login'e yönlendir
             setStatus("success");
             return;
           }
-
           router.push("/dashboard");
           router.refresh();
           return;
@@ -113,193 +100,270 @@ function VerifyEmailContent() {
   }, [token, router]);
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      {/* Left Content Section */}
-      <AnimatedAuthPanel
-        showPassword={false}
-        passwordLength={0}
-        heading="Son bir adım kaldı"
-        subheading="Email adresini doğrulayıp hesabını aktifleştirelim."
-      />
+    <PosterAuthShell
+      heading="Son bir adım kaldı"
+      subheading="Email adresini doğrulayıp hesabını aktifleştirelim."
+    >
+      {/* PENDING — inbox check */}
+      {status === "pending" && (
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              margin: "0 auto 16px",
+              borderRadius: 16,
+              background: "var(--poster-yellow)",
+              border: "2px solid var(--poster-ink)",
+              boxShadow: "0 4px 0 var(--poster-ink)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Mail style={{ width: 28, height: 28, color: "var(--poster-ink)" }} />
+          </div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--poster-ink)", margin: "0 0 8px", fontFamily: "var(--font-display)" }}>
+            Email adresini doğrula
+          </h1>
+          <p style={{ fontSize: 14, color: "var(--poster-ink-2)", lineHeight: 1.55, margin: "0 0 8px", fontFamily: "var(--font-display)" }}>
+            {emailFromUrl ? (
+              <>
+                <strong style={{ color: "var(--poster-ink)" }}>{emailFromUrl}</strong> adresine bir doğrulama linki gönderdik.
+              </>
+            ) : (
+              "Email adresine bir doğrulama linki gönderdik."
+            )}{" "}
+            Linke tıklayarak hesabını aktifleştir.
+          </p>
+          <p style={{ fontSize: 12, color: "var(--poster-ink-3)", margin: "0 0 24px", fontFamily: "var(--font-display)" }}>
+            Link 24 saat süreyle geçerlidir.
+          </p>
 
-      {/* Right Content Section */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white text-zinc-900">
-        <div className="w-full max-w-sm">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <Image src="/logo.svg" alt="Luden" width={200} height={72} className="h-14 w-auto mx-auto" />
+          <div style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: 12 }}>
+            <div>
+              <PLabel htmlFor="resendEmail">Email</PLabel>
+              <PInput
+                id="resendEmail"
+                type="email"
+                placeholder="ad@klinik.com"
+                value={resendEmail}
+                onChange={(e) => setResendEmail(e.target.value)}
+                readOnly={emailLocked}
+                style={emailLocked ? { background: "var(--poster-bg-2)", cursor: "not-allowed" } : undefined}
+              />
+            </div>
+
+            {resendSent ? (
+              <PAlert tone="success">
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <Check size={16} /> Yeni link gönderildi
+                </span>
+              </PAlert>
+            ) : (
+              <>
+                {resendError && <PAlert tone="error">{resendError}</PAlert>}
+                <PBtn
+                  type="button"
+                  variant="dark"
+                  size="md"
+                  onClick={handleResend}
+                  disabled={resendLoading || !resendEmail}
+                  style={{ width: "100%" }}
+                >
+                  {resendLoading ? "Gönderiliyor…" : "Linki tekrar gönder"}
+                </PBtn>
+              </>
+            )}
           </div>
 
-          {/* PENDING — kayıt sonrası inbox kontrol ekranı */}
-          {status === "pending" && (
-            <div className="text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#023435]/10 mx-auto mb-4">
-                <Mail className="h-7 w-7 text-[#023435] dark:text-foreground" />
-              </div>
-              <h1 className="text-xl font-bold text-zinc-900 mb-2">Email adresini doğrula</h1>
-              <p className="text-sm text-zinc-500 mb-2 leading-relaxed">
-                {emailFromUrl ? (
-                  <>
-                    <strong className="text-zinc-700">{emailFromUrl}</strong> adresine bir doğrulama linki gönderdik.
-                  </>
-                ) : (
-                  "Email adresine bir doğrulama linki gönderdik."
-                )}{" "}
-                Linke tıklayarak hesabını aktifleştir.
-              </p>
-              <p className="text-xs text-zinc-400 mb-6">Link 24 saat süreyle geçerlidir.</p>
-
-              {/* Resend form */}
-              <div className="space-y-3 text-left">
-                <div className="space-y-1.5">
-                  <Label htmlFor="resendEmail" className="text-sm font-medium">Email</Label>
-                  <Input
-                    id="resendEmail"
-                    type="email"
-                    placeholder="ad@klinik.com"
-                    value={resendEmail}
-                    onChange={(e) => setResendEmail(e.target.value)}
-                    readOnly={emailLocked}
-                    className={`h-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900 ${
-                      emailLocked ? "bg-zinc-50 cursor-not-allowed" : ""
-                    }`}
-                  />
-                </div>
-
-                {resendSent ? (
-                  <p className="flex items-center justify-center gap-1 text-sm text-green-600 font-medium">
-                    <Check className="size-4" /> Yeni link gönderildi
-                  </p>
-                ) : (
-                  <>
-                    {resendError && (
-                      <p className="text-sm text-red-600 text-center">{resendError}</p>
-                    )}
-                    <Button
-                      type="button"
-                      onClick={handleResend}
-                      disabled={resendLoading || !resendEmail}
-                      className="w-full h-10 bg-[#023435] hover:bg-[#023435]/90 text-white"
-                    >
-                      {resendLoading ? "Gönderiliyor…" : "Linki tekrar gönder"}
-                    </Button>
-                  </>
-                )}
-              </div>
-
-              <p className="mt-6 text-xs text-zinc-400">
-                Email gelmezse spam klasörünü kontrol edin.
-              </p>
-              <p className="mt-4 text-sm text-zinc-500">
-                <Link href="/login" className="font-medium text-[#FE703A] hover:underline">
-                  ← Giriş sayfasına dön
-                </Link>
-              </p>
-            </div>
-          )}
-
-          {/* LOADING — doğrulama başlatıldı */}
-          {status === "loading" && (
-            <div className="text-center py-12">
-              <div className="h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin mx-auto mb-4" />
-              <p className="text-sm font-medium text-zinc-600">Email doğrulanıyor…</p>
-            </div>
-          )}
-
-          {/* SIGNING-IN — verify ok, auto-login çalışıyor */}
-          {status === "signing-in" && (
-            <div className="text-center py-12">
-              <div className="h-10 w-10 rounded-full border-4 border-[#023435]/20 border-t-[#023435] animate-spin mx-auto mb-4" />
-              <p className="text-sm font-medium text-zinc-600">Giriş yapılıyor…</p>
-              <p className="mt-1 text-xs text-zinc-400">Seni yönlendiriyoruz.</p>
-            </div>
-          )}
-
-          {/* SUCCESS — auto-login olmadı/başarısız, manuel login'e yönlendir */}
-          {status === "success" && (
-            <div className="text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 mx-auto mb-4">
-                <Check className="h-7 w-7 text-green-600" />
-              </div>
-              <h1 className="text-xl font-bold text-zinc-900 mb-2">Email doğrulandı!</h1>
-              <p className="text-sm text-zinc-500 mb-6">
-                Hesabın aktif. Artık giriş yapabilirsin.
-              </p>
-              <Link
-                href="/login?verified=1"
-                className="inline-block rounded-xl bg-[#FE703A] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors"
-              >
-                Giriş Yap
-              </Link>
-            </div>
-          )}
-
-          {/* ERROR — token geçersiz/süresi dolmuş */}
-          {status === "error" && (
-            <div className="text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100 mx-auto mb-4">
-                <X className="h-7 w-7 text-red-600" />
-              </div>
-              <h1 className="text-xl font-bold text-zinc-900 mb-2">Doğrulama başarısız</h1>
-              <p className="text-sm text-zinc-500 mb-6">{message}</p>
-
-              {resendSent ? (
-                <p className="flex items-center justify-center gap-1 text-sm text-green-600 font-medium mb-4">
-                  <Check className="size-4" /> Yeni doğrulama emaili gönderildi
-                </p>
-              ) : (
-                <div className="space-y-3 text-left mb-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="resendEmailError" className="text-sm font-medium">Email</Label>
-                    <Input
-                      id="resendEmailError"
-                      type="email"
-                      placeholder="ad@klinik.com"
-                      value={resendEmail}
-                      onChange={(e) => setResendEmail(e.target.value)}
-                      readOnly={emailLocked}
-                      className={`h-10 bg-white border-zinc-200 focus:border-[#023435] text-zinc-900 ${
-                        emailLocked ? "bg-zinc-50 cursor-not-allowed" : ""
-                      }`}
-                    />
-                  </div>
-                  {resendError && (
-                    <p className="text-sm text-red-600">{resendError}</p>
-                  )}
-                  <Button
-                    type="button"
-                    onClick={handleResend}
-                    disabled={resendLoading || !resendEmail}
-                    className="w-full h-10 bg-[#FE703A] hover:bg-[#FE703A]/90 text-white"
-                  >
-                    {resendLoading ? "Gönderiliyor…" : "Yeni doğrulama emaili gönder"}
-                  </Button>
-                </div>
-              )}
-
-              <p className="text-sm text-zinc-500">
-                <Link href="/login" className="font-medium text-zinc-400 hover:text-zinc-600">
-                  ← Giriş sayfasına dön
-                </Link>
-              </p>
-            </div>
-          )}
+          <p style={{ marginTop: 24, fontSize: 12, color: "var(--poster-ink-3)", fontFamily: "var(--font-display)" }}>
+            Email gelmezse spam klasörünü kontrol edin.
+          </p>
+          <p style={{ marginTop: 16, fontSize: 14, fontFamily: "var(--font-display)" }}>
+            <Link href="/login" style={{ color: "var(--poster-accent)", fontWeight: 700, textDecoration: "none" }}>
+              ← Giriş sayfasına dön
+            </Link>
+          </p>
         </div>
-      </div>
-    </div>
+      )}
+
+      {/* LOADING */}
+      {status === "loading" && (
+        <div style={{ textAlign: "center", padding: "48px 0" }}>
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              margin: "0 auto 16px",
+              borderRadius: "50%",
+              border: "4px solid rgba(254,112,58,.2)",
+              borderTopColor: "var(--poster-accent)",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+          <p style={{ fontSize: 14, fontWeight: 600, color: "var(--poster-ink-2)", fontFamily: "var(--font-display)" }}>
+            Email doğrulanıyor…
+          </p>
+          <style jsx>{`
+            @keyframes spin { to { transform: rotate(360deg); } }
+          `}</style>
+        </div>
+      )}
+
+      {/* SIGNING-IN */}
+      {status === "signing-in" && (
+        <div style={{ textAlign: "center", padding: "48px 0" }}>
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              margin: "0 auto 16px",
+              borderRadius: "50%",
+              border: "4px solid rgba(14,30,38,.2)",
+              borderTopColor: "var(--poster-ink)",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+          <p style={{ fontSize: 14, fontWeight: 600, color: "var(--poster-ink-2)", fontFamily: "var(--font-display)" }}>
+            Giriş yapılıyor…
+          </p>
+          <p style={{ marginTop: 4, fontSize: 12, color: "var(--poster-ink-3)", fontFamily: "var(--font-display)" }}>
+            Seni yönlendiriyoruz.
+          </p>
+          <style jsx>{`
+            @keyframes spin { to { transform: rotate(360deg); } }
+          `}</style>
+        </div>
+      )}
+
+      {/* SUCCESS */}
+      {status === "success" && (
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              margin: "0 auto 16px",
+              borderRadius: 16,
+              background: "var(--poster-green)",
+              border: "2px solid var(--poster-ink)",
+              boxShadow: "0 4px 0 var(--poster-ink)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Check style={{ width: 28, height: 28, color: "#fff" }} />
+          </div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--poster-ink)", margin: "0 0 8px", fontFamily: "var(--font-display)" }}>
+            Email doğrulandı!
+          </h1>
+          <p style={{ fontSize: 14, color: "var(--poster-ink-2)", margin: "0 0 24px", fontFamily: "var(--font-display)" }}>
+            Hesabın aktif. Artık giriş yapabilirsin.
+          </p>
+          <PBtn as="a" href="/login?verified=1" variant="accent" size="md">
+            Giriş Yap
+          </PBtn>
+        </div>
+      )}
+
+      {/* ERROR */}
+      {status === "error" && (
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              margin: "0 auto 16px",
+              borderRadius: 16,
+              background: "var(--poster-pink)",
+              border: "2px solid var(--poster-ink)",
+              boxShadow: "0 4px 0 var(--poster-ink)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <X style={{ width: 28, height: 28, color: "#fff" }} />
+          </div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--poster-ink)", margin: "0 0 8px", fontFamily: "var(--font-display)" }}>
+            Doğrulama başarısız
+          </h1>
+          <p style={{ fontSize: 14, color: "var(--poster-ink-2)", margin: "0 0 20px", fontFamily: "var(--font-display)" }}>
+            {message}
+          </p>
+
+          {resendSent ? (
+            <div style={{ marginBottom: 16 }}>
+              <PAlert tone="success">
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <Check size={16} /> Yeni doğrulama emaili gönderildi
+                </span>
+              </PAlert>
+            </div>
+          ) : (
+            <div style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
+              <div>
+                <PLabel htmlFor="resendEmailError">Email</PLabel>
+                <PInput
+                  id="resendEmailError"
+                  type="email"
+                  placeholder="ad@klinik.com"
+                  value={resendEmail}
+                  onChange={(e) => setResendEmail(e.target.value)}
+                  readOnly={emailLocked}
+                  style={emailLocked ? { background: "var(--poster-bg-2)", cursor: "not-allowed" } : undefined}
+                />
+              </div>
+              {resendError && <PAlert tone="error">{resendError}</PAlert>}
+              <PBtn
+                type="button"
+                variant="accent"
+                size="md"
+                onClick={handleResend}
+                disabled={resendLoading || !resendEmail}
+                style={{ width: "100%" }}
+              >
+                {resendLoading ? "Gönderiliyor…" : "Yeni doğrulama emaili gönder"}
+              </PBtn>
+            </div>
+          )}
+
+          <p style={{ fontSize: 14, fontFamily: "var(--font-display)" }}>
+            <Link href="/login" style={{ color: "var(--poster-ink-3)", fontWeight: 600, textDecoration: "none" }}>
+              ← Giriş sayfasına dön
+            </Link>
+          </p>
+        </div>
+      )}
+    </PosterAuthShell>
   );
 }
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
-        </div>
-      }
-    >
-      <VerifyEmailContent />
-    </Suspense>
+    <>
+      <ForceLightTheme />
+      <Suspense
+        fallback={
+          <div className="poster-scope" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--poster-bg)" }}>
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                border: "4px solid rgba(254,112,58,.2)",
+                borderTopColor: "var(--poster-accent)",
+                animation: "spin 1s linear infinite",
+              }}
+            />
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        }
+      >
+        <VerifyEmailContent />
+      </Suspense>
+    </>
   );
 }

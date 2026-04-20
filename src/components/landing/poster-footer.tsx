@@ -38,7 +38,7 @@ export function PosterFooter() {
           <div>
             <Image
               src="/logo.svg"
-              alt="Terapimat"
+              alt="LudenLab"
               width={200}
               height={72}
               style={{ height: 50, width: "auto", marginBottom: 12 }}
@@ -214,7 +214,7 @@ export function PosterFooter() {
             paddingTop: 12,
           }}
         >
-          © {new Date().getFullYear()} Terapimat. Tüm hakları saklıdır.
+          © {new Date().getFullYear()} LudenLab. Tüm hakları saklıdır.
         </div>
       </div>
     </footer>

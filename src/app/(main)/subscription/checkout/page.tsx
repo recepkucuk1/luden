@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { PBtn, PCard } from "@/components/poster";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const planType = searchParams.get("planType");
-  const cycle = searchParams.get("cycle"); // "monthly" | "yearly"
+  const cycle = searchParams.get("cycle");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,8 +40,6 @@ function CheckoutContent() {
         if (data.checkoutFormContent && formWrapperRef.current) {
           formWrapperRef.current.innerHTML = data.checkoutFormContent;
 
-          // Next.js strips and does not execute script tags inserted via innerHTML.
-          // Manually re-execute the script tags supplied by iyzico.
           const scripts = formWrapperRef.current.querySelectorAll("script");
           scripts.forEach((oldScript) => {
             const newScript = document.createElement("script");
@@ -69,52 +68,123 @@ function CheckoutContent() {
 
   if (error) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center space-y-4">
-        <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/50 p-6 text-center shadow-sm">
-          <h2 className="mb-2 text-lg font-bold text-red-600 dark:text-red-400">Ödeme Hatası</h2>
-          <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
-          <button
-            onClick={() => router.push("/subscription")}
-            className="mt-6 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+      <div
+        className="poster-scope"
+        style={{
+          minHeight: "60vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "32px 16px",
+        }}
+      >
+        <PCard rounded={20} style={{ maxWidth: 440, width: "100%", padding: 32, textAlign: "center" }}>
+          <h2
+            style={{
+              margin: "0 0 10px",
+              fontSize: 20,
+              fontWeight: 700,
+              color: "var(--poster-danger)",
+              fontFamily: "var(--font-display)",
+            }}
           >
+            Ödeme Hatası
+          </h2>
+          <p
+            style={{
+              margin: "0 0 22px",
+              fontSize: 14,
+              lineHeight: 1.55,
+              color: "var(--poster-ink-2)",
+              fontFamily: "var(--font-display)",
+            }}
+          >
+            {error}
+          </p>
+          <PBtn onClick={() => router.push("/subscription")} variant="accent" size="md" style={{ width: "100%" }}>
             ← Planlara Dön
-          </button>
-        </div>
+          </PBtn>
+        </PCard>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
-      <div className="mb-8 text-center">
-        <h2 className="text-2xl font-bold text-foreground">Güvenli Ödeme</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+    <div className="poster-scope" style={{ maxWidth: 960, margin: "0 auto", padding: "40px 16px" }}>
+      <div style={{ marginBottom: 24, textAlign: "center" }}>
+        <h2
+          style={{
+            fontSize: 26,
+            fontWeight: 700,
+            color: "var(--poster-ink)",
+            margin: 0,
+            fontFamily: "var(--font-display)",
+            letterSpacing: "-.02em",
+          }}
+        >
+          Güvenli Ödeme
+        </h2>
+        <p
+          style={{
+            marginTop: 8,
+            fontSize: 14,
+            color: "var(--poster-ink-2)",
+            fontFamily: "var(--font-display)",
+          }}
+        >
           Abone planınızı tamamlamak için ödeme bilgilerinizi giriniz.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6 md:p-10 shadow-sm relative min-h-[400px]">
+      <PCard rounded={20} style={{ padding: 28, position: "relative", minHeight: 400 }}>
         {loading && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-card/80 backdrop-blur-sm z-10 rounded-2xl">
-            <Loader2 className="h-8 w-8 animate-spin text-[#023435] dark:text-white" />
-            <p className="mt-4 text-sm font-medium text-muted-foreground">Ödeme formu yükleniyor...</p>
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "var(--poster-panel)",
+              zIndex: 10,
+              borderRadius: 20,
+            }}
+          >
+            <Loader2 style={{ width: 32, height: 32, color: "var(--poster-ink)" }} className="animate-spin" />
+            <p
+              style={{
+                marginTop: 14,
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--poster-ink-2)",
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              Ödeme formu yükleniyor...
+            </p>
           </div>
         )}
 
-        {/* iyzico injects DOM elements exactly here */}
-        <div ref={formWrapperRef} id="iyzico-wrapper" className="w-full" />
-      </div>
+        <div ref={formWrapperRef} id="iyzico-wrapper" style={{ width: "100%" }} />
+      </PCard>
     </div>
   );
 }
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div
+          className="poster-scope"
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}
+        >
+          <Loader2 style={{ width: 32, height: 32, color: "var(--poster-ink-3)" }} className="animate-spin" />
+        </div>
+      }
+    >
       <CheckoutContent />
     </Suspense>
   );

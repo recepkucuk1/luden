@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="poster-scope" style={{ minHeight: "100vh", background: "var(--poster-bg)" }}>
       <AppHeader />
       {children}
     </div>

@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Library } from "lucide-react";
-import { cn, formatDate } from "@/lib/utils";
+import { Library, RefreshCw } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 import { WeeklyPlanView } from "@/components/cards/WeeklyPlanView";
 import type { WeeklyPlanContent } from "@/components/cards/WeeklyPlanView";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
+import { PBtn, PCard, PBadge, PLabel, PSelect, PInput, PTextarea, PCheckbox } from "@/components/poster";
 
 interface Student {
   id: string;
@@ -24,8 +23,6 @@ interface CurriculumItem {
   area: string;
   title: string;
 }
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const WEEKDAYS = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"] as const;
 
@@ -67,8 +64,6 @@ const LOADING_MSGS = [
   "Uzman notları hazırlanıyor...",
 ];
 
-// ─── Loading ──────────────────────────────────────────────────────────────────
-
 function LoadingMessages() {
   const [index, setIndex]     = useState(0);
   const [visible, setVisible] = useState(true);
@@ -89,22 +84,24 @@ function LoadingMessages() {
   }, []);
 
   return (
-    <div className="flex h-10 items-center justify-center">
-      <p
-        className="text-sm text-zinc-500 transition-opacity duration-300 text-center"
-        style={{ opacity: visible ? 1 : 0 }}
-      >
-        {LOADING_MSGS[index]}
-      </p>
-    </div>
+    <p
+      style={{
+        fontSize: 13,
+        fontWeight: 700,
+        color: "var(--poster-ink-2)",
+        margin: 0,
+        transition: "opacity 300ms",
+        opacity: visible ? 1 : 0,
+      }}
+    >
+      {LOADING_MSGS[index]}
+    </p>
   );
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 function getMondayOfCurrentWeek(): string {
   const now  = new Date();
-  const day  = now.getDay(); // 0=Sun
+  const day  = now.getDay();
   const diff = day === 0 ? -6 : 1 - day;
   const mon  = new Date(now);
   mon.setDate(now.getDate() + diff);
@@ -131,7 +128,6 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
   const R     = W - 14;
   const today = formatDate(new Date(), "medium");
 
-  // Load NotoSans for Turkish characters
   const [regResp, boldResp] = await Promise.all([
     fetch(`${window.location.origin}/fonts/NotoSans-Regular.ttf`),
     fetch(`${window.location.origin}/fonts/NotoSans-Bold.ttf`),
@@ -148,9 +144,9 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
   doc.addFont("NotoSans-Regular.ttf", "NotoSans", "normal");
   doc.addFont("NotoSans-Bold.ttf",    "NotoSans", "bold");
 
+  void W;
   const days = Array.isArray(plan.days) ? plan.days : [];
 
-  // ── Title + header info ──────────────────────────────────────────────────
   doc.setFont("NotoSans", "bold");
   doc.setFontSize(16);
   doc.setTextColor("#023435");
@@ -169,17 +165,11 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
 
   let y = 32;
 
-  // ── Day sections ─────────────────────────────────────────────────────────
   for (let di = 0; di < days.length; di++) {
     const day = days[di];
 
-    // Check page space — if less than 60mm left, add a new page
-    if (y > 240) {
-      doc.addPage();
-      y = 16;
-    }
+    if (y > 240) { doc.addPage(); y = 16; }
 
-    // Day heading bar
     doc.setFillColor("#023435");
     doc.roundedRect(L, y, R - L, 8, 1.5, 1.5, "F");
     doc.setFont("NotoSans", "bold");
@@ -192,7 +182,6 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
     doc.text(day.duration, R - 3, y + 5.5, { align: "right" });
     y += 10;
 
-    // Focus + objective
     doc.setFont("NotoSans", "normal");
     doc.setFontSize(8);
     doc.setTextColor("#52525b");
@@ -205,7 +194,6 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
     doc.text(objLines, L, y + 4);
     y += objLines.length * 4.5 + 2;
 
-    // Activity table
     const mainSteps = day.mainWork.steps?.join("; ") ?? "";
     const mainText  = mainSteps ? `${day.mainWork.activity}\n${mainSteps}` : day.mainWork.activity;
 
@@ -222,10 +210,8 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
       headStyles: { fillColor: [2, 52, 53], textColor: 255, fontStyle: "bold", fontSize: 8 },
       columnStyles: { 0: { cellWidth: 28, fontStyle: "bold" }, 2: { cellWidth: 20, halign: "center" } },
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 2;
 
-    // Materials (if any)
     const mats = [...(day.warmup.materials ?? []), ...(day.mainWork.materials ?? [])];
     if (mats.length > 0) {
       doc.setFont("NotoSans", "normal");
@@ -237,7 +223,6 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
       y += matLines.length * 3.8 + 1;
     }
 
-    // Day note
     if (day.notes) {
       doc.setFont("NotoSans", "normal");
       doc.setFontSize(7.5);
@@ -247,7 +232,6 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
       y += noteLines.length * 3.8 + 1;
     }
 
-    // Separator line between days
     if (di < days.length - 1) {
       doc.setDrawColor("#e4e4e7");
       doc.line(L, y + 2, R, y + 2);
@@ -257,7 +241,6 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
     }
   }
 
-  // ── Footer sections ───────────────────────────────────────────────────────
   const addSection = (title: string, text: string, fillRgb: [number,number,number], titleColor: string) => {
     if (y > 255) { doc.addPage(); y = 16; }
     doc.setFillColor(...fillRgb);
@@ -279,7 +262,6 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
   if (plan.materialsNeeded?.length) addSection("Gerekli Materyaller", plan.materialsNeeded.join(", "), [249, 250, 251], "#374151");
   if (plan.parentCommunication)   addSection("Veli Bilgilendirme",  plan.parentCommunication,           [239, 246, 255], "#1e40af");
 
-  // ── PDF footer ────────────────────────────────────────────────────────────
   const pageCount = doc.getNumberOfPages();
   for (let p = 1; p <= pageCount; p++) {
     doc.setPage(p);
@@ -294,6 +276,39 @@ async function downloadWeeklyPlanPDF(plan: WeeklyPlanContent, studentName?: stri
 
   doc.save(`${plan.title.replace(/\s+/g, "_")}.pdf`);
 }
+
+// ─── Style helpers ────────────────────────────────────────────────────────────
+
+const gridBtnStyle = (active: boolean): React.CSSProperties => ({
+  padding: "10px 12px",
+  borderRadius: 12,
+  border: "2px solid var(--poster-ink)",
+  background: active ? "var(--poster-accent)" : "#fff",
+  color: "var(--poster-ink)",
+  fontSize: 12,
+  fontWeight: 800,
+  cursor: "pointer",
+  fontFamily: "inherit",
+  boxShadow: active ? "3px 3px 0 var(--poster-ink)" : "none",
+  transition: "all 0.1s",
+  textAlign: "left" as const,
+});
+
+const counterBtnStyle: React.CSSProperties = {
+  width: 28,
+  height: 28,
+  borderRadius: 8,
+  border: "2px solid var(--poster-ink)",
+  background: "#fff",
+  color: "var(--poster-ink)",
+  fontSize: 14,
+  fontWeight: 800,
+  cursor: "pointer",
+  fontFamily: "inherit",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -311,7 +326,6 @@ export default function WeeklyPlanPage() {
   const [extraNote,   setExtraNote]   = useState("");
 
   const [generating,   setGenerating]   = useState(false);
-  const [saving,       setSaving]       = useState(false);
   const [savedCardId,  setSavedCardId]  = useState<string | null>(null);
   const [pendingCardId,setPendingCardId]= useState<string | null>(null);
   const [plan,         setPlan]         = useState<WeeklyPlanContent | null>(null);
@@ -329,15 +343,12 @@ export default function WeeklyPlanPage() {
 
   const selectedStudent = students.find((s) => s.id === studentId);
 
-  // Curriculum items assigned to selected student
   const studentCurricula = selectedStudent
     ? curricula.filter((c) => selectedStudent.curriculumIds.includes(c.id))
     : [];
 
-  // When student changes, reset focus areas
   useEffect(() => { setFocusAreas([]); }, [studentId]);
 
-  // Auto-distribute lessons when dropdown total changes
   useEffect(() => {
     setDaySchedule(distributeEvenly(sessions));
   }, [sessions]);
@@ -362,7 +373,8 @@ export default function WeeklyPlanPage() {
     ? studentCurricula.map((c) => c.title)
     : DEFAULT_FOCUS_AREAS;
 
-  async function handleGenerate() {
+  async function handleGenerate(e: React.FormEvent) {
+    e.preventDefault();
     if (!studentId) { toast.error("Lütfen öğrenci seçin"); return; }
     if (totalAssigned === 0) { toast.error("En az 1 ders günü belirleyin"); return; }
     const effectiveFocus = [...focusAreas, ...(customFocus.trim() ? [customFocus.trim()] : [])];
@@ -370,7 +382,7 @@ export default function WeeklyPlanPage() {
     setGenerating(true);
     setSavedCardId(null);
     setPendingCardId(null);
-    // Build daySchedule payload: only days with lessons > 0
+    setPlan(null);
     const activeDays = WEEKDAYS
       .filter((d) => (daySchedule[d] ?? 0) > 0)
       .map((d) => ({ dayName: d, lessonCount: daySchedule[d] }));
@@ -393,20 +405,13 @@ export default function WeeklyPlanPage() {
       if (!res.ok) { toast.error(data.error ?? "Bir hata oluştu"); return; }
       setPlan(data.plan as WeeklyPlanContent);
       setPendingCardId(data.cardId ?? null);
+      setSavedCardId(data.cardId ?? null);
       toast.success("Haftalık plan oluşturuldu");
     } catch {
       toast.error("Bağlantı hatası");
     } finally {
       setGenerating(false);
     }
-  }
-
-  async function handleSave() {
-    if (!pendingCardId) { toast.error("Kaydedilecek plan bulunamadı"); return; }
-    setSaving(true);
-    setSavedCardId(pendingCardId);
-    setSaving(false);
-    toast.success("Kütüphaneye kaydedildi");
   }
 
   async function handleDownload() {
@@ -423,273 +428,251 @@ export default function WeeklyPlanPage() {
     }
   }
 
-  return (
-    <div className="min-h-screen relative" style={{ background: "var(--surface-page-gradient)" }}>
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
-      <div className="relative z-10 mx-auto max-w-3xl px-6 py-10">
-        {/* Header */}
-        <div className="mb-8">
-          <Link href="/tools" className="mb-4 inline-flex items-center gap-1.5 text-sm text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Araçlara Dön
-          </Link>
-          <h1 className="text-2xl font-bold text-[#023435] dark:text-foreground">Haftalık Çalışma Planı</h1>
-          <p className="mt-1 text-sm text-[#023435]/60 dark:text-muted-foreground">
-            Öğrenci bazlı, hedef odaklı haftalık ders planları oluşturun.
-          </p>
-        </div>
+  function handleReset() {
+    setPlan(null);
+    setPendingCardId(null);
+    setSavedCardId(null);
+  }
+  void pendingCardId;
 
-        {/* Form */}
-        {!plan && (
-          <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] space-y-6">
-
-            {/* Student */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Öğrenci</label>
-              <select
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                className="w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
-              >
-                <option value="">— Öğrenci seçin —</option>
-                {students.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+  const form = (
+    <form onSubmit={handleGenerate} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Öğrenci */}
+      <div>
+        <PLabel>Öğrenci</PLabel>
+        <PSelect value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+          <option value="">— Öğrenci seçin —</option>
+          {students.map((s) => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </PSelect>
+        {selectedStudent && (
+          <div
+            style={{
+              marginTop: 8,
+              padding: "10px 12px",
+              border: "2px solid var(--poster-ink)",
+              borderRadius: 10,
+              background: "var(--poster-bg-2)",
+            }}
+          >
+            <div style={{ fontSize: 13, fontWeight: 800, color: "var(--poster-ink)" }}>
+              {selectedStudent.name}
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--poster-ink-2)", marginTop: 2 }}>
+              {selectedStudent.workArea}{selectedStudent.diagnosis ? ` · ${selectedStudent.diagnosis}` : ""}
+            </div>
+            {studentCurricula.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+                {studentCurricula.map((c) => (
+                  <PBadge key={c.id} color="accent">{c.title}</PBadge>
                 ))}
-              </select>
-              {selectedStudent && (
-                <div className="rounded-xl border border-white/70 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm p-3 space-y-1">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-[#023435]/10 text-[#023435] dark:text-foreground flex items-center justify-center font-bold text-xs shrink-0">
-                      {selectedStudent.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-zinc-800">{selectedStudent.name}</p>
-                      <p className="text-xs text-zinc-500">{selectedStudent.workArea}{selectedStudent.diagnosis ? ` · ${selectedStudent.diagnosis}` : ""}</p>
-                    </div>
-                  </div>
-                  {studentCurricula.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {studentCurricula.map((c) => (
-                        <span key={c.id} className="rounded-full bg-[#FE703A]/10 border border-[#FE703A]/20 px-2 py-0.5 text-[10px] text-[#FE703A]">
-                          {c.title}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Week */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Hafta</label>
-              <input
-                type="date"
-                value={weekStart}
-                onChange={(e) => setWeekStart(e.target.value)}
-                className="rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20"
-              />
-              {weekStart && (
-                <p className="text-xs text-zinc-400">{formatWeekRange(weekStart)}</p>
-              )}
-            </div>
-
-            {/* Sessions per week */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Haftalık Ders Sayısı</label>
-              <select
-                value={sessions}
-                onChange={(e) => setSessions(Number(e.target.value))}
-                className="w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
-              >
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
-                  <option key={n} value={n}>{n} ders</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Day schedule */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">
-                Günlük Ders Dağılımı
-                <span className="ml-2 text-xs font-normal text-zinc-400">
-                  Toplam: {totalAssigned} ders
-                </span>
-              </label>
-              <div className="rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm divide-y divide-zinc-100">
-                {WEEKDAYS.map((day) => (
-                  <div key={day} className="flex items-center justify-between px-3 py-2">
-                    <span className="text-sm text-zinc-700">{day}</span>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => updateDay(day, -1)}
-                        disabled={!daySchedule[day]}
-                        className="h-7 w-7 rounded-lg border border-zinc-200 text-zinc-500 text-sm font-medium hover:bg-zinc-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        −
-                      </button>
-                      <span className="w-6 text-center text-sm font-semibold text-[#023435] dark:text-foreground">
-                        {daySchedule[day] ?? 0}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => updateDay(day, 1)}
-                        className="h-7 w-7 rounded-lg border border-zinc-200 text-zinc-500 text-sm font-medium hover:bg-zinc-100 transition-colors"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {totalAssigned === 0 && (
-                <p className="text-xs text-red-500">En az 1 ders günü belirleyin.</p>
-              )}
-            </div>
-
-            {/* Duration */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Ders Süresi</label>
-              <select
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                className="w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
-              >
-                {DURATION_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Focus areas */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">
-                Odak Alanları
-                {studentCurricula.length > 0 && (
-                  <span className="ml-2 text-[10px] font-normal text-[#FE703A]">Öğrencinin modüllerinden</span>
-                )}
-              </label>
-              <div className="rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm divide-y divide-zinc-100">
-                {allFocusOptions.map((area) => (
-                  <label key={area} className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-zinc-100 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={focusAreas.includes(area)}
-                      onChange={() => toggleFocus(area)}
-                      className="h-4 w-4 rounded border-zinc-300 accent-[#023435]"
-                    />
-                    <span className="text-sm text-zinc-700">{area}</span>
-                  </label>
-                ))}
-              </div>
-              <input
-                type="text"
-                value={customFocus}
-                onChange={(e) => setCustomFocus(e.target.value)}
-                placeholder="Diğer (serbest metin — isteğe bağlı)"
-                className="w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
-              />
-            </div>
-
-            {/* Approach */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Planlama Yaklaşımı</label>
-              <div className="flex gap-2">
-                {([
-                  ["ai",      "AI Önersin",        "Öğrenci profili ve geçmişe göre otomatik"],
-                  ["guided",  "Ben Yönlendireyim", "Seçilen odak alanlarına göre"],
-                ] as const).map(([v, l, d]) => (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => setApproach(v)}
-                    className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all text-left ${
-                      approach === v
-                        ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                        : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
-                    }`}
-                  >
-                    {l}
-                    <span className="block text-[10px] text-zinc-400 font-normal mt-0.5">{d}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Extra note */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Ek Not <span className="text-zinc-400 font-normal">(isteğe bağlı)</span></label>
-              <textarea
-                value={extraNote}
-                onChange={(e) => setExtraNote(e.target.value)}
-                rows={3}
-                placeholder="Bu hafta dikkat edilecek özel durumlar, veli geri bildirimi, geçen haftadan devam eden konular..."
-                className="w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground placeholder:text-zinc-400 resize-none focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
-              />
-            </div>
-
-            {/* Submit */}
-            <div className="pt-2">
-              <button
-                onClick={handleGenerate}
-                disabled={generating}
-                className="w-full rounded-xl bg-[#FE703A] px-4 py-3 text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {generating ? "Plan oluşturuluyor…" : "Haftalık Plan Oluştur"}
-              </button>
-              <p className="mt-2 text-center text-xs text-zinc-400">20 kredi kullanılacak</p>
-            </div>
-
-            {generating && (
-              <div className="rounded-xl border border-white/70 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm py-4">
-                <LoadingMessages />
               </div>
             )}
           </div>
         )}
+      </div>
 
-        {/* Result */}
-        {plan && (
-          <div className="space-y-6">
-            <WeeklyPlanView plan={plan} />
-
-            {/* Action buttons */}
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={handleDownload}
-                disabled={downloading}
-                className="flex items-center gap-1.5 rounded-xl bg-[#FE703A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors disabled:opacity-60"
-              >
-                {downloading ? "Hazırlanıyor…" : "PDF İndir"}
-              </button>
-              {savedCardId ? (
-                <Link
-                  href={`/cards/${savedCardId}`}
-                  className="flex items-center gap-1.5 rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
-                >
-                  <Library className="h-4 w-4" /> Kütüphanede Gör
-                </Link>
-              ) : (
-                <button
-                  onClick={handleSave}
-                  disabled={saving || !pendingCardId}
-                  className="flex items-center gap-1.5 rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-60"
-                >
-                  <Library className="h-4 w-4" />
-                  {saving ? "Kaydediliyor…" : "Kütüphaneye Kaydet"}
-                </button>
-              )}
-              <button
-                onClick={() => { setPlan(null); setPendingCardId(null); setSavedCardId(null); }}
-                className="flex items-center gap-1.5 rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
-              >
-                Yeni Plan Oluştur
-              </button>
-            </div>
-          </div>
+      {/* Hafta */}
+      <div>
+        <PLabel>Hafta</PLabel>
+        <PInput type="date" value={weekStart} onChange={(e) => setWeekStart(e.target.value)} />
+        {weekStart && (
+          <p style={{ fontSize: 11, color: "var(--poster-ink-3)", margin: "4px 0 0", fontWeight: 600 }}>
+            {formatWeekRange(weekStart)}
+          </p>
         )}
       </div>
-    </div>
+
+      {/* Haftalık ders */}
+      <div>
+        <PLabel>Haftalık Ders Sayısı</PLabel>
+        <PSelect value={sessions} onChange={(e) => setSessions(Number(e.target.value))}>
+          {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+            <option key={n} value={n}>{n} ders</option>
+          ))}
+        </PSelect>
+      </div>
+
+      {/* Day schedule */}
+      <div>
+        <PLabel>
+          Günlük Dağılım
+          <span style={{ marginLeft: 6, fontWeight: 700, color: "var(--poster-accent)", textTransform: "none" }}>
+            · Toplam {totalAssigned}
+          </span>
+        </PLabel>
+        <div
+          style={{
+            border: "2px solid var(--poster-ink)",
+            borderRadius: 12,
+            background: "#fff",
+            overflow: "hidden",
+          }}
+        >
+          {WEEKDAYS.map((day, idx) => (
+            <div
+              key={day}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "8px 12px",
+                borderTop: idx === 0 ? "none" : "2px dashed var(--poster-ink-faint)",
+              }}
+            >
+              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--poster-ink)" }}>{day}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => updateDay(day, -1)}
+                  disabled={!daySchedule[day]}
+                  style={{ ...counterBtnStyle, opacity: daySchedule[day] ? 1 : 0.3, cursor: daySchedule[day] ? "pointer" : "not-allowed" }}
+                >
+                  −
+                </button>
+                <span style={{ width: 20, textAlign: "center", fontSize: 13, fontWeight: 800, color: "var(--poster-ink)" }}>
+                  {daySchedule[day] ?? 0}
+                </span>
+                <button type="button" onClick={() => updateDay(day, 1)} style={counterBtnStyle}>
+                  +
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Ders süresi */}
+      <div>
+        <PLabel>Ders Süresi</PLabel>
+        <PSelect value={duration} onChange={(e) => setDuration(e.target.value)}>
+          {DURATION_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </PSelect>
+      </div>
+
+      {/* Odak alanları */}
+      <div>
+        <PLabel>
+          Odak Alanları
+          {studentCurricula.length > 0 && (
+            <span style={{ marginLeft: 6, fontWeight: 700, color: "var(--poster-accent)", textTransform: "none" }}>
+              · Modüllerden
+            </span>
+          )}
+        </PLabel>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {allFocusOptions.map((area) => (
+            <PCheckbox
+              key={area}
+              checked={focusAreas.includes(area)}
+              onChange={() => toggleFocus(area)}
+              label={area}
+            />
+          ))}
+        </div>
+        <div style={{ marginTop: 8 }}>
+          <PInput
+            value={customFocus}
+            onChange={(e) => setCustomFocus(e.target.value)}
+            placeholder="Diğer (serbest metin — isteğe bağlı)"
+          />
+        </div>
+      </div>
+
+      {/* Yaklaşım */}
+      <div>
+        <PLabel>Planlama Yaklaşımı</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+          {([
+            ["ai",      "AI Önersin",        "Profil ve geçmişe göre"],
+            ["guided",  "Ben Yönlendireyim", "Seçilen odaklara göre"],
+          ] as const).map(([v, l, d]) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setApproach(v)}
+              style={gridBtnStyle(approach === v)}
+            >
+              <div>{l}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--poster-ink-2)", marginTop: 2 }}>
+                {d}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Ek not */}
+      <div>
+        <PLabel>
+          Ek Not <span style={{ fontWeight: 500, color: "var(--poster-ink-3)", textTransform: "none" }}>(opsiyonel)</span>
+        </PLabel>
+        <PTextarea
+          value={extraNote}
+          onChange={(e) => setExtraNote(e.target.value)}
+          rows={3}
+          placeholder="Bu hafta dikkat edilecek durumlar, veli geri bildirimi..."
+        />
+      </div>
+
+      {/* Submit */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
+        <PBtn
+          type="submit"
+          variant="accent"
+          disabled={generating}
+          style={{ width: "100%", justifyContent: "center" }}
+        >
+          {generating ? "Oluşturuluyor…" : "Haftalık Plan Oluştur"}
+        </PBtn>
+        <p style={{ fontSize: 11, color: "var(--poster-ink-3)", textAlign: "center", margin: 0 }}>
+          20 kredi kullanılacak
+        </p>
+      </div>
+    </form>
+  );
+
+  const result = generating ? (
+    <ToolLoadingCard>
+      <LoadingMessages />
+    </ToolLoadingCard>
+  ) : plan ? (
+    <>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <PBtn variant="accent" onClick={handleDownload} disabled={downloading}>
+          {downloading ? "Hazırlanıyor…" : "PDF İndir"}
+        </PBtn>
+        {savedCardId && (
+          <PBtn as="a" href={`/cards/${savedCardId}`} variant="white" icon={<Library style={{ width: 14, height: 14 }} />}>
+            Kütüphanede Gör
+          </PBtn>
+        )}
+        <PBtn variant="white" onClick={handleReset} icon={<RefreshCw style={{ width: 14, height: 14 }} />}>
+          Yeni Plan
+        </PBtn>
+      </div>
+      <PCard rounded={18} style={{ padding: 20, background: "var(--poster-panel)" }}>
+        <WeeklyPlanView plan={plan} />
+      </PCard>
+    </>
+  ) : (
+    <ToolEmptyState
+      icon="🗓️"
+      title="Haftalık plan burada görünecek"
+      hint='Sol formu doldurun ve "Haftalık Plan Oluştur" butonuna tıklayın.'
+    />
+  );
+
+  return (
+    <ToolShell
+      title="Haftalık Çalışma Planı"
+      description="Öğrenci bazlı, hedef odaklı haftalık ders planları oluşturun."
+      form={form}
+      result={result}
+      formWidth={420}
+    />
   );
 }

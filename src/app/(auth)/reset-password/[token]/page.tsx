@@ -93,7 +93,7 @@ export default function ResetPasswordPage({
         <Link href="/">
           <Image
             src="/logo.svg"
-            alt="Terapimat"
+            alt="LudenLab"
             width={200}
             height={72}
             style={{ height: 48, width: "auto", margin: "0 auto" }}

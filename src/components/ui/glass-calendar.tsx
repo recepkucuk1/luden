@@ -16,40 +16,22 @@ import {
   subMonths,
 } from "date-fns";
 import { tr } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export interface GlassCalendarProps {
-  /** Currently highlighted date */
   selectedDate: Date;
-  /** Called when user clicks a day */
   onSelectDate: (date: Date) => void;
-  /**
-   * Dates that have at least one lesson — used to render indicator dots.
-   * Pass an array of Date objects (time part is ignored).
-   */
   lessonDates?: Date[];
   className?: string;
 }
 
-// ─── Animation variants ───────────────────────────────────────────────────────
-
 const slideVariants = {
-  enter: (dir: number) => ({
-    x: dir > 0 ? 40 : -40,
-    opacity: 0,
-  }),
+  enter: (dir: number) => ({ x: dir > 0 ? 40 : -40, opacity: 0 }),
   center: { x: 0, opacity: 1 },
-  exit: (dir: number) => ({
-    x: dir > 0 ? -40 : 40,
-    opacity: 0,
-  }),
+  exit: (dir: number) => ({ x: dir > 0 ? -40 : 40, opacity: 0 }),
 };
 
 const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export function GlassCalendar({
   selectedDate,
@@ -57,13 +39,8 @@ export function GlassCalendar({
   lessonDates = [],
   className,
 }: GlassCalendarProps) {
-  // Internal month cursor — starts on selectedDate's month
-  const [cursor, setCursor] = useState(() =>
-    startOfMonth(selectedDate)
-  );
-  // Track direction for slide animation: +1 forward, -1 backward
+  const [cursor, setCursor] = useState(() => startOfMonth(selectedDate));
   const [direction, setDirection] = useState(0);
-  // Unique key for AnimatePresence
   const monthKey = format(cursor, "yyyy-MM");
   const uid = useId();
 
@@ -72,33 +49,43 @@ export function GlassCalendar({
     setCursor((c) => (dir > 0 ? addMonths(c, 1) : subMonths(c, 1)));
   }
 
-  // Build grid: Mon → Sun, padded to full weeks
   const gridStart = startOfWeek(startOfMonth(cursor), { weekStartsOn: 1 });
-  const gridEnd   = endOfWeek(endOfMonth(cursor),     { weekStartsOn: 1 });
-  const days      = eachDayOfInterval({ start: gridStart, end: gridEnd });
+  const gridEnd = endOfWeek(endOfMonth(cursor), { weekStartsOn: 1 });
+  const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
 
   function hasLesson(date: Date) {
     return lessonDates.some((d) => isSameDay(d, date));
   }
 
+  const navBtn: React.CSSProperties = {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    border: "2px solid var(--poster-ink)",
+    background: "var(--poster-panel)",
+    color: "var(--poster-ink)",
+    display: "grid",
+    placeItems: "center",
+    cursor: "pointer",
+    boxShadow: "var(--poster-shadow-sm)",
+  };
+
   return (
     <div
-      className={cn(
-        "rounded-2xl p-4 select-none",
-        "bg-[rgba(2,52,53,0.06)] dark:bg-white/5 border border-[rgba(2,52,53,0.12)] dark:border-white/10 backdrop-blur-[16px]",
-        className
-      )}
+      className={className}
+      style={{
+        padding: 16,
+        userSelect: "none",
+        background: "var(--poster-panel)",
+        border: "2px solid var(--poster-ink)",
+        borderRadius: 18,
+        boxShadow: "var(--poster-shadow-lg)",
+        fontFamily: "var(--font-display)",
+      }}
     >
-      {/* ── Header ── */}
-      <div className="mb-4 flex items-center justify-between">
-        <button
-          onClick={() => go(-1)}
-          aria-label="Önceki ay"
-          className="rounded-lg p-1.5 text-[#023435]/40 dark:text-zinc-400 hover:bg-[#023435]/8 dark:hover:bg-white/10 hover:text-[#023435]/80 dark:hover:text-foreground dark:text-foreground/90 dark:hover:text-zinc-200 transition-colors"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+        <button type="button" onClick={() => go(-1)} aria-label="Önceki ay" style={navBtn}>
+          <ChevronLeft style={{ width: 14, height: 14 }} />
         </button>
 
         <AnimatePresence mode="popLayout" custom={direction}>
@@ -110,37 +97,44 @@ export function GlassCalendar({
             animate="center"
             exit="exit"
             transition={{ duration: 0.22, ease: "easeInOut" }}
-            className="text-sm font-semibold capitalize text-[#023435] dark:text-zinc-100"
+            style={{
+              margin: 0,
+              fontSize: 14,
+              fontWeight: 800,
+              color: "var(--poster-ink)",
+              textTransform: "capitalize",
+              letterSpacing: "-.01em",
+            }}
           >
             {format(cursor, "MMMM yyyy", { locale: tr })}
           </motion.h2>
         </AnimatePresence>
 
-        <button
-          onClick={() => go(1)}
-          aria-label="Sonraki ay"
-          className="rounded-lg p-1.5 text-[#023435]/40 dark:text-zinc-400 hover:bg-[#023435]/8 dark:hover:bg-white/10 hover:text-[#023435]/80 dark:hover:text-foreground dark:text-foreground/90 dark:hover:text-zinc-200 transition-colors"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
+        <button type="button" onClick={() => go(1)} aria-label="Sonraki ay" style={navBtn}>
+          <ChevronRight style={{ width: 14, height: 14 }} />
         </button>
       </div>
 
-      {/* ── Day-of-week labels ── */}
-      <div className="mb-1 grid grid-cols-7">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", marginBottom: 4 }}>
         {DAY_NAMES.map((name) => (
           <div
             key={name}
-            className="py-1 text-center text-[10px] font-semibold uppercase tracking-wider text-[rgba(2,52,53,0.4)] dark:text-zinc-500"
+            style={{
+              padding: "4px 0",
+              textAlign: "center",
+              fontSize: 10,
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: ".08em",
+              color: "var(--poster-ink-3)",
+            }}
           >
             {name}
           </div>
         ))}
       </div>
 
-      {/* ── Day grid (animated per month) ── */}
-      <div className="relative overflow-hidden" style={{ minHeight: `${Math.ceil(days.length / 7) * 44}px` }}>
+      <div style={{ position: "relative", overflow: "hidden", minHeight: Math.ceil(days.length / 7) * 44 }}>
         <AnimatePresence mode="popLayout" custom={direction}>
           <motion.div
             key={monthKey + uid}
@@ -150,63 +144,78 @@ export function GlassCalendar({
             animate="center"
             exit="exit"
             transition={{ duration: 0.22, ease: "easeInOut" }}
-            className="grid grid-cols-7 gap-y-0.5"
+            style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", rowGap: 2 }}
           >
             {days.map((day) => {
-              const isSelected    = isSameDay(day, selectedDate);
-              const isTodayDate   = isToday(day);
-              const isCurrentMonth = isSameMonth(day, cursor);
-              const lesson        = hasLesson(day);
+              const selected = isSameDay(day, selectedDate);
+              const td = isToday(day);
+              const inMonth = isSameMonth(day, cursor);
+              const lesson = hasLesson(day);
+
+              let bg = "transparent";
+              let color = inMonth ? "var(--poster-ink-2)" : "var(--poster-ink-faint)";
+              let border = "2px solid transparent";
+              let shadow = "none";
+              let fontWeight: number = 700;
+
+              if (selected) {
+                bg = "var(--poster-accent)";
+                color = "#fff";
+                border = "2px solid var(--poster-ink)";
+                shadow = "3px 3px 0 var(--poster-ink)";
+                fontWeight = 800;
+              } else if (td) {
+                color = "var(--poster-accent)";
+                border = "2px dashed var(--poster-accent)";
+                fontWeight = 800;
+              }
 
               return (
                 <button
                   key={day.toISOString()}
+                  type="button"
                   onClick={() => {
                     onSelectDate(day);
-                    // If user clicks a day in another month, navigate to that month
-                    if (!isCurrentMonth) {
+                    if (!inMonth) {
                       setDirection(day > cursor ? 1 : -1);
                       setCursor(startOfMonth(day));
                     }
                   }}
-                  className={cn(
-                    "relative mx-auto flex h-9 w-9 flex-col items-center justify-center rounded-xl text-xs font-medium",
-                    "transition-all duration-150",
-                    isSelected
-                      ? "text-white shadow-lg"
-                      : isTodayDate
-                        ? "text-[#FE703A] font-semibold hover:bg-[#FE703A]/8 dark:hover:bg-[#FE703A]/20"
-                        : isCurrentMonth
-                          ? "text-[#023435]/70 dark:text-zinc-300 hover:bg-[#023435]/8 dark:hover:bg-white/10"
-                          : "text-[#023435]/25 dark:text-zinc-600 hover:bg-[#023435]/5 dark:hover:bg-white/5"
-                  )}
-                  style={
-                    isSelected
-                      ? { background: "linear-gradient(135deg, #FE703A 0%, #F4AE10 100%)" }
-                      : undefined
-                  }
+                  style={{
+                    position: "relative",
+                    margin: "0 auto",
+                    width: 36,
+                    height: 36,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 10,
+                    fontFamily: "var(--font-display)",
+                    fontSize: 12,
+                    fontWeight,
+                    background: bg,
+                    color,
+                    border,
+                    boxShadow: shadow,
+                    cursor: "pointer",
+                    transition: "background .1s, transform .1s",
+                  }}
                 >
                   <span>{format(day, "d")}</span>
-
-                  {/* Today dot (only when not selected) */}
-                  {isTodayDate && !isSelected && (
-                    <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#FE703A]" />
-                  )}
-
-                  {/* Lesson dot (bottom, only when not selected and has lesson) */}
-                  {lesson && !isSelected && (
+                  {lesson && (
                     <span
-                      className={cn(
-                        "absolute bottom-0.5 left-1/2 h-0.5 w-3 -translate-x-1/2 rounded-full",
-                        isTodayDate ? "bottom-0" : "",
-                        isCurrentMonth ? "bg-[#FE703A]/60" : "bg-white/15"
-                      )}
+                      style={{
+                        position: "absolute",
+                        bottom: 3,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        height: 3,
+                        width: 12,
+                        borderRadius: 999,
+                        background: selected ? "#fff" : "var(--poster-accent)",
+                      }}
                     />
-                  )}
-
-                  {/* Lesson dot when selected */}
-                  {lesson && isSelected && (
-                    <span className="absolute bottom-0.5 left-1/2 h-0.5 w-3 -translate-x-1/2 rounded-full bg-white/60 dark:bg-card/60" />
                   )}
                 </button>
               );
@@ -215,16 +224,35 @@ export function GlassCalendar({
         </AnimatePresence>
       </div>
 
-      {/* ── Footer: today shortcut ── */}
-      <div className="mt-3 border-t border-[rgba(2,52,53,0.1)] dark:border-white/10 pt-3 flex justify-center">
+      <div
+        style={{
+          marginTop: 12,
+          paddingTop: 12,
+          borderTop: "2px dashed var(--poster-ink-faint)",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <button
+          type="button"
           onClick={() => {
             const t = new Date();
             setDirection(t > cursor ? 1 : -1);
             setCursor(startOfMonth(t));
             onSelectDate(t);
           }}
-          className="rounded-lg px-3 py-1 text-[11px] font-medium text-[#023435]/40 dark:text-zinc-400 hover:bg-[#023435]/8 dark:hover:bg-white/10 hover:text-[#023435]/70 dark:hover:text-foreground/90 dark:text-foreground/80 dark:hover:text-zinc-200 transition-colors"
+          style={{
+            padding: "4px 12px",
+            borderRadius: 10,
+            border: "2px solid var(--poster-ink)",
+            background: "var(--poster-panel)",
+            color: "var(--poster-ink)",
+            fontFamily: "var(--font-display)",
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: "pointer",
+            boxShadow: "var(--poster-shadow-sm)",
+          }}
         >
           Bugüne git
         </button>

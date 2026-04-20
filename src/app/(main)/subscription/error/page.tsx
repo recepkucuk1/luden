@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { PBtn, PCard } from "@/components/poster";
 
 function ErrorContent() {
   const searchParams = useSearchParams();
@@ -26,25 +25,64 @@ function ErrorContent() {
   };
 
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
-      <div className="rounded-2xl border border-red-200 dark:border-red-900 bg-card p-10 shadow-sm max-w-md w-full relative overflow-hidden">
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="h-20 w-20 rounded-full bg-red-500/10 flex items-center justify-center mb-6">
-            <XCircle className="h-10 w-10 text-red-500" />
-          </div>
-
-          <h1 className="text-2xl font-bold text-foreground mb-2">İşlem Tamamlanamadı</h1>
-          <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-            {getReasonMessage()}
-          </p>
-
-          <Link href="/subscription" className="w-full">
-            <Button variant="outline" className="w-full border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-700 dark:hover:text-red-300">
-              Tekrar Dene
-            </Button>
-          </Link>
+    <div
+      className="poster-scope"
+      style={{
+        minHeight: "70vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "32px 16px",
+        textAlign: "center",
+      }}
+    >
+      <PCard rounded={20} style={{ maxWidth: 440, width: "100%", padding: 40, background: "var(--poster-panel)" }}>
+        <div
+          style={{
+            width: 72,
+            height: 72,
+            margin: "0 auto 20px",
+            borderRadius: 18,
+            background: "var(--poster-pink)",
+            border: "2px solid var(--poster-ink)",
+            boxShadow: "0 4px 0 var(--poster-ink)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <XCircle style={{ width: 36, height: 36, color: "#fff" }} />
         </div>
-      </div>
+
+        <h1
+          style={{
+            fontSize: 26,
+            fontWeight: 700,
+            color: "var(--poster-ink)",
+            margin: "0 0 10px",
+            fontFamily: "var(--font-display)",
+            letterSpacing: "-.02em",
+          }}
+        >
+          İşlem Tamamlanamadı
+        </h1>
+        <p
+          style={{
+            fontSize: 14,
+            lineHeight: 1.55,
+            color: "var(--poster-ink-2)",
+            margin: "0 0 28px",
+            fontFamily: "var(--font-display)",
+          }}
+        >
+          {getReasonMessage()}
+        </p>
+
+        <PBtn as="a" href="/subscription" variant="white" size="md" style={{ width: "100%" }}>
+          Tekrar Dene
+        </PBtn>
+      </PCard>
     </div>
   );
 }

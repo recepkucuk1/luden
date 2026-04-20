@@ -9,25 +9,20 @@ import {
   LayoutGrid,
   Flame,
   User,
-  TrendingUp,
   Package,
   Sparkles,
   Plus,
-  ArrowRight,
   CalendarDays,
   Clock,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import {
   WORK_AREA_LABEL,
-  WORK_AREA_COLOR,
   DIFFICULTY_LABEL,
-  DIFFICULTY_COLOR,
 } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 import { motion, useInView } from "framer-motion";
+import { PBtn, PCard, PBadge, PProgress } from "@/components/poster";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 function relativeTime(dateStr: string): string {
   const now = new Date();
   const d = new Date(dateStr);
@@ -43,7 +38,6 @@ function relativeTime(dateStr: string): string {
   return formatDate(d, "short");
 }
 
-// ─── CountUp Animation ───────────────────────────────────────────────────────
 function CountUp({ target }: { target: number }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
@@ -70,7 +64,6 @@ function CountUp({ target }: { target: number }) {
   return <span ref={ref}>{count}</span>;
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface DashboardStats {
   students: number;
   cards: number;
@@ -101,16 +94,105 @@ interface RecentStudent {
   cardCount: number;
 }
 
-// ─── Category Colors ─────────────────────────────────────────────────────────
-const CATEGORY_META: Record<string, { label: string; color: string; bg: string }> = {
-  speech:   { label: "Konuşma", color: "bg-[#023435]",  bg: "bg-[#023435]/10" },
-  language: { label: "Dil",     color: "bg-[#FE703A]",  bg: "bg-[#FE703A]/10" },
-  hearing:  { label: "İşitme",  color: "bg-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-900/20" },
-  fluency:  { label: "Akıcılık", color: "bg-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
-  voice:    { label: "Ses",     color: "bg-pink-500",   bg: "bg-pink-50 dark:bg-pink-900/20" },
+type PosterColor = "accent" | "green" | "yellow" | "pink" | "blue" | "ink" | "soft";
+
+const CATEGORY_META: Record<string, { label: string; color: string; badge: PosterColor }> = {
+  speech:   { label: "Konuşma",  color: "var(--poster-yellow)", badge: "yellow" },
+  language: { label: "Dil",       color: "var(--poster-accent)", badge: "accent" },
+  hearing:  { label: "İşitme",    color: "var(--poster-blue)",   badge: "blue" },
+  fluency:  { label: "Akıcılık",  color: "var(--poster-pink)",   badge: "pink" },
+  voice:    { label: "Ses",       color: "var(--poster-green)",  badge: "green" },
 };
 
-// ─── Dashboard Page ──────────────────────────────────────────────────────────
+const DIFFICULTY_COLOR: Record<string, PosterColor> = {
+  easy: "green",
+  medium: "yellow",
+  hard: "pink",
+};
+
+function StatCard({
+  Icon,
+  label,
+  value,
+  suffix,
+  sub,
+  tint,
+  delay,
+}: {
+  Icon: React.ElementType;
+  label: string;
+  value: number;
+  suffix?: string;
+  sub: string;
+  tint: string;
+  delay: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay }}
+      style={{
+        padding: 20,
+        background: "var(--poster-panel)",
+        border: "2px solid var(--poster-ink)",
+        borderRadius: 18,
+        boxShadow: "0 6px 0 var(--poster-ink)",
+        fontFamily: "var(--font-display)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 10,
+            background: tint,
+            border: "2px solid var(--poster-ink)",
+            boxShadow: "0 2px 0 var(--poster-ink)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--poster-ink)",
+          }}
+        >
+          <Icon style={{ width: 20, height: 20 }} strokeWidth={2.25} />
+        </div>
+      </div>
+      <p style={{ fontSize: 12, fontWeight: 700, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: 0 }}>
+        {label}
+      </p>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 4 }}>
+        <p style={{ fontSize: 30, fontWeight: 800, color: "var(--poster-ink)", letterSpacing: "-.02em", margin: 0 }}>
+          <CountUp target={value} />
+        </p>
+        {suffix && (
+          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--poster-ink-2)", margin: 0 }}>{suffix}</p>
+        )}
+      </div>
+      <p style={{ fontSize: 12, color: "var(--poster-accent)", fontWeight: 700, marginTop: 6 }}>{sub}</p>
+    </motion.div>
+  );
+}
+
+function Panel({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <div
+      style={{
+        padding: 20,
+        background: "var(--poster-panel)",
+        border: "2px solid var(--poster-ink)",
+        borderRadius: 18,
+        boxShadow: "0 6px 0 var(--poster-ink)",
+        fontFamily: "var(--font-display)",
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [weekly, setWeekly] = useState<WeeklyStats | null>(null);
@@ -143,363 +225,527 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 bg-gray-50 dark:bg-gray-900 p-6 flex flex-col items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
-        <p className="mt-4 text-sm text-gray-500">Yükleniyor...</p>
+      <div
+        className="poster-scope"
+        style={{
+          flex: 1,
+          minHeight: "70vh",
+          background: "var(--poster-bg)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--font-display)",
+        }}
+      >
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            border: "4px solid rgba(254,112,58,.25)",
+            borderTopColor: "var(--poster-accent)",
+            animation: "dash-spin 1s linear infinite",
+          }}
+        />
+        <p style={{ marginTop: 16, fontSize: 13, color: "var(--poster-ink-2)" }}>Yükleniyor…</p>
+        <style>{`@keyframes dash-spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
   const isEmpty = (stats?.students ?? 0) === 0 && (stats?.cards ?? 0) === 0;
-
-  // stats cards config
-  const statCards = [
-    {
-      icon: Users,
-      label: "Toplam Öğrenci",
-      value: stats?.students ?? 0,
-      sub: `Bu hafta ${weekly?.studentsWorked ?? 0} aktif öğrenci`,
-      iconBg: "bg-[#023435]/10 dark:bg-[#023435]/30",
-      iconColor: "text-[#023435] dark:text-emerald-400",
-    },
-    {
-      icon: LayoutGrid,
-      label: "Toplam Kart",
-      value: stats?.cards ?? 0,
-      sub: `Bu hafta ${weekly?.cardsCreated ?? 0} yeni kart`,
-      iconBg: "bg-[#FE703A]/10 dark:bg-[#FE703A]/20",
-      iconColor: "text-[#FE703A]",
-    },
-    {
-      icon: CheckCircle2,
-      label: "Tamamlanan Hedef",
-      value: weekly?.goalsCompleted ?? 0,
-      sub: "Bu hafta genel değerlendirme",
-      iconBg: "bg-emerald-50 dark:bg-emerald-900/20",
-      iconColor: "text-emerald-600 dark:text-emerald-400",
-    },
-    {
-      icon: Flame,
-      label: "Günlük Seri",
-      value: weekly?.streak ?? 0,
-      suffix: "gün",
-      sub: "Çalışmaya devam et!",
-      iconBg: "bg-orange-50 dark:bg-orange-900/20",
-      iconColor: "text-orange-600 dark:text-orange-400",
-    },
-  ];
-
-  // dynamic category distribution — only show known therapy areas
   const KNOWN_CATEGORIES = new Set(Object.keys(CATEGORY_META));
   const categoryEntries = Object.entries(stats?.byCategory ?? {}).filter(
-    ([key, v]) => v > 0 && KNOWN_CATEGORIES.has(key)
+    ([key, v]) => v > 0 && KNOWN_CATEGORIES.has(key),
   );
   const totalCategoryItems = categoryEntries.reduce((s, [, v]) => s + v, 0);
 
+  const statCards: Array<{ Icon: React.ElementType; label: string; value: number; sub: string; tint: string; suffix?: string }> = [
+    { Icon: Users,        label: "Toplam Öğrenci",     value: stats?.students ?? 0,        sub: `Bu hafta ${weekly?.studentsWorked ?? 0} aktif öğrenci`,    tint: "var(--poster-yellow)" },
+    { Icon: LayoutGrid,   label: "Toplam Kart",        value: stats?.cards ?? 0,           sub: `Bu hafta ${weekly?.cardsCreated ?? 0} yeni kart`,          tint: "var(--poster-accent)" },
+    { Icon: CheckCircle2, label: "Tamamlanan Hedef",   value: weekly?.goalsCompleted ?? 0, sub: "Bu hafta genel değerlendirme",                              tint: "var(--poster-green)" },
+    { Icon: Flame,        label: "Günlük Seri",        value: weekly?.streak ?? 0,         sub: "Çalışmaya devam et!",                                       tint: "var(--poster-pink)",  suffix: "gün" },
+  ];
+
   return (
-    <div className="flex-1 bg-gray-50 dark:bg-gray-950 p-4 sm:p-6 overflow-auto">
-      {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Genel Bakış</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Luden paneline hoş geldiniz</p>
-        </div>
-        <div className="flex items-center gap-2 self-end sm:self-auto">
-          {/* Quick Action CTA */}
-          <Link
-            href="/generate"
-            className="group inline-flex items-center gap-2 rounded-xl bg-[#FE703A] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#FE703A]/90 transition-all hover:shadow-md"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Yeni Kart Üret</span>
-          </Link>
-          <Link
-            href="/profile"
-            className="p-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-          >
-            <User className="h-5 w-5" />
-          </Link>
+    <div
+      className="poster-scope"
+      style={{
+        flex: 1,
+        background: "var(--poster-bg)",
+        padding: "24px 24px 48px",
+        fontFamily: "var(--font-display)",
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 14,
+          marginBottom: 28,
+        }}
+      >
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 14 }}>
+          <div>
+            <h1 style={{ fontSize: 32, fontWeight: 700, color: "var(--poster-ink)", letterSpacing: "-.02em", margin: 0 }}>
+              Genel Bakış
+            </h1>
+            <p style={{ marginTop: 4, fontSize: 14, color: "var(--poster-ink-2)" }}>
+              LudenLab paneline hoş geldiniz
+            </p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <PBtn as="a" href="/generate" variant="accent" size="md" icon={<Plus size={16} />}>
+              Yeni Kart Üret
+            </PBtn>
+            <Link
+              href="/profile"
+              aria-label="Profil"
+              style={{
+                width: 44,
+                height: 44,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "var(--poster-panel)",
+                border: "2px solid var(--poster-ink)",
+                borderRadius: 12,
+                boxShadow: "0 3px 0 var(--poster-ink)",
+                color: "var(--poster-ink)",
+              }}
+            >
+              <User style={{ width: 20, height: 20 }} />
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* ── Stats Grid ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
-        {statCards.map((card, i) => (
-          <motion.div
-            key={card.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: i * 0.08 }}
-            className="p-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-all group"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`p-2 rounded-lg ${card.iconBg} transition-colors`}>
-                <card.icon className={`h-5 w-5 ${card.iconColor}`} />
-              </div>
-              <TrendingUp className="h-4 w-4 text-emerald-500 opacity-50 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <h3 className="font-medium text-gray-600 dark:text-gray-400 mb-1">{card.label}</h3>
-            <div className="flex items-end gap-1.5">
-              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                <CountUp target={card.value} />
-              </p>
-              {card.suffix && (
-                <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">{card.suffix}</p>
-              )}
-            </div>
-            <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-2 font-medium">{card.sub}</p>
-          </motion.div>
+      {/* Stats grid */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: 16,
+          marginBottom: 28,
+        }}
+      >
+        {statCards.map((c, i) => (
+          <StatCard key={c.label} Icon={c.Icon} label={c.label} value={c.value} suffix={c.suffix} sub={c.sub} tint={c.tint} delay={i * 0.06} />
         ))}
       </div>
 
-      {/* ── Content Grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        {/* Left — Recent Cards */}
+      {/* Content grid */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
+          gap: 20,
+        }}
+      >
+        {/* Left column — recent cards */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.35 }}
-          className="lg:col-span-2"
+          transition={{ duration: 0.4, delay: 0.3 }}
         >
-          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm h-full max-h-[500px] flex flex-col">
-            <div className="flex items-center justify-between mb-6 shrink-0">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Son Üretilen Kartlar</h3>
-              <Link href="/cards" className="text-sm text-[#FE703A] hover:text-[#FE703A]/80 font-medium transition-colors">
+          <Panel style={{ maxHeight: 560, display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: "var(--poster-ink)", margin: 0 }}>Son Üretilen Kartlar</h3>
+              <Link href="/cards" style={{ fontSize: 13, fontWeight: 700, color: "var(--poster-accent)", textDecoration: "none" }}>
                 Tümünü gör
               </Link>
             </div>
 
             {recentCards.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center py-8">
-                <div className="h-12 w-12 rounded-xl bg-[#FE703A]/10 flex items-center justify-center mb-3">
-                  <Package className="h-6 w-6 text-[#FE703A]" />
-                </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Henüz kart üretilmedi</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">AI ile saniyeler içinde ilk kartınızı oluşturun</p>
-                <Link
-                  href="/generate"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#FE703A] px-4 py-2 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors"
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 0", textAlign: "center" }}>
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 16,
+                    background: "var(--poster-accent)",
+                    border: "2px solid var(--poster-ink)",
+                    boxShadow: "0 3px 0 var(--poster-ink)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 12,
+                    color: "#fff",
+                  }}
                 >
-                  <Sparkles className="h-3.5 w-3.5" />
+                  <Package style={{ width: 26, height: 26 }} />
+                </div>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "var(--poster-ink)", margin: 0 }}>Henüz kart üretilmedi</p>
+                <p style={{ fontSize: 12, color: "var(--poster-ink-2)", margin: "4px 0 16px" }}>AI ile saniyeler içinde ilk kartınızı oluşturun</p>
+                <PBtn as="a" href="/generate" variant="accent" size="sm" icon={<Sparkles size={14} />}>
                   İlk Kartı Üret
-                </Link>
+                </PBtn>
               </div>
             ) : (
-              <div className="space-y-2 overflow-y-auto pr-2 no-scrollbar flex-1">
-                {recentCards.map((card) => (
-                  <Link
-                    href={`/cards/${card.id}`}
-                    key={card.id}
-                    className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer border border-transparent hover:border-gray-100 dark:hover:border-gray-800 group"
-                  >
-                    <div className="p-2 rounded-lg bg-[#023435]/10 dark:bg-[#023435]/30 group-hover:bg-[#023435] transition-colors">
-                      <Package className="h-5 w-5 text-[#023435] dark:text-emerald-400 group-hover:text-white transition-colors" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                        {card.title}
-                      </p>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <Badge
-                          className={WORK_AREA_COLOR[card.category] ?? "bg-gray-100 text-gray-600"}
-                          style={{ fontSize: "10px", padding: "0 6px" }}
-                        >
-                          {WORK_AREA_LABEL[card.category] ?? card.category}
-                        </Badge>
-                        <Badge
-                          className={DIFFICULTY_COLOR[card.difficulty] ?? "bg-gray-100 text-gray-600"}
-                          style={{ fontSize: "10px", padding: "0 6px" }}
-                        >
-                          {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
-                        </Badge>
-                        {card.student && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400 ml-1 truncate max-w-[100px] inline-block">
-                            {card.student.name}
-                          </span>
-                        )}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, overflowY: "auto", paddingRight: 4, flex: 1 }}>
+                {recentCards.map((card) => {
+                  const catMeta = CATEGORY_META[card.category];
+                  const diffColor: PosterColor = DIFFICULTY_COLOR[card.difficulty] ?? "soft";
+                  return (
+                    <Link
+                      key={card.id}
+                      href={`/cards/${card.id}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 14,
+                        padding: "10px 12px",
+                        borderRadius: 12,
+                        border: "2px solid transparent",
+                        textDecoration: "none",
+                        transition: "background .12s, border-color .12s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "var(--poster-bg-2)";
+                        e.currentTarget.style.borderColor = "var(--poster-ink)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "";
+                        e.currentTarget.style.borderColor = "transparent";
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 40,
+                          height: 40,
+                          flexShrink: 0,
+                          borderRadius: 10,
+                          background: catMeta?.color ?? "var(--poster-ink-faint)",
+                          border: "2px solid var(--poster-ink)",
+                          boxShadow: "0 2px 0 var(--poster-ink)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "var(--poster-ink)",
+                        }}
+                      >
+                        <Package style={{ width: 18, height: 18 }} />
                       </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className="inline-flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
-                        <Clock className="h-3 w-3" />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {card.title}
+                        </p>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, alignItems: "center", marginTop: 4 }}>
+                          <PBadge color={catMeta?.badge ?? "soft"}>
+                            {WORK_AREA_LABEL[card.category] ?? card.category}
+                          </PBadge>
+                          <PBadge color={diffColor}>
+                            {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
+                          </PBadge>
+                          {card.student && (
+                            <span style={{ fontSize: 11, color: "var(--poster-ink-2)", fontWeight: 600, marginLeft: 2 }}>
+                              {card.student.name}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--poster-ink-3)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                        <Clock style={{ width: 12, height: 12 }} />
                         {relativeTime(card.createdAt)}
                       </span>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  );
+                })}
               </div>
             )}
-          </div>
+          </Panel>
         </motion.div>
 
-        {/* Right — Sidebar widgets */}
+        {/* Right column */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.45 }}
-          className="space-y-6"
+          transition={{ duration: 0.4, delay: 0.4 }}
+          style={{ display: "flex", flexDirection: "column", gap: 20 }}
         >
-          {/* Onboarding Widget (compact) */}
+          {/* Onboarding */}
           {isEmpty && (
-            <div className="rounded-xl border border-[#023435]/20 dark:border-[#023435]/40 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-[#023435] to-[#04595B] px-4 py-3 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[#FE703A]" />
-                <span className="text-sm font-semibold text-white">Başlangıç Adımları</span>
-                <span className="ml-auto text-xs text-white/50">1/3</span>
+            <Panel style={{ padding: 0, overflow: "hidden" }}>
+              <div
+                style={{
+                  padding: "12px 16px",
+                  background: "var(--poster-ink)",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  borderBottom: "2px solid var(--poster-ink)",
+                }}
+              >
+                <Sparkles style={{ width: 14, height: 14, color: "var(--poster-accent)" }} />
+                <span style={{ fontSize: 13, fontWeight: 700 }}>Başlangıç Adımları</span>
+                <span style={{ marginLeft: "auto", fontSize: 11, opacity: 0.7 }}>1/3</span>
               </div>
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+              <div>
                 {[
                   { done: true, label: "Hesap oluştur", href: "" },
                   { done: (stats?.students ?? 0) > 0, label: "Öğrenci ekle", href: "/students" },
                   { done: (stats?.cards ?? 0) > 0, label: "Kart üret", href: "/generate" },
-                ].map((step, i) => (
-                  <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                ].map((step, i, arr) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      padding: "10px 16px",
+                      borderTop: i === 0 ? "none" : "1px dashed var(--poster-ink-faint)",
+                      borderBottom: i === arr.length - 1 ? "none" : undefined,
+                    }}
+                  >
                     <div
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                        step.done
-                          ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-400"
-                      }`}
+                      style={{
+                        width: 22,
+                        height: 22,
+                        flexShrink: 0,
+                        borderRadius: 999,
+                        border: "2px solid var(--poster-ink)",
+                        background: step.done ? "var(--poster-green)" : "var(--poster-panel)",
+                        color: step.done ? "#fff" : "var(--poster-ink-2)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 10,
+                        fontWeight: 800,
+                      }}
                     >
                       {step.done ? "✓" : i + 1}
                     </div>
-                    <span className={`text-sm flex-1 ${step.done ? "line-through text-gray-400" : "text-gray-700 dark:text-gray-300 font-medium"}`}>
+                    <span
+                      style={{
+                        flex: 1,
+                        fontSize: 14,
+                        fontWeight: step.done ? 500 : 700,
+                        color: step.done ? "var(--poster-ink-3)" : "var(--poster-ink)",
+                        textDecoration: step.done ? "line-through" : "none",
+                      }}
+                    >
                       {step.label}
                     </span>
                     {!step.done && step.href && (
-                      <Link href={step.href} className="text-[11px] font-semibold text-[#FE703A] hover:text-[#FE703A]/80 transition-colors">
+                      <Link href={step.href} style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-accent)", textDecoration: "none" }}>
                         Başla →
                       </Link>
                     )}
                   </div>
                 ))}
               </div>
-            </div>
+            </Panel>
           )}
 
-          {/* Category Distribution */}
-          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-5">Alan Dağılımı</h3>
+          {/* Category distribution */}
+          <Panel>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--poster-ink)", margin: "0 0 16px" }}>
+              Alan Dağılımı
+            </h3>
             {categoryEntries.length === 0 ? (
-              <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">Henüz veri yok</p>
+              <p style={{ fontSize: 13, color: "var(--poster-ink-3)", textAlign: "center", padding: "12px 0", margin: 0 }}>Henüz veri yok</p>
             ) : (
-              <div className="space-y-4">
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {categoryEntries.map(([key, value]) => {
-                  const meta = CATEGORY_META[key] || { label: key, color: "bg-gray-500", bg: "bg-gray-100" };
+                  const meta = CATEGORY_META[key] || { label: key, color: "var(--poster-ink-faint)", badge: "soft" as PosterColor };
                   const pct = totalCategoryItems > 0 ? (value / totalCategoryItems) * 100 : 0;
                   return (
                     <div key={key}>
-                      <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                          <span className={`h-2.5 w-2.5 rounded-full ${meta.color}`} />
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 700, color: "var(--poster-ink)" }}>
+                          <span style={{ width: 10, height: 10, borderRadius: 999, background: meta.color, border: "1.5px solid var(--poster-ink)" }} />
                           {meta.label}
                         </span>
-                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{value}</span>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: "var(--poster-ink)" }}>{value}</span>
                       </div>
-                      <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${pct}%` }}
-                          transition={{ duration: 0.8, ease: "easeOut", delay: 0.5 }}
-                          className={`${meta.color} h-1.5 rounded-full`}
-                        />
-                      </div>
+                      <PProgress value={pct} color={meta.color} />
                     </div>
                   );
                 })}
-                <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
-                  <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
-                    <span>Toplam</span>
-                    <span className="font-semibold">{totalCategoryItems} kart</span>
-                  </div>
+                <div style={{ paddingTop: 8, borderTop: "1px dashed var(--poster-ink-faint)", display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--poster-ink-3)" }}>
+                  <span>Toplam</span>
+                  <span style={{ fontWeight: 800, color: "var(--poster-ink)" }}>{totalCategoryItems} kart</span>
                 </div>
               </div>
             )}
-          </div>
+          </Panel>
 
-          {/* Today's Plan Mini Widget */}
-          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Bugün</h3>
-              <Link href="/calendar" className="text-xs text-[#FE703A] hover:text-[#FE703A]/80 font-medium transition-colors">
+          {/* Today */}
+          <Panel>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--poster-ink)", margin: 0 }}>Bugün</h3>
+              <Link href="/calendar" style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-accent)", textDecoration: "none" }}>
                 Takvim
               </Link>
             </div>
-            <div className="flex items-center gap-3 rounded-xl bg-[#023435]/5 dark:bg-[#023435]/20 p-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#023435]/10 dark:bg-[#023435]/30">
-                <CalendarDays className="h-5 w-5 text-[#023435] dark:text-emerald-400" />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                padding: 12,
+                borderRadius: 12,
+                background: "var(--poster-bg-2)",
+                border: "2px solid var(--poster-ink)",
+                boxShadow: "0 3px 0 var(--poster-ink)",
+              }}
+            >
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  flexShrink: 0,
+                  borderRadius: 10,
+                  background: "var(--poster-panel)",
+                  border: "2px solid var(--poster-ink)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "var(--poster-ink)",
+                }}
+              >
+                <CalendarDays style={{ width: 20, height: 20 }} />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--poster-ink)", margin: 0 }}>
                   {formatDate(new Date(), "long")}
                 </p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                <p style={{ fontSize: 11, color: "var(--poster-ink-2)", margin: "2px 0 0" }}>
                   {weekly?.studentsWorked ?? 0} aktif öğrenci · {weekly?.cardsCreated ?? 0} kart üretildi
                 </p>
               </div>
             </div>
-            {/* Quick links */}
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               <Link
                 href="/generate"
-                className="flex items-center gap-2 rounded-lg border border-gray-100 dark:border-gray-800 px-3 py-2.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:border-[#FE703A]/30 hover:text-[#FE703A] transition-colors"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  border: "2px solid var(--poster-ink)",
+                  boxShadow: "0 2px 0 var(--poster-ink)",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "var(--poster-ink)",
+                  background: "var(--poster-panel)",
+                  textDecoration: "none",
+                }}
               >
-                <Sparkles className="h-3.5 w-3.5" />
+                <Sparkles style={{ width: 14, height: 14 }} />
                 Kart Üret
               </Link>
               <Link
                 href="/students"
-                className="flex items-center gap-2 rounded-lg border border-gray-100 dark:border-gray-800 px-3 py-2.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:border-[#023435]/30 hover:text-[#023435] dark:hover:text-foreground dark:text-foreground dark:hover:text-emerald-400 transition-colors"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  border: "2px solid var(--poster-ink)",
+                  boxShadow: "0 2px 0 var(--poster-ink)",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "var(--poster-ink)",
+                  background: "var(--poster-panel)",
+                  textDecoration: "none",
+                }}
               >
-                <Users className="h-3.5 w-3.5" />
+                <Users style={{ width: 14, height: 14 }} />
                 Öğrenciler
               </Link>
             </div>
-          </div>
+          </Panel>
 
-          {/* Recent Students */}
-          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Yeni Öğrenciler</h3>
-              <Link href="/students" className="text-xs text-[#FE703A] hover:text-[#FE703A]/80 font-medium transition-colors">
+          {/* Recent students */}
+          <Panel>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--poster-ink)", margin: 0 }}>Yeni Öğrenciler</h3>
+              <Link href="/students" style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-accent)", textDecoration: "none" }}>
                 Tümü
               </Link>
             </div>
             {recentStudents.length === 0 ? (
-              <div className="flex flex-col items-center py-4">
-                <p className="text-sm text-gray-400 text-center mb-3">Henüz eklenmedi</p>
-                <Link
-                  href="/students"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#FE703A] hover:text-[#FE703A]/80 transition-colors"
-                >
-                  <Plus className="h-3.5 w-3.5" />
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 0" }}>
+                <p style={{ fontSize: 13, color: "var(--poster-ink-3)", textAlign: "center", margin: "0 0 10px" }}>Henüz eklenmedi</p>
+                <PBtn as="a" href="/students" variant="accent" size="sm" icon={<Plus size={14} />}>
                   Öğrenci Ekle
-                </Link>
+                </PBtn>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {recentStudents.slice(0, 4).map((student) => (
                   <Link
-                    href={`/students/${student.id}`}
                     key={student.id}
-                    className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
+                    href={`/students/${student.id}`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "8px 10px",
+                      borderRadius: 10,
+                      textDecoration: "none",
+                      border: "2px solid transparent",
+                      transition: "background .1s, border-color .1s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "var(--poster-bg-2)";
+                      e.currentTarget.style.borderColor = "var(--poster-ink)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "";
+                      e.currentTarget.style.borderColor = "transparent";
+                    }}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#023435]/10 dark:bg-[#023435]/30 text-[#023435] dark:text-emerald-400 font-bold text-xs shrink-0 group-hover:bg-[#023435] group-hover:text-white transition-colors">
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div
+                        style={{
+                          width: 32,
+                          height: 32,
+                          flexShrink: 0,
+                          borderRadius: 10,
+                          background: "var(--poster-yellow)",
+                          border: "2px solid var(--poster-ink)",
+                          boxShadow: "0 2px 0 var(--poster-ink)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: 800,
+                          fontSize: 13,
+                          color: "var(--poster-ink)",
+                        }}
+                      >
                         {student.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{student.name}</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: "var(--poster-ink)" }}>
+                        {student.name}
+                      </span>
                     </div>
-                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                      {student.cardCount} kart
-                    </span>
+                    <PBadge color="soft">{student.cardCount} kart</PBadge>
                   </Link>
                 ))}
               </div>
             )}
-          </div>
+          </Panel>
         </motion.div>
       </div>
+
+      {/* Responsive override: single column on < 960px */}
+      <style>{`
+        @media (max-width: 960px) {
+          .poster-scope [style*="grid-template-columns: minmax(0, 2fr) minmax(0, 1fr)"] {
+            grid-template-columns: minmax(0, 1fr) !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
+
+// Re-use PCard in future if decorative rotations are needed; kept import for consistency.
+void PCard;

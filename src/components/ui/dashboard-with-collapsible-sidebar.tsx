@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,7 +9,6 @@ import {
   CalendarDays,
   Layers,
   Wand2,
-
   ChevronsRight,
   Settings,
   LogOut,
@@ -17,7 +16,6 @@ import {
   X,
   CreditCard,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Sidebar = () => {
@@ -53,51 +51,97 @@ export const Sidebar = () => {
   }, [pathname]);
 
   const navItems = [
-    { icon: Home,         title: "Dashboard",  href: "/dashboard"   },
-    { icon: Wand2,        title: "Araçlar",    href: "/tools"       },
-    { icon: Users,        title: "Öğrenciler", href: "/students"    },
-    { icon: Layers,       title: "Kütüphane",  href: "/cards"       },
-    { icon: CalendarDays, title: "Takvim",     href: "/calendar"    },
-    { icon: CreditCard,   title: "Abonelik",   href: "/subscription"},
+    { icon: Home,         title: "Dashboard",  href: "/dashboard"    },
+    { icon: Wand2,        title: "Araçlar",    href: "/tools"        },
+    { icon: Users,        title: "Öğrenciler", href: "/students"     },
+    { icon: Layers,       title: "Kütüphane",  href: "/cards"        },
+    { icon: CalendarDays, title: "Takvim",     href: "/calendar"     },
+    { icon: CreditCard,   title: "Abonelik",   href: "/subscription" },
   ];
 
   const adminItems = [
     { icon: Settings, title: "Admin Panel", href: "/admin/users" },
   ];
 
+  const width = open ? 256 : 72;
+
   return (
     <>
-      {/* Mobile Hamburger Header */}
-      <div className="md:hidden flex items-center justify-between p-4 border-b border-sidebar-border bg-sidebar absolute top-0 left-0 right-0 z-50">
+      {/* Mobile header */}
+      <div
+        className="md:hidden flex"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "10px 14px",
+          background: "var(--poster-panel)",
+          borderBottom: "2px solid var(--poster-ink)",
+          fontFamily: "var(--font-display)",
+        }}
+      >
         <Logo size="small" />
         <button
+          type="button"
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="text-sidebar-foreground/70 hover:bg-sidebar-accent p-2 rounded-lg"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            border: "2px solid var(--poster-ink)",
+            background: "#fff",
+            color: "var(--poster-ink)",
+            display: "grid",
+            placeItems: "center",
+            cursor: "pointer",
+            boxShadow: "2px 2px 0 var(--poster-ink)",
+          }}
         >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {mobileOpen ? <X style={{ width: 18, height: 18 }} /> : <Menu style={{ width: 18, height: 18 }} />}
         </button>
       </div>
 
-      {/* Mobile Backdrop */}
+      {/* Mobile backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
           onClick={() => setMobileOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(14, 30, 38, 0.55)",
+            zIndex: 40,
+          }}
+          className="md:hidden"
         />
       )}
 
       {/* Sidebar */}
       <nav
-        className={cn(
-          "fixed md:sticky top-0 h-screen shrink-0 border-r transition-all duration-300 ease-in-out z-50 md:z-0",
-          "border-sidebar-border bg-sidebar p-2 shadow-sm",
-          open ? "w-64" : "w-16",
-          mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        )}
+        className={`poster-scope fixed md:sticky top-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
+        style={{
+          height: "100vh",
+          flexShrink: 0,
+          width,
+          background: "var(--poster-panel)",
+          borderRight: "2px solid var(--poster-ink)",
+          padding: 10,
+          fontFamily: "var(--font-display)",
+          transition: "width 300ms, transform 300ms",
+          zIndex: 50,
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
         <TitleSection open={open} userName={session?.user?.name || "Kullanıcı"} userImage={avatarUrl || session?.user?.image} />
 
-        <div className="space-y-1 mb-8 overflow-y-auto max-h-[calc(100vh-250px)] no-scrollbar">
+        <div
+          className="no-scrollbar"
+          style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, overflowY: "auto", paddingBottom: 12 }}
+        >
           {navItems.map((item) => (
             <Option
               key={item.href}
@@ -122,17 +166,24 @@ export const Sidebar = () => {
             ))}
         </div>
 
-        <div className="border-t border-sidebar-border pt-4 pb-2 space-y-1 absolute bottom-14 left-2 right-2 bg-sidebar">
-          {open && (
-            <div className="flex flex-col gap-1.5 px-3 py-2">
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+        <div
+          style={{
+            borderTop: "2px solid var(--poster-ink)",
+            paddingTop: 10,
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+          }}
+        >
+          {open ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "2px 8px 4px" }}>
+              <span style={{ fontSize: 10, fontWeight: 800, color: "var(--poster-ink-3)", textTransform: "uppercase", letterSpacing: ".08em" }}>
                 Tema
               </span>
               <ThemeToggle variant="segmented" className="w-full justify-between" />
             </div>
-          )}
-          {!open && (
-            <div className="flex justify-center py-1">
+          ) : (
+            <div style={{ display: "flex", justifyContent: "center", padding: "2px 0" }}>
               <ThemeToggle variant="compact" />
             </div>
           )}
@@ -144,23 +195,40 @@ export const Sidebar = () => {
             open={open}
           />
           <button
+            type="button"
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-sidebar-foreground/70 hover:bg-destructive/10 hover:text-destructive"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              height: 44,
+              borderRadius: 10,
+              border: "2px solid transparent",
+              background: "transparent",
+              color: "var(--poster-ink-2)",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              fontSize: 13,
+              fontWeight: 700,
+              transition: "all 0.1s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--poster-danger, #ef4444)";
+              e.currentTarget.style.color = "#fff";
+              e.currentTarget.style.borderColor = "var(--poster-ink)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "var(--poster-ink-2)";
+              e.currentTarget.style.borderColor = "transparent";
+            }}
             title="Çıkış Yap"
           >
-            <div className="grid h-full w-12 place-content-center">
-              <LogOut className="h-4 w-4" />
+            <div style={{ display: "grid", width: 48, height: "100%", placeContent: "center" }}>
+              <LogOut style={{ width: 16, height: 16 }} />
             </div>
-            {open && (
-              <span className="text-sm font-medium transition-opacity duration-200 opacity-100">
-                Çıkış Yap
-              </span>
-            )}
+            {open && <span>Çıkış Yap</span>}
           </button>
-        </div>
-
-
-        <div className="hidden md:block">
           <ToggleClose open={open} setOpen={setOpen} />
         </div>
       </nav>
@@ -174,81 +242,118 @@ interface OptionProps {
   href: string;
   currentPath: string;
   open: boolean;
-  notifs?: number;
 }
 
-const Option = ({ Icon, title, href, currentPath, open, notifs }: OptionProps) => {
+const Option = ({ Icon, title, href, currentPath, open }: OptionProps) => {
   const isSelected = currentPath === href || currentPath.startsWith(href + "/");
 
   return (
     <Link
       href={href}
-      className={cn(
-        "relative flex h-11 w-full items-center rounded-md transition-all duration-200",
-        isSelected
-          ? "bg-sidebar-accent text-foreground shadow-sm border-l-2 border-brand-orange"
-          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-foreground"
-      )}
+      style={{
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        height: 44,
+        width: "100%",
+        borderRadius: 10,
+        border: isSelected ? "2px solid var(--poster-ink)" : "2px solid transparent",
+        background: isSelected ? "var(--poster-accent)" : "transparent",
+        color: isSelected ? "var(--poster-ink)" : "var(--poster-ink-2)",
+        textDecoration: "none",
+        fontWeight: isSelected ? 800 : 700,
+        fontSize: 13,
+        boxShadow: isSelected ? "3px 3px 0 var(--poster-ink)" : "none",
+        transition: "all 0.1s",
+      }}
     >
-      <div className="grid h-full w-12 place-content-center">
-        <Icon className="h-4 w-4" />
+      <div style={{ display: "grid", width: 48, height: "100%", placeContent: "center" }}>
+        <Icon style={{ width: 16, height: 16 }} />
       </div>
-      {open && (
-        <span className={cn("text-sm font-medium transition-opacity duration-200", open ? "opacity-100" : "opacity-0")}>
-          {title}
-        </span>
-      )}
-      {notifs && open && (
-        <span className="absolute right-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#FE703A] dark:bg-[#FE703A] text-xs text-white font-medium">
-          {notifs}
-        </span>
-      )}
+      {open && <span>{title}</span>}
     </Link>
   );
 };
 
 const TitleSection = ({ open, userName, userImage }: { open: boolean; userName: string; userImage?: string | null }) => {
   return (
-    <div className="mb-6 border-b border-sidebar-border pb-4 pt-2 md:pt-0">
+    <div style={{ marginBottom: 14, borderBottom: "2px solid var(--poster-ink)", paddingBottom: 12 }}>
       <Link
         href="/dashboard"
-        className="flex items-center justify-between rounded-md p-2 transition-colors hover:bg-sidebar-accent"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: 6,
+          borderRadius: 10,
+          textDecoration: "none",
+        }}
       >
-        <div className="flex items-center gap-3">
-          {userImage ? (
-            <img src={userImage} alt={userName} className="size-10 rounded-xl object-cover shadow-sm bg-muted" />
-          ) : (
-            <Logo />
-          )}
-          {open && (
-            <div className={cn("transition-opacity duration-200", open ? "opacity-100" : "opacity-0")}>
-              <div className="flex items-center gap-2">
-                <div className="max-w-[130px]">
-                  <span className="block text-sm font-semibold text-foreground truncate">
-                    {userName}
-                  </span>
-                  <span className="block text-xs text-muted-foreground">Pro Plan</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        {userImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={userImage}
+            alt={userName}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              objectFit: "cover",
+              border: "2px solid var(--poster-ink)",
+              background: "#fff",
+              flexShrink: 0,
+            }}
+          />
+        ) : (
+          <Logo />
+        )}
+        {open && (
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <span
+              style={{
+                display: "block",
+                fontSize: 13,
+                fontWeight: 800,
+                color: "var(--poster-ink)",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {userName}
+            </span>
+            <span style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--poster-ink-3)" }}>
+              Pro Plan
+            </span>
+          </div>
+        )}
       </Link>
     </div>
   );
 };
 
 const Logo = ({ size = "normal" }: { size?: "small" | "normal" }) => {
-  const dim = size === "small" ? "size-8" : "size-10";
+  const dim = size === "small" ? 32 : 40;
   return (
-    <div className={cn("grid shrink-0 place-content-center rounded-lg bg-gradient-to-br from-[#023435] to-[#04595B] shadow-sm", dim)}>
+    <div
+      style={{
+        display: "grid",
+        placeContent: "center",
+        width: dim,
+        height: dim,
+        borderRadius: 10,
+        border: "2px solid var(--poster-ink)",
+        background: "var(--poster-accent)",
+        flexShrink: 0,
+      }}
+    >
       <svg
-        width={size === "small" ? "16" : "20"}
-        height={size === "small" ? "12" : "16"}
+        width={size === "small" ? 16 : 20}
+        height={size === "small" ? 12 : 16}
         viewBox="0 0 50 39"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="fill-white"
+        style={{ fill: "var(--poster-ink)" }}
       >
         <path d="M16.4992 2H37.5808L22.0816 24.9729H1L16.4992 2Z" />
         <path d="M17.4224 27.102L11.4192 36H33.5008L49 13.0271H32.7024L23.2064 27.102H17.4224Z" />
@@ -260,21 +365,35 @@ const Logo = ({ size = "normal" }: { size?: "small" | "normal" }) => {
 const ToggleClose = ({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) => {
   return (
     <button
+      type="button"
       onClick={() => setOpen(!open)}
-      className="absolute bottom-0 left-0 right-0 border-t border-sidebar-border transition-colors hover:bg-sidebar-accent"
+      className="hidden md:flex"
+      style={{
+        alignItems: "center",
+        width: "100%",
+        height: 40,
+        borderRadius: 10,
+        border: "2px solid var(--poster-ink)",
+        background: "#fff",
+        color: "var(--poster-ink)",
+        cursor: "pointer",
+        fontFamily: "inherit",
+        fontSize: 12,
+        fontWeight: 700,
+        boxShadow: "2px 2px 0 var(--poster-ink)",
+      }}
     >
-      <div className="flex items-center p-3">
-        <div className="grid size-10 place-content-center">
-          <ChevronsRight
-            className={cn("h-4 w-4 transition-transform duration-300 text-muted-foreground", open && "rotate-180")}
-          />
-        </div>
-        {open && (
-          <span className={cn("text-sm font-medium text-muted-foreground transition-opacity duration-200", open ? "opacity-100" : "opacity-0")}>
-            Daralt
-          </span>
-        )}
+      <div style={{ display: "grid", width: 44, height: "100%", placeContent: "center" }}>
+        <ChevronsRight
+          style={{
+            width: 14,
+            height: 14,
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 300ms",
+          }}
+        />
       </div>
+      {open && <span>Daralt</span>}
     </button>
   );
 };

@@ -15,7 +15,7 @@ type PosterAuthShellProps = {
 export function PosterAuthShell({
   heading,
   subheading,
-  eyebrow = "Terapimat",
+  eyebrow = "LudenLab",
   children,
 }: PosterAuthShellProps) {
   return (
@@ -92,7 +92,7 @@ export function PosterAuthShell({
             <Link href="/" style={{ display: "inline-flex", alignItems: "center" }}>
               <Image
                 src="/logo.svg"
-                alt="Terapimat"
+                alt="LudenLab"
                 width={200}
                 height={72}
                 priority
@@ -193,7 +193,7 @@ export function PosterAuthShell({
               fontFamily: "var(--font-display)",
             }}
           >
-            © {new Date().getFullYear()} Terapimat · Dil, konuşma ve işitme uzmanları için.
+            © {new Date().getFullYear()} LudenLab · Dil, konuşma ve işitme uzmanları için.
           </div>
         </aside>
 

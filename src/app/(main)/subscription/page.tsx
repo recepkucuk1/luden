@@ -12,7 +12,6 @@ export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch user's current plan
     fetch("/api/profile")
       .then((res) => res.json())
       .then((data) => {
@@ -25,8 +24,16 @@ export default function SubscriptionPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-300" />
+      <main
+        className="poster-scope"
+        style={{
+          minHeight: "60vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Loader2 style={{ width: 32, height: 32, color: "var(--poster-ink-3)" }} className="animate-spin" />
       </main>
     );
   }
@@ -102,9 +109,9 @@ export default function SubscriptionPage() {
   ];
 
   return (
-    <div className="py-12 bg-background min-h-screen">
-      <Pricing 
-        plans={plans} 
+    <div className="poster-scope" style={{ minHeight: "100vh", background: "var(--poster-bg)" }}>
+      <Pricing
+        plans={plans}
         title="Gücünüzü Zirveye Taşıyın"
         description={
           currentPlan

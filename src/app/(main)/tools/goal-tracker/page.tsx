@@ -17,7 +17,8 @@ import {
   Circle,
   Printer,
 } from "lucide-react";
-import { cn, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import { PBtn, PCard, PBadge, PLabel, PSelect, PTextarea } from "@/components/poster";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -78,12 +79,12 @@ const STATUS_OPTIONS = [
   { value: "mastered",      label: "Kazanıldı"      },
 ];
 
-const STATUS_META: Record<string, { label: string; cls: string }> = {
-  not_started:   { label: "Başlanmamış",    cls: "bg-zinc-100 text-zinc-500" },
-  in_progress:   { label: "Devam Ediyor",   cls: "bg-[#FE703A]/10 text-[#FE703A]" },
-  consolidating: { label: "Pekiştiriliyor", cls: "bg-[#F4AE10]/15 text-amber-700" },
-  mastered:      { label: "Kazanıldı",      cls: "bg-[#023435]/10 text-[#023435] dark:text-foreground" },
-  completed:     { label: "Kazanıldı",      cls: "bg-[#023435]/10 text-[#023435] dark:text-foreground" },
+const STATUS_META: Record<string, { label: string; color: "soft" | "accent" | "yellow" | "ink" | "green" }> = {
+  not_started:   { label: "Başlanmamış",    color: "soft"   },
+  in_progress:   { label: "Devam Ediyor",   color: "accent" },
+  consolidating: { label: "Pekiştiriliyor", color: "yellow" },
+  mastered:      { label: "Kazanıldı",      color: "green"  },
+  completed:     { label: "Kazanıldı",      color: "green"  },
 };
 
 const TOOL_LABELS: Record<string, string> = {
@@ -145,7 +146,6 @@ async function downloadGoalTrackerPDF(data: TrackerData) {
   const active   = allGoals.filter(g => g.progress && isActive(g.progress.status)).length;
   const notStart = total - mastered - active;
 
-  // Title
   doc.setFont("NotoSans", "bold");
   doc.setFontSize(16);
   doc.setTextColor("#023435");
@@ -156,7 +156,6 @@ async function downloadGoalTrackerPDF(data: TrackerData) {
   doc.setTextColor("#71717a");
   doc.text(today, L, 24);
 
-  // Summary
   doc.setFont("NotoSans", "normal");
   doc.setFontSize(9);
   doc.setTextColor("#18181b");
@@ -228,16 +227,30 @@ function StatCard({
   Icon: React.ElementType;
 }) {
   return (
-    <div className="rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-zinc-500">{label}</span>
-        <div className="grid h-7 w-7 place-content-center rounded-lg" style={{ backgroundColor: `${color}22` }}>
-          <Icon className="h-3.5 w-3.5" style={{ color }} />
+    <PCard rounded={14} style={{ padding: 14, background: "var(--poster-panel)" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".05em" }}>
+          {label}
+        </span>
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 8,
+            border: "2px solid var(--poster-ink)",
+            display: "grid",
+            placeItems: "center",
+            background: color,
+          }}
+        >
+          <Icon style={{ width: 14, height: 14, color: "#fff" }} />
         </div>
       </div>
-      <p className="text-2xl font-bold" style={{ color }}>{value}</p>
-      <p className="text-[11px] text-zinc-400 mt-0.5">%{pct}</p>
-    </div>
+      <p style={{ fontSize: 26, fontWeight: 900, color: "var(--poster-ink)", margin: 0, lineHeight: 1 }}>
+        {value}
+      </p>
+      <p style={{ fontSize: 11, fontWeight: 700, color: "var(--poster-ink-3)", margin: "4px 0 0" }}>%{pct}</p>
+    </PCard>
   );
 }
 
@@ -360,7 +373,7 @@ export default function GoalTrackerPage() {
   function toggleModule(id: string) {
     setExpanded(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   }
@@ -375,34 +388,51 @@ export default function GoalTrackerPage() {
     : [];
 
   return (
-    <div className="min-h-screen relative" style={{ background: "var(--surface-page-gradient)" }}>
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
-      <div className="relative z-10 mx-auto max-w-5xl px-6 py-10">
+    <div
+      className="poster-scope"
+      style={{
+        minHeight: "100%",
+        background: "var(--poster-bg)",
+        padding: "20px 20px 32px",
+        fontFamily: "var(--font-display)",
+      }}
+    >
+      <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", flexDirection: "column", gap: 18 }}>
 
-        {/* Page header */}
-        <div className="mb-8">
-          <Link href="/tools" className="inline-flex items-center gap-1.5 text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground mb-4">
-            <ArrowLeft className="h-3.5 w-3.5" />
+        {/* Header */}
+        <PCard rounded={14} style={{ padding: "14px 18px", background: "var(--poster-panel)" }}>
+          <Link
+            href="/tools"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 12,
+              fontWeight: 700,
+              color: "var(--poster-ink-2)",
+              textDecoration: "none",
+              marginBottom: 6,
+            }}
+          >
+            <ArrowLeft style={{ width: 14, height: 14 }} />
             Araçlara Dön
           </Link>
-          <div className="flex items-start justify-between flex-wrap gap-3">
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
             <div>
-              <h1 className="text-2xl font-bold text-[#023435] dark:text-foreground">Hedef Takip Tablosu</h1>
-              <p className="mt-1 text-sm text-[#023435]/60 dark:text-muted-foreground">
+              <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--poster-ink)", letterSpacing: "-.02em", margin: 0 }}>
+                Hedef Takip Tablosu
+              </h1>
+              <p style={{ fontSize: 13, color: "var(--poster-ink-2)", margin: "3px 0 0" }}>
                 Öğrencilerinizin BEP hedeflerini takip edin, ilerlemeyi görselleştirin.
               </p>
             </div>
             {data && (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => window.print()}
-                  className="flex items-center gap-1.5 rounded-lg border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-white/80 dark:bg-card/80"
-                >
-                  <Printer className="h-3.5 w-3.5" />
+              <div style={{ display: "flex", gap: 8 }}>
+                <PBtn variant="white" onClick={() => window.print()} icon={<Printer style={{ width: 14, height: 14 }} />}>
                   Yazdır
-                </button>
-                <button
+                </PBtn>
+                <PBtn
+                  variant="dark"
                   onClick={async () => {
                     if (!data) return;
                     setDownloadingPDF(true);
@@ -411,122 +441,156 @@ export default function GoalTrackerPage() {
                     finally { setDownloadingPDF(false); }
                   }}
                   disabled={downloadingPDF}
-                  className="flex items-center gap-1.5 rounded-lg bg-[#023435] px-3 py-2 text-xs font-medium text-white hover:bg-[#023435]/90 disabled:opacity-50"
+                  icon={downloadingPDF
+                    ? <Loader2 style={{ width: 14, height: 14, animation: "spin 1s linear infinite" }} />
+                    : <FileText style={{ width: 14, height: 14 }} />}
                 >
-                  {downloadingPDF
-                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    : <FileText className="h-3.5 w-3.5" />}
                   PDF İndir
-                </button>
+                </PBtn>
               </div>
             )}
           </div>
-        </div>
+        </PCard>
 
         {/* Student selector */}
-        <div className="mb-6 rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-          <label className="block mb-1.5 text-xs font-bold text-[#023435]/70 dark:text-foreground/80 uppercase tracking-wide">Öğrenci Seç</label>
-          <select
-            value={selectedId}
-            onChange={e => setSelectedId(e.target.value)}
-            className="w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20"
-          >
-            <option value="">-- Öğrenci seçin --</option>
+        <PCard rounded={14} style={{ padding: 16, background: "var(--poster-panel)" }}>
+          <PLabel>Öğrenci Seç</PLabel>
+          <PSelect value={selectedId} onChange={e => setSelectedId(e.target.value)}>
+            <option value="">— Öğrenci seçin —</option>
             {students.map(s => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
-          </select>
+          </PSelect>
 
           {selectedStudent && (
-            <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl border border-white/70 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm p-3">
+            <div
+              style={{
+                marginTop: 12,
+                padding: 12,
+                border: "2px solid var(--poster-ink)",
+                borderRadius: 12,
+                background: "var(--poster-bg-2)",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                gap: 12,
+              }}
+            >
               <div>
-                <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Ad</p>
-                <p className="text-sm font-medium text-zinc-800">{selectedStudent.name}</p>
+                <p style={{ fontSize: 10, fontWeight: 700, color: "var(--poster-ink-3)", textTransform: "uppercase", letterSpacing: ".05em", margin: 0 }}>Ad</p>
+                <p style={{ fontSize: 13, fontWeight: 800, color: "var(--poster-ink)", margin: "2px 0 0" }}>{selectedStudent.name}</p>
               </div>
               <div>
-                <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Yaş</p>
-                <p className="text-sm font-medium text-zinc-800">{getAge(selectedStudent.birthDate)}</p>
+                <p style={{ fontSize: 10, fontWeight: 700, color: "var(--poster-ink-3)", textTransform: "uppercase", letterSpacing: ".05em", margin: 0 }}>Yaş</p>
+                <p style={{ fontSize: 13, fontWeight: 800, color: "var(--poster-ink)", margin: "2px 0 0" }}>{getAge(selectedStudent.birthDate)}</p>
               </div>
               <div>
-                <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Alan</p>
-                <p className="text-sm font-medium text-zinc-800">{AREA_LABELS[selectedStudent.workArea] ?? selectedStudent.workArea}</p>
+                <p style={{ fontSize: 10, fontWeight: 700, color: "var(--poster-ink-3)", textTransform: "uppercase", letterSpacing: ".05em", margin: 0 }}>Alan</p>
+                <p style={{ fontSize: 13, fontWeight: 800, color: "var(--poster-ink)", margin: "2px 0 0" }}>{AREA_LABELS[selectedStudent.workArea] ?? selectedStudent.workArea}</p>
               </div>
               {selectedStudent.diagnosis ? (
                 <div>
-                  <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Tanı</p>
-                  <p className="text-sm font-medium text-zinc-800">{selectedStudent.diagnosis}</p>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "var(--poster-ink-3)", textTransform: "uppercase", letterSpacing: ".05em", margin: 0 }}>Tanı</p>
+                  <p style={{ fontSize: 13, fontWeight: 800, color: "var(--poster-ink)", margin: "2px 0 0" }}>{selectedStudent.diagnosis}</p>
                 </div>
               ) : (
                 <div>
-                  <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Atanmış Modül</p>
-                  <p className="text-sm font-medium text-zinc-800">{selectedStudent.curriculumIds.length} modül</p>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "var(--poster-ink-3)", textTransform: "uppercase", letterSpacing: ".05em", margin: 0 }}>Modül</p>
+                  <p style={{ fontSize: 13, fontWeight: 800, color: "var(--poster-ink)", margin: "2px 0 0" }}>{selectedStudent.curriculumIds.length}</p>
                 </div>
               )}
             </div>
           )}
-        </div>
+        </PCard>
 
         {/* Empty state */}
         {!selectedId && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <Target className="h-12 w-12 text-zinc-200 mb-4" />
-            <p className="text-sm font-medium text-zinc-400">Bir öğrenci seçerek hedef takibine başlayın.</p>
-          </div>
+          <PCard rounded={18} style={{ padding: "64px 24px", textAlign: "center", background: "var(--poster-panel)" }}>
+            <Target style={{ width: 48, height: 48, margin: "0 auto 16px", color: "var(--poster-ink-faint)" }} />
+            <p style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink-2)", margin: 0 }}>
+              Bir öğrenci seçerek hedef takibine başlayın.
+            </p>
+          </PCard>
         )}
 
         {/* Loading */}
         {selectedId && loading && (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-zinc-300" />
+          <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
+            <Loader2 style={{ width: 32, height: 32, color: "var(--poster-accent)", animation: "spin 1s linear infinite" }} />
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         )}
 
         {/* No modules */}
         {selectedId && !loading && data && data.modules.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl">
-            <Target className="h-10 w-10 text-zinc-200 mb-3" />
-            <p className="text-sm text-zinc-500 mb-1">Bu öğrenciye henüz modül atanmamış.</p>
-            <Link href={`/students/${selectedId}`} className="text-sm text-[#FE703A] hover:underline">
+          <PCard rounded={18} style={{ padding: "48px 24px", textAlign: "center", background: "var(--poster-panel)" }}>
+            <Target style={{ width: 40, height: 40, margin: "0 auto 12px", color: "var(--poster-ink-faint)" }} />
+            <p style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink-2)", margin: "0 0 4px" }}>
+              Bu öğrenciye henüz modül atanmamış.
+            </p>
+            <Link
+              href={`/students/${selectedId}`}
+              style={{ fontSize: 13, fontWeight: 700, color: "var(--poster-accent)", textDecoration: "underline" }}
+            >
               Öğrenci detayına git → Modül ata
             </Link>
-          </div>
+          </PCard>
         )}
 
-        {/* Main dashboard */}
+        {/* Dashboard */}
         {selectedId && !loading && data && stats && data.modules.length > 0 && (
-          <div className="space-y-6">
-
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatCard label="Toplam Hedef" value={stats.total}    pct={100}                                                    color="#107996" Icon={Target}      />
-              <StatCard label="Kazanıldı"    value={stats.mastered} pct={stats.total ? Math.round(stats.mastered/stats.total*100) : 0} color="#023435" Icon={CheckCircle} />
-              <StatCard label="Devam Eden"   value={stats.active}   pct={stats.total ? Math.round(stats.active/stats.total*100)   : 0} color="#FE703A" Icon={Clock}       />
-              <StatCard label="Başlanmamış"  value={stats.notStart} pct={stats.total ? Math.round(stats.notStart/stats.total*100) : 0} color="#9ca3af" Icon={Circle}      />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
+              <StatCard label="Toplam" value={stats.total}    pct={100} color="var(--poster-blue)"   Icon={Target}      />
+              <StatCard label="Kazanıldı"    value={stats.mastered} pct={stats.total ? Math.round(stats.mastered/stats.total*100) : 0} color="var(--poster-green)"  Icon={CheckCircle} />
+              <StatCard label="Devam Eden"   value={stats.active}   pct={stats.total ? Math.round(stats.active/stats.total*100)   : 0} color="var(--poster-accent)" Icon={Clock}       />
+              <StatCard label="Başlanmamış"  value={stats.notStart} pct={stats.total ? Math.round(stats.notStart/stats.total*100) : 0} color="var(--poster-ink-3)"  Icon={Circle}      />
             </div>
 
             {/* Progress bar */}
-            <div className="rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-zinc-600">Genel İlerleme</span>
-                <span className="text-sm font-bold text-[#023435] dark:text-foreground">%{stats.overallPct}</span>
+            <PCard rounded={14} style={{ padding: 14, background: "var(--poster-panel)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 800, color: "var(--poster-ink)", textTransform: "uppercase", letterSpacing: ".05em" }}>
+                  Genel İlerleme
+                </span>
+                <span style={{ fontSize: 16, fontWeight: 900, color: "var(--poster-ink)" }}>%{stats.overallPct}</span>
               </div>
-              <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-100 flex">
+              <div
+                style={{
+                  height: 14,
+                  width: "100%",
+                  border: "2px solid var(--poster-ink)",
+                  borderRadius: 7,
+                  background: "#fff",
+                  display: "flex",
+                  overflow: "hidden",
+                }}
+              >
                 {stats.total > 0 && (
                   <>
-                    <div style={{ width: `${stats.mastered / stats.total * 100}%` }} className="h-full bg-[#023435] transition-all" />
-                    <div style={{ width: `${stats.active   / stats.total * 100}%` }} className="h-full bg-[#FE703A] transition-all" />
+                    <div style={{ width: `${stats.mastered / stats.total * 100}%`, background: "var(--poster-green)" }} />
+                    <div style={{ width: `${stats.active   / stats.total * 100}%`, background: "var(--poster-accent)" }} />
                   </>
                 )}
               </div>
-              <div className="mt-2 flex gap-4 text-[10px] text-zinc-500">
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#023435] inline-block" />Kazanıldı</span>
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#FE703A] inline-block" />Devam Ediyor</span>
-                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-zinc-200 inline-block" />Başlanmamış</span>
+              <div style={{ marginTop: 8, display: "flex", gap: 14, flexWrap: "wrap", fontSize: 11, fontWeight: 700, color: "var(--poster-ink-2)" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--poster-green)", border: "1.5px solid var(--poster-ink)" }} />
+                  Kazanıldı
+                </span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--poster-accent)", border: "1.5px solid var(--poster-ink)" }} />
+                  Devam Ediyor
+                </span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#fff", border: "1.5px solid var(--poster-ink)" }} />
+                  Başlanmamış
+                </span>
               </div>
-            </div>
+            </PCard>
 
-            {/* Module accordions */}
-            <div className="space-y-3">
+            {/* Modules */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {data.modules.map(mod => {
                 const modMastered = mod.goals.filter(g => g.progress && isMastered(g.progress.status)).length;
                 const modTotal    = mod.goals.length;
@@ -534,36 +598,63 @@ export default function GoalTrackerPage() {
                 const isOpen      = expanded.has(mod.curriculum.id);
 
                 return (
-                  <div key={mod.curriculum.id} className="rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-hidden">
+                  <PCard key={mod.curriculum.id} rounded={14} style={{ padding: 0, background: "var(--poster-panel)", overflow: "hidden" }}>
                     <button
-                      className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-zinc-50 transition-colors"
+                      type="button"
                       onClick={() => toggleModule(mod.curriculum.id)}
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "14px 16px",
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        textAlign: "left" as const,
+                      }}
                     >
                       {isOpen
-                        ? <ChevronDown  className="h-4 w-4 text-zinc-400 shrink-0" />
-                        : <ChevronRight className="h-4 w-4 text-zinc-400 shrink-0" />}
-                      <div className="flex-1 min-w-0 text-left">
-                        <span className="text-sm font-semibold text-zinc-800">{mod.curriculum.title}</span>
-                        <span className="ml-2 text-xs text-zinc-400">{mod.curriculum.code}</span>
+                        ? <ChevronDown  style={{ width: 16, height: 16, color: "var(--poster-ink)", flexShrink: 0 }} />
+                        : <ChevronRight style={{ width: 16, height: 16, color: "var(--poster-ink)", flexShrink: 0 }} />}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: "var(--poster-ink)" }}>
+                          {mod.curriculum.title}
+                        </span>
+                        <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, color: "var(--poster-ink-3)", fontFamily: "monospace" }}>
+                          {mod.curriculum.code}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="w-24 h-1.5 rounded-full bg-zinc-100 overflow-hidden">
-                          <div style={{ width: `${modPct}%` }} className="h-full bg-[#023435]" />
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                        <div
+                          style={{
+                            width: 80,
+                            height: 8,
+                            border: "1.5px solid var(--poster-ink)",
+                            borderRadius: 6,
+                            background: "#fff",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <div style={{ width: `${modPct}%`, height: "100%", background: "var(--poster-green)" }} />
                         </div>
-                        <span className="text-xs text-zinc-500 w-14 text-right">{modMastered}/{modTotal} kazanıldı</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--poster-ink-2)", minWidth: 56, textAlign: "right" as const }}>
+                          {modMastered}/{modTotal}
+                        </span>
                       </div>
                     </button>
 
                     {isOpen && (
-                      <div className="border-t border-zinc-100 overflow-x-auto">
-                        <table className="w-full text-xs min-w-[600px]">
+                      <div style={{ borderTop: "2px solid var(--poster-ink)", overflowX: "auto" }}>
+                        <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse", minWidth: 640 }}>
                           <thead>
-                            <tr className="bg-zinc-50 border-b border-zinc-100">
-                              <th className="px-4 py-2 text-left font-semibold text-zinc-400 w-14">Kod</th>
-                              <th className="px-4 py-2 text-left font-semibold text-zinc-400">Hedef</th>
-                              <th className="px-4 py-2 text-left font-semibold text-zinc-400 w-40">Durum</th>
-                              <th className="px-4 py-2 text-center font-semibold text-zinc-400 w-10">Not</th>
-                              <th className="px-4 py-2 text-left font-semibold text-zinc-400 w-24">Güncelleme</th>
+                            <tr style={{ background: "var(--poster-bg-2)", borderBottom: "2px solid var(--poster-ink)" }}>
+                              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 800, color: "var(--poster-ink-2)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".05em", width: 56 }}>Kod</th>
+                              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 800, color: "var(--poster-ink-2)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".05em" }}>Hedef</th>
+                              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 800, color: "var(--poster-ink-2)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".05em", width: 160 }}>Durum</th>
+                              <th style={{ padding: "8px 12px", textAlign: "center", fontWeight: 800, color: "var(--poster-ink-2)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".05em", width: 48 }}>Not</th>
+                              <th style={{ padding: "8px 12px", textAlign: "left", fontWeight: 800, color: "var(--poster-ink-2)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".05em", width: 96 }}>Güncelleme</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -574,28 +665,34 @@ export default function GoalTrackerPage() {
 
                               return (
                                 <React.Fragment key={goal.id}>
-                                  <tr className={cn(
-                                    "border-b border-zinc-50 hover:bg-zinc-50/60 transition-colors",
-                                    goal.isMainGoal && "bg-zinc-50/40"
-                                  )}>
-                                    <td className="px-4 py-2.5 text-zinc-400 font-mono">{goal.code}</td>
-                                    <td className="px-4 py-2.5 text-zinc-700">
+                                  <tr style={{ borderBottom: "2px dashed var(--poster-ink-faint)" }}>
+                                    <td style={{ padding: "10px 12px", fontFamily: "monospace", fontWeight: 700, color: "var(--poster-ink-3)" }}>
+                                      {goal.code}
+                                    </td>
+                                    <td style={{ padding: "10px 12px", color: "var(--poster-ink)", fontWeight: 600 }}>
                                       {goal.isMainGoal && (
-                                        <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-[#023435] align-middle" />
+                                        <span style={{ marginRight: 6, display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "var(--poster-accent)", verticalAlign: "middle" }} />
                                       )}
                                       {goal.title}
                                     </td>
-                                    <td className="px-4 py-2.5">
+                                    <td style={{ padding: "10px 12px" }}>
                                       {isSaving ? (
-                                        <Loader2 className="h-3.5 w-3.5 animate-spin text-zinc-300" />
+                                        <Loader2 style={{ width: 14, height: 14, color: "var(--poster-ink-3)", animation: "spin 1s linear infinite" }} />
                                       ) : (
                                         <select
                                           value={status}
                                           onChange={e => updateStatus(goal.id, e.target.value)}
-                                          className={cn(
-                                            "rounded-full border-0 px-2.5 py-1 text-xs font-medium cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#023435]/30",
-                                            STATUS_META[status]?.cls ?? "bg-zinc-100 text-zinc-500"
-                                          )}
+                                          style={{
+                                            padding: "4px 8px",
+                                            border: "2px solid var(--poster-ink)",
+                                            borderRadius: 8,
+                                            background: "#fff",
+                                            color: "var(--poster-ink)",
+                                            fontFamily: "inherit",
+                                            fontSize: 11,
+                                            fontWeight: 700,
+                                            cursor: "pointer",
+                                          }}
                                         >
                                           {STATUS_OPTIONS.map(opt => (
                                             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -603,53 +700,57 @@ export default function GoalTrackerPage() {
                                         </select>
                                       )}
                                     </td>
-                                    <td className="px-4 py-2.5 text-center">
+                                    <td style={{ padding: "10px 12px", textAlign: "center" }}>
                                       <button
+                                        type="button"
                                         onClick={() => setEditNote(noteOpen ? null : goal.id)}
                                         title={progress?.notes ? "Notu görüntüle / düzenle" : "Not ekle"}
-                                        className={cn(
-                                          "p-1 rounded hover:bg-zinc-100 transition-colors",
-                                          progress?.notes ? "text-[#023435] dark:text-foreground" : "text-zinc-300"
-                                        )}
+                                        style={{
+                                          width: 28,
+                                          height: 28,
+                                          borderRadius: 8,
+                                          border: "2px solid var(--poster-ink)",
+                                          background: progress?.notes ? "var(--poster-yellow)" : "#fff",
+                                          color: "var(--poster-ink)",
+                                          cursor: "pointer",
+                                          display: "inline-flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                        }}
                                       >
-                                        <StickyNote className="h-3.5 w-3.5" />
+                                        <StickyNote style={{ width: 14, height: 14 }} />
                                       </button>
                                     </td>
-                                    <td className="px-4 py-2.5 text-zinc-400">
-                                      {progress?.updatedAt
-                                        ? formatDate(progress.updatedAt, "short")
-                                        : "—"}
+                                    <td style={{ padding: "10px 12px", fontSize: 11, fontWeight: 700, color: "var(--poster-ink-3)" }}>
+                                      {progress?.updatedAt ? formatDate(progress.updatedAt, "short") : "—"}
                                     </td>
                                   </tr>
                                   {noteOpen && (
                                     <tr>
-                                      <td colSpan={5} className="px-4 py-2.5 bg-zinc-50 border-b border-zinc-100">
-                                        <textarea
+                                      <td colSpan={5} style={{ padding: 12, background: "var(--poster-bg-2)", borderBottom: "2px dashed var(--poster-ink-faint)" }}>
+                                        <PTextarea
                                           rows={2}
                                           placeholder="Bu hedefle ilgili not ekleyin..."
                                           value={noteInputs[goal.id] ?? ""}
                                           onChange={e =>
                                             setNoteInputs(prev => ({ ...prev, [goal.id]: e.target.value }))
                                           }
-                                          className="w-full rounded-lg border border-zinc-200 p-2 text-xs text-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#023435]/30 resize-none"
                                         />
-                                        <div className="flex gap-2 mt-1.5">
-                                          <button
+                                        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                                          <PBtn
+                                            variant="dark"
+                                            size="sm"
                                             onClick={() => saveNote(goal.id)}
                                             disabled={savingNote === goal.id}
-                                            className="flex items-center gap-1 rounded-md bg-[#023435] px-2.5 py-1 text-xs text-white hover:bg-[#023435]/90 disabled:opacity-50"
+                                            icon={savingNote === goal.id
+                                              ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} />
+                                              : <Check style={{ width: 12, height: 12 }} />}
                                           >
-                                            {savingNote === goal.id
-                                              ? <Loader2 className="h-3 w-3 animate-spin" />
-                                              : <Check    className="h-3 w-3" />}
                                             Kaydet
-                                          </button>
-                                          <button
-                                            onClick={() => setEditNote(null)}
-                                            className="rounded-md px-2.5 py-1 text-xs text-zinc-500 hover:bg-zinc-100"
-                                          >
+                                          </PBtn>
+                                          <PBtn variant="white" size="sm" onClick={() => setEditNote(null)}>
                                             İptal
-                                          </button>
+                                          </PBtn>
                                         </div>
                                       </td>
                                     </tr>
@@ -661,47 +762,68 @@ export default function GoalTrackerPage() {
                         </table>
                       </div>
                     )}
-                  </div>
+                  </PCard>
                 );
               })}
             </div>
 
             {/* Recent activities */}
             {activities.length > 0 && (
-              <div className="rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-                <h3 className="text-sm font-semibold text-zinc-700 mb-4">Son Aktiviteler</h3>
-                <div className="relative pl-5 border-l-2 border-zinc-100 space-y-4">
+              <PCard rounded={14} style={{ padding: 16, background: "var(--poster-panel)" }}>
+                <h3 style={{ fontSize: 14, fontWeight: 800, color: "var(--poster-ink)", margin: "0 0 14px", textTransform: "uppercase", letterSpacing: ".05em" }}>
+                  Son Aktiviteler
+                </h3>
+                <div
+                  style={{
+                    position: "relative",
+                    paddingLeft: 18,
+                    borderLeft: "2px dashed var(--poster-ink-faint)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 14,
+                  }}
+                >
                   {activities.map((item, i) => (
-                    <div key={i} className="relative">
-                      <div className="absolute -left-[21px] h-3 w-3 rounded-full border-2 border-white bg-zinc-200" />
+                    <div key={i} style={{ position: "relative" }}>
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: -24,
+                          top: 2,
+                          width: 12,
+                          height: 12,
+                          borderRadius: "50%",
+                          background: "#fff",
+                          border: "2px solid var(--poster-ink)",
+                        }}
+                      />
                       {item.type === "card" ? (
-                        <div className="flex items-start gap-2.5">
-                          <span className="shrink-0 mt-0.5 rounded-full bg-[#107996]/10 text-[#107996] border border-[#107996]/20 px-2 py-0.5 text-[10px] font-medium">
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                          <PBadge color="blue">
                             {TOOL_LABELS[item.card.toolType] ?? item.card.toolType}
-                          </span>
+                          </PBadge>
                           <div>
                             <Link
                               href={`/cards/${item.card.id}`}
-                              className="text-xs font-medium text-zinc-700 hover:text-[#023435] dark:hover:text-foreground dark:text-foreground hover:underline"
+                              style={{ fontSize: 12, fontWeight: 800, color: "var(--poster-ink)", textDecoration: "none" }}
                             >
                               {item.card.title}
                             </Link>
-                            <p className="text-[10px] text-zinc-400 mt-0.5">
+                            <p style={{ fontSize: 11, fontWeight: 600, color: "var(--poster-ink-3)", margin: "2px 0 0" }}>
                               {formatDate(item.date, "medium")}
                             </p>
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-start gap-2.5">
-                          <span className={cn(
-                            "shrink-0 mt-0.5 rounded-full px-2 py-0.5 text-[10px] font-medium",
-                            STATUS_META[item.prog.status]?.cls ?? "bg-zinc-100 text-zinc-500"
-                          )}>
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                          <PBadge color={STATUS_META[item.prog.status]?.color ?? "soft"}>
                             {STATUS_META[item.prog.status]?.label ?? item.prog.status}
-                          </span>
+                          </PBadge>
                           <div>
-                            <p className="text-xs text-zinc-700">{item.prog.goalTitle}</p>
-                            <p className="text-[10px] text-zinc-400 mt-0.5">
+                            <p style={{ fontSize: 12, fontWeight: 700, color: "var(--poster-ink)", margin: 0 }}>
+                              {item.prog.goalTitle}
+                            </p>
+                            <p style={{ fontSize: 11, fontWeight: 600, color: "var(--poster-ink-3)", margin: "2px 0 0" }}>
                               {formatDate(item.date, "medium")}
                             </p>
                           </div>
@@ -710,9 +832,8 @@ export default function GoalTrackerPage() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </PCard>
             )}
-
           </div>
         )}
       </div>

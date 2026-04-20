@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, RefreshCw, Library, Plus, X, Lock } from "lucide-react";
-import { cn, formatDate } from "@/lib/utils";
-import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
+import { RefreshCw, Library, Plus, X, Lock, Download } from "lucide-react";
+import { formatDate } from "@/lib/utils";
+import { WORK_AREA_LABEL, calcAge } from "@/lib/constants";
 import { SessionSummaryView, type SessionSummaryContent } from "@/components/cards/SessionSummaryView";
+import { PBtn, PCard, PBadge, PSelect, PLabel, PInput, PTextarea, PCheckbox } from "@/components/poster";
+import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,11 +36,19 @@ interface CurriculumItem {
 
 interface GoalEntry {
   tempId: string;
-  goalId: string;   // "" for custom goals
+  goalId: string;
   title: string;
   accuracy: number;
   cueLevel: string;
 }
+
+type BadgeColor = "accent" | "green" | "yellow" | "pink" | "blue" | "ink" | "soft";
+
+const WORK_AREA_BADGE: Record<string, BadgeColor> = {
+  speech: "yellow",
+  language: "accent",
+  hearing: "blue",
+};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -106,18 +115,13 @@ function LoadingMessages() {
   }, []);
 
   return (
-    <div className="flex h-10 items-center justify-center">
-      <p
-        className="text-sm text-zinc-500 transition-opacity duration-300 text-center"
-        style={{ opacity: visible ? 1 : 0 }}
-      >
-        {LOADING_MSGS[index]}
-      </p>
-    </div>
+    <p style={{ fontSize: 13, color: "var(--poster-ink-2)", transition: "opacity .3s", opacity: visible ? 1 : 0, margin: 0 }}>
+      {LOADING_MSGS[index]}
+    </p>
   );
 }
 
-// ─── PDF Downloads ─────────────────────────────────────────────────────────────
+// ─── PDF Downloads (unchanged) ────────────────────────────────────────────────
 
 async function downloadFullPDF(summary: SessionSummaryContent, studentName?: string) {
   const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
@@ -171,7 +175,6 @@ async function downloadFullPDF(summary: SessionSummaryContent, studentName?: str
       <Page size="A4" style={S.page}>
         <Text style={S.title}>{summary.title ?? "Oturum Özeti"}</Text>
 
-        {/* Info row */}
         <View style={S.infoRow}>
           {studentName ? <Text style={S.infoBadge}>Öğrenci: {studentName}</Text> : null}
           {summary.sessionInfo?.date     ? <Text style={S.infoBadge}>{summary.sessionInfo.date}</Text> : null}
@@ -179,7 +182,6 @@ async function downloadFullPDF(summary: SessionSummaryContent, studentName?: str
           {summary.sessionInfo?.type     ? <Text style={S.infoBadge}>{summary.sessionInfo.type}</Text> : null}
         </View>
 
-        {/* Goals */}
         {goals.length > 0 ? (
           <View style={{ marginBottom: 14 }}>
             <Text style={S.secHdr}>Çalışılan Hedefler</Text>
@@ -208,7 +210,6 @@ async function downloadFullPDF(summary: SessionSummaryContent, studentName?: str
           </View>
         ) : null}
 
-        {/* Overall assessment */}
         {summary.overallAssessment ? (
           <View style={[S.box, { backgroundColor: "#f0f9ff", borderWidth: 1, borderColor: "#bae6fd" }]}>
             <Text style={[S.boxTitle, { color: "#0369a1" }]}>Genel Değerlendirme</Text>
@@ -216,7 +217,6 @@ async function downloadFullPDF(summary: SessionSummaryContent, studentName?: str
           </View>
         ) : null}
 
-        {/* Behavior notes */}
         {summary.behaviorNotes ? (
           <View style={[S.box, { backgroundColor: "#f9fafb", borderWidth: 1, borderColor: "#e4e4e7" }]}>
             <Text style={[S.boxTitle, { color: "#374151" }]}>Davranış ve Katılım</Text>
@@ -224,7 +224,6 @@ async function downloadFullPDF(summary: SessionSummaryContent, studentName?: str
           </View>
         ) : null}
 
-        {/* Next session plan */}
         {summary.nextSessionPlan ? (
           <View style={[S.box, { backgroundColor: "#f0fdf4", borderWidth: 1, borderColor: "#bbf7d0", borderLeftWidth: 3, borderLeftColor: "#16a34a" }]}>
             <Text style={[S.boxTitle, { color: "#15803d" }]}>Sonraki Oturum Planı</Text>
@@ -232,7 +231,6 @@ async function downloadFullPDF(summary: SessionSummaryContent, studentName?: str
           </View>
         ) : null}
 
-        {/* Parent note */}
         {summary.parentNote ? (
           <View style={[S.box, { backgroundColor: "#f0fdf4", borderWidth: 2, borderColor: "#86efac" }]}>
             <Text style={[S.boxTitle, { color: "#15803d" }]}>Veliye İletilecek Not</Text>
@@ -240,7 +238,6 @@ async function downloadFullPDF(summary: SessionSummaryContent, studentName?: str
           </View>
         ) : null}
 
-        {/* Expert notes */}
         {summary.expertNotes ? (
           <View style={[S.box, { backgroundColor: "#fffbeb", borderWidth: 1, borderColor: "#fde68a" }]}>
             <Text style={[S.boxTitle, { color: "#92400e" }]}>Uzman Notları (Gizli)</Text>
@@ -327,7 +324,6 @@ export default function SessionSummaryPage() {
   const [curricula, setCurricula]         = useState<CurriculumItem[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
 
-  // Form state
   const [studentId,          setStudentId]          = useState("");
   const [sessionDate,        setSessionDate]        = useState(todayStr());
   const [duration,           setDuration]           = useState<Duration>("45");
@@ -337,7 +333,6 @@ export default function SessionSummaryPage() {
   const [behaviorNotes,      setBehaviorNotes]      = useState("");
   const [nextSessionNotes,   setNextSessionNotes]   = useState("");
 
-  // Result state
   const [loading,       setLoading]       = useState(false);
   const [summary,       setSummary]       = useState<SessionSummaryContent | null>(null);
   const [savedCardId,   setSavedCardId]   = useState<string | null>(null);
@@ -346,7 +341,6 @@ export default function SessionSummaryPage() {
 
   const selectedStudent = students.find((s) => s.id === studentId) ?? null;
 
-  // Available curriculum goals for selected student
   const availableGoals = curricula
     .filter((c) => selectedStudent?.curriculumIds?.includes(c.id))
     .flatMap((c) =>
@@ -374,7 +368,6 @@ export default function SessionSummaryPage() {
     setSelectedGoals([]);
   }
 
-  // Toggle a curriculum goal on/off
   function toggleGoal(goalId: string, goalTitle: string) {
     setSelectedGoals((prev) => {
       const exists = prev.find((g) => g.tempId === goalId);
@@ -389,7 +382,6 @@ export default function SessionSummaryPage() {
     );
   }
 
-  // Add a custom free-text goal
   function addCustomGoal() {
     const tempId = `custom-${Date.now()}`;
     setSelectedGoals((prev) => [...prev, { tempId, goalId: "", title: "", accuracy: 80, cueLevel: "Bağımsız" }]);
@@ -490,381 +482,416 @@ export default function SessionSummaryPage() {
     }
   }
 
-  const inputCls = "w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30 dark:text-muted-foreground/60";
-  const labelCls = "block text-xs font-bold text-[#023435]/70 dark:text-foreground/80 mb-1.5 uppercase tracking-wide";
-  const selCls   = cn(inputCls, "cursor-pointer");
+  // ── Button helpers ───────────────────────────────────────────────────────────
+  const chipStyle = (active: boolean): React.CSSProperties => ({
+    padding: "6px 12px",
+    background: active ? "var(--poster-ink)" : "var(--poster-panel)",
+    color: active ? "#fff" : "var(--poster-ink)",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 10,
+    boxShadow: active ? "0 2px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+    fontSize: 12,
+    fontWeight: 800,
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+  });
+
+  const rowStyle = (active: boolean): React.CSSProperties => ({
+    width: "100%",
+    padding: "10px 12px",
+    background: active ? "var(--poster-accent)" : "var(--poster-panel)",
+    color: active ? "#fff" : "var(--poster-ink)",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 10,
+    boxShadow: active ? "0 2px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+    textAlign: "left",
+    fontSize: 13,
+    fontWeight: 700,
+  });
+
+  const miniInput: React.CSSProperties = {
+    height: 30,
+    padding: "0 8px",
+    background: "var(--poster-panel)",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 8,
+    fontSize: 12,
+    color: "var(--poster-ink)",
+    outline: "none",
+    fontFamily: "var(--font-display)",
+  };
+
+  const miniSelect: React.CSSProperties = {
+    height: 30,
+    padding: "0 24px 0 8px",
+    background: `var(--poster-panel) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 12 8'%3e%3cpath fill='none' stroke='%230E1E26' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3e%3c/svg%3e") no-repeat right 6px center`,
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 8,
+    fontSize: 12,
+    color: "var(--poster-ink)",
+    outline: "none",
+    appearance: "none" as const,
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+    flex: 1,
+    minWidth: 0,
+  };
+
+  const submitStyle: React.CSSProperties = {
+    width: "100%",
+    height: 44,
+    background: "var(--poster-accent)",
+    color: "#fff",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 12,
+    boxShadow: "0 3px 0 var(--poster-ink)",
+    fontSize: 14,
+    fontWeight: 800,
+    cursor: loading ? "not-allowed" : "pointer",
+    opacity: loading ? 0.6 : 1,
+    fontFamily: "var(--font-display)",
+  };
+
+  const form = (
+    <form key={formKey} onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      {/* Öğrenci */}
+      <div>
+        <PLabel>Öğrenci</PLabel>
+        <PSelect value={studentId} onChange={(e) => handleStudentChange(e.target.value)} required>
+          <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
+          {students.map((s) => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </PSelect>
+        {selectedStudent && (
+          <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {selectedStudent.birthDate && <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>}
+            <PBadge color={WORK_AREA_BADGE[selectedStudent.workArea] ?? "soft"}>
+              {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
+            </PBadge>
+            {selectedStudent.diagnosis && <PBadge color="soft">{selectedStudent.diagnosis}</PBadge>}
+          </div>
+        )}
+      </div>
+
+      {/* Oturum Tarihi */}
+      <div>
+        <PLabel>Oturum Tarihi</PLabel>
+        <PInput
+          type="date"
+          value={sessionDate}
+          onChange={(e) => setSessionDate(e.target.value)}
+          required
+        />
+      </div>
+
+      {/* Süre */}
+      <div>
+        <PLabel>Oturum Süresi</PLabel>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {DURATION_OPTIONS.map((d) => (
+            <button key={d} type="button" onClick={() => setDuration(d)} style={chipStyle(duration === d)}>
+              {d} dk
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Oturum Türü */}
+      <div>
+        <PLabel>Oturum Türü</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
+          {SESSION_TYPE_OPTIONS.map((opt) => (
+            <button key={opt.value} type="button" onClick={() => setSessionType(opt.value)} style={rowStyle(sessionType === opt.value)}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Çalışılan Hedefler */}
+      <div>
+        <PLabel>
+          Çalışılan Hedefler{" "}
+          {selectedGoals.length > 0 && (
+            <span style={{ color: "var(--poster-accent)", fontWeight: 800 }}>({selectedGoals.length})</span>
+          )}
+        </PLabel>
+
+        {!studentId ? (
+          <p style={{ fontSize: 12, color: "var(--poster-ink-3)", fontStyle: "italic", margin: 0 }}>
+            Önce öğrenci seçin
+          </p>
+        ) : hasAvailableGoals ? (
+          <div
+            style={{
+              background: "var(--poster-panel)",
+              border: "2px solid var(--poster-ink)",
+              borderRadius: 12,
+              boxShadow: "var(--poster-shadow-sm)",
+              maxHeight: 240,
+              overflowY: "auto",
+            }}
+          >
+            {availableGoals.map((goal, i) => {
+              const isSelected = selectedGoals.some((g) => g.tempId === goal.id);
+              const entry = selectedGoals.find((g) => g.tempId === goal.id);
+              return (
+                <div
+                  key={goal.id}
+                  style={{
+                    padding: 10,
+                    borderTop: i === 0 ? "none" : "2px dashed var(--poster-ink-faint)",
+                    background: isSelected ? "var(--poster-bg-2)" : "transparent",
+                  }}
+                >
+                  <PCheckbox
+                    checked={isSelected}
+                    onChange={() => toggleGoal(goal.id, goal.title)}
+                    label={<span style={{ fontSize: 12, lineHeight: 1.5 }}>{goal.title}</span>}
+                  />
+                  {isSelected && entry && (
+                    <div style={{ marginTop: 8, marginLeft: 30, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ fontSize: 11, color: "var(--poster-ink-3)" }}>%</span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={entry.accuracy}
+                          onChange={(e) => updateGoal(entry.tempId, "accuracy", Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                          style={{ ...miniInput, width: 56, textAlign: "center" }}
+                        />
+                      </div>
+                      <select
+                        value={entry.cueLevel}
+                        onChange={(e) => updateGoal(entry.tempId, "cueLevel", e.target.value)}
+                        style={miniSelect}
+                      >
+                        {CUE_LEVELS.map((cl) => (
+                          <option key={cl} value={cl}>{cl}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {selectedGoals.map((entry) => (
+              <div
+                key={entry.tempId}
+                style={{
+                  padding: 10,
+                  background: "var(--poster-bg-2)",
+                  border: "2px solid var(--poster-ink)",
+                  borderRadius: 12,
+                  boxShadow: "var(--poster-shadow-sm)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <input
+                    type="text"
+                    placeholder="Hedef açıklaması..."
+                    value={entry.title}
+                    onChange={(e) => updateCustomTitle(entry.tempId, e.target.value)}
+                    style={{ ...miniInput, flex: 1 }}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeGoal(entry.tempId)}
+                    style={{
+                      width: 28,
+                      height: 28,
+                      background: "var(--poster-panel)",
+                      border: "2px solid var(--poster-ink)",
+                      borderRadius: 8,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <X style={{ width: 14, height: 14, color: "var(--poster-ink)" }} />
+                  </button>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 11, color: "var(--poster-ink-3)" }}>%</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={entry.accuracy}
+                    onChange={(e) => updateGoal(entry.tempId, "accuracy", Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                    style={{ ...miniInput, width: 56, textAlign: "center" }}
+                  />
+                  <select
+                    value={entry.cueLevel}
+                    onChange={(e) => updateGoal(entry.tempId, "cueLevel", e.target.value)}
+                    style={miniSelect}
+                  >
+                    {CUE_LEVELS.map((cl) => (
+                      <option key={cl} value={cl}>{cl}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addCustomGoal}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                width: "100%",
+                padding: "8px 12px",
+                background: "var(--poster-panel)",
+                border: "2px dashed var(--poster-ink-3)",
+                borderRadius: 10,
+                fontSize: 12,
+                fontWeight: 700,
+                color: "var(--poster-ink-2)",
+                cursor: "pointer",
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              <Plus style={{ width: 14, height: 14 }} />
+              Hedef Ekle
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Genel Performans */}
+      <div>
+        <PLabel>Genel Performans Değerlendirmesi</PLabel>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {PERFORMANCE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setOverallPerformance(opt.value)}
+              style={rowStyle(overallPerformance === opt.value)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Davranış gözlemi */}
+      <div>
+        <PLabel>
+          Davranış ve Katılım Gözlemi{" "}
+          <span style={{ fontSize: 10, fontWeight: 500, color: "var(--poster-ink-3)" }}>opsiyonel</span>
+        </PLabel>
+        <PTextarea
+          value={behaviorNotes}
+          onChange={(e) => setBehaviorNotes(e.target.value)}
+          placeholder="Öğrencinin oturum sırasındaki genel tutumu, motivasyonu, dikkat süresi, işbirliği düzeyi..."
+          rows={3}
+        />
+      </div>
+
+      {/* Sonraki oturum notları */}
+      <div>
+        <PLabel>
+          Sonraki Oturum İçin Notlar{" "}
+          <span style={{ fontSize: 10, fontWeight: 500, color: "var(--poster-ink-3)" }}>opsiyonel</span>
+        </PLabel>
+        <PTextarea
+          value={nextSessionNotes}
+          onChange={(e) => setNextSessionNotes(e.target.value)}
+          placeholder="Sonraki oturumda odaklanılacak konular, değiştirilecek yaklaşımlar..."
+          rows={3}
+        />
+      </div>
+
+      <button type="submit" disabled={loading} style={submitStyle}>
+        {loading ? "Oluşturuluyor..." : "Oturum Özeti Oluştur"}
+      </button>
+      <p style={{ textAlign: "center", fontSize: 11, color: "var(--poster-ink-3)", margin: 0 }}>
+        10 kredi kullanılacak
+      </p>
+    </form>
+  );
+
+  const result = loading ? (
+    <ToolLoadingCard>
+      <LoadingMessages />
+    </ToolLoadingCard>
+  ) : summary ? (
+    <>
+      <PCard rounded={18} style={{ padding: 20, background: "var(--poster-panel)" }}>
+        <SessionSummaryView summary={summary} />
+      </PCard>
+      <PCard rounded={14} style={{ padding: 14, background: "var(--poster-panel)" }}>
+        <p style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: "0 0 10px" }}>
+          Sonraki adım
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <PBtn
+            as="button"
+            variant="accent"
+            size="md"
+            onClick={handleDownloadFull}
+            disabled={downloading}
+            icon={<Download style={{ width: 16, height: 16 }} />}
+          >
+            Tam Rapor PDF
+          </PBtn>
+          <PBtn
+            as="button"
+            variant="dark"
+            size="md"
+            onClick={handleDownloadParent}
+            disabled={downloading}
+            icon={<Download style={{ width: 16, height: 16 }} />}
+          >
+            Veli Notu PDF
+          </PBtn>
+          {savedCardId && (
+            <PBtn as="a" href="/cards" variant="white" size="md" icon={<Library style={{ width: 16, height: 16 }} />}>
+              Kütüphane
+            </PBtn>
+          )}
+          <PBtn as="button" variant="white" size="md" onClick={handleReset} icon={<RefreshCw style={{ width: 16, height: 16 }} />}>
+            Yeni Özet
+          </PBtn>
+        </div>
+        <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
+          <Lock style={{ width: 12, height: 12, color: "var(--poster-ink-3)" }} />
+          <p style={{ fontSize: 10, color: "var(--poster-ink-3)", margin: 0 }}>
+            Tam rapor PDF uzman notlarını içerir. Veli Notu PDF yalnızca genel özeti paylaşır.
+          </p>
+        </div>
+      </PCard>
+    </>
+  ) : (
+    <ToolEmptyState
+      icon="📋"
+      title="Oturum bilgilerini doldurun"
+      hint="Oluşturulan özet burada görünecek"
+    />
+  );
 
   return (
-    <div
-      className="w-full flex flex-col relative md:h-[calc(100vh-0px)] md:overflow-hidden"
-      style={{ background: "var(--surface-page-gradient)" }}
-    >
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
-    <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:h-full flex flex-col">
-      {/* Header */}
-      <div className="mb-5 shrink-0 bg-white/50 dark:bg-card/50 backdrop-blur-xl rounded-2xl border border-white/70 dark:border-border/60 px-5 py-4 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
-        <Link
-          href="/tools"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Araçlara Dön
-        </Link>
-        <h1 className="text-xl font-extrabold text-[#023435] dark:text-foreground tracking-tight">Oturum Özeti Oluşturucu</h1>
-        <p className="text-sm text-[#023435]/60 dark:text-muted-foreground mt-0.5">
-          Oturum sonrası profesyonel ve yapılandırılmış değerlendirme raporları oluşturun.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr] md:flex-1 md:min-h-0">
-        {/* ── Sol: Form ── */}
-        <div className="flex flex-col md:min-h-0">
-          <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
-            <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
-
-              {/* Öğrenci */}
-              <div>
-                <label className={labelCls}>Öğrenci</label>
-                <select
-                  value={studentId}
-                  onChange={(e) => handleStudentChange(e.target.value)}
-                  className={selCls}
-                  required
-                >
-                  <option value="">
-                    {studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}
-                  </option>
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-                {selectedStudent && (
-                  <div className="mt-2 rounded-xl border border-white/80 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm px-3 py-2.5 flex flex-wrap gap-1.5">
-                    {selectedStudent.birthDate && (
-                      <span className="rounded-full bg-white border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600">
-                        {calcAge(selectedStudent.birthDate)}
-                      </span>
-                    )}
-                    <span className={cn("rounded-full px-2 py-0.5 text-xs border", WORK_AREA_COLOR[selectedStudent.workArea] ?? "bg-zinc-100 text-zinc-600")}>
-                      {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
-                    </span>
-                    {selectedStudent.diagnosis && (
-                      <span className="rounded-full bg-white border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600 truncate max-w-full">
-                        {selectedStudent.diagnosis}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Oturum Tarihi */}
-              <div>
-                <label className={labelCls}>Oturum Tarihi</label>
-                <input
-                  type="date"
-                  value={sessionDate}
-                  onChange={(e) => setSessionDate(e.target.value)}
-                  className={inputCls}
-                  required
-                />
-              </div>
-
-              {/* Süre */}
-              <div>
-                <label className={labelCls}>Oturum Süresi</label>
-                <div className="flex gap-2 flex-wrap">
-                  {DURATION_OPTIONS.map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setDuration(d)}
-                      className={cn(
-                        "rounded-lg border px-3 py-2 text-xs font-semibold transition-colors",
-                        duration === d
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      {d} dk
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Oturum Türü */}
-              <div>
-                <label className={labelCls}>Oturum Türü</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {SESSION_TYPE_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setSessionType(opt.value)}
-                      className={cn(
-                        "rounded-lg border px-3 py-2.5 text-left transition-colors",
-                        sessionType === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      <span className="block text-xs font-semibold">{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Çalışılan Hedefler */}
-              <div>
-                <label className={cn(labelCls, "flex items-center justify-between")}>
-                  <span>
-                    Çalışılan Hedefler
-                    {selectedGoals.length > 0 && (
-                      <span className="ml-1.5 rounded-full bg-[#023435]/10 text-[#023435] dark:text-foreground px-1.5 py-0.5 text-[10px] font-semibold">
-                        {selectedGoals.length}
-                      </span>
-                    )}
-                  </span>
-                </label>
-
-                {!studentId ? (
-                  <p className="text-xs text-zinc-400 italic">Önce öğrenci seçin</p>
-                ) : hasAvailableGoals ? (
-                  /* Curriculum goals checkboxes */
-                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 divide-y divide-zinc-100 max-h-56 overflow-y-auto">
-                    {availableGoals.map((goal) => {
-                      const isSelected = selectedGoals.some((g) => g.tempId === goal.id);
-                      const entry = selectedGoals.find((g) => g.tempId === goal.id);
-                      return (
-                        <div key={goal.id} className={cn("px-3 py-2.5", isSelected && "bg-[#023435]/3")}>
-                          <label className="flex items-start gap-2.5 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => toggleGoal(goal.id, goal.title)}
-                              className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-[#023435]"
-                            />
-                            <span className="text-xs text-zinc-700 flex-1 leading-relaxed">{goal.title}</span>
-                          </label>
-                          {isSelected && entry && (
-                            <div className="mt-2 ml-6 flex items-center gap-2 flex-wrap">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] text-zinc-500 shrink-0">%</span>
-                                <input
-                                  type="number"
-                                  min={0}
-                                  max={100}
-                                  value={entry.accuracy}
-                                  onChange={(e) => updateGoal(entry.tempId, "accuracy", Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
-                                  className="w-14 rounded-md border border-zinc-200 px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-[#023435]/30"
-                                />
-                              </div>
-                              <select
-                                value={entry.cueLevel}
-                                onChange={(e) => updateGoal(entry.tempId, "cueLevel", e.target.value)}
-                                className="flex-1 min-w-0 rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#023435]/30 cursor-pointer"
-                              >
-                                {CUE_LEVELS.map((cl) => (
-                                  <option key={cl} value={cl}>{cl}</option>
-                                ))}
-                              </select>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  /* Free-text goal input */
-                  <div className="space-y-2">
-                    {selectedGoals.map((entry) => (
-                      <div key={entry.tempId} className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            placeholder="Hedef açıklaması..."
-                            value={entry.title}
-                            onChange={(e) => updateCustomTitle(entry.tempId, e.target.value)}
-                            className="flex-1 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#023435]/30"
-                            required
-                          />
-                          <button type="button" onClick={() => removeGoal(entry.tempId)} className="shrink-0 text-zinc-400 hover:text-red-500 transition-colors">
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] text-zinc-500 shrink-0">%</span>
-                            <input
-                              type="number"
-                              min={0}
-                              max={100}
-                              value={entry.accuracy}
-                              onChange={(e) => updateGoal(entry.tempId, "accuracy", Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
-                              className="w-14 rounded-md border border-zinc-200 px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-[#023435]/30"
-                            />
-                          </div>
-                          <select
-                            value={entry.cueLevel}
-                            onChange={(e) => updateGoal(entry.tempId, "cueLevel", e.target.value)}
-                            className="flex-1 min-w-0 rounded-md border border-zinc-200 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#023435]/30 cursor-pointer"
-                          >
-                            {CUE_LEVELS.map((cl) => (
-                              <option key={cl} value={cl}>{cl}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={addCustomGoal}
-                      className="flex items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 w-full py-2 px-3 text-xs text-zinc-500 hover:text-zinc-700 hover:border-zinc-400 transition-colors"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      Hedef Ekle
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Genel Performans */}
-              <div>
-                <label className={labelCls}>Genel Performans Değerlendirmesi</label>
-                <div className="space-y-1.5">
-                  {PERFORMANCE_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setOverallPerformance(opt.value)}
-                      className={cn(
-                        "w-full rounded-lg border px-3 py-2 text-left text-xs font-semibold transition-colors",
-                        overallPerformance === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Davranış gözlemi */}
-              <div>
-                <label className={cn(labelCls, "flex items-center justify-between")}>
-                  Davranış ve Katılım Gözlemi
-                  <span className="text-[10px] font-normal text-zinc-400">opsiyonel</span>
-                </label>
-                <textarea
-                  value={behaviorNotes}
-                  onChange={(e) => setBehaviorNotes(e.target.value)}
-                  placeholder="Öğrencinin oturum sırasındaki genel tutumu, motivasyonu, dikkat süresi, işbirliği düzeyi..."
-                  rows={3}
-                  className={cn(inputCls, "resize-none")}
-                />
-              </div>
-
-              {/* Sonraki oturum notları */}
-              <div>
-                <label className={cn(labelCls, "flex items-center justify-between")}>
-                  Sonraki Oturum İçin Notlar
-                  <span className="text-[10px] font-normal text-zinc-400">opsiyonel</span>
-                </label>
-                <textarea
-                  value={nextSessionNotes}
-                  onChange={(e) => setNextSessionNotes(e.target.value)}
-                  placeholder="Sonraki oturumda odaklanılacak konular, değiştirilecek yaklaşımlar..."
-                  rows={3}
-                  className={cn(inputCls, "resize-none")}
-                />
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-lg bg-[#FE703A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? "Oluşturuluyor..." : "Oturum Özeti Oluştur"}
-              </button>
-              <p className="text-center text-xs text-zinc-400">10 kredi kullanılacak</p>
-            </form>
-          </div>
-        </div>
-
-        {/* ── Sağ: Sonuç ── */}
-        <div className="flex flex-col md:min-h-0">
-          <div className="overflow-y-auto no-scrollbar flex flex-col md:flex-1 md:min-h-0">
-            {loading ? (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-                <div className="text-center space-y-4 px-8">
-                  <div className="mx-auto h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
-                  <LoadingMessages />
-                </div>
-              </div>
-            ) : summary ? (
-              <>
-                {/* Özet Kartı */}
-                <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-                  <SessionSummaryView summary={summary} />
-                </div>
-
-                {/* Aksiyon Çubuğu */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    onClick={handleDownloadFull}
-                    disabled={downloading}
-                    className="flex items-center gap-1.5 rounded-lg bg-[#FE703A] px-4 py-2 text-xs font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-60 transition-colors"
-                  >
-                    Tam Rapor PDF İndir
-                  </button>
-                  <button
-                    onClick={handleDownloadParent}
-                    disabled={downloading}
-                    className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-4 py-2 text-xs font-semibold text-[#023435] dark:text-foreground hover:bg-[#023435]/10 dark:hover:bg-accent/50 disabled:opacity-60 transition-colors"
-                  >
-                    Veli Notu PDF İndir
-                  </button>
-                  {savedCardId && (
-                    <Link
-                      href="/cards"
-                      className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
-                    >
-                      <Library className="h-3.5 w-3.5" />
-                      Kütüphane
-                    </Link>
-                  )}
-                  <button
-                    onClick={handleReset}
-                    className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
-                  >
-                    <RefreshCw className="h-3.5 w-3.5" />
-                    Yeni Özet
-                  </button>
-                </div>
-
-                {/* Uzman notu uyarısı */}
-                <div className="mt-3 flex items-center gap-1.5">
-                  <Lock className="h-3 w-3 text-zinc-400" />
-                  <p className="text-[10px] text-zinc-400">
-                    Tam rapor PDF uzman notlarını içerir. Veli Notu PDF yalnızca genel özeti paylaşır.
-                  </p>
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-[#023435]/15 bg-white/40 dark:bg-card/40 backdrop-blur-xl">
-                <div className="text-center px-8 space-y-2">
-                  <div className="text-3xl">📋</div>
-                  <p className="text-sm font-medium text-zinc-500">Oturum bilgilerini doldurun</p>
-                  <p className="text-xs text-zinc-400">Oluşturulan özet burada görünecek</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </main>
-    </div>
+    <ToolShell
+      title="Oturum Özeti Oluşturucu"
+      description="Oturum sonrası profesyonel ve yapılandırılmış değerlendirme raporları oluşturun."
+      form={form}
+      result={result}
+      formWidth={420}
+    />
   );
 }

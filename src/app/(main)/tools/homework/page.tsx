@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, RefreshCw, Library, Eye, Star, Clock, Package, ChevronRight, Lightbulb } from "lucide-react";
-import { cn, formatDate } from "@/lib/utils";
-import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
+import { RefreshCw, Library, Eye, Star, Clock, Package, ChevronRight, Lightbulb, Download } from "lucide-react";
+import { formatDate } from "@/lib/utils";
+import { WORK_AREA_LABEL, calcAge } from "@/lib/constants";
 import type { HomeworkContent } from "@/components/cards/HomeworkView";
+import { PBtn, PCard, PBadge, PSelect, PLabel, PInput, PTextarea } from "@/components/poster";
+import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -25,6 +26,14 @@ interface CurriculumItem {
   title: string;
   goals?: { id: string; title: string }[];
 }
+
+type BadgeColor = "accent" | "green" | "yellow" | "pink" | "blue" | "ink" | "soft";
+
+const WORK_AREA_BADGE: Record<string, BadgeColor> = {
+  speech: "yellow",
+  language: "accent",
+  hearing: "blue",
+};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -50,10 +59,10 @@ const MATERIAL_TYPE_LABEL: Record<string, string> = {
   daily_activity: "Günlük Aktivite",
 };
 
-const MATERIAL_TYPE_COLOR: Record<string, string> = {
-  exercise:       "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
-  observation:    "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20",
-  daily_activity: "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
+const MATERIAL_TYPE_BADGE: Record<string, BadgeColor> = {
+  exercise:       "blue",
+  observation:    "ink",
+  daily_activity: "yellow",
 };
 
 const LOADING_MSGS = [
@@ -87,62 +96,65 @@ function LoadingMessages() {
   }, []);
 
   return (
-    <div className="flex h-10 items-center justify-center">
-      <p
-        className="text-sm text-zinc-500 transition-opacity duration-300 text-center"
-        style={{ opacity: visible ? 1 : 0 }}
-      >
-        {LOADING_MSGS[index]}
-      </p>
-    </div>
+    <p style={{ fontSize: 13, color: "var(--poster-ink-2)", transition: "opacity .3s", opacity: visible ? 1 : 0, margin: 0 }}>
+      {LOADING_MSGS[index]}
+    </p>
   );
 }
 
-// ─── Result View (inline, for PDF exclusion of expertNotes) ──────────────────
+// ─── Result View ──────────────────────────────────────────────────────────────
 
 function HomeworkResult({ hw, forPdf = false }: { hw: HomeworkContent; forPdf?: boolean }) {
   return (
-    <div className="space-y-5">
-      {/* Başlık + badge'ler */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div>
-        <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-3">{hw.title}</h2>
-        <div className="flex flex-wrap gap-1.5">
-          <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-semibold", MATERIAL_TYPE_COLOR[hw.materialType] ?? "bg-zinc-100 text-zinc-600 border-zinc-200")}>
+        <h2 style={{ fontSize: 18, fontWeight: 800, color: "var(--poster-ink)", margin: "0 0 10px", letterSpacing: "-.01em" }}>
+          {hw.title}
+        </h2>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          <PBadge color={MATERIAL_TYPE_BADGE[hw.materialType] ?? "soft"}>
             {MATERIAL_TYPE_LABEL[hw.materialType] ?? hw.materialType}
-          </span>
+          </PBadge>
           {hw.duration && (
-            <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-600 flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {hw.duration}
-            </span>
+            <PBadge color="soft">
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <Clock style={{ width: 12, height: 12 }} /> {hw.duration}
+              </span>
+            </PBadge>
           )}
-          {hw.targetArea && (
-            <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-600">
-              {hw.targetArea}
-            </span>
-          )}
+          {hw.targetArea && <PBadge color="soft">{hw.targetArea}</PBadge>}
         </div>
       </div>
 
-      {/* Giriş */}
       {hw.introduction && (
-        <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 flex gap-3">
-          <Lightbulb className="h-4 w-4 text-zinc-400 shrink-0 mt-0.5" />
-          <p className="text-sm text-zinc-700 leading-relaxed">{hw.introduction}</p>
+        <div
+          style={{
+            padding: 14,
+            background: "var(--poster-bg-2)",
+            border: "2px solid var(--poster-ink)",
+            borderRadius: 12,
+            boxShadow: "0 2px 0 var(--poster-ink)",
+            display: "flex",
+            gap: 10,
+          }}
+        >
+          <Lightbulb style={{ width: 16, height: 16, color: "var(--poster-ink-2)", flexShrink: 0, marginTop: 2 }} />
+          <p style={{ fontSize: 13, color: "var(--poster-ink)", lineHeight: 1.6, margin: 0 }}>{hw.introduction}</p>
         </div>
       )}
 
-      {/* Gerekli malzemeler */}
       {hw.materials && hw.materials.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Package className="h-4 w-4 text-zinc-400" />
-            <p className="text-xs font-semibold text-zinc-500">Gerekli Malzemeler</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+            <Package style={{ width: 14, height: 14, color: "var(--poster-ink-2)" }} />
+            <p style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: 0 }}>
+              Gerekli Malzemeler
+            </p>
           </div>
-          <ul className="space-y-1">
+          <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 6 }}>
             {hw.materials.map((m, i) => (
-              <li key={i} className="flex items-center gap-2 text-sm text-zinc-700">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#FE703A] shrink-0" />
+              <li key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--poster-ink)" }}>
+                <span style={{ width: 6, height: 6, borderRadius: 999, background: "var(--poster-accent)", flexShrink: 0 }} />
                 {m}
               </li>
             ))}
@@ -150,21 +162,58 @@ function HomeworkResult({ hw, forPdf = false }: { hw: HomeworkContent; forPdf?: 
         </div>
       )}
 
-      {/* Adımlar */}
       {hw.steps && hw.steps.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-zinc-500 mb-3">Adımlar</p>
-          <div className="space-y-2.5">
+          <p style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: "0 0 10px" }}>
+            Adımlar
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {hw.steps.map((step, i) => (
-              <div key={i} className="rounded-lg border border-zinc-100 bg-white p-3 flex gap-3">
-                <span className="shrink-0 h-6 w-6 rounded-full bg-[#107996]/10 text-[#107996] text-xs font-bold flex items-center justify-center">
+              <div
+                key={i}
+                style={{
+                  padding: 12,
+                  background: "var(--poster-panel)",
+                  border: "2px solid var(--poster-ink)",
+                  borderRadius: 12,
+                  boxShadow: "0 2px 0 var(--poster-ink)",
+                  display: "flex",
+                  gap: 10,
+                }}
+              >
+                <span
+                  style={{
+                    flexShrink: 0,
+                    width: 26,
+                    height: 26,
+                    borderRadius: 999,
+                    background: "var(--poster-blue)",
+                    color: "#fff",
+                    fontSize: 12,
+                    fontWeight: 800,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   {step.stepNumber ?? i + 1}
                 </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-zinc-800 leading-relaxed">{step.instruction}</p>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 13, color: "var(--poster-ink)", lineHeight: 1.6, margin: 0 }}>{step.instruction}</p>
                   {step.tip && (
-                    <p className="mt-1.5 rounded-md bg-zinc-50 border border-zinc-100 px-2.5 py-1.5 text-xs italic text-zinc-500">
-                      <ChevronRight className="inline h-3 w-3 mr-0.5" />
+                    <p
+                      style={{
+                        marginTop: 8,
+                        padding: "6px 10px",
+                        background: "var(--poster-bg-2)",
+                        border: "2px dashed var(--poster-ink-faint)",
+                        borderRadius: 8,
+                        fontSize: 11,
+                        fontStyle: "italic",
+                        color: "var(--poster-ink-2)",
+                      }}
+                    >
+                      <ChevronRight style={{ display: "inline", width: 12, height: 12, marginRight: 2, verticalAlign: "-2px" }} />
                       {step.tip}
                     </p>
                   )}
@@ -175,59 +224,90 @@ function HomeworkResult({ hw, forPdf = false }: { hw: HomeworkContent; forPdf?: 
         </div>
       )}
 
-      {/* Dikkat Edin */}
       {hw.watchFor && (
-        <div className="rounded-xl border border-[#F4AE10]/30 bg-[#F4AE10]/10 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Eye className="h-4 w-4 text-amber-600 shrink-0" />
-            <span className="text-xs font-semibold text-amber-800">Dikkat Edin</span>
+        <div
+          style={{
+            padding: 14,
+            background: "#fff3d1",
+            border: "2px solid #b7791f",
+            borderRadius: 12,
+            boxShadow: "0 3px 0 #b7791f",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <Eye style={{ width: 16, height: 16, color: "#b7791f" }} />
+            <span style={{ fontSize: 12, fontWeight: 800, color: "#5a3d05" }}>Dikkat Edin</span>
           </div>
-          <p className="text-xs text-amber-700 leading-relaxed">{hw.watchFor}</p>
+          <p style={{ fontSize: 12, color: "#5a3d05", lineHeight: 1.6, margin: 0 }}>{hw.watchFor}</p>
         </div>
       )}
 
-      {/* Kutlama Anı */}
       {hw.celebration && (
-        <div className="rounded-xl border border-[#023435]/20 bg-[#023435]/5 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Star className="h-4 w-4 text-[#023435] dark:text-foreground shrink-0" />
-            <span className="text-xs font-semibold text-[#023435] dark:text-foreground">Kutlama Anı</span>
+        <div
+          style={{
+            padding: 14,
+            background: "#e4f8ec",
+            border: "2px solid var(--poster-green)",
+            borderRadius: 12,
+            boxShadow: "0 3px 0 var(--poster-green)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <Star style={{ width: 16, height: 16, color: "var(--poster-green)" }} />
+            <span style={{ fontSize: 12, fontWeight: 800, color: "#0f4f28" }}>Kutlama Anı</span>
           </div>
-          <p className="text-xs text-[#023435]/80 dark:text-foreground/90 leading-relaxed">{hw.celebration}</p>
+          <p style={{ fontSize: 12, color: "#0f4f28", lineHeight: 1.6, margin: 0 }}>{hw.celebration}</p>
         </div>
       )}
 
-      {/* Tekrar sıklığı */}
       {hw.frequency && (
-        <div className="flex items-center gap-2">
-          <Clock className="h-3.5 w-3.5 text-zinc-400" />
-          <span className="text-xs text-zinc-500">Öneri: <span className="font-medium text-zinc-700">{hw.frequency}</span></span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <Clock style={{ width: 14, height: 14, color: "var(--poster-ink-3)" }} />
+          <span style={{ fontSize: 12, color: "var(--poster-ink-2)" }}>
+            Öneri: <span style={{ fontWeight: 700, color: "var(--poster-ink)" }}>{hw.frequency}</span>
+          </span>
         </div>
       )}
 
-      {/* Uyarlama önerileri */}
       {hw.adaptations && (
-        <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-xs font-semibold text-zinc-500 mb-1.5">Uyarlama Önerileri</p>
-          <p className="text-xs text-zinc-600 leading-relaxed">{hw.adaptations}</p>
+        <div
+          style={{
+            padding: 14,
+            background: "var(--poster-bg-2)",
+            border: "2px solid var(--poster-ink)",
+            borderRadius: 12,
+            boxShadow: "0 2px 0 var(--poster-ink)",
+          }}
+        >
+          <p style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: "0 0 6px" }}>
+            Uyarlama Önerileri
+          </p>
+          <p style={{ fontSize: 12, color: "var(--poster-ink)", lineHeight: 1.6, margin: 0 }}>{hw.adaptations}</p>
         </div>
       )}
 
-      {/* Uzman Notları — sadece ekranda, PDF'e dahil edilmez */}
       {!forPdf && hw.expertNotes && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Lightbulb className="h-4 w-4 text-amber-600 shrink-0" />
-            <span className="text-xs font-semibold text-amber-800">Uzman Notları</span>
+        <div
+          style={{
+            padding: 14,
+            background: "#fff3d1",
+            border: "2px solid #b7791f",
+            borderRadius: 12,
+            boxShadow: "0 3px 0 #b7791f",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <Lightbulb style={{ width: 16, height: 16, color: "#b7791f" }} />
+            <span style={{ fontSize: 12, fontWeight: 800, color: "#5a3d05" }}>Uzman Notları</span>
           </div>
-          <p className="text-xs text-amber-700 leading-relaxed">{hw.expertNotes}</p>
+          <p style={{ fontSize: 12, color: "#5a3d05", lineHeight: 1.6, margin: 0 }}>{hw.expertNotes}</p>
         </div>
       )}
     </div>
   );
 }
 
-// ─── PDF Download ─────────────────────────────────────────────────────────────
+// ─── PDF Download (unchanged) ─────────────────────────────────────────────────
 
 async function downloadHomeworkPDF(hw: HomeworkContent, studentName?: string) {
   const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
@@ -274,11 +354,8 @@ async function downloadHomeworkPDF(hw: HomeworkContent, studentName?: string) {
   const Doc = () => (
     <Document title={hw.title} author="LudenLab">
       <Page size="A4" style={S.page}>
-
-        {/* Başlık */}
         <Text style={S.title}>{hw.title ?? ""}</Text>
 
-        {/* Bilgi satırı */}
         <View style={S.infoRow}>
           {studentName ? <Text style={S.infoText}>Öğrenci: {studentName}</Text> : null}
           {hw.duration  ? <Text style={S.infoText}>Süre: {hw.duration}</Text>   : null}
@@ -289,14 +366,12 @@ async function downloadHomeworkPDF(hw: HomeworkContent, studentName?: string) {
           <Text style={[S.infoText, { marginLeft: "auto", marginRight: 0 }]}>{today}</Text>
         </View>
 
-        {/* Giriş */}
         {hw.introduction ? (
           <View style={[S.intro, { marginBottom: 14 }]}>
             <Text style={S.introText}>{hw.introduction}</Text>
           </View>
         ) : null}
 
-        {/* Malzemeler */}
         {mats.length > 0 ? (
           <View style={{ marginBottom: 12 }}>
             <Text style={S.sectionHdr}>Gerekli Malzemeler</Text>
@@ -306,7 +381,6 @@ async function downloadHomeworkPDF(hw: HomeworkContent, studentName?: string) {
           </View>
         ) : null}
 
-        {/* Adımlar */}
         {steps.length > 0 ? (
           <View style={{ marginBottom: 12 }}>
             <Text style={S.sectionHdr}>Adımlar</Text>
@@ -322,7 +396,6 @@ async function downloadHomeworkPDF(hw: HomeworkContent, studentName?: string) {
           </View>
         ) : null}
 
-        {/* Dikkat Edin */}
         {hw.watchFor ? (
           <View style={[S.box, { backgroundColor: "#fefce8", borderWidth: 1, borderColor: "#fde68a" }]}>
             <Text style={[S.boxTitle, { color: "#92400e" }]}>⚠ Dikkat Edin</Text>
@@ -330,7 +403,6 @@ async function downloadHomeworkPDF(hw: HomeworkContent, studentName?: string) {
           </View>
         ) : null}
 
-        {/* Kutlama Anı */}
         {hw.celebration ? (
           <View style={[S.box, { backgroundColor: "#f0fdf4", borderWidth: 1, borderColor: "#bbf7d0" }]}>
             <Text style={[S.boxTitle, { color: "#14532d" }]}>★ Kutlama Anı</Text>
@@ -338,10 +410,8 @@ async function downloadHomeworkPDF(hw: HomeworkContent, studentName?: string) {
           </View>
         ) : null}
 
-        {/* Tekrar sıklığı */}
         {hw.frequency ? <Text style={S.freq}>Önerilen Sıklık: {hw.frequency}</Text> : null}
 
-        {/* Uyarlama önerileri */}
         {hw.adaptations ? (
           <View style={[S.box, { backgroundColor: "#f9fafb", borderWidth: 1, borderColor: "#e4e4e7" }]}>
             <Text style={[S.boxTitle, { color: "#374151" }]}>Uyarlama Önerileri</Text>
@@ -349,9 +419,6 @@ async function downloadHomeworkPDF(hw: HomeworkContent, studentName?: string) {
           </View>
         ) : null}
 
-        {/* expertNotes — PDF'e dahil edilmez */}
-
-        {/* Footer */}
         <View style={S.footer} fixed>
           <Text style={S.footerTxt}>LudenLab — ludenlab.com</Text>
           <Text style={S.footerTxt}>{today}</Text>
@@ -376,7 +443,6 @@ export default function HomeworkPage() {
   const [curricula, setCurricula]       = useState<CurriculumItem[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
 
-  // Form state
   const [studentId,    setStudentId]    = useState("");
   const [targetArea,   setTargetArea]   = useState("");
   const [customArea,   setCustomArea]   = useState("");
@@ -385,7 +451,6 @@ export default function HomeworkPage() {
   const [materialType, setMaterialType] = useState<"exercise" | "observation" | "daily_activity">("exercise");
   const [extraNote,    setExtraNote]    = useState("");
 
-  // Result state
   const [loading,     setLoading]     = useState(false);
   const [homework,    setHomework]    = useState<HomeworkContent | null>(null);
   const [savedCardId, setSavedCardId] = useState<string | null>(null);
@@ -394,7 +459,6 @@ export default function HomeworkPage() {
 
   const selectedStudent = students.find((s) => s.id === studentId) ?? null;
 
-  // Öğrencinin modüllerinden türetilen hedef alanlar
   const studentAreas = curricula
     .filter((c) => selectedStudent?.curriculumIds?.includes(c.id))
     .map((c) => c.title);
@@ -411,7 +475,6 @@ export default function HomeworkPage() {
     }).finally(() => setStudentsLoading(false));
   }, []);
 
-  // Öğrenci değişince alan seçimini sıfırla
   function handleStudentChange(id: string) {
     setStudentId(id);
     setTargetArea("");
@@ -480,264 +543,217 @@ export default function HomeworkPage() {
     }
   }
 
-  const inputCls = "w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30 dark:text-muted-foreground/60";
-  const labelCls = "block text-xs font-bold text-[#023435]/70 dark:text-foreground/80 mb-1.5 uppercase tracking-wide";
+  const rowStyle = (active: boolean): React.CSSProperties => ({
+    width: "100%",
+    padding: "10px 12px",
+    background: active ? "var(--poster-accent)" : "var(--poster-panel)",
+    color: active ? "#fff" : "var(--poster-ink)",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 10,
+    boxShadow: active ? "0 2px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+    textAlign: "left",
+  });
+
+  const gridBtnStyle = (active: boolean): React.CSSProperties => ({
+    padding: "10px 12px",
+    background: active ? "var(--poster-ink)" : "var(--poster-panel)",
+    color: active ? "#fff" : "var(--poster-ink)",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 10,
+    boxShadow: active ? "0 2px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+  });
+
+  const submitStyle: React.CSSProperties = {
+    width: "100%",
+    height: 44,
+    background: "var(--poster-accent)",
+    color: "#fff",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 12,
+    boxShadow: "0 3px 0 var(--poster-ink)",
+    fontSize: 14,
+    fontWeight: 800,
+    cursor: loading ? "not-allowed" : "pointer",
+    opacity: loading ? 0.6 : 1,
+    fontFamily: "var(--font-display)",
+  };
+
+  const form = (
+    <form key={formKey} onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      {/* Öğrenci */}
+      <div>
+        <PLabel>Öğrenci</PLabel>
+        <PSelect value={studentId} onChange={(e) => handleStudentChange(e.target.value)} required>
+          <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
+          {students.map((s) => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </PSelect>
+        {selectedStudent && (
+          <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {selectedStudent.birthDate && <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>}
+            <PBadge color={WORK_AREA_BADGE[selectedStudent.workArea] ?? "soft"}>
+              {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
+            </PBadge>
+            {selectedStudent.diagnosis && <PBadge color="soft">{selectedStudent.diagnosis}</PBadge>}
+          </div>
+        )}
+      </div>
+
+      {/* Çalışma Alanı */}
+      <div>
+        <PLabel>
+          Çalışma Alanı{" "}
+          {studentAreas.length > 0 && (
+            <span style={{ fontSize: 10, fontWeight: 500, color: "var(--poster-ink-3)" }}>(öğrencinin modüllerinden)</span>
+          )}
+        </PLabel>
+        <PSelect value={targetArea} onChange={(e) => setTargetArea(e.target.value)} required>
+          <option value="">Alan seçin</option>
+          {areaOptions.map((a) => (
+            <option key={a} value={a}>{a}</option>
+          ))}
+        </PSelect>
+        {targetArea === "Diğer" && (
+          <div style={{ marginTop: 8 }}>
+            <PInput
+              type="text"
+              placeholder="Çalışma alanını açıklayın..."
+              value={customArea}
+              onChange={(e) => setCustomArea(e.target.value)}
+              required
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Süre */}
+      <div>
+        <PLabel>Süre</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+          {(["10", "15", "20"] as const).map((d) => (
+            <button key={d} type="button" onClick={() => setDuration(d)} style={gridBtnStyle(duration === d)}>
+              <span style={{ fontSize: 13, fontWeight: 800 }}>{d} dk</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Veli Bilgi Düzeyi */}
+      <div>
+        <PLabel>Veli Bilgi Düzeyi</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
+          {([
+            { value: "basic",    label: "Temel",    desc: "Basit anlatım" },
+            { value: "detailed", label: "Detaylı",  desc: "Teknik bilgi" },
+          ] as const).map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setParentLevel(opt.value)}
+              style={{ ...gridBtnStyle(parentLevel === opt.value), textAlign: "left" }}
+            >
+              <span style={{ display: "block", fontSize: 13, fontWeight: 800 }}>{opt.label}</span>
+              <span style={{ display: "block", fontSize: 10, opacity: 0.75 }}>{opt.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Materyal Türü */}
+      <div>
+        <PLabel>Materyal Türü</PLabel>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {MATERIAL_TYPE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setMaterialType(opt.value as typeof materialType)}
+              style={rowStyle(materialType === opt.value)}
+            >
+              <span style={{ display: "block", fontSize: 13, fontWeight: 800 }}>{opt.label}</span>
+              <span style={{ display: "block", fontSize: 10, opacity: 0.75 }}>{opt.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Ek Not */}
+      <div>
+        <PLabel>
+          Ek Not <span style={{ fontSize: 10, fontWeight: 500, color: "var(--poster-ink-3)" }}>(opsiyonel)</span>
+        </PLabel>
+        <PTextarea
+          value={extraNote}
+          onChange={(e) => setExtraNote(e.target.value)}
+          placeholder="Bu oturumdaki gözlemleriniz, özel durumlar..."
+          rows={3}
+        />
+      </div>
+
+      <button type="submit" disabled={loading} style={submitStyle}>
+        {loading ? "Üretiliyor..." : "Ev Ödevi Üret"}
+      </button>
+      <p style={{ textAlign: "center", fontSize: 11, color: "var(--poster-ink-3)", margin: 0 }}>
+        15 kredi kullanılacak
+      </p>
+    </form>
+  );
+
+  const result = loading ? (
+    <ToolLoadingCard>
+      <LoadingMessages />
+    </ToolLoadingCard>
+  ) : homework ? (
+    <>
+      <PCard rounded={18} style={{ padding: 18, background: "var(--poster-panel)" }}>
+        <HomeworkResult hw={homework} />
+      </PCard>
+      <PCard rounded={14} style={{ padding: 14, background: "var(--poster-panel)" }}>
+        <p style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: "0 0 10px" }}>
+          Sonraki adım
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <PBtn
+            as="button"
+            variant="accent"
+            size="md"
+            onClick={handleDownloadPDF}
+            disabled={downloading}
+            icon={<Download style={{ width: 16, height: 16 }} />}
+            style={{ flex: 1, minWidth: 140 }}
+          >
+            {downloading ? "Hazırlanıyor..." : "PDF İndir"}
+          </PBtn>
+          {savedCardId && (
+            <PBtn as="a" href="/cards" variant="white" size="md" icon={<Library style={{ width: 16, height: 16 }} />} style={{ flex: 1, minWidth: 140 }}>
+              Kütüphaneye Git
+            </PBtn>
+          )}
+          <PBtn as="button" variant="white" size="md" onClick={handleReset} icon={<RefreshCw style={{ width: 16, height: 16 }} />} style={{ flex: 1, minWidth: 140 }}>
+            Yeni Materyal Üret
+          </PBtn>
+        </div>
+      </PCard>
+    </>
+  ) : (
+    <ToolEmptyState
+      icon="📋"
+      title="Henüz materyal üretilmedi"
+      hint='Sol taraftan parametreleri seçip "Ev Ödevi Üret" butonuna bas.'
+    />
+  );
 
   return (
-    <div
-      className="w-full flex flex-col relative md:h-[calc(100vh-0px)] md:overflow-hidden"
-      style={{ background: "var(--surface-page-gradient)" }}
-    >
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
-    <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:h-full flex flex-col">
-      {/* Header */}
-      <div className="mb-5 shrink-0 bg-white/50 dark:bg-card/50 backdrop-blur-xl rounded-2xl border border-white/70 dark:border-border/60 px-5 py-4 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
-        <Link
-          href="/tools"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Araçlara Dön
-        </Link>
-        <h1 className="text-xl font-extrabold tracking-tight text-[#023435] dark:text-foreground">Ev Ödevi Materyali Üretici</h1>
-        <p className="text-sm text-[#023435]/60 dark:text-muted-foreground mt-0.5">
-          Velilerin evde uygulayabileceği, uzman yönlendirmeli çalışma materyalleri üretin.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] md:flex-1 md:min-h-0">
-        {/* ── Sol: Form ── */}
-        <div className="flex flex-col md:min-h-0">
-          <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
-            <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
-
-              {/* Öğrenci */}
-              <div>
-                <label className={labelCls}>Öğrenci</label>
-                <select
-                  value={studentId}
-                  onChange={(e) => handleStudentChange(e.target.value)}
-                  className={inputCls}
-                  required
-                >
-                  <option value="">
-                    {studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}
-                  </option>
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-                {selectedStudent && (
-                  <div className="mt-2 rounded-xl border border-white/80 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm px-3 py-2.5 flex flex-wrap gap-1.5">
-                    {selectedStudent.birthDate && (
-                      <span className="rounded-full bg-white border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600">
-                        {calcAge(selectedStudent.birthDate)}
-                      </span>
-                    )}
-                    <span className={cn("rounded-full px-2 py-0.5 text-xs border", WORK_AREA_COLOR[selectedStudent.workArea] ?? "bg-zinc-100 text-zinc-600")}>
-                      {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
-                    </span>
-                    {selectedStudent.diagnosis && (
-                      <span className="rounded-full bg-white border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600 truncate max-w-full">
-                        {selectedStudent.diagnosis}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Çalışma Alanı */}
-              <div>
-                <label className={labelCls}>
-                  Çalışma Alanı
-                  {studentAreas.length > 0 && (
-                    <span className="ml-1.5 text-[10px] font-normal text-zinc-400">(öğrencinin modüllerinden)</span>
-                  )}
-                </label>
-                <select
-                  value={targetArea}
-                  onChange={(e) => setTargetArea(e.target.value)}
-                  className={inputCls}
-                  required
-                >
-                  <option value="">Alan seçin</option>
-                  {areaOptions.map((a) => (
-                    <option key={a} value={a}>{a}</option>
-                  ))}
-                </select>
-                {targetArea === "Diğer" && (
-                  <input
-                    type="text"
-                    placeholder="Çalışma alanını açıklayın..."
-                    value={customArea}
-                    onChange={(e) => setCustomArea(e.target.value)}
-                    className={cn(inputCls, "mt-2")}
-                    required
-                  />
-                )}
-              </div>
-
-              {/* Süre */}
-              <div>
-                <label className={labelCls}>Süre</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(["10", "15", "20"] as const).map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setDuration(d)}
-                      className={cn(
-                        "rounded-lg border px-3 py-2.5 text-center transition-colors",
-                        duration === d
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      <span className="block text-xs font-semibold">{d} dk</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Veli Bilgi Düzeyi */}
-              <div>
-                <label className={labelCls}>Veli Bilgi Düzeyi</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {([
-                    { value: "basic",    label: "Temel",    desc: "Basit anlatım" },
-                    { value: "detailed", label: "Detaylı",  desc: "Teknik bilgi" },
-                  ] as const).map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setParentLevel(opt.value)}
-                      className={cn(
-                        "rounded-lg border px-3 py-2.5 text-left transition-colors",
-                        parentLevel === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      <span className="block text-xs font-semibold">{opt.label}</span>
-                      <span className="block text-[10px] text-zinc-400">{opt.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Materyal Türü */}
-              <div>
-                <label className={labelCls}>Materyal Türü</label>
-                <div className="space-y-2">
-                  {MATERIAL_TYPE_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setMaterialType(opt.value as typeof materialType)}
-                      className={cn(
-                        "w-full rounded-lg border px-3 py-2.5 text-left transition-colors",
-                        materialType === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      <span className="block text-xs font-semibold">{opt.label}</span>
-                      <span className="block text-[10px] text-zinc-400">{opt.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Ek Not */}
-              <div>
-                <label className={labelCls}>
-                  Ek Not
-                  <span className="ml-1 text-[10px] font-normal text-zinc-400">(opsiyonel)</span>
-                </label>
-                <textarea
-                  value={extraNote}
-                  onChange={(e) => setExtraNote(e.target.value)}
-                  placeholder="Bu oturumdaki gözlemleriniz, özel durumlar..."
-                  rows={3}
-                  className={cn(inputCls, "resize-none")}
-                />
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-lg bg-[#FE703A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? "Üretiliyor..." : "Ev Ödevi Üret"}
-              </button>
-              <p className="text-center text-xs text-zinc-400">15 kredi kullanılacak</p>
-            </form>
-          </div>
-        </div>
-
-        {/* ── Sağ: Sonuç ── */}
-        <div className="flex flex-col md:min-h-0">
-          <div className="overflow-y-auto no-scrollbar flex flex-col md:flex-1 md:min-h-0">
-            {loading ? (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-                <div className="text-center space-y-4 px-8">
-                  <div className="mx-auto h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
-                  <LoadingMessages />
-                </div>
-              </div>
-            ) : homework ? (
-              <div className="flex flex-col gap-4 md:flex-1 md:min-h-0">
-                <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
-                  <HomeworkResult hw={homework} />
-                </div>
-
-                {/* Aksiyon butonları */}
-                <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)] shrink-0">
-                  <p className="text-xs font-semibold text-zinc-400 mb-3">Sonraki adım</p>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={handleDownloadPDF}
-                      disabled={downloading}
-                      className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 rounded-lg bg-[#FE703A] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#FE703A]/90 disabled:opacity-60 transition-colors"
-                    >
-                      {downloading ? "Hazırlanıyor..." : "PDF İndir"}
-                    </button>
-                    {savedCardId && (
-                      <Link
-                        href="/cards"
-                        className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
-                      >
-                        <Library className="h-4 w-4" />
-                        Kütüphaneye Git
-                      </Link>
-                    )}
-                    <button
-                      onClick={handleReset}
-                      className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-500 hover:bg-zinc-50 transition-colors"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                      Yeni Materyal Üret
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-[#023435]/15 bg-white/40 dark:bg-card/40 backdrop-blur-xl">
-                <div className="text-center space-y-2 px-8">
-                  <div className="text-4xl">📋</div>
-                  <p className="text-sm font-medium text-zinc-500">Henüz materyal üretilmedi</p>
-                  <p className="text-xs text-zinc-400">
-                    Sol taraftan parametreleri seçip &quot;Ev Ödevi Üret&quot; butonuna bas.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </main>
-    </div>
+    <ToolShell
+      title="Ev Ödevi Materyali Üretici"
+      description="Velilerin evde uygulayabileceği, uzman yönlendirmeli çalışma materyalleri üretin."
+      form={form}
+      result={result}
+    />
   );
 }

@@ -1,33 +1,69 @@
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { PBtn, PCard } from "@/components/poster";
 
 export default function SubscriptionSuccessPage() {
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
-      <div className="rounded-2xl border border-border bg-card p-10 shadow-sm max-w-md w-full relative overflow-hidden">
-
-        {/* Decorative background glow */}
-        <div className="absolute -top-12 -left-12 w-32 h-32 bg-[#107996]/10 rounded-full blur-2xl" />
-        <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-[#FE703A]/10 rounded-full blur-2xl" />
-
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="h-20 w-20 rounded-full bg-green-500/10 flex items-center justify-center mb-6">
-            <CheckCircle2 className="h-10 w-10 text-green-500" />
-          </div>
-
-          <h1 className="text-2xl font-bold text-foreground mb-2">Tebrikler!</h1>
-          <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-            Aboneliğiniz başarıyla aktif edildi. Yeni planınızın tüm özelliklerine anında erişebilirsiniz. Kredileriniz hesabınıza yüklendi.
-          </p>
-
-          <Link href="/dashboard" className="w-full">
-            <Button className="w-full bg-[#023435] hover:bg-[#04595B]">
-              Panele Dön
-            </Button>
-          </Link>
+    <div
+      className="poster-scope"
+      style={{
+        minHeight: "70vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "32px 16px",
+        textAlign: "center",
+      }}
+    >
+      <PCard rounded={20} style={{ maxWidth: 440, width: "100%", padding: 40, background: "var(--poster-panel)" }}>
+        <div
+          style={{
+            width: 72,
+            height: 72,
+            margin: "0 auto 20px",
+            borderRadius: 18,
+            background: "var(--poster-green)",
+            border: "2px solid var(--poster-ink)",
+            boxShadow: "0 4px 0 var(--poster-ink)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CheckCircle2 style={{ width: 36, height: 36, color: "#fff" }} />
         </div>
-      </div>
+
+        <h1
+          style={{
+            fontSize: 26,
+            fontWeight: 700,
+            color: "var(--poster-ink)",
+            margin: "0 0 10px",
+            fontFamily: "var(--font-display)",
+            letterSpacing: "-.02em",
+          }}
+        >
+          Tebrikler!
+        </h1>
+        <p
+          style={{
+            fontSize: 14,
+            lineHeight: 1.55,
+            color: "var(--poster-ink-2)",
+            margin: "0 0 28px",
+            fontFamily: "var(--font-display)",
+          }}
+        >
+          Aboneliğiniz başarıyla aktif edildi. Yeni planınızın tüm özelliklerine anında erişebilirsiniz. Kredileriniz hesabınıza yüklendi.
+        </p>
+
+        <Link href="/dashboard" style={{ display: "block", textDecoration: "none" }}>
+          <PBtn as="a" href="/dashboard" variant="accent" size="md" style={{ width: "100%" }}>
+            Panele Dön
+          </PBtn>
+        </Link>
+      </PCard>
     </div>
   );
 }

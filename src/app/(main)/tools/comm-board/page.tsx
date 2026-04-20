@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Library } from "lucide-react";
+import { Library, RefreshCw } from "lucide-react";
 import { CommBoardView } from "@/components/cards/CommBoardView";
 import type { CommBoardContent } from "@/components/cards/CommBoardView";
 import { formatDate } from "@/lib/utils";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
+import { PBtn, PCard, PLabel, PSelect, PInput, PSwitch } from "@/components/poster";
 
 interface Student {
   id: string;
@@ -22,16 +21,14 @@ type BoardType = "basic_needs" | "emotions" | "daily_routines" | "school" | "soc
 type Layout    = "grid" | "strip";
 type TextMode  = "word_only" | "word_sentence";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const BOARD_TYPE_OPTIONS: { value: BoardType; label: string; emoji: string; desc: string }[] = [
-  { value: "basic_needs",    label: "Temel İhtiyaçlar",  emoji: "💧", desc: "Yemek, su, tuvalet, uyku, acı/ağrı" },
-  { value: "emotions",       label: "Duygular",           emoji: "😊", desc: "Mutlu, üzgün, kızgın, korkmuş, şaşkın, yorgun" },
-  { value: "daily_routines", label: "Günlük Rutinler",    emoji: "🌅", desc: "Uyanma, kahvaltı, okul, oyun, banyo, uyku" },
-  { value: "school",         label: "Okul Aktiviteleri",  emoji: "📚", desc: "Ders, teneffüs, yemek, spor, müzik, resim" },
-  { value: "social",         label: "Sosyal İfadeler",    emoji: "👋", desc: "Merhaba, hoşça kal, teşekkürler, lütfen, evet, hayır" },
-  { value: "requests",       label: "İstek ve Seçim",     emoji: "🙋", desc: "İstiyorum, istemiyorum, bu, şu, daha, bitti" },
-  { value: "custom",         label: "Özel",               emoji: "✏️", desc: "Kendi kategorinizi tanımlayın" },
+  { value: "basic_needs",    label: "Temel İhtiyaçlar",  emoji: "💧", desc: "Yemek, su, tuvalet, uyku" },
+  { value: "emotions",       label: "Duygular",           emoji: "😊", desc: "Mutlu, üzgün, kızgın" },
+  { value: "daily_routines", label: "Günlük Rutinler",    emoji: "🌅", desc: "Uyanma, kahvaltı, okul" },
+  { value: "school",         label: "Okul",               emoji: "📚", desc: "Ders, teneffüs, yemek" },
+  { value: "social",         label: "Sosyal",             emoji: "👋", desc: "Merhaba, teşekkürler" },
+  { value: "requests",       label: "İstek / Seçim",      emoji: "🙋", desc: "İstiyorum, bu, daha" },
+  { value: "custom",         label: "Özel",               emoji: "✏️", desc: "Kendi kategoriniz" },
 ];
 
 const SYMBOL_COUNT_OPTIONS: { value: number; label: string; grid: string }[] = [
@@ -49,8 +46,6 @@ const LOADING_MSGS = [
   "Veli rehberi hazırlanıyor...",
   "Uzman önerileri ekleniyor...",
 ];
-
-// ─── Loading ──────────────────────────────────────────────────────────────────
 
 function LoadingMessages() {
   const [index, setIndex]     = useState(0);
@@ -72,14 +67,18 @@ function LoadingMessages() {
   }, []);
 
   return (
-    <div className="flex h-10 items-center justify-center">
-      <p
-        className="text-sm text-zinc-500 transition-opacity duration-300 text-center"
-        style={{ opacity: visible ? 1 : 0 }}
-      >
-        {LOADING_MSGS[index]}
-      </p>
-    </div>
+    <p
+      style={{
+        fontSize: 13,
+        fontWeight: 700,
+        color: "var(--poster-ink-2)",
+        margin: 0,
+        transition: "opacity 300ms",
+        opacity: visible ? 1 : 0,
+      }}
+    >
+      {LOADING_MSGS[index]}
+    </p>
   );
 }
 
@@ -116,13 +115,10 @@ async function downloadBoardOnlyPDF(board: CommBoardContent, studentName?: strin
     pink: "#831843",   orange: "#7C2D12", white: "#3F3F46",
   };
 
-  // A4: 595pt wide, 842pt tall, padding 40 on each side → 515pt content
-  // Cell width = (515 - gap*(cols-1)) / cols, gap=4
   const CONTENT_W = 515;
   const GAP = 4;
   const cellW = Math.floor((CONTENT_W - GAP * (cols - 1)) / cols);
-  // Each row height: target ~120pt minimum
-  const CONTENT_H = 842 - 40 - 40 - 50 - rows * GAP; // 50 for header
+  const CONTENT_H = 842 - 40 - 40 - 50 - rows * GAP;
   const cellH = Math.floor(CONTENT_H / rows);
 
   const S = StyleSheet.create({
@@ -138,7 +134,6 @@ async function downloadBoardOnlyPDF(board: CommBoardContent, studentName?: strin
     footTxt:  { fontSize: 7, color: "#a1a1aa" },
   });
 
-  // Build grid rows
   const gridRows: (typeof cells)[] = [];
   for (let r = 0; r < rows; r++) {
     gridRows.push(cells.slice(r * cols, (r + 1) * cols));
@@ -348,6 +343,39 @@ async function downloadFullReportPDF(board: CommBoardContent, studentName?: stri
   URL.revokeObjectURL(url);
 }
 
+// ─── Style helpers ────────────────────────────────────────────────────────────
+
+const rowStyle = (active: boolean): React.CSSProperties => ({
+  width: "100%",
+  display: "flex",
+  alignItems: "flex-start",
+  gap: 8,
+  padding: "10px 12px",
+  borderRadius: 12,
+  border: "2px solid var(--poster-ink)",
+  background: active ? "var(--poster-accent)" : "#fff",
+  color: "var(--poster-ink)",
+  textAlign: "left" as const,
+  cursor: "pointer",
+  fontFamily: "inherit",
+  boxShadow: active ? "3px 3px 0 var(--poster-ink)" : "none",
+  transition: "all 0.1s",
+});
+
+const gridBtnStyle = (active: boolean): React.CSSProperties => ({
+  padding: "10px 8px",
+  borderRadius: 12,
+  border: "2px solid var(--poster-ink)",
+  background: active ? "var(--poster-accent)" : "#fff",
+  color: "var(--poster-ink)",
+  fontSize: 12,
+  fontWeight: 800,
+  cursor: "pointer",
+  fontFamily: "inherit",
+  boxShadow: active ? "3px 3px 0 var(--poster-ink)" : "none",
+  transition: "all 0.1s",
+});
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CommBoardPage() {
@@ -361,7 +389,6 @@ export default function CommBoardPage() {
   const [colorCoding, setColorCoding]     = useState(true);
 
   const [generating, setGenerating]       = useState(false);
-  const [saving, setSaving]               = useState(false);
   const [savedCardId, setSavedCardId]     = useState<string | null>(null);
   const [board, setBoard]                 = useState<CommBoardContent | null>(null);
   const [pendingCardId, setPendingCardId] = useState<string | null>(null);
@@ -376,7 +403,8 @@ export default function CommBoardPage() {
 
   const selectedStudent = students.find((s) => s.id === studentId);
 
-  async function handleGenerate() {
+  async function handleGenerate(e: React.FormEvent) {
+    e.preventDefault();
     if (boardType === "custom" && !customCategory.trim()) {
       toast.error("Lütfen özel kategori adını girin");
       return;
@@ -384,6 +412,7 @@ export default function CommBoardPage() {
     setGenerating(true);
     setSavedCardId(null);
     setPendingCardId(null);
+    setBoard(null);
     try {
       const res = await fetch("/api/tools/comm-board", {
         method: "POST",
@@ -402,18 +431,13 @@ export default function CommBoardPage() {
       if (!res.ok) { toast.error(data.error ?? "Bir hata oluştu"); return; }
       setBoard(data.board as CommBoardContent);
       setPendingCardId(data.cardId ?? null);
+      setSavedCardId(data.cardId ?? null);
       toast.success("İletişim panosu oluşturuldu");
     } catch {
       toast.error("Bağlantı hatası");
     } finally {
       setGenerating(false);
     }
-  }
-
-  async function handleSave() {
-    if (!pendingCardId) { toast.error("Kaydedilecek pano bulunamadı"); return; }
-    setSavedCardId(pendingCardId);
-    toast.success("Kütüphaneye kaydedildi");
   }
 
   async function handleDownloadBoard() {
@@ -449,241 +473,219 @@ export default function CommBoardPage() {
     setPendingCardId(null);
     setSavedCardId(null);
   }
+  void pendingCardId;
 
-  return (
-    <div className="min-h-screen relative" style={{ background: "var(--surface-page-gradient)" }}>
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
-      <div className="relative z-10 mx-auto max-w-3xl px-6 py-10">
-        {/* Header */}
-        <div className="mb-8">
-          <Link href="/tools" className="mb-4 inline-flex items-center gap-1.5 text-sm text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Araçlara Dön
-          </Link>
-          <h1 className="text-2xl font-bold text-[#023435] dark:text-foreground">İletişim Panosu Üretici</h1>
-          <p className="mt-1 text-sm text-[#023435]/60 dark:text-muted-foreground">
-            Alternatif ve destekleyici iletişim için kişiselleştirilmiş görsel iletişim panoları üretin.
-          </p>
-        </div>
-
-        {/* Form */}
-        {!board && (
-          <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] space-y-6">
-
-            {/* Student */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Öğrenci (isteğe bağlı)</label>
-              <select
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                className="w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
-              >
-                <option value="">— Öğrenci seçin —</option>
-                {students.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-              {selectedStudent && (
-                <div className="rounded-xl border border-white/70 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm p-3 flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-[#023435]/10 text-[#023435] dark:text-foreground flex items-center justify-center font-bold text-xs shrink-0">
-                    {selectedStudent.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-zinc-800">{selectedStudent.name}</p>
-                    {selectedStudent.diagnosis && (
-                      <p className="text-xs text-zinc-500">{selectedStudent.diagnosis}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Board type */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Pano Türü</label>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {BOARD_TYPE_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => { setBoardType(opt.value); if (opt.value !== "custom") setCustomCategory(""); }}
-                    className={`flex items-start gap-2 rounded-xl border p-3 text-left transition-all ${
-                      boardType === opt.value
-                        ? "border-[#023435] bg-[#023435]/5"
-                        : "border-zinc-200 hover:border-zinc-300"
-                    }`}
-                  >
-                    <span className="text-lg leading-none">{opt.emoji}</span>
-                    <div>
-                      <p className={`text-xs font-semibold ${boardType === opt.value ? "text-[#023435] dark:text-foreground" : "text-zinc-700"}`}>
-                        {opt.label}
-                      </p>
-                      <p className="text-[10px] text-zinc-400 leading-snug mt-0.5">{opt.desc}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-              {boardType === "custom" && (
-                <input
-                  type="text"
-                  value={customCategory}
-                  onChange={(e) => setCustomCategory(e.target.value)}
-                  placeholder="Kategori adını yazın (örn: Spor aktiviteleri)"
-                  className="mt-2 w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2.5 text-sm text-[#023435] dark:text-foreground placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40"
-                />
-              )}
-            </div>
-
-            {/* Symbol count */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Sembol Sayısı</label>
-              <div className="flex gap-2 flex-wrap">
-                {SYMBOL_COUNT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSymbolCount(opt.value)}
-                    className={`rounded-xl border px-4 py-2 text-sm font-medium transition-all ${
-                      symbolCount === opt.value
-                        ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                        : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
-                    }`}
-                  >
-                    {opt.label}
-                    <span className="ml-1 text-xs text-zinc-400">({opt.grid})</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Layout */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Düzen</label>
-              <div className="flex gap-2">
-                {([["grid", "Grid", "Satır ve sütun"], ["strip", "Satır", "Tek yatay şerit"]] as const).map(([v, l, d]) => (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => setLayout(v)}
-                    className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all text-left ${
-                      layout === v
-                        ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                        : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
-                    }`}
-                  >
-                    {l}
-                    <span className="block text-[10px] text-zinc-400 font-normal mt-0.5">{d}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Text mode */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Metin Dili</label>
-              <div className="flex gap-2">
-                {([["word_only", "Sadece kelime", "Su"], ["word_sentence", "Kelime + cümle", "Su istiyorum"]] as const).map(([v, l, ex]) => (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => setTextMode(v)}
-                    className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all text-left ${
-                      textMode === v
-                        ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                        : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
-                    }`}
-                  >
-                    {l}
-                    <span className="block text-[10px] text-zinc-400 font-normal mt-0.5">Örn: &quot;{ex}&quot;</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Color coding toggle */}
-            <div className="flex items-center justify-between rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-4 py-3">
-              <div>
-                <p className="text-sm font-bold text-[#023435]/70 dark:text-foreground/80">Fitzgerald Renk Kodlaması</p>
-                <p className="text-xs text-zinc-400 mt-0.5">İsim=Sarı · Fiil=Yeşil · Sıfat=Mavi · Sosyal=Pembe · Soru=Turuncu</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setColorCoding((v) => !v)}
-                className={`relative h-6 w-11 rounded-full transition-colors duration-200 ${colorCoding ? "bg-[#023435]" : "bg-zinc-300"}`}
-              >
-                <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${colorCoding ? "translate-x-5" : "translate-x-0.5"}`} />
-              </button>
-            </div>
-
-            {/* Submit */}
-            <div className="pt-2">
-              <button
-                onClick={handleGenerate}
-                disabled={generating}
-                className="w-full rounded-xl bg-[#FE703A] px-4 py-3 text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {generating ? "Pano üretiliyor…" : "İletişim Panosu Üret"}
-              </button>
-              <p className="mt-2 text-center text-xs text-zinc-400">15 kredi kullanılacak</p>
-            </div>
-
-            {generating && (
-              <div className="rounded-xl border border-white/70 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm py-4">
-                <LoadingMessages />
+  const form = (
+    <form onSubmit={handleGenerate} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Öğrenci */}
+      <div>
+        <PLabel>
+          Öğrenci <span style={{ fontWeight: 500, color: "var(--poster-ink-3)", textTransform: "none" }}>(opsiyonel)</span>
+        </PLabel>
+        <PSelect value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+          <option value="">— Öğrenci seçin —</option>
+          {students.map((s) => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </PSelect>
+        {selectedStudent && (
+          <div
+            style={{
+              marginTop: 8,
+              padding: "8px 10px",
+              border: "2px solid var(--poster-ink)",
+              borderRadius: 10,
+              background: "var(--poster-bg-2)",
+              fontSize: 12,
+              fontWeight: 700,
+              color: "var(--poster-ink)",
+            }}
+          >
+            {selectedStudent.name}
+            {selectedStudent.diagnosis && (
+              <div style={{ fontSize: 11, fontWeight: 500, color: "var(--poster-ink-2)", marginTop: 2 }}>
+                {selectedStudent.diagnosis}
               </div>
             )}
           </div>
         )}
+      </div>
 
-        {/* Result */}
-        {board && (
-          <div className="space-y-6">
-            <CommBoardView board={board} />
-
-            {/* Action buttons */}
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={handleDownloadBoard}
-                disabled={downloadingBoard || downloadingReport}
-                className="flex items-center gap-1.5 rounded-xl bg-[#FE703A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors disabled:opacity-60"
-              >
-                {downloadingBoard ? "Hazırlanıyor…" : "PDF İndir — Pano"}
-              </button>
-              <button
-                onClick={handleDownloadReport}
-                disabled={downloadingBoard || downloadingReport}
-                className="flex items-center gap-1.5 rounded-xl border border-[#023435]/30 bg-[#023435]/5 px-4 py-2.5 text-sm font-semibold text-[#023435] dark:text-foreground hover:bg-[#023435]/10 dark:hover:bg-accent/50 transition-colors disabled:opacity-60"
-              >
-                {downloadingReport ? "Hazırlanıyor…" : "PDF İndir — Tam Rapor"}
-              </button>
-              {savedCardId ? (
-                <Link
-                  href={`/cards/${savedCardId}`}
-                  className="flex items-center gap-1.5 rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
-                >
-                  <Library className="h-4 w-4" /> Kütüphanede Gör
-                </Link>
-              ) : (
-                <button
-                  onClick={handleSave}
-                  disabled={saving || !pendingCardId}
-                  className="flex items-center gap-1.5 rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-60"
-                >
-                  <Library className="h-4 w-4" />
-                  {saving ? "Kaydediliyor…" : "Kütüphaneye Kaydet"}
-                </button>
-              )}
-              <button
-                onClick={handleReset}
-                className="flex items-center gap-1.5 rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
-              >
-                Yeni Pano Üret
-              </button>
-            </div>
+      {/* Pano türü */}
+      <div>
+        <PLabel>Pano Türü</PLabel>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {BOARD_TYPE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                setBoardType(opt.value);
+                if (opt.value !== "custom") setCustomCategory("");
+              }}
+              style={rowStyle(boardType === opt.value)}
+            >
+              <span style={{ fontSize: 18, flexShrink: 0 }}>{opt.emoji}</span>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 800 }}>{opt.label}</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "var(--poster-ink-2)", marginTop: 2 }}>
+                  {opt.desc}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+        {boardType === "custom" && (
+          <div style={{ marginTop: 8 }}>
+            <PInput
+              placeholder="Kategori adı (örn: Spor aktiviteleri)"
+              value={customCategory}
+              onChange={(e) => setCustomCategory(e.target.value)}
+            />
           </div>
         )}
       </div>
-    </div>
+
+      {/* Sembol sayısı */}
+      <div>
+        <PLabel>Sembol Sayısı</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+          {SYMBOL_COUNT_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setSymbolCount(opt.value)}
+              style={gridBtnStyle(symbolCount === opt.value)}
+            >
+              <div>{opt.label}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--poster-ink-2)", marginTop: 2 }}>
+                {opt.grid}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Düzen */}
+      <div>
+        <PLabel>Düzen</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+          {([["grid", "Grid", "Satır ve sütun"], ["strip", "Satır", "Tek yatay şerit"]] as const).map(([v, l, d]) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setLayout(v)}
+              style={{ ...gridBtnStyle(layout === v), textAlign: "left" as const, padding: "10px 12px" }}
+            >
+              <div>{l}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--poster-ink-2)", marginTop: 2 }}>
+                {d}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Metin dili */}
+      <div>
+        <PLabel>Metin Dili</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+          {([["word_only", "Sadece kelime", "Su"], ["word_sentence", "Kelime + cümle", "Su istiyorum"]] as const).map(([v, l, ex]) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setTextMode(v)}
+              style={{ ...gridBtnStyle(textMode === v), textAlign: "left" as const, padding: "10px 12px" }}
+            >
+              <div>{l}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--poster-ink-2)", marginTop: 2 }}>
+                &quot;{ex}&quot;
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Color coding */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          padding: "10px 12px",
+          border: "2px solid var(--poster-ink)",
+          borderRadius: 12,
+          background: "#fff",
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: "var(--poster-ink)" }}>Fitzgerald Renk Kodu</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "var(--poster-ink-2)", marginTop: 2 }}>
+            İsim=Sarı · Fiil=Yeşil · Sıfat=Mavi
+          </div>
+        </div>
+        <PSwitch checked={colorCoding} onChange={setColorCoding} />
+      </div>
+
+      {/* Submit */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
+        <PBtn
+          type="submit"
+          variant="accent"
+          disabled={generating}
+          style={{ width: "100%", justifyContent: "center" }}
+        >
+          {generating ? "Pano üretiliyor…" : "İletişim Panosu Üret"}
+        </PBtn>
+        <p style={{ fontSize: 11, color: "var(--poster-ink-3)", textAlign: "center", margin: 0 }}>
+          15 kredi kullanılacak
+        </p>
+      </div>
+    </form>
+  );
+
+  const result = generating ? (
+    <ToolLoadingCard>
+      <LoadingMessages />
+    </ToolLoadingCard>
+  ) : board ? (
+    <>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <PBtn variant="accent" onClick={handleDownloadBoard} disabled={downloadingBoard || downloadingReport}>
+          {downloadingBoard ? "Hazırlanıyor…" : "PDF — Pano"}
+        </PBtn>
+        <PBtn variant="dark" onClick={handleDownloadReport} disabled={downloadingBoard || downloadingReport}>
+          {downloadingReport ? "Hazırlanıyor…" : "PDF — Tam Rapor"}
+        </PBtn>
+        {savedCardId && (
+          <PBtn as="a" href={`/cards/${savedCardId}`} variant="white" icon={<Library style={{ width: 14, height: 14 }} />}>
+            Kütüphanede Gör
+          </PBtn>
+        )}
+        <PBtn variant="white" onClick={handleReset} icon={<RefreshCw style={{ width: 14, height: 14 }} />}>
+          Yeni Pano
+        </PBtn>
+      </div>
+      <PCard rounded={18} style={{ padding: 20, background: "var(--poster-panel)" }}>
+        <CommBoardView board={board} />
+      </PCard>
+    </>
+  ) : (
+    <ToolEmptyState
+      icon="🗨️"
+      title="Pano burada görünecek"
+      hint='Sol formu doldurun ve "İletişim Panosu Üret" butonuna tıklayın.'
+    />
+  );
+
+  return (
+    <ToolShell
+      title="İletişim Panosu Üretici"
+      description="AAC için kişiselleştirilmiş görsel iletişim panoları üretin."
+      form={form}
+      result={result}
+      formWidth={400}
+    />
   );
 }
-

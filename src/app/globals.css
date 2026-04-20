@@ -32,33 +32,42 @@ input, select, textarea {
 
 /* ========== /MOBILE FIX PACKAGE ========== */
 
-/* ========== POSTER DESIGN TOKENS (landing + auth only) ========== */
+/* ========== POSTER DESIGN TOKENS ========== */
 :root {
+  /* Light poster palette (cream + ink) */
   --poster-bg: #fff8ec;
   --poster-bg-2: #fde8c7;
   --poster-panel: #ffffff;
   --poster-ink: #0e1e26;
   --poster-ink-2: rgba(14, 30, 38, 0.7);
   --poster-ink-3: rgba(14, 30, 38, 0.45);
+  --poster-ink-faint: rgba(14, 30, 38, 0.12);
   --poster-accent: #fe703a;
   --poster-green: #2cc069;
   --poster-yellow: #ffce52;
   --poster-pink: #ff6b9d;
   --poster-blue: #4a90e2;
+  --poster-danger: #c53030;
+
+  /* Derived: shadow, radius, border — used by every P* primitive */
+  --poster-shadow-sm: 0 2px 0 var(--poster-ink);
+  --poster-shadow-md: 0 4px 0 var(--poster-ink);
+  --poster-shadow-lg: 0 6px 0 var(--poster-ink);
+  --poster-border: 2px solid var(--poster-ink);
+  --poster-radius-sm: 10px;
+  --poster-radius-md: 14px;
+  --poster-radius-lg: 18px;
+  --poster-radius-pill: 999px;
 }
 
-/* Scope: keeps poster-themed pages in light mode regardless of .dark class.
-   Re-declares shadcn tokens to their light values so any descendant that
-   happens to consume them (stray component, future drift) stays light. */
-.poster-scope,
-.poster-scope * {
-  color-scheme: light;
-}
+/* Scope: poster-themed pages can live in both light and dark modes.
+   Re-declares shadcn tokens so descendant components stay on poster palette. */
 .poster-scope {
   background: var(--poster-bg);
   color: var(--poster-ink);
   font-family: var(--font-display), system-ui, sans-serif;
 
+  /* shadcn token mapping — light */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -77,15 +86,115 @@ input, select, textarea {
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.21 0.063 180);
-  --surface-page-gradient: linear-gradient(135deg, #f0f7f7 0%, #e8f4f4 50%, #f5fafa 100%);
-  --surface-page-solid: #F0F4F4;
+  --radius: 0.875rem;
+
+  /* Sidebar tokens — poster sidebar re-skin */
+  --sidebar: #fff8ec;
+  --sidebar-foreground: #0e1e26;
+  --sidebar-primary: #fe703a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #fde8c7;
+  --sidebar-accent-foreground: #0e1e26;
+  --sidebar-border: #0e1e26;
+  --sidebar-ring: #fe703a;
+
+  /* Chart tokens — poster categorical palette */
+  --chart-1: #ffce52;
+  --chart-2: #ff6b9d;
+  --chart-3: #4a90e2;
+  --chart-4: #2cc069;
+  --chart-5: #fe703a;
+
+  --surface-page-gradient: linear-gradient(135deg, #fff8ec 0%, #fde8c7 50%, #fff8ec 100%);
+  --surface-page-solid: #fff8ec;
 }
-/* Neutralize `dark:*` Tailwind variants inside poster-scope — even when
-   .dark is on <html>, these selectors (`.dark .poster-scope …`) would
-   otherwise flip to dark styles. */
-.dark .poster-scope,
-.dark .poster-scope * {
-  color-scheme: light !important;
+
+/* Dark poster palette — deep kraft + cream ink, same accent */
+.poster-scope.dark,
+.dark .poster-scope {
+  --poster-bg: #15100a;
+  --poster-bg-2: #1e1811;
+  --poster-panel: #1e1811;
+  --poster-ink: #f5e8c7;
+  --poster-ink-2: rgba(245, 232, 199, 0.62);
+  --poster-ink-3: rgba(245, 232, 199, 0.4);
+  --poster-ink-faint: rgba(245, 232, 199, 0.12);
+  --poster-accent: #fe703a;
+  --poster-green: #2cc069;
+  --poster-yellow: #ffce52;
+  --poster-pink: #ff6b9d;
+  --poster-blue: #4a90e2;
+  --poster-danger: #ff7a7a;
+
+  --poster-shadow-sm: 0 2px 0 var(--poster-ink);
+  --poster-shadow-md: 0 4px 0 var(--poster-ink);
+  --poster-shadow-lg: 0 6px 0 var(--poster-ink);
+  --poster-border: 2px solid var(--poster-ink);
+
+  background: var(--poster-bg);
+  color: var(--poster-ink);
+  color-scheme: dark;
+
+  /* shadcn token mapping — dark poster */
+  --background: oklch(0.12 0.015 60);
+  --foreground: oklch(0.93 0.04 85);
+  --card: oklch(0.16 0.015 60);
+  --card-foreground: oklch(0.93 0.04 85);
+  --popover: oklch(0.18 0.015 60);
+  --popover-foreground: oklch(0.93 0.04 85);
+  --primary: oklch(0.66 0.179 33.4);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.22 0.015 60);
+  --secondary-foreground: oklch(0.93 0.04 85);
+  --muted: oklch(0.22 0.015 60);
+  --muted-foreground: oklch(0.65 0.03 85);
+  --accent: oklch(0.22 0.015 60);
+  --accent-foreground: oklch(0.93 0.04 85);
+  --destructive: oklch(0.68 0.2 22);
+  --border: oklch(0.93 0.04 85 / 70%);
+  --input: oklch(0.93 0.04 85 / 14%);
+  --ring: oklch(0.93 0.04 85);
+
+  --sidebar: #15100a;
+  --sidebar-foreground: #f5e8c7;
+  --sidebar-primary: #fe703a;
+  --sidebar-primary-foreground: #15100a;
+  --sidebar-accent: #1e1811;
+  --sidebar-accent-foreground: #f5e8c7;
+  --sidebar-border: #f5e8c7;
+  --sidebar-ring: #fe703a;
+
+  --surface-page-gradient: linear-gradient(135deg, #15100a 0%, #1e1811 50%, #15100a 100%);
+  --surface-page-solid: #15100a;
+}
+
+/* Focus ring — WCAG AA: 2px ink outline + 2px offset on poster interactive els */
+.poster-scope :focus-visible {
+  outline: 2px solid var(--poster-ink);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+/* Keep transparent buttons (mode switcher pills) from double-outlining */
+.poster-scope button:focus-visible,
+.poster-scope a:focus-visible,
+.poster-scope input:focus-visible,
+.poster-scope select:focus-visible,
+.poster-scope textarea:focus-visible,
+.poster-scope [role="button"]:focus-visible,
+.poster-scope [tabindex]:focus-visible {
+  outline: 2px solid var(--poster-ink);
+  outline-offset: 2px;
+}
+/* Sonner toast tone overrides */
+.poster-toast-success { border-color: var(--poster-green) !important; box-shadow: 0 6px 0 var(--poster-green) !important; }
+.poster-toast-error   { border-color: var(--poster-danger) !important; box-shadow: 0 6px 0 var(--poster-danger) !important; }
+.poster-toast-warning { border-color: var(--poster-yellow) !important; box-shadow: 0 6px 0 var(--poster-yellow) !important; }
+.poster-toast-info    { border-color: var(--poster-blue) !important;   box-shadow: 0 6px 0 var(--poster-blue) !important; }
+
+/* PSkeleton shimmer */
+@keyframes poster-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
 }
 /* ========== /POSTER DESIGN TOKENS ========== */
 

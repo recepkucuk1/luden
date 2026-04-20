@@ -49,7 +49,7 @@ export function PosterHeader() {
         <Link href="/" style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>
           <Image
             src="/logo.svg"
-            alt="Terapimat"
+            alt="LudenLab"
             width={200}
             height={72}
             priority

@@ -3,12 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Lightbulb, Home, RefreshCw, Library } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
-import { Switch } from "@/components/ui/switch";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
+import { Lightbulb, Home, RefreshCw, Library } from "lucide-react";
+import { WORK_AREA_LABEL, calcAge } from "@/lib/constants";
+import { PBtn, PCard, PBadge, PSwitch, PSelect, PInput, PLabel } from "@/components/poster";
+import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
 interface Student {
   id: string;
@@ -31,8 +29,6 @@ interface StoryResult {
   homeGuidance?: string;
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const SITUATIONS = [
   "Sıra bekleme",
   "Selamlaşma",
@@ -46,27 +42,26 @@ const SITUATIONS = [
   "Diğer",
 ];
 
-const ENVIRONMENTS = [
-  "Okul",
-  "Ev",
-  "Park",
-  "Market",
-  "Hastane",
-  "Rehabilitasyon merkezi",
-];
+const ENVIRONMENTS = ["Okul", "Ev", "Park", "Market", "Hastane", "Rehabilitasyon merkezi"];
 
 const SENTENCE_TYPE_LABEL: Record<string, string> = {
-  descriptive:  "Tanımlayıcı",
-  perspective:  "Perspektif",
-  directive:    "Yönlendirici",
-  affirmative:  "Olumlu",
+  descriptive: "Tanımlayıcı",
+  perspective: "Perspektif",
+  directive: "Yönlendirici",
+  affirmative: "Olumlu",
 };
 
-const SENTENCE_TYPE_COLOR: Record<string, string> = {
-  descriptive:  "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
-  perspective:  "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20",
-  directive:    "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20",
-  affirmative:  "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
+type BadgeColor = "accent" | "green" | "blue" | "yellow" | "pink" | "soft" | "ink";
+const SENTENCE_TYPE_COLOR: Record<string, BadgeColor> = {
+  descriptive: "blue",
+  perspective: "ink",
+  directive: "accent",
+  affirmative: "yellow",
+};
+const AREA_BADGE: Record<string, BadgeColor> = {
+  speech: "yellow",
+  language: "accent",
+  hearing: "blue",
 };
 
 const LOADING_MSGS = [
@@ -77,8 +72,6 @@ const LOADING_MSGS = [
   "Hikaye yapılandırılıyor...",
   "Son dokunuşlar yapılıyor...",
 ];
-
-// ─── Loading Messages ─────────────────────────────────────────────────────────
 
 function LoadingMessages() {
   const [index, setIndex] = useState(0);
@@ -100,10 +93,17 @@ function LoadingMessages() {
   }, []);
 
   return (
-    <div className="flex h-10 items-center justify-center">
+    <div style={{ height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <p
-        className="text-sm text-zinc-500 transition-opacity duration-300 text-center"
-        style={{ opacity: visible ? 1 : 0 }}
+        style={{
+          fontSize: 13,
+          color: "var(--poster-ink-2)",
+          fontWeight: 600,
+          textAlign: "center",
+          opacity: visible ? 1 : 0,
+          transition: "opacity .3s",
+          margin: 0,
+        }}
       >
         {LOADING_MSGS[index]}
       </p>
@@ -111,25 +111,21 @@ function LoadingMessages() {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
 export default function SocialStoryPage() {
-  const [students, setStudents]         = useState<Student[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
 
-  // Form state
-  const [studentId,     setStudentId]     = useState("");
-  const [situation,     setSituation]     = useState("");
-  const [customSit,     setCustomSit]     = useState("");
-  const [environment,   setEnvironment]   = useState("Okul");
-  const [length,        setLength]        = useState<"short" | "medium" | "long">("medium");
+  const [studentId, setStudentId] = useState("");
+  const [situation, setSituation] = useState("");
+  const [customSit, setCustomSit] = useState("");
+  const [environment, setEnvironment] = useState("Okul");
+  const [length, setLength] = useState<"short" | "medium" | "long">("medium");
   const [visualSupport, setVisualSupport] = useState(false);
 
-  // Result state
-  const [loading,    setLoading]    = useState(false);
-  const [story,      setStory]      = useState<StoryResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [story, setStory] = useState<StoryResult | null>(null);
   const [savedCardId, setSavedCardId] = useState<string | null>(null);
-  const [formKey,    setFormKey]    = useState(0);
+  const [formKey, setFormKey] = useState(0);
 
   const selectedStudent = students.find((s) => s.id === studentId) ?? null;
 
@@ -142,9 +138,15 @@ export default function SocialStoryPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!studentId) { toast.error("Lütfen bir öğrenci seçin"); return; }
+    if (!studentId) {
+      toast.error("Lütfen bir öğrenci seçin");
+      return;
+    }
     const finalSituation = situation === "Diğer" ? customSit.trim() : situation;
-    if (!finalSituation) { toast.error("Lütfen sosyal durumu belirtin"); return; }
+    if (!finalSituation) {
+      toast.error("Lütfen sosyal durumu belirtin");
+      return;
+    }
 
     setLoading(true);
     setStory(null);
@@ -157,7 +159,10 @@ export default function SocialStoryPage() {
         body: JSON.stringify({ studentId, situation: finalSituation, environment, length, visualSupport }),
       });
       const data = await res.json();
-      if (!res.ok) { toast.error(data.error ?? "Bir hata oluştu"); return; }
+      if (!res.ok) {
+        toast.error(data.error ?? "Bir hata oluştu");
+        return;
+      }
       setStory(data.story as StoryResult);
       setSavedCardId(data.cardId ?? null);
       toast.success("Sosyal hikaye üretildi!");
@@ -180,272 +185,306 @@ export default function SocialStoryPage() {
     setStudentId("");
   }
 
-  const inputCls = "w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30 dark:text-muted-foreground/60";
-  const labelCls = "block text-xs font-bold text-[#023435]/70 dark:text-foreground/80 mb-1.5 uppercase tracking-wide";
+  const LENGTH_LABELS = { short: "Kısa", medium: "Orta", long: "Uzun" } as const;
+  const LENGTH_SUB = { short: "3–5 cümle", medium: "6–10 cümle", long: "11–15 cümle" } as const;
+
+  const form = (
+    <form
+      key={formKey}
+      onSubmit={handleSubmit}
+      style={{ display: "flex", flexDirection: "column", gap: 16 }}
+    >
+      <div>
+        <PLabel>Öğrenci</PLabel>
+        <PSelect value={studentId} onChange={(e) => setStudentId(e.target.value)} required>
+          <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
+          {students.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </PSelect>
+        {selectedStudent && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+            {selectedStudent.birthDate && <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>}
+            <PBadge color={AREA_BADGE[selectedStudent.workArea] ?? "soft"}>
+              {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
+            </PBadge>
+            {selectedStudent.diagnosis && <PBadge color="soft">{selectedStudent.diagnosis}</PBadge>}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <PLabel>Sosyal Durum</PLabel>
+        <PSelect value={situation} onChange={(e) => setSituation(e.target.value)} required>
+          <option value="">Durum seçin</option>
+          {SITUATIONS.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </PSelect>
+        {situation === "Diğer" && (
+          <PInput
+            type="text"
+            placeholder="Sosyal durumu açıklayın..."
+            value={customSit}
+            onChange={(e) => setCustomSit(e.target.value)}
+            required
+            style={{ marginTop: 8 }}
+          />
+        )}
+      </div>
+
+      <div>
+        <PLabel>Ortam</PLabel>
+        <PSelect value={environment} onChange={(e) => setEnvironment(e.target.value)}>
+          {ENVIRONMENTS.map((env) => (
+            <option key={env} value={env}>
+              {env}
+            </option>
+          ))}
+        </PSelect>
+      </div>
+
+      <div>
+        <PLabel>Hikaye Uzunluğu</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+          {(["short", "medium", "long"] as const).map((l) => {
+            const active = length === l;
+            return (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLength(l)}
+                style={{
+                  padding: "10px 8px",
+                  background: active ? "var(--poster-accent)" : "var(--poster-panel)",
+                  color: active ? "#fff" : "var(--poster-ink)",
+                  border: "2px solid var(--poster-ink)",
+                  borderRadius: 12,
+                  boxShadow: active ? "0 3px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+                  textAlign: "left",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                <span style={{ display: "block", fontSize: 12, fontWeight: 800 }}>{LENGTH_LABELS[l]}</span>
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    opacity: active ? 0.85 : 0.6,
+                  }}
+                >
+                  {LENGTH_SUB[l]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          padding: 12,
+          background: "var(--poster-bg-2)",
+          border: "2px solid var(--poster-ink-faint)",
+          borderRadius: 12,
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <p style={{ fontSize: 12, fontWeight: 800, color: "var(--poster-ink)", margin: 0 }}>
+            Görsel Destek Açıklamaları
+          </p>
+          <p style={{ fontSize: 11, color: "var(--poster-ink-3)", margin: "2px 0 0" }}>
+            Her cümle için görsel sahne notu ekle
+          </p>
+        </div>
+        <PSwitch checked={visualSupport} onChange={setVisualSupport} />
+      </div>
+
+      <PBtn
+        as="button"
+        type="submit"
+        variant="accent"
+        size="md"
+        disabled={loading}
+        style={{ width: "100%", justifyContent: "center" }}
+      >
+        {loading ? "Üretiliyor..." : "Sosyal Hikaye Üret"}
+      </PBtn>
+
+      <p style={{ textAlign: "center", fontSize: 11, color: "var(--poster-ink-3)", margin: 0 }}>
+        20 kredi kullanılacak
+      </p>
+    </form>
+  );
+
+  let result: React.ReactNode;
+  if (loading) {
+    result = (
+      <ToolLoadingCard>
+        <LoadingMessages />
+      </ToolLoadingCard>
+    );
+  } else if (story) {
+    result = (
+      <>
+        <PCard rounded={18} style={{ padding: 20, background: "var(--poster-panel)" }}>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: "var(--poster-ink)",
+              letterSpacing: "-.01em",
+              margin: "0 0 16px",
+            }}
+          >
+            {story.title}
+          </h2>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {story.sentences?.map((sentence, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  gap: 12,
+                  padding: 12,
+                  background: "var(--poster-bg-2)",
+                  border: "2px solid var(--poster-ink-faint)",
+                  borderRadius: 12,
+                }}
+              >
+                <PBadge color={SENTENCE_TYPE_COLOR[sentence.type] ?? "soft"}>
+                  {SENTENCE_TYPE_LABEL[sentence.type] ?? sentence.type}
+                </PBadge>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 14, color: "var(--poster-ink)", margin: 0, lineHeight: 1.55 }}>
+                    {sentence.text}
+                  </p>
+                  {sentence.visualPrompt && (
+                    <p
+                      style={{
+                        fontSize: 12,
+                        color: "var(--poster-ink-3)",
+                        fontStyle: "italic",
+                        margin: "4px 0 0",
+                      }}
+                    >
+                      {sentence.visualPrompt}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {story.expertNotes && (
+            <div
+              style={{
+                marginTop: 18,
+                padding: 14,
+                background: "#fff3d1",
+                border: "2px solid #b7791f",
+                boxShadow: "0 3px 0 #b7791f",
+                borderRadius: 14,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <Lightbulb style={{ width: 16, height: 16, color: "#5a3d05" }} />
+                <span style={{ fontSize: 12, fontWeight: 800, color: "#5a3d05" }}>Uzman Notları</span>
+              </div>
+              <p style={{ fontSize: 13, color: "#5a3d05", margin: 0, lineHeight: 1.55 }}>{story.expertNotes}</p>
+            </div>
+          )}
+
+          {story.homeGuidance && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 14,
+                background: "#e0ecfb",
+                border: "2px solid var(--poster-blue)",
+                boxShadow: "0 3px 0 var(--poster-blue)",
+                borderRadius: 14,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <Home style={{ width: 16, height: 16, color: "#0e3a6b" }} />
+                <span style={{ fontSize: 12, fontWeight: 800, color: "#0e3a6b" }}>Veli Rehberi</span>
+              </div>
+              <p style={{ fontSize: 13, color: "#0e3a6b", margin: 0, lineHeight: 1.55 }}>{story.homeGuidance}</p>
+            </div>
+          )}
+        </PCard>
+
+        <PCard rounded={18} style={{ padding: 14, background: "var(--poster-panel)" }}>
+          <p
+            style={{
+              fontSize: 10,
+              fontWeight: 800,
+              color: "var(--poster-ink-3)",
+              textTransform: "uppercase",
+              letterSpacing: ".12em",
+              margin: "0 0 10px",
+            }}
+          >
+            Sonraki adım
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {savedCardId && (
+              <PBtn
+                as="a"
+                href="/cards"
+                variant="white"
+                size="md"
+                style={{ flex: "1 1 140px", justifyContent: "center" }}
+              >
+                <Library style={{ width: 14, height: 14, marginRight: 6 }} />
+                Kütüphaneye Git
+              </PBtn>
+            )}
+            <PBtn
+              as="button"
+              type="button"
+              variant="white"
+              size="md"
+              onClick={handleReset}
+              style={{ flex: "1 1 140px", justifyContent: "center" }}
+            >
+              <RefreshCw style={{ width: 14, height: 14, marginRight: 6 }} />
+              Yeni Hikaye Üret
+            </PBtn>
+          </div>
+        </PCard>
+      </>
+    );
+  } else {
+    result = (
+      <ToolEmptyState
+        icon="📖"
+        title="Henüz hikaye üretilmedi"
+        hint='Sol taraftan parametreleri seçip "Sosyal Hikaye Üret" butonuna bas.'
+      />
+    );
+  }
+
+  void Link;
 
   return (
-    <div
-      className="w-full flex flex-col relative md:h-[calc(100vh-0px)] md:overflow-hidden"
-      style={{ background: "var(--surface-page-gradient)" }}
-    >
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
-    <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:h-full flex flex-col">
-      {/* Header */}
-      <div className="mb-5 shrink-0 bg-white/50 dark:bg-card/50 backdrop-blur-xl rounded-2xl border border-white/70 dark:border-border/60 px-5 py-4 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
-        <Link
-          href="/tools"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Araçlara Dön
-        </Link>
-        <h1 className="text-xl font-extrabold text-[#023435] dark:text-foreground tracking-tight">Sosyal Hikaye Üretici</h1>
-        <p className="text-sm text-[#023435]/60 dark:text-muted-foreground mt-0.5">
-          Pragmatik dil ve sosyal iletişim becerileri için Carol Gray formatında kişiselleştirilmiş sosyal hikayeler üretin.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] md:flex-1 md:min-h-0">
-        {/* ── Sol: Form ── */}
-        <div className="flex flex-col md:min-h-0">
-          <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
-            <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
-
-              {/* Öğrenci seçimi */}
-              <div>
-                <label className={labelCls}>Öğrenci</label>
-                <select
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  className={inputCls}
-                  required
-                >
-                  <option value="">
-                    {studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}
-                  </option>
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-
-                {/* Öğrenci bilgi kartı */}
-                {selectedStudent && (
-                  <div className="mt-2 rounded-xl border border-white/80 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm px-3 py-2.5 flex flex-wrap gap-1.5">
-                    {selectedStudent.birthDate && (
-                      <span className="rounded-full bg-white border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600">
-                        {calcAge(selectedStudent.birthDate)}
-                      </span>
-                    )}
-                    <span className={cn("rounded-full px-2 py-0.5 text-xs border", WORK_AREA_COLOR[selectedStudent.workArea] ?? "bg-zinc-100 text-zinc-600")}>
-                      {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
-                    </span>
-                    {selectedStudent.diagnosis && (
-                      <span className="rounded-full bg-white border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600 truncate max-w-full">
-                        {selectedStudent.diagnosis}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Sosyal durum */}
-              <div>
-                <label className={labelCls}>Sosyal Durum</label>
-                <select
-                  value={situation}
-                  onChange={(e) => setSituation(e.target.value)}
-                  className={inputCls}
-                  required
-                >
-                  <option value="">Durum seçin</option>
-                  {SITUATIONS.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-                {situation === "Diğer" && (
-                  <input
-                    type="text"
-                    placeholder="Sosyal durumu açıklayın..."
-                    value={customSit}
-                    onChange={(e) => setCustomSit(e.target.value)}
-                    className={cn(inputCls, "mt-2")}
-                    required
-                  />
-                )}
-              </div>
-
-              {/* Ortam */}
-              <div>
-                <label className={labelCls}>Ortam</label>
-                <select
-                  value={environment}
-                  onChange={(e) => setEnvironment(e.target.value)}
-                  className={inputCls}
-                >
-                  {ENVIRONMENTS.map((env) => (
-                    <option key={env} value={env}>{env}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Hikaye uzunluğu */}
-              <div>
-                <label className={labelCls}>Hikaye Uzunluğu</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(["short", "medium", "long"] as const).map((l) => {
-                    const labels = { short: "Kısa", medium: "Orta", long: "Uzun" };
-                    const sub    = { short: "3–5 cümle", medium: "6–10 cümle", long: "11–15 cümle" };
-                    return (
-                      <button
-                        key={l}
-                        type="button"
-                        onClick={() => setLength(l)}
-                        className={cn(
-                          "rounded-lg border px-3 py-2.5 text-left transition-colors",
-                          length === l
-                            ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                            : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                        )}
-                      >
-                        <span className="block text-xs font-semibold">{labels[l]}</span>
-                        <span className="block text-[10px] text-zinc-400">{sub[l]}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Görsel destek */}
-              <div className="flex items-center gap-4 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-zinc-700">Görsel Destek Açıklamaları</p>
-                  <p className="text-[10px] text-zinc-400">Her cümle için görsel sahne notu ekle</p>
-                </div>
-                <Switch
-                  checked={visualSupport}
-                  onCheckedChange={setVisualSupport}
-                  className="shrink-0 data-[state=checked]:bg-[#023435]"
-                />
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-lg bg-[#FE703A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? "Üretiliyor..." : "Sosyal Hikaye Üret"}
-              </button>
-
-              <p className="text-center text-xs text-zinc-400">20 kredi kullanılacak</p>
-            </form>
-          </div>
-        </div>
-
-        {/* ── Sağ: Sonuç ── */}
-        <div className="flex flex-col md:min-h-0">
-          <div className="overflow-y-auto no-scrollbar flex flex-col md:flex-1 md:min-h-0">
-            {loading ? (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-                <div className="text-center space-y-4 px-8">
-                  <div className="mx-auto h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
-                  <LoadingMessages />
-                </div>
-              </div>
-            ) : story ? (
-              <div className="flex flex-col gap-4 md:flex-1 md:min-h-0">
-                {/* Hikaye kartı */}
-                <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
-                  {/* Başlık */}
-                  <h2 className="text-lg font-bold text-[#023435] dark:text-foreground mb-5">{story.title}</h2>
-
-                  {/* Cümleler */}
-                  <div className="space-y-2.5">
-                    {story.sentences?.map((sentence, i) => (
-                      <div
-                        key={i}
-                        className="flex gap-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3"
-                      >
-                        <span
-                          className={cn(
-                            "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold h-fit mt-0.5",
-                            SENTENCE_TYPE_COLOR[sentence.type] ?? "bg-zinc-100 text-zinc-500 border-zinc-200"
-                          )}
-                        >
-                          {SENTENCE_TYPE_LABEL[sentence.type] ?? sentence.type}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-zinc-800 leading-relaxed">{sentence.text}</p>
-                          {sentence.visualPrompt && (
-                            <p className="mt-1 text-xs italic text-zinc-400">{sentence.visualPrompt}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Uzman Notları */}
-                  {story.expertNotes && (
-                    <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Lightbulb className="h-4 w-4 text-amber-600 shrink-0" />
-                        <span className="text-xs font-semibold text-amber-800">Uzman Notları</span>
-                      </div>
-                      <p className="text-xs text-amber-700 leading-relaxed">{story.expertNotes}</p>
-                    </div>
-                  )}
-
-                  {/* Veli Rehberi */}
-                  {story.homeGuidance && (
-                    <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Home className="h-4 w-4 text-blue-600 shrink-0" />
-                        <span className="text-xs font-semibold text-blue-800">Veli Rehberi</span>
-                      </div>
-                      <p className="text-xs text-blue-700 leading-relaxed">{story.homeGuidance}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Aksiyon butonları */}
-                <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)] shrink-0">
-                  <p className="text-xs font-semibold text-zinc-400 mb-3">Sonraki adım</p>
-                  <div className="flex flex-wrap gap-2">
-                    {savedCardId && (
-                      <Link
-                        href="/cards"
-                        className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
-                      >
-                        <Library className="h-4 w-4" />
-                        Kütüphaneye Git
-                      </Link>
-                    )}
-                    <button
-                      onClick={handleReset}
-                      className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-500 hover:bg-zinc-50 transition-colors"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                      Yeni Hikaye Üret
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-[#023435]/15 bg-white/40 dark:bg-card/40 backdrop-blur-xl">
-                <div className="text-center space-y-2 px-8">
-                  <div className="text-4xl">📖</div>
-                  <p className="text-sm font-medium text-zinc-500">Henüz hikaye üretilmedi</p>
-                  <p className="text-xs text-zinc-400">
-                    Sol taraftan parametreleri seçip &quot;Sosyal Hikaye Üret&quot; butonuna bas.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </main>
-    </div>
+    <ToolShell
+      title="Sosyal Hikaye Üretici"
+      description="Pragmatik dil ve sosyal iletişim becerileri için Carol Gray formatında kişiselleştirilmiş sosyal hikayeler üretin."
+      form={form}
+      result={result}
+    />
   );
 }

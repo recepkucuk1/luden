@@ -15,7 +15,8 @@ import { PhonationView, type PhonationActivityContent } from "@/components/cards
 import { CommBoardView, type CommBoardContent } from "@/components/cards/CommBoardView";
 import { WeeklyPlanView, type WeeklyPlanContent } from "@/components/cards/WeeklyPlanView";
 import type { GeneratedCard } from "@/lib/prompts";
-import { cn, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import { PBtn, PCard, PBadge } from "@/components/poster";
 
 interface CurriculumGoal {
   id: string;
@@ -39,16 +40,17 @@ interface CardRecord {
   curriculumGoals: CurriculumGoal[];
 }
 
-const TOOL_TYPE_BADGE: Record<string, { label: string; cls: string }> = {
-  LEARNING_CARD:      { label: "Öğrenme Kartı",      cls: "bg-[#107996]/10 text-[#107996] border-[#107996]/20" },
-  SOCIAL_STORY:       { label: "Sosyal Hikaye",       cls: "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20" },
-  ARTICULATION_DRILL: { label: "Artikülasyon",        cls: "bg-[#FE703A]/10 text-[#FE703A] border-[#FE703A]/20" },
-  HOMEWORK_MATERIAL:  { label: "Ev Ödevi Materyali",  cls: "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30" },
-  SESSION_SUMMARY:    { label: "Oturum Özeti",        cls: "bg-purple-50 text-purple-700 border-purple-200" },
-  MATCHING_GAME:      { label: "Kelime Eşleştirme",   cls: "bg-[#107996]/10 text-[#107996] border-[#107996]/20" },
-  PHONATION_ACTIVITY:  { label: "Sesletim Aktivitesi", cls: "bg-green-50 text-green-700 border-green-200" },
-  COMMUNICATION_BOARD: { label: "İletişim Panosu",     cls: "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20" },
-  WEEKLY_PLAN:         { label: "Haftalık Plan",        cls: "bg-amber-50 text-amber-700 border-amber-200" },
+type ToolBadgeColor = "accent" | "green" | "blue" | "yellow" | "pink" | "soft" | "ink";
+const TOOL_TYPE_BADGE: Record<string, { label: string; color: ToolBadgeColor }> = {
+  LEARNING_CARD:       { label: "Öğrenme Kartı",       color: "blue" },
+  SOCIAL_STORY:        { label: "Sosyal Hikaye",       color: "ink" },
+  ARTICULATION_DRILL:  { label: "Artikülasyon",        color: "accent" },
+  HOMEWORK_MATERIAL:   { label: "Ev Ödevi Materyali",  color: "yellow" },
+  SESSION_SUMMARY:     { label: "Oturum Özeti",        color: "pink" },
+  MATCHING_GAME:       { label: "Kelime Eşleştirme",   color: "blue" },
+  PHONATION_ACTIVITY:  { label: "Sesletim Aktivitesi", color: "green" },
+  COMMUNICATION_BOARD: { label: "İletişim Panosu",     color: "ink" },
+  WEEKLY_PLAN:         { label: "Haftalık Plan",       color: "yellow" },
 };
 
 async function downloadSocialStoryPDF(card: CardRecord) {
@@ -1474,19 +1476,52 @@ export default function CardDetailPage({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <div className="h-8 w-8 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
+      <div
+        className="poster-scope"
+        style={{
+          minHeight: "100%",
+          background: "var(--poster-bg)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "80px 20px",
+        }}
+      >
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            border: "4px solid rgba(254,112,58,.2)",
+            borderTopColor: "var(--poster-accent)",
+            animation: "spin 1s linear infinite",
+          }}
+        />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
   if (notFound || !card) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 gap-3">
-        <p className="text-zinc-500">Kart bulunamadı.</p>
-        <button onClick={() => router.back()} className="text-sm text-[#FE703A] hover:underline">
+      <div
+        className="poster-scope"
+        style={{
+          minHeight: "100%",
+          background: "var(--poster-bg)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 14,
+          padding: "80px 20px",
+          fontFamily: "var(--font-display)",
+        }}
+      >
+        <p style={{ color: "var(--poster-ink-2)", fontWeight: 700 }}>Kart bulunamadı.</p>
+        <PBtn as="button" variant="white" size="md" onClick={() => router.back()}>
           Geri dön
-        </button>
+        </PBtn>
       </div>
     );
   }
@@ -1495,63 +1530,118 @@ export default function CardDetailPage({
   const ttBadge  = TOOL_TYPE_BADGE[toolType];
 
   return (
-    <>
+    <div
+      className="poster-scope"
+      style={{
+        minHeight: "100%",
+        background: "var(--poster-bg)",
+        fontFamily: "var(--font-display)",
+      }}
+    >
       {/* Breadcrumb */}
-      <div className="border-b border-zinc-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-2.5">
-        <div className="mx-auto max-w-3xl flex items-center gap-2 text-sm">
+      <div
+        style={{
+          borderBottom: "2px solid var(--poster-ink)",
+          background: "var(--poster-panel)",
+          padding: "12px 20px",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 880,
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontSize: 13,
+            fontWeight: 700,
+          }}
+        >
           {card.student ? (
             <>
-              <Link href="/students" className="text-zinc-400 dark:text-gray-500 hover:text-zinc-600 dark:hover:text-gray-300 transition-colors">Öğrenciler</Link>
-              <span className="text-zinc-300 dark:text-gray-700">/</span>
-              <Link href={`/students/${card.student.id}`} className="text-zinc-400 dark:text-gray-500 hover:text-zinc-600 dark:hover:text-gray-300 transition-colors">
+              <Link href="/students" style={{ color: "var(--poster-ink-2)", textDecoration: "none" }}>
+                Öğrenciler
+              </Link>
+              <span style={{ color: "var(--poster-ink-3)" }}>/</span>
+              <Link
+                href={`/students/${card.student.id}`}
+                style={{ color: "var(--poster-ink-2)", textDecoration: "none" }}
+              >
                 {card.student.name}
               </Link>
             </>
           ) : (
-            <Link href="/cards" className="text-zinc-400 dark:text-gray-500 hover:text-zinc-600 dark:hover:text-gray-300 transition-colors">Kütüphane</Link>
+            <Link href="/cards" style={{ color: "var(--poster-ink-2)", textDecoration: "none" }}>
+              Kütüphane
+            </Link>
           )}
-          <span className="text-zinc-300 dark:text-gray-700">/</span>
-          <span className="text-zinc-700 dark:text-gray-200 font-medium truncate max-w-[200px]">{card.title}</span>
+          <span style={{ color: "var(--poster-ink-3)" }}>/</span>
+          <span
+            style={{
+              color: "var(--poster-ink)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              maxWidth: 240,
+            }}
+          >
+            {card.title}
+          </span>
         </div>
       </div>
 
-      <main className="mx-auto max-w-3xl px-6 py-8">
-        {/* Araç türü badge */}
+      <main style={{ maxWidth: 880, margin: "0 auto", padding: "24px 20px 40px" }}>
+        {/* Tool type + curriculum */}
         {ttBadge && (
-          <span className={cn("inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold mb-4", ttBadge.cls)}>
-            {ttBadge.label}
-          </span>
+          <div style={{ marginBottom: 14 }}>
+            <PBadge color={ttBadge.color}>{ttBadge.label}</PBadge>
+          </div>
         )}
 
-        {/* Müfredat Hedefleri */}
         {card.curriculumGoals.length > 0 && (
-          <div className="mb-4 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50 dark:bg-purple-900/10 px-4 py-3">
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="text-purple-500 dark:text-purple-400 text-sm">🎯</span>
-              <p className="text-xs font-semibold text-purple-700 dark:text-purple-300">
+          <PCard
+            rounded={14}
+            style={{
+              padding: "12px 14px",
+              marginBottom: 14,
+              background: "var(--poster-bg-2)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+              <span>🎯</span>
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  color: "var(--poster-ink)",
+                  textTransform: "uppercase",
+                  letterSpacing: ".08em",
+                  margin: 0,
+                }}
+              >
                 Müfredat Hedefleri ({card.curriculumGoals.length})
               </p>
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {card.curriculumGoals.map((goal) => (
-                <div key={goal.id} className="flex items-start gap-2">
-                  <span className="rounded-full bg-purple-200 dark:bg-purple-800/50 px-1.5 py-0.5 text-[10px] font-semibold text-purple-800 dark:text-purple-200 shrink-0 mt-px">
-                    {goal.code}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-[10px] text-purple-500 dark:text-purple-400 leading-none mb-0.5">
+                <div key={goal.id} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <PBadge color="pink">{goal.code}</PBadge>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: 10, color: "var(--poster-ink-3)", margin: "0 0 2px", lineHeight: 1 }}>
                       {goal.curriculum.code} {goal.curriculum.title}
                     </p>
-                    <p className="text-xs text-purple-700 dark:text-purple-200 leading-snug">{goal.title}</p>
+                    <p style={{ fontSize: 12, color: "var(--poster-ink-2)", margin: 0, lineHeight: 1.4 }}>
+                      {goal.title}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </PCard>
         )}
 
-        {/* ── İçerik — toolType'a göre ── */}
-        <div className="rounded-2xl border border-zinc-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 p-6 shadow-sm">
+        {/* Content */}
+        <PCard rounded={18} style={{ padding: 20, background: "var(--poster-panel)" }}>
           {toolType === "SOCIAL_STORY" ? (
             <SocialStoryView story={card.content as unknown as SocialStoryContent} />
           ) : toolType === "ARTICULATION_DRILL" ? (
@@ -1587,90 +1677,65 @@ export default function CardDetailPage({
               return <CardPreview card={generatedCard} />;
             })()
           )}
-        </div>
+        </PCard>
 
-        {/* Alt çubuk */}
-        <div className="flex items-center justify-between mt-4 flex-wrap gap-2">
-          <p className="text-xs text-zinc-400 dark:text-gray-500">
+        {/* Action bar */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 14,
+            flexWrap: "wrap",
+            gap: 10,
+          }}
+        >
+          <p style={{ fontSize: 12, color: "var(--poster-ink-3)", fontWeight: 700, margin: 0 }}>
             {formatDate(card.createdAt, "medium")}
             {card.student && ` · ${card.student.name}`}
           </p>
-          <div className="flex items-center gap-2">
-            {/* PDF butonları */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
             {toolType === "MATCHING_GAME" && (
               <>
-                <button
-                  onClick={handleDownloadPDF}
-                  disabled={downloading || downloadingCards}
-                  className="flex items-center gap-1.5 rounded-lg bg-[#FE703A] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors disabled:opacity-60"
-                >
+                <PBtn as="button" variant="accent" size="sm" onClick={handleDownloadPDF} disabled={downloading || downloadingCards}>
                   {downloading ? "Hazırlanıyor…" : "PDF — Tablo"}
-                </button>
-                <button
-                  onClick={handleDownloadCardsPDF}
-                  disabled={downloading || downloadingCards}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] dark:text-foreground hover:bg-[#023435]/10 dark:hover:bg-accent/50 transition-colors disabled:opacity-60"
-                >
+                </PBtn>
+                <PBtn as="button" variant="white" size="sm" onClick={handleDownloadCardsPDF} disabled={downloading || downloadingCards}>
                   {downloadingCards ? "Hazırlanıyor…" : "PDF — Kesme Kartları"}
-                </button>
+                </PBtn>
               </>
             )}
             {(toolType === "SOCIAL_STORY" || toolType === "ARTICULATION_DRILL" || toolType === "HOMEWORK_MATERIAL" || toolType === "PHONATION_ACTIVITY" || toolType === "WEEKLY_PLAN") && (
-              <button
-                onClick={handleDownloadPDF}
-                disabled={downloading}
-                className="flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-zinc-600 dark:text-gray-300 hover:bg-zinc-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-60"
-              >
+              <PBtn as="button" variant="white" size="sm" onClick={handleDownloadPDF} disabled={downloading}>
                 {downloading ? "Hazırlanıyor…" : "PDF İndir"}
-              </button>
+              </PBtn>
             )}
             {toolType === "COMMUNICATION_BOARD" && (
               <>
-                <button
-                  onClick={handleDownloadBoardPDF}
-                  disabled={downloadingBoardPDF || downloadingReportPDF}
-                  className="flex items-center gap-1.5 rounded-lg bg-[#FE703A] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors disabled:opacity-60"
-                >
+                <PBtn as="button" variant="accent" size="sm" onClick={handleDownloadBoardPDF} disabled={downloadingBoardPDF || downloadingReportPDF}>
                   {downloadingBoardPDF ? "Hazırlanıyor…" : "PDF — Pano"}
-                </button>
-                <button
-                  onClick={handleDownloadReportPDF}
-                  disabled={downloadingBoardPDF || downloadingReportPDF}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] dark:text-foreground hover:bg-[#023435]/10 dark:hover:bg-accent/50 transition-colors disabled:opacity-60"
-                >
+                </PBtn>
+                <PBtn as="button" variant="white" size="sm" onClick={handleDownloadReportPDF} disabled={downloadingBoardPDF || downloadingReportPDF}>
                   {downloadingReportPDF ? "Hazırlanıyor…" : "PDF — Tam Rapor"}
-                </button>
+                </PBtn>
               </>
             )}
             {toolType === "SESSION_SUMMARY" && (
               <>
-                <button
-                  onClick={handleDownloadPDF}
-                  disabled={downloading || downloadingParent}
-                  className="flex items-center gap-1.5 rounded-lg bg-[#FE703A] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#FE703A]/90 transition-colors disabled:opacity-60"
-                >
+                <PBtn as="button" variant="accent" size="sm" onClick={handleDownloadPDF} disabled={downloading || downloadingParent}>
                   {downloading ? "Hazırlanıyor…" : "Tam Rapor PDF"}
-                </button>
-                <button
-                  onClick={handleDownloadParentPDF}
-                  disabled={downloading || downloadingParent}
-                  className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-3 py-1.5 text-xs font-semibold text-[#023435] dark:text-foreground hover:bg-[#023435]/10 dark:hover:bg-accent/50 transition-colors disabled:opacity-60"
-                >
+                </PBtn>
+                <PBtn as="button" variant="white" size="sm" onClick={handleDownloadParentPDF} disabled={downloading || downloadingParent}>
                   {downloadingParent ? "Hazırlanıyor…" : "Veli Notu PDF"}
-                </button>
+                </PBtn>
               </>
             )}
-            <button
-              onClick={() => setShowAssign(true)}
-              className="flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-gray-700 px-3 py-1.5 text-xs font-medium text-zinc-600 dark:text-gray-300 hover:bg-zinc-50 dark:hover:bg-gray-800 hover:border-zinc-300 dark:hover:border-gray-500 transition-colors"
-            >
-              Öğrenciye Ata
-              {assignedCount > 0 && (
-                <span className="rounded-full bg-[#023435]/10 dark:bg-gray-700 text-[#023435] dark:text-gray-300 px-1.5 py-0.5 text-[10px] font-semibold">
-                  {assignedCount}
-                </span>
-              )}
-            </button>
+            <PBtn as="button" variant="white" size="sm" onClick={() => setShowAssign(true)}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                Öğrenciye Ata
+                {assignedCount > 0 && <PBadge color="ink">{assignedCount}</PBadge>}
+              </span>
+            </PBtn>
           </div>
         </div>
       </main>
@@ -1683,6 +1748,6 @@ export default function CardDetailPage({
           onSaved={(count) => setAssignedCount(count)}
         />
       )}
-    </>
+    </div>
   );
 }

@@ -3,13 +3,20 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Camera, Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import { type EarnedBadge } from "@/lib/badges";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { type EarnedBadge } from "@/lib/badges";
+import {
+  PBtn,
+  PCard,
+  PBadge,
+  PInput,
+  PTextarea,
+  PLabel,
+  PSelect,
+  PSwitch,
+  PProgress,
+} from "@/components/poster";
 
 interface TherapistProfile {
   id: string;
@@ -46,62 +53,65 @@ interface UsageStats {
 
 const SPECIALTY_OPTIONS = [
   { value: "speech-therapist", label: "Dil ve Konuşma Terapisti" },
-  { value: "audiologist",      label: "Odyolog" },
+  { value: "audiologist", label: "Odyolog" },
   { value: "speech-audiology", label: "Odyoloji ve Konuşma Bozuklukları Uzmanı" },
-  { value: "other",            label: "Diğer" },
+  { value: "other", label: "Diğer" },
 ];
 const PREDEFINED_SPECIALTIES = ["speech-therapist", "audiologist", "speech-audiology"];
 
 const EXPERIENCE_OPTIONS = [
-  { value: "",    label: "Belirtmek istemiyorum" },
+  { value: "", label: "Belirtmek istemiyorum" },
   { value: "0-1", label: "0–1 yıl" },
   { value: "1-3", label: "1–3 yıl" },
   { value: "3-5", label: "3–5 yıl" },
-  { value: "5-10",label: "5–10 yıl" },
+  { value: "5-10", label: "5–10 yıl" },
   { value: "10+", label: "10+ yıl" },
 ];
 
 const DURATION_OPTIONS = ["20", "30", "40", "45", "60"];
 const DIFFICULTY_OPTIONS = [
-  { value: "easy",   label: "Kolay" },
+  { value: "easy", label: "Kolay" },
   { value: "medium", label: "Orta" },
-  { value: "hard",   label: "Zor" },
+  { value: "hard", label: "Zor" },
 ];
 const THEME_OPTIONS = [
-  { value: "none",    label: "Tema yok" },
+  { value: "none", label: "Tema yok" },
   { value: "animals", label: "Hayvanlar" },
-  { value: "food",    label: "Yiyecekler" },
-  { value: "nature",  label: "Doğa" },
-  { value: "sports",  label: "Spor" },
-  { value: "school",  label: "Okul" },
+  { value: "food", label: "Yiyecekler" },
+  { value: "nature", label: "Doğa" },
+  { value: "sports", label: "Spor" },
+  { value: "school", label: "Okul" },
 ];
 
 const TOOL_LABELS: Record<string, string> = {
-  LEARNING_CARD:       "Öğrenme Kartı",
-  SOCIAL_STORY:        "Sosyal Hikaye",
-  ARTICULATION_DRILL:  "Artikülasyon",
-  HOMEWORK_MATERIAL:   "Ev Ödevi",
-  WEEKLY_PLAN:         "Haftalık Plan",
-  SESSION_SUMMARY:     "Oturum Özeti",
-  MATCHING_GAME:       "Kelime Eşleştirme",
-  PHONATION_ACTIVITY:  "Sesletim",
+  LEARNING_CARD: "Öğrenme Kartı",
+  SOCIAL_STORY: "Sosyal Hikaye",
+  ARTICULATION_DRILL: "Artikülasyon",
+  HOMEWORK_MATERIAL: "Ev Ödevi",
+  WEEKLY_PLAN: "Haftalık Plan",
+  SESSION_SUMMARY: "Oturum Özeti",
+  MATCHING_GAME: "Kelime Eşleştirme",
+  PHONATION_ACTIVITY: "Sesletim",
   COMMUNICATION_BOARD: "İletişim Panosu",
 };
 
 const TOOL_COLORS: Record<string, string> = {
-  LEARNING_CARD:       "#107996",
-  SOCIAL_STORY:        "#F4AE10",
-  ARTICULATION_DRILL:  "#FE703A",
-  HOMEWORK_MATERIAL:   "#692137",
-  WEEKLY_PLAN:         "#023435",
-  SESSION_SUMMARY:     "#4f46e5",
-  MATCHING_GAME:       "#059669",
-  PHONATION_ACTIVITY:  "#db2777",
+  LEARNING_CARD: "var(--poster-blue)",
+  SOCIAL_STORY: "var(--poster-yellow)",
+  ARTICULATION_DRILL: "var(--poster-accent)",
+  HOMEWORK_MATERIAL: "var(--poster-pink)",
+  WEEKLY_PLAN: "var(--poster-green)",
+  SESSION_SUMMARY: "#4f46e5",
+  MATCHING_GAME: "#059669",
+  PHONATION_ACTIVITY: "#db2777",
   COMMUNICATION_BOARD: "#7c3aed",
 };
 
 const PLAN_LABELS: Record<string, string> = {
-  FREE: "Ücretsiz", PRO: "Pro", ADVANCED: "Gelişmiş", ENTERPRISE: "Kurumsal",
+  FREE: "Ücretsiz",
+  PRO: "Pro",
+  ADVANCED: "Gelişmiş",
+  ENTERPRISE: "Kurumsal",
 };
 
 const DEFAULT_PREFS: UserPreferences = {
@@ -113,7 +123,12 @@ const DEFAULT_PREFS: UserPreferences = {
 };
 
 function getInitials(name: string) {
-  return name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+  return name
+    .split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function compressAndConvert(file: File): Promise<string> {
@@ -141,65 +156,77 @@ function compressAndConvert(file: File): Promise<string> {
   });
 }
 
-function SectionCard({ title, subtitle, children }: {
-  title: string; subtitle?: string; children: React.ReactNode;
+function Panel({
+  title,
+  subtitle,
+  children,
+  style,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
 }) {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h2 className="text-base font-semibold text-zinc-900">{title}</h2>
-      {subtitle && <p className="text-xs text-zinc-400 mt-0.5 mb-5">{subtitle}</p>}
-      {!subtitle && <div className="mb-5" />}
-      {children}
-    </div>
-  );
-}
-
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className={cn(
-        "relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#023435]/30",
-        checked ? "bg-[#023435]" : "bg-zinc-200"
+    <PCard rounded={20} style={{ padding: 24, background: "var(--poster-panel)", ...style }}>
+      <h2
+        style={{
+          fontSize: 17,
+          fontWeight: 700,
+          color: "var(--poster-ink)",
+          letterSpacing: "-.01em",
+          margin: 0,
+          fontFamily: "var(--font-display)",
+        }}
+      >
+        {title}
+      </h2>
+      {subtitle && (
+        <p
+          style={{
+            fontSize: 12,
+            color: "var(--poster-ink-3)",
+            margin: "2px 0 18px",
+            fontFamily: "var(--font-display)",
+          }}
+        >
+          {subtitle}
+        </p>
       )}
-    >
-      <span className={cn(
-        "inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform",
-        checked ? "translate-x-4" : "translate-x-1"
-      )} />
-    </button>
+      {!subtitle && <div style={{ marginBottom: 18 }} />}
+      {children}
+    </PCard>
   );
 }
 
 export default function ProfilePage() {
   const { data: session } = useSession();
 
-  const [profile,  setProfile]  = useState<TherapistProfile | null>(null);
-  const [stats,    setStats]    = useState<UsageStats | null>(null);
-  const [badges,   setBadges]   = useState<EarnedBadge[]>([]);
-  const [loading,  setLoading]  = useState(true);
+  const [profile, setProfile] = useState<TherapistProfile | null>(null);
+  const [stats, setStats] = useState<UsageStats | null>(null);
+  const [badges, setBadges] = useState<EarnedBadge[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [name,            setName]            = useState("");
-  const [selectedSpec,    setSelectedSpec]    = useState("");
-  const [otherText,       setOtherText]       = useState("");
-  const [institution,     setInstitution]     = useState("");
-  const [phone,           setPhone]           = useState("");
+  const [name, setName] = useState("");
+  const [selectedSpec, setSelectedSpec] = useState("");
+  const [otherText, setOtherText] = useState("");
+  const [institution, setInstitution] = useState("");
+  const [phone, setPhone] = useState("");
   const [experienceYears, setExperienceYears] = useState("");
-  const [certifications,  setCertifications]  = useState("");
-  const [profileSaving,   setProfileSaving]   = useState(false);
+  const [certifications, setCertifications] = useState("");
+  const [profileSaving, setProfileSaving] = useState(false);
 
-  const [avatarUrl,    setAvatarUrl]    = useState<string | null>(null);
-  const [avatarHover,  setAvatarHover]  = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarHover, setAvatarHover] = useState(false);
   const [avatarSaving, setAvatarSaving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [currentPwd,  setCurrentPwd]  = useState("");
-  const [newPwd,      setNewPwd]      = useState("");
-  const [confirmPwd,  setConfirmPwd]  = useState("");
-  const [pwdSaving,   setPwdSaving]   = useState(false);
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [pwdSaving, setPwdSaving] = useState(false);
 
-  const [prefs,       setPrefs]       = useState<UserPreferences>(DEFAULT_PREFS);
+  const [prefs, setPrefs] = useState<UserPreferences>(DEFAULT_PREFS);
   const [prefsSaving, setPrefsSaving] = useState(false);
 
   useEffect(() => {
@@ -244,10 +271,12 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      toast.error("Sadece JPG, PNG veya WebP yükleyebilirsiniz"); return;
+      toast.error("Sadece JPG, PNG veya WebP yükleyebilirsiniz");
+      return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      toast.error("Maksimum dosya boyutu 2MB"); return;
+      toast.error("Maksimum dosya boyutu 2MB");
+      return;
     }
     setAvatarSaving(true);
     try {
@@ -275,7 +304,9 @@ export default function ProfilePage() {
       const specialty =
         selectedSpec === "other" && otherText.trim()
           ? [otherText.trim()]
-          : selectedSpec ? [selectedSpec] : [];
+          : selectedSpec
+          ? [selectedSpec]
+          : [];
       const r = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -293,7 +324,10 @@ export default function ProfilePage() {
 
   async function handlePasswordChange(e: React.FormEvent) {
     e.preventDefault();
-    if (newPwd !== confirmPwd) { toast.error("Yeni şifreler eşleşmiyor"); return; }
+    if (newPwd !== confirmPwd) {
+      toast.error("Yeni şifreler eşleşmiyor");
+      return;
+    }
     setPwdSaving(true);
     try {
       const r = await fetch("/api/profile/password", {
@@ -304,7 +338,9 @@ export default function ProfilePage() {
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
       toast.success("Şifre güncellendi");
-      setCurrentPwd(""); setNewPwd(""); setConfirmPwd("");
+      setCurrentPwd("");
+      setNewPwd("");
+      setConfirmPwd("");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Hata oluştu");
     } finally {
@@ -331,342 +367,693 @@ export default function ProfilePage() {
   }
 
   const displayName = name || session?.user?.name || "Kullanıcı";
-  const specialtyLabel = selectedSpec === "other"
-    ? otherText
-    : SPECIALTY_OPTIONS.find(o => o.value === selectedSpec)?.label ?? "";
+  const specialtyLabel =
+    selectedSpec === "other"
+      ? otherText
+      : SPECIALTY_OPTIONS.find((o) => o.value === selectedSpec)?.label ?? "";
 
   const thisMonthCount = stats?.thisMonth.count ?? 0;
   const lastMonthCount = stats?.lastMonth.count ?? 0;
-  const monthDiff      = thisMonthCount - lastMonthCount;
-  const allTimeByType  = stats?.allTime.byToolType ?? {};
-  const allTimeTotal   = stats?.allTime.total ?? 0;
-  const topToolName    = stats?.topToolThisMonth
-    ? (TOOL_LABELS[stats.topToolThisMonth] ?? stats.topToolThisMonth)
+  const monthDiff = thisMonthCount - lastMonthCount;
+  const allTimeByType = stats?.allTime.byToolType ?? {};
+  const allTimeTotal = stats?.allTime.total ?? 0;
+  const topToolName = stats?.topToolThisMonth
+    ? TOOL_LABELS[stats.topToolThisMonth] ?? stats.topToolThisMonth
     : "—";
 
-  const earnedCount = badges.filter(b => b.earned).length;
+  const earnedCount = badges.filter((b) => b.earned).length;
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-16 flex justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-300" />
-      </main>
+      <div
+        className="poster-scope"
+        style={{
+          minHeight: "70vh",
+          background: "var(--poster-bg)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Loader2 style={{ width: 32, height: 32, color: "var(--poster-ink-3)" }} className="animate-spin" />
+      </div>
     );
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-8 space-y-6">
-
-      {/* Hero */}
-      <div className="flex flex-col items-center gap-3 py-6">
-        <div
-          className="relative cursor-pointer"
-          onMouseEnter={() => setAvatarHover(true)}
-          onMouseLeave={() => setAvatarHover(false)}
-          onClick={() => fileRef.current?.click()}
-        >
-          <div className="h-28 w-28 rounded-full overflow-hidden border-4 border-white shadow-lg">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="Profil" className="h-full w-full object-cover" />
-            ) : (
-              <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-[#023435] to-[#04595B] text-white text-3xl font-bold select-none">
-                {getInitials(displayName)}
-              </div>
-            )}
+    <div
+      className="poster-scope"
+      style={{
+        minHeight: "100%",
+        background: "var(--poster-bg)",
+        padding: "24px 24px 48px",
+        fontFamily: "var(--font-display)",
+      }}
+    >
+      <div style={{ maxWidth: 820, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
+        {/* Hero */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "12px 0 8px" }}>
+          <div
+            style={{ position: "relative", cursor: "pointer" }}
+            onMouseEnter={() => setAvatarHover(true)}
+            onMouseLeave={() => setAvatarHover(false)}
+            onClick={() => fileRef.current?.click()}
+          >
+            <div
+              style={{
+                width: 112,
+                height: 112,
+                borderRadius: "50%",
+                overflow: "hidden",
+                border: "3px solid var(--poster-ink)",
+                boxShadow: "0 6px 0 var(--poster-ink)",
+                background: "var(--poster-panel)",
+              }}
+            >
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt="Profil" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "var(--poster-accent)",
+                    color: "#fff",
+                    fontSize: 32,
+                    fontWeight: 800,
+                    userSelect: "none",
+                  }}
+                >
+                  {getInitials(displayName)}
+                </div>
+              )}
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: "50%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "rgba(14,30,38,.55)",
+                opacity: avatarHover || avatarSaving ? 1 : 0,
+                transition: "opacity .15s",
+              }}
+            >
+              {avatarSaving ? (
+                <Loader2 className="animate-spin" style={{ width: 20, height: 20, color: "#fff" }} />
+              ) : (
+                <>
+                  <Camera style={{ width: 20, height: 20, color: "#fff" }} />
+                  <span style={{ fontSize: 10, color: "#fff", fontWeight: 700, marginTop: 2 }}>Değiştir</span>
+                </>
+              )}
+            </div>
           </div>
-          <div className={cn(
-            "absolute inset-0 rounded-full flex flex-col items-center justify-center bg-black/50 transition-opacity",
-            avatarHover || avatarSaving ? "opacity-100" : "opacity-0"
-          )}>
-            {avatarSaving
-              ? <Loader2 className="h-5 w-5 text-white animate-spin" />
-              : <><Camera className="h-5 w-5 text-white mb-0.5" /><span className="text-[10px] text-white font-medium">Değiştir</span></>
-            }
-          </div>
-        </div>
-        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarFile} />
-          <div className="text-center">
-            <h1 className="text-xl font-bold text-zinc-900">{displayName}</h1>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            style={{ display: "none" }}
+            onChange={handleAvatarFile}
+          />
+          <div style={{ textAlign: "center" }}>
+            <h1
+              style={{
+                fontSize: 24,
+                fontWeight: 700,
+                color: "var(--poster-ink)",
+                margin: 0,
+                letterSpacing: "-.02em",
+              }}
+            >
+              {displayName}
+            </h1>
             {specialtyLabel && (
-              <span className="inline-block mt-1 rounded-full bg-[#023435]/10 px-3 py-0.5 text-xs font-medium text-[#023435] dark:text-foreground">
-                {specialtyLabel}
-              </span>
+              <div style={{ marginTop: 6 }}>
+                <PBadge color="accent">{specialtyLabel}</PBadge>
+              </div>
             )}
             {profile && (
-              <div className="flex flex-col items-center mt-2 gap-2">
-                <p className="text-xs text-zinc-500 font-medium">
-                  {PLAN_LABELS[profile.planType] ?? profile.planType} Planı · <span className="text-[#FE703A] font-bold">{profile.credits} Kredi</span>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, marginTop: 10 }}>
+                <p style={{ fontSize: 12, color: "var(--poster-ink-2)", fontWeight: 600, margin: 0 }}>
+                  {PLAN_LABELS[profile.planType] ?? profile.planType} Planı ·{" "}
+                  <span style={{ color: "var(--poster-accent)", fontWeight: 800 }}>{profile.credits} Kredi</span>
                 </p>
-                <Link
-                  href="/subscription"
-                  className="rounded-lg border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-600 transition-colors hover:bg-zinc-50"
-                >
+                <PBtn as="a" href="/subscription" variant="white" size="sm">
                   Planı Yükselt / Aboneliği Yönet
-                </Link>
+                </PBtn>
               </div>
             )}
           </div>
-      </div>
+        </div>
 
-      {/* Kişisel Bilgiler */}
-      <SectionCard title="Kişisel Bilgiler">
-        <form onSubmit={handleProfileSave} className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-sm font-medium">Ad Soyad</Label>
-              <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Adınız Soyadınız" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium">E-posta</Label>
-              <p className="text-sm text-zinc-500 bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2">{session?.user?.email}</p>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="institution" className="text-sm font-medium">Kurum / Merkez</Label>
-              <Input id="institution" value={institution} onChange={e => setInstitution(e.target.value)} placeholder="Çalıştığınız kurum adı" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-sm font-medium">Telefon <span className="text-zinc-400 font-normal text-xs">(opsiyonel)</span></Label>
-              <Input id="phone" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+90 5XX XXX XX XX" />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="experience" className="text-sm font-medium">Deneyim Yılı</Label>
-              <select
-                id="experience"
-                value={experienceYears}
-                onChange={e => setExperienceYears(e.target.value)}
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023435]/30"
-              >
-                {EXPERIENCE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="certs" className="text-sm font-medium">Lisans / Sertifikalar <span className="text-zinc-400 font-normal text-xs">(opsiyonel)</span></Label>
-            <textarea
-              id="certs"
-              rows={2}
-              value={certifications}
-              onChange={e => setCertifications(e.target.value)}
-              placeholder="Lisans, yüksek lisans, sertifika bilgileri..."
-              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023435]/30 resize-none"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Uzmanlık Alanı</Label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {SPECIALTY_OPTIONS.map(opt => (
-                <div key={opt.value}>
-                  <label className="flex items-center gap-2.5 cursor-pointer group">
-                    <input
-                      type="radio"
-                      name="specialty"
-                      value={opt.value}
-                      checked={selectedSpec === opt.value}
-                      onChange={() => setSelectedSpec(opt.value)}
-                      className="h-4 w-4 border-zinc-300 accent-[#023435]"
-                    />
-                    <span className="text-sm text-zinc-700 group-hover:text-zinc-900 transition-colors">{opt.label}</span>
-                  </label>
-                  {opt.value === "other" && selectedSpec === "other" && (
-                    <div className="ml-6 mt-2">
-                      <Input value={otherText} onChange={e => setOtherText(e.target.value)} placeholder="Uzmanlık alanınızı yazın" className="text-sm" />
-                    </div>
-                  )}
+        {/* Kişisel Bilgiler */}
+        <Panel title="Kişisel Bilgiler">
+          <form onSubmit={handleProfileSave} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 }}>
+              <div>
+                <PLabel htmlFor="name">Ad Soyad</PLabel>
+                <PInput id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Adınız Soyadınız" />
+              </div>
+              <div>
+                <PLabel>E-posta</PLabel>
+                <div
+                  style={{
+                    height: 46,
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "0 14px",
+                    background: "var(--poster-bg-2)",
+                    border: "2px dashed var(--poster-ink-3)",
+                    borderRadius: 12,
+                    fontSize: 14,
+                    color: "var(--poster-ink-2)",
+                  }}
+                >
+                  {session?.user?.email}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <Button type="submit" disabled={profileSaving}>
-            {profileSaving ? "Kaydediliyor…" : "Bilgileri Kaydet"}
-          </Button>
-        </form>
-      </SectionCard>
-
-      {/* Kullanım İstatistikleri */}
-      {stats && (
-        <SectionCard title="Kullanım İstatistikleri" subtitle={`Toplam ${allTimeTotal} materyal üretildi`}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
-              <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Bu Ay</p>
-              <p className="text-2xl font-bold text-[#023435] dark:text-foreground mt-1">{thisMonthCount}</p>
-              <div className="flex items-center gap-1 mt-1">
-                {monthDiff > 0
-                  ? <><TrendingUp className="h-3 w-3 text-green-500" /><span className="text-[10px] text-green-600">+{monthDiff} geçen aya göre</span></>
-                  : monthDiff < 0
-                  ? <><TrendingDown className="h-3 w-3 text-red-400" /><span className="text-[10px] text-red-500">{monthDiff} geçen aya göre</span></>
-                  : <><Minus className="h-3 w-3 text-zinc-300" /><span className="text-[10px] text-zinc-400">değişim yok</span></>
-                }
+              </div>
+              <div>
+                <PLabel htmlFor="institution">Kurum / Merkez</PLabel>
+                <PInput
+                  id="institution"
+                  value={institution}
+                  onChange={(e) => setInstitution(e.target.value)}
+                  placeholder="Çalıştığınız kurum adı"
+                />
+              </div>
+              <div>
+                <PLabel htmlFor="phone">
+                  Telefon <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(opsiyonel)</span>
+                </PLabel>
+                <PInput id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+90 5XX XXX XX XX" />
+              </div>
+              <div>
+                <PLabel htmlFor="experience">Deneyim Yılı</PLabel>
+                <PSelect
+                  id="experience"
+                  value={experienceYears}
+                  onChange={(e) => setExperienceYears(e.target.value)}
+                >
+                  {EXPERIENCE_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </PSelect>
               </div>
             </div>
-            <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
-              <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Kalan Kredi</p>
-              <p className="text-2xl font-bold text-[#FE703A] mt-1">{profile?.credits ?? 0}</p>
-              <div className="mt-1.5 h-1 w-full rounded-full bg-zinc-200">
-                <div className="h-1 rounded-full bg-[#FE703A]" style={{ width: `${Math.min(((profile?.credits ?? 0) / 200) * 100, 100)}%` }} />
-              </div>
-            </div>
-            <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
-              <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Aktif Öğrenci</p>
-              <p className="text-2xl font-bold text-[#107996] mt-1">{stats.students}</p>
-            </div>
-            <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
-              <p className="text-[10px] text-zinc-400 uppercase tracking-wide">En Çok Araç</p>
-              <p className="text-sm font-bold text-zinc-700 mt-1 leading-tight">{topToolName}</p>
-            </div>
-          </div>
 
-          {allTimeTotal > 0 && (
-            <div className="space-y-2.5 mb-6">
-              <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Araç Dağılımı</p>
-              {Object.entries(allTimeByType)
-                .sort(([, a], [, b]) => b - a)
-                .map(([type, count]) => {
-                  const pct   = Math.round((count / allTimeTotal) * 100);
-                  const color = TOOL_COLORS[type] ?? "#9ca3af";
+            <div>
+              <PLabel htmlFor="certs">
+                Lisans / Sertifikalar{" "}
+                <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(opsiyonel)</span>
+              </PLabel>
+              <PTextarea
+                id="certs"
+                rows={2}
+                value={certifications}
+                onChange={(e) => setCertifications(e.target.value)}
+                placeholder="Lisans, yüksek lisans, sertifika bilgileri..."
+              />
+            </div>
+
+            <div>
+              <PLabel>Uzmanlık Alanı</PLabel>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 8 }}>
+                {SPECIALTY_OPTIONS.map((opt) => {
+                  const active = selectedSpec === opt.value;
                   return (
-                    <div key={type} className="flex items-center gap-3">
-                      <span className="w-36 text-xs text-zinc-600 truncate shrink-0">{TOOL_LABELS[type] ?? type}</span>
-                      <div className="flex-1 h-2 rounded-full bg-zinc-100 overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
-                      </div>
-                      <span className="text-xs text-zinc-500 w-16 text-right shrink-0">{count} (%{pct})</span>
+                    <div key={opt.value}>
+                      <label
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          cursor: "pointer",
+                          padding: "10px 12px",
+                          background: active ? "var(--poster-bg-2)" : "var(--poster-panel)",
+                          border: "2px solid var(--poster-ink)",
+                          borderRadius: 12,
+                          boxShadow: active ? "0 3px 0 var(--poster-accent)" : "var(--poster-shadow-sm)",
+                          transition: "box-shadow .15s, background .15s",
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="specialty"
+                          value={opt.value}
+                          checked={active}
+                          onChange={() => setSelectedSpec(opt.value)}
+                          style={{ width: 16, height: 16, accentColor: "var(--poster-accent)" }}
+                        />
+                        <span style={{ fontSize: 14, color: "var(--poster-ink)", fontWeight: 600 }}>{opt.label}</span>
+                      </label>
+                      {opt.value === "other" && active && (
+                        <div style={{ marginTop: 8, paddingLeft: 4 }}>
+                          <PInput
+                            value={otherText}
+                            onChange={(e) => setOtherText(e.target.value)}
+                            placeholder="Uzmanlık alanınızı yazın"
+                          />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
+              </div>
             </div>
-          )}
 
-          {stats.last3Months.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">Aylık Trend</p>
-              <div className="flex gap-3">
-                {stats.last3Months.map((m, i) => (
-                  <div key={i} className="flex-1 rounded-xl border border-zinc-100 bg-zinc-50 p-3 text-center">
-                    <p className="text-[10px] text-zinc-400 leading-tight">{m.month}</p>
-                    <p className="text-xl font-bold text-zinc-700 mt-1">{m.count}</p>
-                  </div>
-                ))}
-              </div>
+              <PBtn type="submit" variant="accent" size="md" disabled={profileSaving}>
+                {profileSaving ? "Kaydediliyor…" : "Bilgileri Kaydet"}
+              </PBtn>
             </div>
-          )}
-        </SectionCard>
-      )}
+          </form>
+        </Panel>
 
-      {/* Rozetlerim */}
-      {badges.length > 0 && (
-        <SectionCard title="Rozetlerim" subtitle={`${earnedCount} / ${badges.length} rozet kazanıldı`}>
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-            {badges.map(badge => (
-              <div
-                key={badge.id}
-                className={cn(
-                  "relative flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all",
-                  badge.earned
-                    ? "border-[#023435]/20 bg-[#023435]/[0.06] shadow-sm"
-                    : "border-zinc-100 bg-zinc-50 opacity-30 grayscale"
-                )}
-              >
-                {badge.earned && (
-                  <div className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#023435] text-white text-[9px] font-bold">
-                    ✓
-                  </div>
-                )}
-                <span className="text-4xl leading-none">{badge.emoji}</span>
-                <div>
-                  <p className={cn("text-[11px] font-semibold leading-tight", badge.earned ? "text-zinc-800" : "text-zinc-500")}>
-                    {badge.name}
-                  </p>
-                  <p className="text-[10px] text-zinc-400 mt-0.5 leading-snug">{badge.description}</p>
+        {/* Kullanım İstatistikleri */}
+        {stats && (
+          <Panel title="Kullanım İstatistikleri" subtitle={`Toplam ${allTimeTotal} materyal üretildi`}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                gap: 10,
+                marginBottom: 20,
+              }}
+            >
+              <StatBox label="Bu Ay" value={thisMonthCount} color="var(--poster-ink)">
+                <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
+                  {monthDiff > 0 ? (
+                    <>
+                      <TrendingUp style={{ width: 12, height: 12, color: "var(--poster-green)" }} />
+                      <span style={{ fontSize: 10, color: "var(--poster-green)", fontWeight: 700 }}>
+                        +{monthDiff} geçen aya göre
+                      </span>
+                    </>
+                  ) : monthDiff < 0 ? (
+                    <>
+                      <TrendingDown style={{ width: 12, height: 12, color: "var(--poster-danger)" }} />
+                      <span style={{ fontSize: 10, color: "var(--poster-danger)", fontWeight: 700 }}>
+                        {monthDiff} geçen aya göre
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Minus style={{ width: 12, height: 12, color: "var(--poster-ink-3)" }} />
+                      <span style={{ fontSize: 10, color: "var(--poster-ink-3)" }}>değişim yok</span>
+                    </>
+                  )}
+                </div>
+              </StatBox>
+              <StatBox label="Kalan Kredi" value={profile?.credits ?? 0} color="var(--poster-accent)">
+                <div style={{ marginTop: 8 }}>
+                  <PProgress value={Math.min(((profile?.credits ?? 0) / 200) * 100, 100)} color="var(--poster-accent)" />
+                </div>
+              </StatBox>
+              <StatBox label="Aktif Öğrenci" value={stats.students} color="var(--poster-blue)" />
+              <StatBox label="En Çok Araç" value={topToolName} color="var(--poster-ink)" small />
+            </div>
+
+            {allTimeTotal > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+                <p
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    color: "var(--poster-ink-2)",
+                    textTransform: "uppercase",
+                    letterSpacing: ".1em",
+                    margin: 0,
+                  }}
+                >
+                  Araç Dağılımı
+                </p>
+                {Object.entries(allTimeByType)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([type, count]) => {
+                    const pct = Math.round((count / allTimeTotal) * 100);
+                    const color = TOOL_COLORS[type] ?? "var(--poster-ink-3)";
+                    return (
+                      <div key={type} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <span
+                          style={{
+                            width: 140,
+                            fontSize: 12,
+                            color: "var(--poster-ink-2)",
+                            fontWeight: 600,
+                            flexShrink: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {TOOL_LABELS[type] ?? type}
+                        </span>
+                        <div style={{ flex: 1 }}>
+                          <PProgress value={pct} color={color} />
+                        </div>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            color: "var(--poster-ink-2)",
+                            fontWeight: 700,
+                            width: 72,
+                            textAlign: "right",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {count} (%{pct})
+                        </span>
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+
+            {stats.last3Months.length > 0 && (
+              <div>
+                <p
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    color: "var(--poster-ink-2)",
+                    textTransform: "uppercase",
+                    letterSpacing: ".1em",
+                    margin: "0 0 8px",
+                  }}
+                >
+                  Aylık Trend
+                </p>
+                <div style={{ display: "flex", gap: 10 }}>
+                  {stats.last3Months.map((m, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        flex: 1,
+                        textAlign: "center",
+                        padding: 12,
+                        background: "var(--poster-bg-2)",
+                        border: "2px solid var(--poster-ink)",
+                        borderRadius: 12,
+                        boxShadow: "var(--poster-shadow-sm)",
+                      }}
+                    >
+                      <p style={{ fontSize: 10, color: "var(--poster-ink-3)", margin: 0, fontWeight: 700 }}>{m.month}</p>
+                      <p
+                        style={{
+                          fontSize: 22,
+                          fontWeight: 800,
+                          color: "var(--poster-ink)",
+                          margin: "4px 0 0",
+                          letterSpacing: "-.02em",
+                        }}
+                      >
+                        {m.count}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </SectionCard>
-      )}
+            )}
+          </Panel>
+        )}
 
-      {/* Tercihler */}
-      <SectionCard title="Tercihler">
-        <form onSubmit={handlePrefsSave} className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Varsayılan Ders Süresi</Label>
-              <select
-                value={prefs.defaultSessionDuration}
-                onChange={e => setPrefs(p => ({ ...p, defaultSessionDuration: e.target.value }))}
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023435]/30"
-              >
-                {DURATION_OPTIONS.map(d => <option key={d} value={d}>{d} dk</option>)}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Varsayılan Zorluk Seviyesi</Label>
-              <select
-                value={prefs.defaultDifficulty}
-                onChange={e => setPrefs(p => ({ ...p, defaultDifficulty: e.target.value }))}
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023435]/30"
-              >
-                {DIFFICULTY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Varsayılan Tema</Label>
-              <select
-                value={prefs.defaultTheme}
-                onChange={e => setPrefs(p => ({ ...p, defaultTheme: e.target.value }))}
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#023435]/30"
-              >
-                {THEME_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-2.5 pt-1">
-            {([
-              { key: "showInstitutionLogo" as const, label: "PDF'lerde Kurum Logosu Göster", desc: "İleride PDF çıktılarına kurum logosu eklensin" },
-              { key: "emailNotifications"  as const, label: "E-posta Bildirimleri",          desc: "Haftalık özet e-postası al" },
-            ] as const).map(({ key, label, desc }) => (
-              <div key={key} className="flex items-center justify-between gap-4 rounded-xl border border-zinc-100 p-3.5">
-                <div>
-                  <p className="text-sm font-medium text-zinc-700">{label}</p>
-                  <p className="text-xs text-zinc-400 mt-0.5">{desc}</p>
+        {/* Rozetlerim */}
+        {badges.length > 0 && (
+          <Panel title="Rozetlerim" subtitle={`${earnedCount} / ${badges.length} rozet kazanıldı`}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 12 }}>
+              {badges.map((badge) => (
+                <div
+                  key={badge.id}
+                  style={{
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: 14,
+                    textAlign: "center",
+                    background: badge.earned ? "var(--poster-panel)" : "var(--poster-bg-2)",
+                    border: "2px solid var(--poster-ink)",
+                    borderRadius: 14,
+                    boxShadow: badge.earned ? "var(--poster-shadow-sm)" : "none",
+                    opacity: badge.earned ? 1 : 0.4,
+                    filter: badge.earned ? "none" : "grayscale(1)",
+                  }}
+                >
+                  {badge.earned && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        width: 18,
+                        height: 18,
+                        borderRadius: "50%",
+                        background: "var(--poster-accent)",
+                        border: "2px solid var(--poster-ink)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#fff",
+                        fontSize: 10,
+                        fontWeight: 900,
+                      }}
+                    >
+                      ✓
+                    </div>
+                  )}
+                  <span style={{ fontSize: 36, lineHeight: 1 }}>{badge.emoji}</span>
+                  <div>
+                    <p
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "var(--poster-ink)",
+                        margin: 0,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {badge.name}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 10,
+                        color: "var(--poster-ink-3)",
+                        margin: "2px 0 0",
+                        lineHeight: 1.35,
+                      }}
+                    >
+                      {badge.description}
+                    </p>
+                  </div>
                 </div>
-                <Toggle checked={prefs[key] as boolean} onChange={v => setPrefs(p => ({ ...p, [key]: v }))} />
+              ))}
+            </div>
+          </Panel>
+        )}
+
+        {/* Tercihler */}
+        <Panel title="Tercihler">
+          <form onSubmit={handlePrefsSave} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14 }}>
+              <div>
+                <PLabel>Varsayılan Ders Süresi</PLabel>
+                <PSelect
+                  value={prefs.defaultSessionDuration}
+                  onChange={(e) => setPrefs((p) => ({ ...p, defaultSessionDuration: e.target.value }))}
+                >
+                  {DURATION_OPTIONS.map((d) => (
+                    <option key={d} value={d}>
+                      {d} dk
+                    </option>
+                  ))}
+                </PSelect>
               </div>
-            ))}
-          </div>
-
-          <Button type="submit" disabled={prefsSaving}>
-            {prefsSaving ? "Kaydediliyor…" : "Tercihleri Kaydet"}
-          </Button>
-        </form>
-      </SectionCard>
-
-      {/* Şifre Değiştir */}
-      <SectionCard title="Şifre Değiştir">
-        <form onSubmit={handlePasswordChange} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="currentPwd" className="text-sm font-medium">Mevcut Şifre</Label>
-            <Input id="currentPwd" type="password" value={currentPwd} onChange={e => setCurrentPwd(e.target.value)} placeholder="••••••••" autoComplete="current-password" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="newPwd" className="text-sm font-medium">Yeni Şifre</Label>
-              <Input id="newPwd" type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="En az 8 karakter" autoComplete="new-password" />
+              <div>
+                <PLabel>Varsayılan Zorluk Seviyesi</PLabel>
+                <PSelect
+                  value={prefs.defaultDifficulty}
+                  onChange={(e) => setPrefs((p) => ({ ...p, defaultDifficulty: e.target.value }))}
+                >
+                  {DIFFICULTY_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </PSelect>
+              </div>
+              <div>
+                <PLabel>Varsayılan Tema</PLabel>
+                <PSelect
+                  value={prefs.defaultTheme}
+                  onChange={(e) => setPrefs((p) => ({ ...p, defaultTheme: e.target.value }))}
+                >
+                  {THEME_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </PSelect>
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="confirmPwd" className="text-sm font-medium">Yeni Şifre Tekrar</Label>
-              <Input id="confirmPwd" type="password" value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)} placeholder="••••••••" autoComplete="new-password" />
-            </div>
-          </div>
-          <Button type="submit" disabled={pwdSaving} variant="outline">
-            {pwdSaving ? "Değiştiriliyor…" : "Şifreyi Değiştir"}
-          </Button>
-        </form>
-      </SectionCard>
 
-    </main>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {(
+                [
+                  {
+                    key: "showInstitutionLogo" as const,
+                    label: "PDF'lerde Kurum Logosu Göster",
+                    desc: "İleride PDF çıktılarına kurum logosu eklensin",
+                  },
+                  {
+                    key: "emailNotifications" as const,
+                    label: "E-posta Bildirimleri",
+                    desc: "Haftalık özet e-postası al",
+                  },
+                ] as const
+              ).map(({ key, label, desc }) => (
+                <div
+                  key={key}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 16,
+                    padding: "12px 14px",
+                    background: "var(--poster-panel)",
+                    border: "2px solid var(--poster-ink)",
+                    borderRadius: 14,
+                    boxShadow: "var(--poster-shadow-sm)",
+                  }}
+                >
+                  <div>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink)", margin: 0 }}>{label}</p>
+                    <p style={{ fontSize: 12, color: "var(--poster-ink-3)", margin: "2px 0 0" }}>{desc}</p>
+                  </div>
+                  <PSwitch
+                    checked={prefs[key] as boolean}
+                    onChange={(v) => setPrefs((p) => ({ ...p, [key]: v }))}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <PBtn type="submit" variant="accent" size="md" disabled={prefsSaving}>
+                {prefsSaving ? "Kaydediliyor…" : "Tercihleri Kaydet"}
+              </PBtn>
+            </div>
+          </form>
+        </Panel>
+
+        {/* Şifre Değiştir */}
+        <Panel title="Şifre Değiştir">
+          <form onSubmit={handlePasswordChange} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div>
+              <PLabel htmlFor="currentPwd">Mevcut Şifre</PLabel>
+              <PInput
+                id="currentPwd"
+                type="password"
+                value={currentPwd}
+                onChange={(e) => setCurrentPwd(e.target.value)}
+                placeholder="••••••••"
+                autoComplete="current-password"
+              />
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
+              <div>
+                <PLabel htmlFor="newPwd">Yeni Şifre</PLabel>
+                <PInput
+                  id="newPwd"
+                  type="password"
+                  value={newPwd}
+                  onChange={(e) => setNewPwd(e.target.value)}
+                  placeholder="En az 8 karakter"
+                  autoComplete="new-password"
+                />
+              </div>
+              <div>
+                <PLabel htmlFor="confirmPwd">Yeni Şifre Tekrar</PLabel>
+                <PInput
+                  id="confirmPwd"
+                  type="password"
+                  value={confirmPwd}
+                  onChange={(e) => setConfirmPwd(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                />
+              </div>
+            </div>
+            <div>
+              <PBtn type="submit" variant="dark" size="md" disabled={pwdSaving}>
+                {pwdSaving ? "Değiştiriliyor…" : "Şifreyi Değiştir"}
+              </PBtn>
+            </div>
+          </form>
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+function StatBox({
+  label,
+  value,
+  color,
+  small,
+  children,
+}: {
+  label: string;
+  value: React.ReactNode;
+  color: string;
+  small?: boolean;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        padding: 14,
+        background: "var(--poster-bg-2)",
+        border: "2px solid var(--poster-ink)",
+        borderRadius: 14,
+        boxShadow: "var(--poster-shadow-sm)",
+      }}
+    >
+      <p
+        style={{
+          fontSize: 10,
+          color: "var(--poster-ink-3)",
+          textTransform: "uppercase",
+          letterSpacing: ".1em",
+          fontWeight: 800,
+          margin: 0,
+        }}
+      >
+        {label}
+      </p>
+      <p
+        style={{
+          fontSize: small ? 14 : 26,
+          fontWeight: 800,
+          color,
+          margin: small ? "6px 0 0" : "4px 0 0",
+          lineHeight: 1.15,
+          letterSpacing: small ? 0 : "-.02em",
+        }}
+      >
+        {value}
+      </p>
+      {children}
+    </div>
   );
 }

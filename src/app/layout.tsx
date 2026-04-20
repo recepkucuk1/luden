@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Space_Grotesk, Instrument_Serif } from "next/font/google";
-import { Toaster } from "sonner";
+import { PToaster } from "@/components/poster";
 import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import { CookieBanner } from "@/components/cookie-banner";
 import "./globals.css";
@@ -56,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <ThemeProvider>
           <AuthSessionProvider>{children}</AuthSessionProvider>
-          <Toaster position="bottom-right" duration={3000} richColors />
+          <PToaster />
           <CookieBanner />
         </ThemeProvider>
       </body>

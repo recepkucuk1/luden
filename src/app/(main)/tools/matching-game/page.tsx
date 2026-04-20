@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, RefreshCw, Library, LayoutList, LayoutGrid, ChevronDown, ChevronUp, Lightbulb, Info } from "lucide-react";
-import { cn, formatDate } from "@/lib/utils";
-import { WORK_AREA_LABEL, WORK_AREA_COLOR, calcAge } from "@/lib/constants";
+import { RefreshCw, Library, LayoutList, LayoutGrid, ChevronDown, ChevronUp, Lightbulb, Info, Download } from "lucide-react";
+import { formatDate } from "@/lib/utils";
+import { WORK_AREA_LABEL, calcAge } from "@/lib/constants";
 import type { MatchingGameContent, MatchingPair } from "@/components/cards/MatchingGameView";
+import { PBtn, PCard, PBadge, PSelect, PLabel } from "@/components/poster";
+import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,6 +31,14 @@ interface CurriculumItem {
   title: string;
   goals: CurriculumGoal[];
 }
+
+type BadgeColor = "accent" | "green" | "yellow" | "pink" | "blue" | "ink" | "soft";
+
+const WORK_AREA_BADGE: Record<string, BadgeColor> = {
+  speech: "yellow",
+  language: "accent",
+  hearing: "blue",
+};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -75,21 +84,17 @@ const MATCH_TYPE_LABEL: Record<string, string> = {
   sentence:   "Cümle Tamamlama",
 };
 
-const MATCH_TYPE_COLOR: Record<string, string> = {
-  definition: "bg-[#107996]/10 text-[#107996] border-[#107996]/20",
-  image_desc: "bg-[#023435]/10 text-[#023435] dark:text-foreground border-[#023435]/20",
-  synonym:    "bg-green-50 text-green-700 border-green-200",
-  antonym:    "bg-red-50 text-red-700 border-red-200",
-  category:   "bg-purple-50 text-purple-700 border-purple-200",
-  sentence:   "bg-[#F4AE10]/15 text-amber-800 border-[#F4AE10]/30",
+const MATCH_TYPE_BADGE: Record<string, BadgeColor> = {
+  definition: "blue",
+  image_desc: "ink",
+  synonym:    "green",
+  antonym:    "pink",
+  category:   "accent",
+  sentence:   "yellow",
 };
 
 const DIFFICULTY_LABEL: Record<string, string> = { easy: "Kolay", medium: "Orta", hard: "Zor" };
-const DIFFICULTY_COLOR: Record<string, string> = {
-  easy:   "bg-green-50 text-green-700 border-green-200",
-  medium: "bg-amber-50 text-amber-700 border-amber-200",
-  hard:   "bg-red-50 text-red-700 border-red-200",
-};
+const DIFFICULTY_BADGE: Record<string, BadgeColor> = { easy: "green", medium: "yellow", hard: "pink" };
 
 const LOADING_MSGS = [
   "Kelime listesi oluşturuluyor...",
@@ -122,14 +127,9 @@ function LoadingMessages() {
   }, []);
 
   return (
-    <div className="flex h-10 items-center justify-center">
-      <p
-        className="text-sm text-zinc-500 transition-opacity duration-300 text-center"
-        style={{ opacity: visible ? 1 : 0 }}
-      >
-        {LOADING_MSGS[index]}
-      </p>
-    </div>
+    <p style={{ fontSize: 13, color: "var(--poster-ink-2)", transition: "opacity .3s", opacity: visible ? 1 : 0, margin: 0 }}>
+      {LOADING_MSGS[index]}
+    </p>
   );
 }
 
@@ -138,40 +138,47 @@ function LoadingMessages() {
 function PrintableCards({ game }: { game: MatchingGameContent }) {
   const pairs = Array.isArray(game.pairs) ? game.pairs : [];
 
-  // Create shuffled flat list of all cards
   const allCards: { text: string; type: "A" | "B"; pairId: number }[] = [];
   pairs.forEach((p) => {
     allCards.push({ text: p.cardA, type: "A", pairId: p.id ?? 0 });
     allCards.push({ text: p.cardB, type: "B", pairId: p.id ?? 0 });
   });
-  // Shuffle
   const shuffled = [...allCards].sort(() => Math.random() - 0.5);
 
   return (
     <div>
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-6">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8, marginBottom: 16 }}>
         {shuffled.map((card, i) => (
           <div
             key={i}
-            className={cn(
-              "rounded-lg border-2 border-dashed p-3 min-h-[72px] flex items-center justify-center text-center text-sm font-medium leading-snug",
-              card.type === "A"
-                ? "border-[#107996]/40 bg-[#107996]/5 text-[#107996]"
-                : "border-[#FE703A]/40 bg-[#FE703A]/5 text-[#FE703A]"
-            )}
+            style={{
+              padding: 12,
+              minHeight: 72,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              fontSize: 13,
+              fontWeight: 700,
+              lineHeight: 1.4,
+              background: card.type === "A" ? "var(--poster-panel)" : "#fff0e8",
+              color: card.type === "A" ? "var(--poster-blue)" : "var(--poster-accent)",
+              border: `2px dashed ${card.type === "A" ? "var(--poster-blue)" : "var(--poster-accent)"}`,
+              borderRadius: 10,
+            }}
           >
             {card.text}
           </div>
         ))}
       </div>
-      <p className="text-[10px] text-zinc-400 text-center mb-1">
+      <p style={{ fontSize: 10, color: "var(--poster-ink-3)", textAlign: "center", margin: 0 }}>
         Mavi kartlar = Kart A &nbsp;·&nbsp; Turuncu kartlar = Kart B
       </p>
     </div>
   );
 }
 
-// ─── PDF Downloads ────────────────────────────────────────────────────────────
+// ─── PDF Downloads (unchanged) ────────────────────────────────────────────────
 
 async function downloadTablePDF(game: MatchingGameContent, studentName?: string) {
   const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import("@react-pdf/renderer");
@@ -219,7 +226,6 @@ async function downloadTablePDF(game: MatchingGameContent, studentName?: string)
           {game.theme ? <Text style={S.badge}>{game.theme}</Text> : null}
         </View>
 
-        {/* Table */}
         <View style={{ borderWidth: 1, borderColor: "#e4e4e7", borderRadius: 4 }}>
           <View style={S.tableHdr}>
             <Text style={S.hdrNum}>#</Text>
@@ -287,13 +293,11 @@ async function downloadCardsPDF(game: MatchingGameContent, studentName?: string)
   const today = formatDate(new Date(), "medium");
   const pairs = Array.isArray(game.pairs) ? game.pairs : [];
 
-  // Build shuffled card list
   const cards: { text: string; type: "A" | "B" }[] = [];
   pairs.forEach((p) => {
     cards.push({ text: p.cardA, type: "A" });
     cards.push({ text: p.cardB, type: "B" });
   });
-  // Deterministic shuffle using pair interleave (A B A B... but offset)
   const shuffled: typeof cards = [];
   const aCards = cards.filter((c) => c.type === "A");
   const bCards = cards.filter((c) => c.type === "B");
@@ -314,7 +318,6 @@ async function downloadCardsPDF(game: MatchingGameContent, studentName?: string)
     legend:    { flexDirection: "row", marginBottom: 12, marginTop: 4 },
     legendDot: { width: 8, height: 8, borderRadius: 4, marginRight: 4, marginTop: 1 },
     legendTxt: { fontSize: 8, color: "#71717a", marginRight: 12 },
-    // Answer key page
     ansTitle:  { fontFamily: "NotoSans", fontWeight: "bold", fontSize: 14, color: "#023435", marginBottom: 12 },
     ansRow:    { flexDirection: "row", marginBottom: 6, alignItems: "flex-start" },
     ansNum:    { width: 20, fontSize: 9, color: "#a1a1aa", fontFamily: "NotoSans", fontWeight: "bold" },
@@ -327,7 +330,6 @@ async function downloadCardsPDF(game: MatchingGameContent, studentName?: string)
 
   const Doc = () => (
     <Document title={`${game.title ?? "Kelime Eşleştirme"} — Kesme Kartları`} author="LudenLab">
-      {/* Sayfa 1: Kartlar */}
       <Page size="A4" style={S.page}>
         <Text style={S.title}>{game.title ?? "Kelime Eşleştirme"}</Text>
         <Text style={S.subtitle}>
@@ -356,7 +358,6 @@ async function downloadCardsPDF(game: MatchingGameContent, studentName?: string)
         </View>
       </Page>
 
-      {/* Sayfa 2: Cevap Anahtarı */}
       <Page size="A4" style={S.page}>
         <Text style={S.ansTitle}>Cevap Anahtarı</Text>
         {pairs.map((pair, i) => (
@@ -391,7 +392,6 @@ export default function MatchingGamePage() {
   const [curricula, setCurricula]       = useState<CurriculumItem[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
 
-  // Form state
   const [studentId,  setStudentId]  = useState("");
   const [matchType,  setMatchType]  = useState<MatchType>("synonym");
   const [pairCount,  setPairCount]  = useState<PairCount>("8");
@@ -399,7 +399,6 @@ export default function MatchingGamePage() {
   const [theme,      setTheme]      = useState("");
   const [goalId,     setGoalId]     = useState("");
 
-  // Result state
   const [loading,      setLoading]      = useState(false);
   const [game,         setGame]         = useState<MatchingGameContent | null>(null);
   const [savedCardId,  setSavedCardId]  = useState<string | null>(null);
@@ -410,7 +409,6 @@ export default function MatchingGamePage() {
 
   const selectedStudent = students.find((s) => s.id === studentId) ?? null;
 
-  // Available curriculum goals for selected student
   const availableGoals: { id: string; title: string }[] = curricula
     .filter((c) => selectedStudent?.curriculumIds?.includes(c.id))
     .flatMap((c) => c.goals.map((g) => ({ id: g.id, title: g.title })));
@@ -509,388 +507,405 @@ export default function MatchingGamePage() {
   }
 
   const pairs = game ? (Array.isArray(game.pairs) ? game.pairs : []) : [];
-  const inputCls = "w-full rounded-xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-sm px-3 py-2 text-sm text-[#023435] dark:text-foreground focus:outline-none focus:ring-2 focus:ring-[#023435]/20 focus:border-[#023435]/40 placeholder:text-[#023435]/30 dark:text-muted-foreground/60";
-  const labelCls = "block text-xs font-bold text-[#023435]/70 dark:text-foreground/80 mb-1.5 uppercase tracking-wide";
+
+  // ── Button style helpers ─────────────────────────────────────────────────────
+  const rowStyle = (active: boolean): React.CSSProperties => ({
+    width: "100%",
+    padding: "10px 12px",
+    background: active ? "var(--poster-accent)" : "var(--poster-panel)",
+    color: active ? "#fff" : "var(--poster-ink)",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 10,
+    boxShadow: active ? "0 2px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+    textAlign: "left",
+  });
+
+  const gridBtnStyle = (active: boolean): React.CSSProperties => ({
+    padding: "10px 8px",
+    background: active ? "var(--poster-ink)" : "var(--poster-panel)",
+    color: active ? "#fff" : "var(--poster-ink)",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 10,
+    boxShadow: active ? "0 2px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+    fontSize: 13,
+    fontWeight: 800,
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+  });
+
+  const toggleBtn = (active: boolean): React.CSSProperties => ({
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "6px 10px",
+    background: active ? "var(--poster-ink)" : "transparent",
+    color: active ? "#fff" : "var(--poster-ink-2)",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 12,
+    fontWeight: 700,
+    cursor: "pointer",
+    fontFamily: "var(--font-display)",
+  });
+
+  const submitStyle: React.CSSProperties = {
+    width: "100%",
+    height: 44,
+    background: "var(--poster-accent)",
+    color: "#fff",
+    border: "2px solid var(--poster-ink)",
+    borderRadius: 12,
+    boxShadow: "0 3px 0 var(--poster-ink)",
+    fontSize: 14,
+    fontWeight: 800,
+    cursor: loading ? "not-allowed" : "pointer",
+    opacity: loading ? 0.6 : 1,
+    fontFamily: "var(--font-display)",
+  };
+
+  const form = (
+    <form key={formKey} onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      {/* Öğrenci */}
+      <div>
+        <PLabel>
+          Öğrenci <span style={{ fontSize: 10, fontWeight: 500, color: "var(--poster-ink-3)" }}>opsiyonel</span>
+        </PLabel>
+        <PSelect value={studentId} onChange={(e) => handleStudentChange(e.target.value)}>
+          <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin (opsiyonel)"}</option>
+          {students.map((s) => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </PSelect>
+        {selectedStudent && (
+          <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {selectedStudent.birthDate && <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>}
+            <PBadge color={WORK_AREA_BADGE[selectedStudent.workArea] ?? "soft"}>
+              {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
+            </PBadge>
+            {selectedStudent.diagnosis && <PBadge color="soft">{selectedStudent.diagnosis}</PBadge>}
+          </div>
+        )}
+      </div>
+
+      {/* Eşleştirme Türü */}
+      <div>
+        <PLabel>Eşleştirme Türü</PLabel>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {MATCH_TYPE_OPTIONS.map((opt) => (
+            <button key={opt.value} type="button" onClick={() => setMatchType(opt.value)} style={rowStyle(matchType === opt.value)}>
+              <span style={{ display: "block", fontSize: 13, fontWeight: 800 }}>{opt.label}</span>
+              <span style={{ display: "block", fontSize: 10, opacity: 0.75 }}>{opt.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Çift Sayısı */}
+      <div>
+        <PLabel>Çift Sayısı</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8 }}>
+          {PAIR_COUNTS.map((n) => (
+            <button key={n} type="button" onClick={() => setPairCount(n)} style={gridBtnStyle(pairCount === n)}>
+              {n}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Zorluk */}
+      <div>
+        <PLabel>Zorluk Seviyesi</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+          {DIFFICULTY_OPTIONS.map((opt) => (
+            <button key={opt.value} type="button" onClick={() => setDifficulty(opt.value)} style={gridBtnStyle(difficulty === opt.value)}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tema */}
+      <div>
+        <PLabel>
+          Tema <span style={{ fontSize: 10, fontWeight: 500, color: "var(--poster-ink-3)" }}>opsiyonel</span>
+        </PLabel>
+        <PSelect value={theme} onChange={(e) => setTheme(e.target.value)}>
+          {THEME_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </PSelect>
+      </div>
+
+      {/* Müfredat Hedefi */}
+      {availableGoals.length > 0 && (
+        <div>
+          <PLabel>
+            Müfredat Hedefi <span style={{ fontSize: 10, fontWeight: 500, color: "var(--poster-ink-3)" }}>opsiyonel</span>
+          </PLabel>
+          <PSelect value={goalId} onChange={(e) => setGoalId(e.target.value)}>
+            <option value="">Hedef seçin (opsiyonel)</option>
+            {availableGoals.map((g) => (
+              <option key={g.id} value={g.id}>{g.title}</option>
+            ))}
+          </PSelect>
+        </div>
+      )}
+
+      <button type="submit" disabled={loading} style={submitStyle}>
+        {loading ? "Üretiliyor..." : "Eşleştirme Kartları Üret"}
+      </button>
+      <p style={{ textAlign: "center", fontSize: 11, color: "var(--poster-ink-3)", margin: 0 }}>
+        15 kredi kullanılacak
+      </p>
+    </form>
+  );
+
+  const result = loading ? (
+    <ToolLoadingCard>
+      <LoadingMessages />
+    </ToolLoadingCard>
+  ) : game ? (
+    <>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          <PBadge color={MATCH_TYPE_BADGE[game.matchType] ?? "soft"}>
+            {MATCH_TYPE_LABEL[game.matchType] ?? game.matchType}
+          </PBadge>
+          <PBadge color={DIFFICULTY_BADGE[game.difficulty] ?? "soft"}>
+            {DIFFICULTY_LABEL[game.difficulty] ?? game.difficulty}
+          </PBadge>
+          <PBadge color="soft">{pairs.length} çift</PBadge>
+          {game.theme && <PBadge color="soft">{game.theme}</PBadge>}
+        </div>
+        <div
+          style={{
+            display: "inline-flex",
+            padding: 3,
+            background: "var(--poster-panel)",
+            border: "2px solid var(--poster-ink)",
+            borderRadius: 10,
+            boxShadow: "var(--poster-shadow-sm)",
+          }}
+        >
+          <button type="button" onClick={() => setViewMode("table")} style={toggleBtn(viewMode === "table")}>
+            <LayoutList style={{ width: 14, height: 14 }} /> Tablo
+          </button>
+          <button type="button" onClick={() => setViewMode("cards")} style={toggleBtn(viewMode === "cards")}>
+            <LayoutGrid style={{ width: 14, height: 14 }} /> Kartlar
+          </button>
+        </div>
+      </div>
+
+      <PCard rounded={18} style={{ padding: 20, background: "var(--poster-panel)" }}>
+        <h2 style={{ fontSize: 17, fontWeight: 800, color: "var(--poster-ink)", margin: "0 0 16px", letterSpacing: "-.01em" }}>
+          {game.title}
+        </h2>
+
+        {viewMode === "table" ? (
+          <div
+            style={{
+              background: "var(--poster-panel)",
+              border: "2px solid var(--poster-ink)",
+              borderRadius: 12,
+              boxShadow: "0 3px 0 var(--poster-ink)",
+              overflow: "hidden",
+              marginBottom: 18,
+            }}
+          >
+            <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "var(--poster-bg-2)", borderBottom: "2px solid var(--poster-ink)" }}>
+                  <th style={{ width: 36, padding: "10px 12px", textAlign: "left", fontSize: 10, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em" }}>#</th>
+                  <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 10, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em" }}>Kart A</th>
+                  <th style={{ padding: "10px 12px", textAlign: "left", fontSize: 10, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em" }}>Kart B</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pairs.map((pair: MatchingPair, i: number) => (
+                  <tr key={pair.id ?? i} style={{ borderTop: i === 0 ? "none" : "2px dashed var(--poster-ink-faint)" }}>
+                    <td style={{ padding: "10px 12px", fontSize: 11, color: "var(--poster-ink-3)", fontWeight: 700 }}>{pair.id ?? i + 1}</td>
+                    <td style={{ padding: "10px 12px", fontSize: 13, fontWeight: 700, color: "var(--poster-ink)" }}>{pair.cardA}</td>
+                    <td style={{ padding: "10px 12px", fontSize: 13, color: "var(--poster-ink)" }}>
+                      {pair.cardB}
+                      {pair.hint && (
+                        <span style={{ marginLeft: 6, fontSize: 10, color: "var(--poster-ink-3)", fontStyle: "italic" }}>
+                          ({pair.hint})
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ marginBottom: 18 }}>
+            <PrintableCards game={game} />
+          </div>
+        )}
+
+        {game.instructions && (
+          <div
+            style={{
+              padding: 14,
+              background: "var(--poster-bg-2)",
+              border: "2px solid var(--poster-ink)",
+              borderRadius: 12,
+              boxShadow: "0 2px 0 var(--poster-ink)",
+              display: "flex",
+              gap: 10,
+              marginBottom: 12,
+            }}
+          >
+            <Info style={{ width: 16, height: 16, color: "var(--poster-ink-2)", flexShrink: 0, marginTop: 2 }} />
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: "0 0 4px" }}>
+                Nasıl Oynanır
+              </p>
+              <p style={{ fontSize: 13, color: "var(--poster-ink)", lineHeight: 1.6, margin: 0 }}>{game.instructions}</p>
+            </div>
+          </div>
+        )}
+
+        {game.adaptations && (
+          <div
+            style={{
+              padding: 14,
+              background: "var(--poster-panel)",
+              border: "2px solid var(--poster-ink)",
+              borderRadius: 12,
+              boxShadow: "0 2px 0 var(--poster-ink)",
+              marginBottom: 12,
+            }}
+          >
+            <p style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: "0 0 6px" }}>
+              Uyarlama Önerileri
+            </p>
+            <p style={{ fontSize: 13, color: "var(--poster-ink)", lineHeight: 1.6, margin: 0 }}>{game.adaptations}</p>
+          </div>
+        )}
+
+        {game.expertNotes && (
+          <div
+            style={{
+              padding: 14,
+              background: "#fff3d1",
+              border: "2px solid #b7791f",
+              borderRadius: 12,
+              boxShadow: "0 3px 0 #b7791f",
+              display: "flex",
+              gap: 10,
+              marginBottom: 12,
+            }}
+          >
+            <Lightbulb style={{ width: 16, height: 16, color: "#b7791f", flexShrink: 0, marginTop: 2 }} />
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 800, color: "#5a3d05", margin: "0 0 4px" }}>Uzman Notları</p>
+              <p style={{ fontSize: 12, color: "#5a3d05", lineHeight: 1.6, margin: 0 }}>{game.expertNotes}</p>
+            </div>
+          </div>
+        )}
+
+        <div
+          style={{
+            background: "var(--poster-panel)",
+            border: "2px solid var(--poster-ink)",
+            borderRadius: 12,
+            boxShadow: "var(--poster-shadow-sm)",
+            overflow: "hidden",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setShowAnswers((v) => !v)}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "10px 14px",
+              background: "var(--poster-bg-2)",
+              border: "none",
+              borderBottom: showAnswers ? "2px solid var(--poster-ink)" : "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-display)",
+              fontSize: 12,
+              fontWeight: 800,
+              color: "var(--poster-ink-2)",
+              textTransform: "uppercase",
+              letterSpacing: ".08em",
+            }}
+          >
+            Cevap Anahtarı
+            {showAnswers ? <ChevronUp style={{ width: 14, height: 14 }} /> : <ChevronDown style={{ width: 14, height: 14 }} />}
+          </button>
+          {showAnswers && (
+            <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 6 }}>
+              {pairs.map((pair: MatchingPair, i: number) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--poster-ink)" }}>
+                  <span style={{ width: 22, flexShrink: 0, fontWeight: 800, color: "var(--poster-ink-3)" }}>{pair.id ?? i + 1}.</span>
+                  <span style={{ fontWeight: 700 }}>{pair.cardA}</span>
+                  <span style={{ color: "var(--poster-ink-3)" }}>→</span>
+                  <span>{pair.cardB}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </PCard>
+
+      <PCard rounded={14} style={{ padding: 14, background: "var(--poster-panel)" }}>
+        <p style={{ fontSize: 11, fontWeight: 800, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: "0 0 10px" }}>
+          Sonraki adım
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <PBtn
+            as="button"
+            variant="accent"
+            size="md"
+            onClick={handleDownloadTable}
+            disabled={downloading}
+            icon={<Download style={{ width: 16, height: 16 }} />}
+          >
+            Tablo PDF
+          </PBtn>
+          <PBtn
+            as="button"
+            variant="dark"
+            size="md"
+            onClick={handleDownloadCards}
+            disabled={downloading}
+            icon={<Download style={{ width: 16, height: 16 }} />}
+          >
+            Kesme Kartları PDF
+          </PBtn>
+          {savedCardId && (
+            <PBtn as="a" href="/cards" variant="white" size="md" icon={<Library style={{ width: 16, height: 16 }} />}>
+              Kütüphane
+            </PBtn>
+          )}
+          <PBtn as="button" variant="white" size="md" onClick={handleReset} icon={<RefreshCw style={{ width: 16, height: 16 }} />}>
+            Yeni Oyun
+          </PBtn>
+        </div>
+      </PCard>
+    </>
+  ) : (
+    <ToolEmptyState
+      icon="🃏"
+      title="Parametreleri ayarlayın"
+      hint="Üretilen kartlar burada görünecek"
+    />
+  );
 
   return (
-    <div
-      className="w-full flex flex-col relative md:h-[calc(100vh-0px)] md:overflow-hidden"
-      style={{ background: "var(--surface-page-gradient)" }}
-    >
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
-    <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:h-full flex flex-col">
-      {/* Header */}
-      <div className="mb-5 shrink-0 bg-white/50 dark:bg-card/50 backdrop-blur-xl rounded-2xl border border-white/70 dark:border-border/60 px-5 py-4 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
-        <Link
-          href="/tools"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Araçlara Dön
-        </Link>
-        <h1 className="text-xl font-extrabold tracking-tight text-[#023435] dark:text-foreground">Kelime Eşleştirme Oyunu</h1>
-        <p className="text-sm text-[#023435]/60 dark:text-muted-foreground mt-0.5">
-          Dil gelişimi için yazdırılabilir eşleştirme kartları ve oyunları üretin.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] md:flex-1 md:min-h-0">
-        {/* ── Sol: Form ── */}
-        <div className="flex flex-col md:min-h-0">
-          <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
-            <form key={formKey} onSubmit={handleSubmit} className="space-y-5">
-
-              {/* Öğrenci */}
-              <div>
-                <label className={labelCls}>
-                  Öğrenci
-                  <span className="ml-1.5 text-[10px] font-normal text-zinc-400">opsiyonel</span>
-                </label>
-                <select
-                  value={studentId}
-                  onChange={(e) => handleStudentChange(e.target.value)}
-                  className={cn(inputCls, "cursor-pointer")}
-                >
-                  <option value="">
-                    {studentsLoading ? "Yükleniyor..." : "Öğrenci seçin (opsiyonel)"}
-                  </option>
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-                {selectedStudent && (
-                  <div className="mt-2 rounded-xl border border-white/80 dark:border-border/60 bg-white/50 dark:bg-card/50 backdrop-blur-sm px-3 py-2.5 flex flex-wrap gap-1.5">
-                    {selectedStudent.birthDate && (
-                      <span className="rounded-full bg-white border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600">
-                        {calcAge(selectedStudent.birthDate)}
-                      </span>
-                    )}
-                    <span className={cn("rounded-full px-2 py-0.5 text-xs border", WORK_AREA_COLOR[selectedStudent.workArea] ?? "bg-zinc-100 text-zinc-600")}>
-                      {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
-                    </span>
-                    {selectedStudent.diagnosis && (
-                      <span className="rounded-full bg-white border border-zinc-200 px-2 py-0.5 text-xs text-zinc-600 truncate max-w-full">
-                        {selectedStudent.diagnosis}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Eşleştirme Türü */}
-              <div>
-                <label className={labelCls}>Eşleştirme Türü</label>
-                <div className="space-y-1.5">
-                  {MATCH_TYPE_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setMatchType(opt.value)}
-                      className={cn(
-                        "w-full rounded-lg border px-3 py-2 text-left transition-colors",
-                        matchType === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      <span className="block text-xs font-semibold">{opt.label}</span>
-                      <span className="block text-[10px] text-zinc-400">{opt.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Çift Sayısı */}
-              <div>
-                <label className={labelCls}>Çift Sayısı</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {PAIR_COUNTS.map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => setPairCount(n)}
-                      className={cn(
-                        "rounded-lg border py-2.5 text-xs font-semibold transition-colors",
-                        pairCount === n
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Zorluk */}
-              <div>
-                <label className={labelCls}>Zorluk Seviyesi</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {DIFFICULTY_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setDifficulty(opt.value)}
-                      className={cn(
-                        "rounded-lg border px-2 py-2.5 text-left transition-colors",
-                        difficulty === opt.value
-                          ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                          : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                      )}
-                    >
-                      <span className="block text-xs font-semibold text-center">{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tema */}
-              <div>
-                <label className={labelCls}>
-                  Tema
-                  <span className="ml-1.5 text-[10px] font-normal text-zinc-400">opsiyonel</span>
-                </label>
-                <select
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
-                  className={cn(inputCls, "cursor-pointer")}
-                >
-                  {THEME_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Müfredat Hedefi */}
-              {availableGoals.length > 0 && (
-                <div>
-                  <label className={labelCls}>
-                    Müfredat Hedefi
-                    <span className="ml-1.5 text-[10px] font-normal text-zinc-400">opsiyonel</span>
-                  </label>
-                  <select
-                    value={goalId}
-                    onChange={(e) => setGoalId(e.target.value)}
-                    className={cn(inputCls, "cursor-pointer")}
-                  >
-                    <option value="">Hedef seçin (opsiyonel)</option>
-                    {availableGoals.map((g) => (
-                      <option key={g.id} value={g.id}>{g.title}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-lg bg-[#FE703A] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? "Üretiliyor..." : "Eşleştirme Kartları Üret"}
-              </button>
-              <p className="text-center text-xs text-zinc-400">15 kredi kullanılacak</p>
-            </form>
-          </div>
-        </div>
-
-        {/* ── Sağ: Sonuç ── */}
-        <div className="flex flex-col md:min-h-0">
-          <div className="overflow-y-auto no-scrollbar flex flex-col md:flex-1 md:min-h-0">
-            {loading ? (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-                <div className="text-center space-y-4 px-8">
-                  <div className="mx-auto h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
-                  <LoadingMessages />
-                </div>
-              </div>
-            ) : game ? (
-              <>
-                {/* View toggle + badges */}
-                <div className="mb-3 flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex flex-wrap gap-1.5">
-                    <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-semibold", MATCH_TYPE_COLOR[game.matchType] ?? "bg-zinc-100 text-zinc-600 border-zinc-200")}>
-                      {MATCH_TYPE_LABEL[game.matchType] ?? game.matchType}
-                    </span>
-                    <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-semibold", DIFFICULTY_COLOR[game.difficulty] ?? "bg-zinc-100 text-zinc-600 border-zinc-200")}>
-                      {DIFFICULTY_LABEL[game.difficulty] ?? game.difficulty}
-                    </span>
-                    <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-0.5 text-xs text-zinc-600">
-                      {pairs.length} çift
-                    </span>
-                    {game.theme && (
-                      <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-0.5 text-xs text-zinc-600">
-                        {game.theme}
-                      </span>
-                    )}
-                  </div>
-                  {/* View toggle */}
-                  <div className="flex items-center gap-1 rounded-lg bg-zinc-100 p-1">
-                    <button
-                      type="button"
-                      onClick={() => setViewMode("table")}
-                      className={cn(
-                        "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
-                        viewMode === "table" ? "bg-white shadow-sm text-zinc-800" : "text-zinc-500 hover:text-zinc-700"
-                      )}
-                    >
-                      <LayoutList className="h-3.5 w-3.5" />
-                      Tablo
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewMode("cards")}
-                      className={cn(
-                        "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
-                        viewMode === "cards" ? "bg-white shadow-sm text-zinc-800" : "text-zinc-500 hover:text-zinc-700"
-                      )}
-                    >
-                      <LayoutGrid className="h-3.5 w-3.5" />
-                      Kartlar
-                    </button>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl p-5 shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-                  <h2 className="text-base font-bold text-[#023435] dark:text-foreground mb-4">{game.title}</h2>
-
-                  {viewMode === "table" ? (
-                    /* Table view */
-                    <div className="rounded-xl border border-zinc-200 overflow-hidden mb-5">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="bg-zinc-50 border-b border-zinc-200">
-                            <th className="w-8 py-2.5 px-3 text-left text-xs font-semibold text-zinc-400">#</th>
-                            <th className="py-2.5 px-3 text-left text-xs font-semibold text-zinc-600">Kart A</th>
-                            <th className="py-2.5 px-3 text-left text-xs font-semibold text-zinc-600">Kart B</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {pairs.map((pair: MatchingPair, i: number) => (
-                            <tr key={pair.id ?? i} className={cn("border-b border-zinc-100 last:border-0", i % 2 === 1 && "bg-zinc-50/50")}>
-                              <td className="py-2.5 px-3 text-xs text-zinc-400 font-medium">{pair.id ?? i + 1}</td>
-                              <td className="py-2.5 px-3 text-sm text-zinc-800 font-medium">{pair.cardA}</td>
-                              <td className="py-2.5 px-3 text-sm text-zinc-600">
-                                {pair.cardB}
-                                {pair.hint && (
-                                  <span className="ml-1.5 text-[10px] text-zinc-400 italic">({pair.hint})</span>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    /* Cards / printable view */
-                    <div className="mb-5">
-                      <PrintableCards game={game} />
-                    </div>
-                  )}
-
-                  {/* Instructions */}
-                  {game.instructions && (
-                    <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 flex gap-3 mb-4">
-                      <Info className="h-4 w-4 text-zinc-400 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-semibold text-zinc-500 mb-1">Nasıl Oynanır</p>
-                        <p className="text-sm text-zinc-700 leading-relaxed">{game.instructions}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Adaptations */}
-                  {game.adaptations && (
-                    <div className="rounded-xl border border-zinc-200 bg-white p-4 mb-4">
-                      <p className="text-xs font-semibold text-zinc-500 mb-1.5">Uyarlama Önerileri</p>
-                      <p className="text-sm text-zinc-600 leading-relaxed">{game.adaptations}</p>
-                    </div>
-                  )}
-
-                  {/* Expert notes */}
-                  {game.expertNotes && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 flex gap-3 mb-4">
-                      <Lightbulb className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-semibold text-amber-800 mb-1">Uzman Notları</p>
-                        <p className="text-xs text-amber-700 leading-relaxed">{game.expertNotes}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Answer key */}
-                  <div className="rounded-xl border border-zinc-200 overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setShowAnswers((v) => !v)}
-                      className="w-full flex items-center justify-between px-4 py-3 text-xs font-semibold text-zinc-600 bg-zinc-50 hover:bg-zinc-100 transition-colors"
-                    >
-                      Cevap Anahtarı
-                      {showAnswers ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                    </button>
-                    {showAnswers && (
-                      <div className="p-4 space-y-1.5 bg-white">
-                        {pairs.map((pair: MatchingPair, i: number) => (
-                          <div key={i} className="flex items-center gap-2 text-xs text-zinc-600">
-                            <span className="w-5 shrink-0 font-semibold text-zinc-400">{pair.id ?? i + 1}.</span>
-                            <span className="font-medium text-zinc-800">{pair.cardA}</span>
-                            <span className="text-zinc-400">→</span>
-                            <span>{pair.cardB}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Action bar */}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    onClick={handleDownloadTable}
-                    disabled={downloading}
-                    className="flex items-center gap-1.5 rounded-lg bg-[#FE703A] px-4 py-2 text-xs font-semibold text-white hover:bg-[#FE703A]/90 disabled:opacity-60 transition-colors"
-                  >
-                    PDF İndir — Tablo
-                  </button>
-                  <button
-                    onClick={handleDownloadCards}
-                    disabled={downloading}
-                    className="flex items-center gap-1.5 rounded-lg border border-[#023435]/30 bg-[#023435]/5 px-4 py-2 text-xs font-semibold text-[#023435] dark:text-foreground hover:bg-[#023435]/10 dark:hover:bg-accent/50 disabled:opacity-60 transition-colors"
-                  >
-                    PDF İndir — Kesme Kartları
-                  </button>
-                  {savedCardId && (
-                    <Link
-                      href="/cards"
-                      className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
-                    >
-                      <Library className="h-3.5 w-3.5" />
-                      Kütüphane
-                    </Link>
-                  )}
-                  <button
-                    onClick={handleReset}
-                    className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
-                  >
-                    <RefreshCw className="h-3.5 w-3.5" />
-                    Yeni Oyun
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-[#023435]/15 bg-white/40 dark:bg-card/40 backdrop-blur-xl">
-                <div className="text-center px-8 space-y-2">
-                  <div className="text-3xl">🃏</div>
-                  <p className="text-sm font-medium text-zinc-500">Parametreleri ayarlayın</p>
-                  <p className="text-xs text-zinc-400">Üretilen kartlar burada görünecek</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </main>
-    </div>
+    <ToolShell
+      title="Kelime Eşleştirme Oyunu"
+      description="Dil gelişimi için yazdırılabilir eşleştirme kartları ve oyunları üretin."
+      form={form}
+      result={result}
+    />
   );
 }

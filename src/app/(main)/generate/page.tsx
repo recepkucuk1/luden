@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { CardGeneratorForm } from "@/components/cards/CardGeneratorForm";
 import { CardPreview } from "@/components/cards/CardPreview";
 import { AssignStudentsModal } from "@/components/cards/AssignStudentsModal";
+import { PBtn, PCard } from "@/components/poster";
 import type { GeneratedCard } from "@/lib/prompts";
 
 const LOADING_MSGS = [
@@ -47,12 +47,56 @@ function LoadingMessages() {
   }, []);
 
   return (
-    <div className="flex h-12 items-center justify-center">
+    <div style={{ height: 48, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <p
-        className="text-sm text-zinc-500 transition-opacity duration-300 max-w-xs text-center"
-        style={{ opacity: visible ? 1 : 0 }}
+        style={{
+          fontSize: 13,
+          color: "var(--poster-ink-2)",
+          fontWeight: 600,
+          maxWidth: 320,
+          textAlign: "center",
+          opacity: visible ? 1 : 0,
+          transition: "opacity .3s",
+          fontFamily: "var(--font-display)",
+          margin: 0,
+        }}
       >
         {LOADING_MSGS[index]}
+      </p>
+    </div>
+  );
+}
+
+function PanelHeader({ title, subtitle, right }: { title: string; subtitle: string; right?: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        marginBottom: 14,
+        padding: "12px 16px",
+        background: "var(--poster-panel)",
+        border: "2px solid var(--poster-ink)",
+        borderRadius: 14,
+        boxShadow: "var(--poster-shadow-sm)",
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <h2
+          style={{
+            fontSize: 17,
+            fontWeight: 800,
+            color: "var(--poster-ink)",
+            letterSpacing: "-.02em",
+            margin: 0,
+            fontFamily: "var(--font-display)",
+          }}
+        >
+          {title}
+        </h2>
+        {right}
+      </div>
+      <p style={{ fontSize: 13, color: "var(--poster-ink-2)", margin: "2px 0 0", fontFamily: "var(--font-display)" }}>
+        {subtitle}
       </p>
     </div>
   );
@@ -87,127 +131,173 @@ function HomeContent() {
 
   return (
     <div
-      className="w-full flex flex-col relative md:h-[calc(100vh-0px)] md:overflow-hidden dark:bg-gray-900"
-      style={{ background: "linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%)" }}
+      className="poster-scope"
+      style={{
+        width: "100%",
+        minHeight: "100%",
+        background: "var(--poster-bg)",
+        padding: "20px 20px 32px",
+        fontFamily: "var(--font-display)",
+      }}
     >
-      <style jsx>{`
-        div {
-          --bg-start: #f0f7f7;
-          --bg-mid: #e8f4f4;
-          --bg-end: #f5fafa;
-        }
-        :global(.dark) div {
-          --bg-start: #111827;
-          --bg-mid: #111827;
-          --bg-end: #111827;
-        }
-      `}</style>
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#107996]/6 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FE703A]/5 rounded-full blur-[150px] pointer-events-none translate-y-1/2 -translate-x-1/2" />
-    <main className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:h-full flex flex-col">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr] md:flex-1 md:min-h-0">
-        {/* Sol: Form */}
-        <div className="flex flex-col md:h-full md:min-h-0">
-          <div className="mb-4 shrink-0 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-2xl border border-white/70 dark:border-white/10 px-4 py-3 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-extrabold text-[#023435] dark:text-zinc-100 tracking-tight">Öğrenme Kartı Oluştur</h2>
-              {studentName && (
-                <Link
-                  href="/students"
-                  className="text-xs text-[#023435]/50 dark:text-muted-foreground hover:text-[#023435] dark:hover:text-foreground dark:text-foreground underline"
-                >
-                  öğrencilere dön
-                </Link>
-              )}
-            </div>
-            <p className="text-sm text-[#023435]/60 dark:text-zinc-400 mt-0.5">Parametreleri seç, AI öğrenme kartını üretsin.</p>
-          </div>
-          <div className="rounded-2xl border border-white/80 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar md:flex-1">
-            <CardGeneratorForm
-              key={formKey}
-              onCardGenerated={handleCardGenerated}
-              onLoading={setLoading}
-              onCardIdGenerated={setGeneratedCardId}
-              studentId={studentId}
-              studentName={studentName}
-              studentBirthDate={studentBirthDate}
+      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 380px) minmax(0, 1fr)",
+            gap: 24,
+          }}
+        >
+          {/* Sol: Form */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <PanelHeader
+              title="Öğrenme Kartı Oluştur"
+              subtitle="Parametreleri seç, AI öğrenme kartını üretsin."
+              right={
+                studentName ? (
+                  <a
+                    href="/students"
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: "var(--poster-accent)",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    öğrencilere dön
+                  </a>
+                ) : undefined
+              }
             />
+            <PCard rounded={18} style={{ padding: 20, background: "var(--poster-panel)" }}>
+              <CardGeneratorForm
+                key={formKey}
+                onCardGenerated={handleCardGenerated}
+                onLoading={setLoading}
+                onCardIdGenerated={setGeneratedCardId}
+                studentId={studentId}
+                studentName={studentName}
+                studentBirthDate={studentBirthDate}
+              />
+            </PCard>
           </div>
-        </div>
 
-        {/* Sağ: Önizleme */}
-        <div className="flex flex-col md:h-full md:min-h-0">
-          <div className="mb-4 shrink-0 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-2xl border border-white/70 dark:border-white/10 px-4 py-3 shadow-[0_2px_8px_rgba(2,52,53,0.04)]">
-            <h2 className="text-lg font-extrabold text-[#023435] dark:text-zinc-100 tracking-tight">Kart Önizleme</h2>
-            <p className="text-sm text-[#023435]/60 dark:text-zinc-400 mt-0.5">
-              {card ? "Üretilen öğrenme kartı aşağıda görüntüleniyor." : "Kart üretildiğinde burada görünecek."}
-            </p>
-          </div>
+          {/* Sağ: Önizleme */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <PanelHeader
+              title="Kart Önizleme"
+              subtitle={card ? "Üretilen öğrenme kartı aşağıda görüntüleniyor." : "Kart üretildiğinde burada görünecek."}
+            />
 
-          <div className="overflow-y-auto no-scrollbar flex flex-col md:flex-1 md:min-h-0">
-            {loading ? (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border border-white/80 dark:border-border/60 bg-white/60 dark:bg-card/60 backdrop-blur-xl shadow-[0_4px_24px_rgba(2,52,53,0.04)]">
-                <div className="text-center space-y-4 px-8">
-                  <div className="mx-auto h-10 w-10 rounded-full border-4 border-[#FE703A]/20 border-t-[#FE703A] animate-spin" />
-                  <LoadingMessages />
-                </div>
-              </div>
-            ) : card ? (
-              <div className="flex flex-col gap-4 md:flex-1 md:min-h-0">
-                <div className="rounded-2xl border border-white/80 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-5 sm:p-6 shadow-[0_4px_24px_rgba(2,52,53,0.04)] overflow-y-auto no-scrollbar min-h-[500px] md:flex-1 md:min-h-0">
-                  <CardPreview card={card} />
-                </div>
-                {/* Sonraki adım CTA'ları */}
-                <div className="rounded-2xl border border-white/80 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl p-4 shadow-[0_4px_24px_rgba(2,52,53,0.04)] shrink-0">
-                  <p className="text-xs font-semibold text-zinc-400 mb-3">Sonraki adım</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Link
-                      href="/cards"
-                      className="flex-1 min-w-[140px] rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition-colors text-center"
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {loading ? (
+                <PCard
+                  rounded={18}
+                  style={{
+                    minHeight: 400,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "var(--poster-panel)",
+                  }}
+                >
+                  <div style={{ textAlign: "center", padding: "0 32px" }}>
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        margin: "0 auto 16px",
+                        borderRadius: "50%",
+                        border: "4px solid rgba(254,112,58,.2)",
+                        borderTopColor: "var(--poster-accent)",
+                        animation: "spin 1s linear infinite",
+                      }}
+                    />
+                    <LoadingMessages />
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                  </div>
+                </PCard>
+              ) : card ? (
+                <>
+                  <PCard rounded={18} style={{ padding: 20, background: "var(--poster-panel)", minHeight: 500 }}>
+                    <CardPreview card={card} />
+                  </PCard>
+                  <PCard rounded={18} style={{ padding: 16, background: "var(--poster-panel)" }}>
+                    <p
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 800,
+                        color: "var(--poster-ink-3)",
+                        textTransform: "uppercase",
+                        letterSpacing: ".12em",
+                        margin: "0 0 10px",
+                      }}
                     >
-                      Kart Kütüphanesi
-                    </Link>
-                    {generatedCardId && (
-                      <button
-                        onClick={() => setShowAssign(true)}
-                        className="flex-1 min-w-[140px] rounded-lg bg-[#FE703A] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#FE703A]/90 transition-colors"
+                      Sonraki adım
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      <PBtn as="a" href="/cards" variant="white" size="md" style={{ flex: "1 1 140px", justifyContent: "center" }}>
+                        Kart Kütüphanesi
+                      </PBtn>
+                      {generatedCardId && (
+                        <PBtn
+                          type="button"
+                          variant="accent"
+                          size="md"
+                          onClick={() => setShowAssign(true)}
+                          style={{ flex: "1 1 140px", justifyContent: "center" }}
+                        >
+                          Öğrenciye Ata
+                        </PBtn>
+                      )}
+                      <PBtn
+                        type="button"
+                        variant="white"
+                        size="md"
+                        onClick={handleNewCard}
+                        style={{ flex: "1 1 140px", justifyContent: "center" }}
                       >
-                        Öğrenciye Ata
-                      </button>
-                    )}
-                    <button
-                      onClick={handleNewCard}
-                      className="flex-1 min-w-[140px] rounded-lg border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:border-zinc-300 transition-colors"
-                    >
-                      Yeni Kart Üret
-                    </button>
+                        Yeni Kart Üret
+                      </PBtn>
+                    </div>
+                  </PCard>
+                </>
+              ) : (
+                <div
+                  style={{
+                    minHeight: 400,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "var(--poster-bg-2)",
+                    border: "2px dashed var(--poster-ink-3)",
+                    borderRadius: 18,
+                  }}
+                >
+                  <div style={{ textAlign: "center", padding: "0 32px" }}>
+                    <div style={{ fontSize: 40, marginBottom: 8 }}>🗂️</div>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink-2)", margin: 0 }}>
+                      Henüz kart üretilmedi
+                    </p>
+                    <p style={{ fontSize: 12, color: "var(--poster-ink-3)", margin: "4px 0 0" }}>
+                      Sol taraftan parametreleri seçip &quot;Kart Üret&quot; butonuna bas.
+                    </p>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex flex-1 min-h-[400px] items-center justify-center rounded-2xl border-2 border-dashed border-[#023435]/15 bg-white/40 dark:bg-card/40 backdrop-blur-xl">
-                <div className="text-center space-y-2 px-8">
-                  <div className="text-4xl">🗂️</div>
-                  <p className="text-sm font-medium text-zinc-500">Henüz kart üretilmedi</p>
-                  <p className="text-xs text-zinc-400">
-                    Sol taraftan parametreleri seçip &quot;Kart Üret&quot; butonuna bas.
-                  </p>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {showAssign && generatedCardId && card && (
-        <AssignStudentsModal
-          cardId={generatedCardId}
-          cardTitle={card.title as string}
-          onClose={() => setShowAssign(false)}
-        />
-      )}
-    </main>
-  </div>
+        {showAssign && generatedCardId && card && (
+          <AssignStudentsModal
+            cardId={generatedCardId}
+            cardTitle={card.title as string}
+            onClose={() => setShowAssign(false)}
+          />
+        )}
+      </div>
+    </div>
   );
 }
 
