@@ -134,7 +134,9 @@ export const Sidebar = () => {
       <nav
         className={`poster-scope fixed md:sticky top-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
         style={{
-          height: "100vh",
+          height: "100dvh",
+          maxHeight: "100dvh",
+          overflowY: "auto",
           flexShrink: 0,
           width,
           background: "var(--poster-panel)",
