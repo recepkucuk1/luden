@@ -33,7 +33,7 @@ export function PosterHeader() {
         borderBottom: "2px solid var(--poster-ink)",
         boxShadow: scrolled ? "0 4px 0 var(--poster-ink)" : "none",
         transition: "box-shadow .2s cubic-bezier(.16,1,.3,1), padding .2s cubic-bezier(.16,1,.3,1)",
-        padding: scrolled ? "10px 24px" : "14px 24px",
+        padding: scrolled ? "10px clamp(14px, 4vw, 24px)" : "14px clamp(14px, 4vw, 24px)",
       }}
     >
       <div
@@ -53,9 +53,10 @@ export function PosterHeader() {
             width={200}
             height={72}
             priority
+            className="poster-logo-img"
             style={{
               width: "auto",
-              height: scrolled ? 44 : 56,
+              height: scrolled ? 36 : 44,
               transition: "height .2s cubic-bezier(.16,1,.3,1)",
             }}
           />
@@ -117,8 +118,8 @@ export function PosterHeader() {
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              height: 36,
-              width: 36,
+              height: 44,
+              width: 44,
               borderRadius: 10,
               border: "2px solid var(--poster-ink)",
               background: "transparent",
@@ -200,6 +201,9 @@ export function PosterHeader() {
           }
           :global(.poster-mobile-toggle) {
             display: none !important;
+          }
+          :global(.poster-logo-img) {
+            height: ${scrolled ? "44px" : "56px"} !important;
           }
         }
         @media (min-width: 640px) {

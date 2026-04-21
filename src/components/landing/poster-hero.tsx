@@ -164,7 +164,7 @@ export function PosterHero() {
         style={{
           position: "relative",
           zIndex: 3,
-          padding: "64px 24px 88px",
+          padding: "clamp(40px, 8vw, 64px) clamp(16px, 5vw, 24px) clamp(56px, 10vw, 88px)",
           maxWidth: 1200,
           margin: "0 auto",
         }}
@@ -211,8 +211,8 @@ export function PosterHero() {
 
             <p
               style={{
-                margin: "28px 0 36px",
-                fontSize: 19,
+                margin: "24px 0 32px",
+                fontSize: "clamp(15px, 4vw, 19px)",
                 lineHeight: 1.5,
                 maxWidth: 520,
                 color: "rgba(14,30,38,.7)",
@@ -277,7 +277,7 @@ export function PosterHero() {
           display: none;
         }
         .poster-hero-h1 {
-          font-size: 56px;
+          font-size: clamp(36px, 10vw, 56px);
         }
         @media (min-width: 768px) {
           .poster-hero-grid {
@@ -287,7 +287,7 @@ export function PosterHero() {
             display: block;
           }
           .poster-hero-h1 {
-            font-size: 84px;
+            font-size: clamp(56px, 7vw, 84px);
           }
         }
         @keyframes spin {

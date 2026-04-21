@@ -494,7 +494,7 @@ export default function GoalTrackerPage() {
       style={{
         minHeight: "100%",
         background: "var(--poster-bg)",
-        padding: "20px 20px 32px",
+        padding: "clamp(14px, 3.5vw, 20px) clamp(14px, 3.5vw, 20px) clamp(24px, 5vw, 32px)",
         fontFamily: "var(--font-display)",
       }}
     >
@@ -572,7 +572,7 @@ export default function GoalTrackerPage() {
                 borderRadius: 12,
                 background: "var(--poster-bg-2)",
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(110px, 100%), 1fr))",
                 gap: 12,
               }}
             >
@@ -641,7 +641,7 @@ export default function GoalTrackerPage() {
         {selectedId && !loading && data && stats && data.modules.length > 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {/* Stats */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(120px, 100%), 1fr))", gap: 12 }}>
               <StatCard label="Toplam" value={stats.total}    pct={100} color="var(--poster-blue)"   Icon={Target}      />
               <StatCard label="Kazanıldı"    value={stats.mastered} pct={stats.total ? Math.round(stats.mastered/stats.total*100) : 0} color="var(--poster-green)"  Icon={CheckCircle} />
               <StatCard label="Devam Eden"   value={stats.active}   pct={stats.total ? Math.round(stats.active/stats.total*100)   : 0} color="var(--poster-accent)" Icon={Clock}       />
@@ -759,7 +759,7 @@ export default function GoalTrackerPage() {
 
                     {isOpen && (
                       <div style={{ borderTop: "2px solid var(--poster-ink)", overflowX: "auto" }}>
-                        <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse", minWidth: 720 }}>
+                        <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse", minWidth: 560 }}>
                           <thead>
                             <tr style={{ background: "var(--poster-bg-2)", borderBottom: "2px solid var(--poster-ink)" }}>
                               <SortableTh label="Kod"        sortKey="code"      current={sortKey} dir={sortDir} onClick={toggleSort} width={64} />
@@ -803,8 +803,8 @@ export default function GoalTrackerPage() {
                                                 aria-label={opt.label}
                                                 aria-pressed={active}
                                                 style={{
-                                                  width: 26,
-                                                  height: 26,
+                                                  width: 36,
+                                                  height: 36,
                                                   borderRadius: 8,
                                                   border: "2px solid var(--poster-ink)",
                                                   background: opt.color,
@@ -835,8 +835,8 @@ export default function GoalTrackerPage() {
                                         onClick={() => setEditNote(noteOpen ? null : goal.id)}
                                         title={progress?.notes ? "Notu görüntüle / düzenle" : "Not ekle"}
                                         style={{
-                                          width: 28,
-                                          height: 28,
+                                          width: 36,
+                                          height: 36,
                                           borderRadius: 8,
                                           border: "2px solid var(--poster-ink)",
                                           background: progress?.notes ? "var(--poster-yellow)" : "#fff",

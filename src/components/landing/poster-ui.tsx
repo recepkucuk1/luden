@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 /**
  * Poster / neo-brutalist UI primitives — kept local to the landing + auth routes.
@@ -93,9 +94,20 @@ const BTN_SIZES: Record<
   BtnSize,
   { height: number; padding: string; fontSize: number; radius: number; shadowY: number }
 > = {
-  sm: { height: 36, padding: "0 14px", fontSize: 13, radius: 12, shadowY: 3 },
+  sm: { height: 44, padding: "0 14px", fontSize: 13, radius: 12, shadowY: 3 },
   md: { height: 48, padding: "0 22px", fontSize: 14.5, radius: 14, shadowY: 4 },
   lg: { height: 58, padding: "0 28px", fontSize: 16, radius: 16, shadowY: 5 },
+};
+
+// Mobile-compact overrides: tighten padding, reduce shadow depth, but keep
+// height at or above 44px so touch targets stay within WCAG guidance.
+const BTN_SIZES_MOBILE: Record<
+  BtnSize,
+  { height: number; padding: string; fontSize: number; radius: number; shadowY: number }
+> = {
+  sm: { height: 44, padding: "0 12px", fontSize: 13, radius: 12, shadowY: 2 },
+  md: { height: 46, padding: "0 16px", fontSize: 14, radius: 14, shadowY: 3 },
+  lg: { height: 52, padding: "0 20px", fontSize: 15, radius: 16, shadowY: 3 },
 };
 
 type PBtnProps = {
@@ -120,7 +132,8 @@ export function PBtn({
   ...rest
 }: PBtnProps) {
   const v = BTN_VARIANTS[variant];
-  const s = BTN_SIZES[size];
+  const isMobile = useMediaQuery("(max-width: 640px)");
+  const s = isMobile ? BTN_SIZES_MOBILE[size] : BTN_SIZES[size];
   const baseShadow = `0 ${s.shadowY}px 0 ${v.shadow}`;
 
   const commonStyle: React.CSSProperties = {
@@ -183,21 +196,26 @@ export function PCard({
   rotate = 0,
   rounded = 20,
   style,
+  keepRotateOnMobile = false,
 }: {
   children: React.ReactNode;
   color?: string;
   rotate?: number;
   rounded?: number;
   style?: React.CSSProperties;
+  keepRotateOnMobile?: boolean;
 }) {
+  const isMobile = useMediaQuery("(max-width: 640px)");
+  const effectiveRotate = isMobile && !keepRotateOnMobile ? 0 : rotate;
+  const shadowY = isMobile ? 3 : 6;
   return (
     <div
       style={{
         background: color,
         borderRadius: rounded,
         border: "2px solid #0E1E26",
-        boxShadow: "0 6px 0 #0E1E26",
-        transform: rotate ? `rotate(${rotate}deg)` : undefined,
+        boxShadow: `0 ${shadowY}px 0 #0E1E26`,
+        transform: effectiveRotate ? `rotate(${effectiveRotate}deg)` : undefined,
         ...style,
       }}
     >

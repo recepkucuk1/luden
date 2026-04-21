@@ -827,7 +827,7 @@ function HowItWorksCarousel() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25 }}
-              style={{ fontSize: 36, fontWeight: 700, color: "var(--poster-ink)", marginBottom: 8, letterSpacing: "-.02em", lineHeight: 1.1 }}
+              style={{ fontSize: "clamp(24px, 6vw, 36px)", fontWeight: 700, color: "var(--poster-ink)", marginBottom: 8, letterSpacing: "-.02em", lineHeight: 1.1 }}
             >
               {currentTool.headline}
             </motion.h2>
@@ -1140,7 +1140,7 @@ function FaqSection() {
           </p>
           <h2
             style={{
-              fontSize: 40,
+              fontSize: "clamp(26px, 7vw, 40px)",
               fontWeight: 700,
               color: "var(--poster-ink)",
               marginBottom: 12,

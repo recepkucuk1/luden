@@ -110,17 +110,18 @@ export function PModal({
                 onClick={onClose}
                 aria-label="Kapat"
                 style={{
-                  width: 32,
-                  height: 32,
+                  width: 40,
+                  height: 40,
                   border: "2px solid var(--poster-ink)",
                   borderRadius: 8,
                   background: "var(--poster-panel)",
                   boxShadow: "0 2px 0 var(--poster-ink)",
                   cursor: "pointer",
-                  fontSize: 16,
+                  fontSize: 20,
                   fontWeight: 800,
                   color: "var(--poster-ink)",
                   lineHeight: 1,
+                  flexShrink: 0,
                 }}
               >
                 ×

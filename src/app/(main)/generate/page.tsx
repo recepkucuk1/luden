@@ -136,12 +136,13 @@ function HomeContent() {
         width: "100%",
         minHeight: "100%",
         background: "var(--poster-bg)",
-        padding: "20px 20px 32px",
+        padding: "clamp(14px, 3.5vw, 20px) clamp(14px, 3.5vw, 20px) clamp(24px, 5vw, 32px)",
         fontFamily: "var(--font-display)",
       }}
     >
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
         <div
+          className="poster-tool-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0, 380px) minmax(0, 1fr)",

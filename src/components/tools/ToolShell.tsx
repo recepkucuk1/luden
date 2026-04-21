@@ -19,7 +19,7 @@ export function ToolShell({ title, description, form, result, formWidth = 380 }:
       style={{
         minHeight: "100%",
         background: "var(--poster-bg)",
-        padding: "20px 20px 32px",
+        padding: "clamp(14px, 3.5vw, 20px) clamp(14px, 3.5vw, 20px) clamp(24px, 5vw, 32px)",
         fontFamily: "var(--font-display)",
       }}
     >
@@ -44,7 +44,7 @@ export function ToolShell({ title, description, form, result, formWidth = 380 }:
           </Link>
           <h1
             style={{
-              fontSize: 22,
+              fontSize: "clamp(18px, 5vw, 22px)",
               fontWeight: 800,
               color: "var(--poster-ink)",
               letterSpacing: "-.02em",
@@ -56,8 +56,9 @@ export function ToolShell({ title, description, form, result, formWidth = 380 }:
           <p style={{ fontSize: 13, color: "var(--poster-ink-2)", margin: "3px 0 0" }}>{description}</p>
         </PCard>
 
-        {/* Two-column layout */}
+        {/* Two-column layout — collapses to 1 col on mobile */}
         <div
+          className="poster-tool-grid"
           style={{
             display: "grid",
             gridTemplateColumns: `minmax(0, ${formWidth}px) minmax(0, 1fr)`,
@@ -72,6 +73,13 @@ export function ToolShell({ title, description, form, result, formWidth = 380 }:
           <div style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 12 }}>{result}</div>
         </div>
       </div>
+      <style>{`
+        @media (max-width: 900px) {
+          .poster-tool-grid {
+            grid-template-columns: minmax(0, 1fr) !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -60,11 +60,33 @@ input, select, textarea {
   --poster-radius-pill: 999px;
 }
 
+/* Shrink offset shadows on narrow viewports so cards/inputs stop blowing past
+   the viewport edge. Overrides apply to both light and dark poster scopes. */
+@media (max-width: 640px) {
+  :root,
+  .poster-scope,
+  .poster-scope.dark,
+  .dark .poster-scope {
+    --poster-shadow-sm: 0 1px 0 var(--poster-ink);
+    --poster-shadow-md: 0 2px 0 var(--poster-ink);
+    --poster-shadow-lg: 0 3px 0 var(--poster-ink);
+  }
+}
+
+/* Collapse two-column poster tool / dashboard layouts to a single column on
+   narrow viewports so right-hand panels stop overflowing the screen. */
+@media (max-width: 900px) {
+  .poster-tool-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
 /* Scope: poster-themed pages can live in both light and dark modes.
    Re-declares shadcn tokens so descendant components stay on poster palette. */
 .poster-scope {
   background: var(--poster-bg);
   color: var(--poster-ink);
+  overflow-x: clip;
   font-family: var(--font-display), system-ui, sans-serif;
 
   /* shadcn token mapping — light */
@@ -356,11 +378,10 @@ input, select, textarea {
   }
   body {
     @apply bg-background text-foreground;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
   html {
     @apply font-sans;
-    overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: var(--color-muted-foreground) transparent;
   }

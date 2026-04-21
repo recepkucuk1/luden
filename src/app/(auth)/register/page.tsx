@@ -98,7 +98,7 @@ export default function RegisterPage() {
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 700,
-            fontSize: 30,
+            fontSize: "clamp(24px, 6vw, 30px)",
             letterSpacing: "-.02em",
             color: "var(--poster-ink)",
             margin: 0,

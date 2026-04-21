@@ -203,7 +203,7 @@ export function PosterAuthShell({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "48px 24px",
+            padding: "clamp(24px, 6vw, 48px) clamp(16px, 5vw, 24px)",
             background: "var(--poster-bg)",
           }}
         >

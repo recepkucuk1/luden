@@ -137,7 +137,7 @@ function StatCard({
         background: "var(--poster-panel)",
         border: "2px solid var(--poster-ink)",
         borderRadius: 18,
-        boxShadow: "0 6px 0 var(--poster-ink)",
+        boxShadow: "var(--poster-shadow-lg)",
         fontFamily: "var(--font-display)",
       }}
     >
@@ -163,7 +163,7 @@ function StatCard({
         {label}
       </p>
       <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 4 }}>
-        <p style={{ fontSize: 30, fontWeight: 800, color: "var(--poster-ink)", letterSpacing: "-.02em", margin: 0 }}>
+        <p style={{ fontSize: "clamp(22px, 5vw, 30px)", fontWeight: 800, color: "var(--poster-ink)", letterSpacing: "-.02em", margin: 0 }}>
           <CountUp target={value} />
         </p>
         {suffix && (
@@ -183,7 +183,7 @@ function Panel({ children, style }: { children: React.ReactNode; style?: React.C
         background: "var(--poster-panel)",
         border: "2px solid var(--poster-ink)",
         borderRadius: 18,
-        boxShadow: "0 6px 0 var(--poster-ink)",
+        boxShadow: "var(--poster-shadow-lg)",
         fontFamily: "var(--font-display)",
         ...style,
       }}
@@ -274,7 +274,7 @@ export default function DashboardPage() {
       style={{
         flex: 1,
         background: "var(--poster-bg)",
-        padding: "24px 24px 48px",
+        padding: "clamp(16px, 4vw, 24px) clamp(16px, 4vw, 24px) clamp(32px, 6vw, 48px)",
         fontFamily: "var(--font-display)",
       }}
     >
@@ -289,7 +289,7 @@ export default function DashboardPage() {
       >
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 14 }}>
           <div>
-            <h1 style={{ fontSize: 32, fontWeight: 700, color: "var(--poster-ink)", letterSpacing: "-.02em", margin: 0 }}>
+            <h1 style={{ fontSize: "clamp(22px, 5.5vw, 32px)", fontWeight: 700, color: "var(--poster-ink)", letterSpacing: "-.02em", margin: 0 }}>
               Genel Bakış
             </h1>
             <p style={{ marginTop: 4, fontSize: 14, color: "var(--poster-ink-2)" }}>
@@ -326,7 +326,7 @@ export default function DashboardPage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(140px, 100%), 1fr))",
           gap: 16,
           marginBottom: 28,
         }}
@@ -338,6 +338,7 @@ export default function DashboardPage() {
 
       {/* Content grid */}
       <div
+        className="poster-tool-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
@@ -735,14 +736,6 @@ export default function DashboardPage() {
         </motion.div>
       </div>
 
-      {/* Responsive override: single column on < 960px */}
-      <style>{`
-        @media (max-width: 960px) {
-          .poster-scope [style*="grid-template-columns: minmax(0, 2fr) minmax(0, 1fr)"] {
-            grid-template-columns: minmax(0, 1fr) !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

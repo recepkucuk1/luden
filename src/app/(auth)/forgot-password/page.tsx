@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 700,
-                fontSize: 30,
+                fontSize: "clamp(24px, 6vw, 30px)",
                 letterSpacing: "-.02em",
                 color: "var(--poster-ink)",
                 margin: 0,
@@ -115,7 +115,7 @@ export default function ForgotPasswordPage() {
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 700,
-                fontSize: 26,
+                fontSize: "clamp(22px, 5.5vw, 26px)",
                 letterSpacing: "-.02em",
                 color: "var(--poster-ink)",
                 margin: 0,

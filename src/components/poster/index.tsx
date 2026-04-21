@@ -293,9 +293,10 @@ export function PSwitch({ checked, onChange, label, disabled, id }: PSwitchProps
         onClick={() => onChange(!checked)}
         style={{
           position: "relative",
-          width: 46,
-          height: 26,
+          width: 48,
+          height: 28,
           padding: 0,
+          minHeight: 28,
           background: checked ? "var(--poster-accent)" : "var(--poster-panel)",
           border: "2px solid var(--poster-ink)",
           borderRadius: 999,
