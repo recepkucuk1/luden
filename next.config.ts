@@ -3,6 +3,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   turbopack: {},
   serverExternalPackages: ["iyzipay"],
+  // iyzipay SDK loads its resource files via fs.readdirSync at runtime.
+  // Next.js tracer can't statically detect these, so we force-include them
+  // in the build output. Without this Hostinger reports:
+  //   ENOENT: ... node_modules/iyzipay/lib/resources
+  outputFileTracingIncludes: {
+    "/api/**/*": [
+      "./node_modules/iyzipay/lib/resources/**/*",
+      "./node_modules/iyzipay/lib/requests/**/*",
+    ],
+  },
   headers: async () => [
     {
       source: "/(.*)",
