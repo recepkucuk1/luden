@@ -39,8 +39,12 @@ function verifyIyzicoSignature(
     fields.customerReferenceCode;
 
   const expected = crypto.createHmac("sha256", secretKey).update(data, "utf8").digest("hex");
+  const provided = headerSig.toLowerCase();
 
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(headerSig.toLowerCase()));
+  // timingSafeEqual throws on length mismatch — short-circuit safely.
+  if (expected.length !== provided.length) return false;
+
+  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(provided));
 }
 
 /**
