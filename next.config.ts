@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   turbopack: {},
+  // Self-contained server bundle at .next/standalone/server.js — required
+  // for the iyzipay package to ship its full transitive dep tree alongside
+  // outputFileTracingIncludes below.
+  output: "standalone",
   serverExternalPackages: ["iyzipay"],
   // iyzipay SDK loads its resource files via fs.readdirSync at runtime.
   // Next.js tracer can't statically detect these, so we force-include them
