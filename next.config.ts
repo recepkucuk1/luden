@@ -9,10 +9,9 @@ const nextConfig: NextConfig = {
   //   ENOENT: ... node_modules/iyzipay/lib/resources
   outputFileTracingIncludes: {
     "/api/**/*": [
-      // Full iyzipay transitive dep tree. Generated via:
-      //   npm ls --all --omit=dev | sed -n '/iyzipay@/,/^[+`]/p' | ...
-      // Externalized packages aren't followed by Next's tracer, so every
-      // dep that postman-request reaches must be pinned explicitly.
+      // bluebird missed by npm ls (deduped) — added manually.
+      "./node_modules/bluebird/**/*",
+      // Earlier hand-pinned list:
       "./node_modules/iyzipay/**/*",
       "./node_modules/postman-request/**/*",
       "./node_modules/@postman/**/*",
