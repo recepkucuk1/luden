@@ -9,8 +9,10 @@ const nextConfig: NextConfig = {
   //   ENOENT: ... node_modules/iyzipay/lib/resources
   outputFileTracingIncludes: {
     "/api/**/*": [
-      "./node_modules/iyzipay/lib/resources/**/*",
-      "./node_modules/iyzipay/lib/requests/**/*",
+      // Whole iyzipay package — its constructor does fs.readdirSync on
+      // ./resources and the resource files require sibling helpers
+      // (../IyzipayResource, ../utils) that the tracer can't see.
+      "./node_modules/iyzipay/**/*",
     ],
   },
   headers: async () => [
