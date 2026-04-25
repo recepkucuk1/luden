@@ -170,15 +170,22 @@ export async function POST(req: NextRequest) {
             pdfEnabled: false,
           },
         });
-      } else if (
-        iyziEventType === "subscription.cancelled" ||
-        iyziEventType === "subscription.expired"
-      ) {
+      } else if (iyziEventType === "subscription.cancelled") {
+        // Period-end cancellation: mark cancelled but keep paid access until
+        // currentPeriodEnd. Therapist downgrade happens on subscription.expired.
         await tx.subscription.update({
           where: { id: subscription.id },
           data: {
-            status: iyziEventType === "subscription.cancelled" ? "CANCELLED" : "EXPIRED",
-            cancelledAt: new Date(),
+            status: "CANCELLED",
+            cancelledAt: subscription.cancelledAt ?? new Date(),
+          },
+        });
+      } else if (iyziEventType === "subscription.expired") {
+        await tx.subscription.update({
+          where: { id: subscription.id },
+          data: {
+            status: "EXPIRED",
+            cancelledAt: subscription.cancelledAt ?? new Date(),
           },
         });
 

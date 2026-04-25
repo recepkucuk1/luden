@@ -17,7 +17,17 @@ export interface PricingPlan {
   features: string[];
   description: string;
   buttonText: string;
+  /**
+   * Either `href` (Link navigation) or `onSelect` (in-page handler) must be
+   * supplied — `onSelect` takes precedence when both are present. Pass `null`
+   * for both to render a disabled button (e.g. "Mevcut Planınız").
+   */
   href: string | null;
+  /**
+   * Called with the active billing cycle when the user clicks the plan button.
+   * Use this for in-page modal flows instead of navigating to a checkout page.
+   */
+  onSelect?: (cycle: "monthly" | "yearly") => void;
   isPopular: boolean;
   customPriceLabel?: string;
 }
@@ -366,7 +376,41 @@ export function Pricing({
                 }}
               />
 
-              {plan.href ? (
+              {plan.onSelect ? (
+                <button
+                  type="button"
+                  onClick={() => plan.onSelect!(isMonthly ? "monthly" : "yearly")}
+                  style={{
+                    width: "100%",
+                    padding: "11px 16px",
+                    textAlign: "center",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    fontFamily: "var(--font-display)",
+                    borderRadius: 12,
+                    border: "2px solid var(--poster-ink)",
+                    boxShadow: "0 4px 0 var(--poster-ink)",
+                    background: plan.isPopular ? "var(--poster-accent)" : "var(--poster-panel)",
+                    color: plan.isPopular ? "#fff" : "var(--poster-ink)",
+                    cursor: "pointer",
+                    transition: "transform .1s, box-shadow .1s",
+                  }}
+                  onMouseDown={(e) => {
+                    e.currentTarget.style.transform = "translateY(3px)";
+                    e.currentTarget.style.boxShadow = "0 1px 0 var(--poster-ink)";
+                  }}
+                  onMouseUp={(e) => {
+                    e.currentTarget.style.transform = "";
+                    e.currentTarget.style.boxShadow = "0 4px 0 var(--poster-ink)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "";
+                    e.currentTarget.style.boxShadow = "0 4px 0 var(--poster-ink)";
+                  }}
+                >
+                  {plan.buttonText}
+                </button>
+              ) : plan.href ? (
                 <Link
                   href={`${plan.href}${plan.href.includes("?") ? "&" : "?"}cycle=${isMonthly ? "monthly" : "yearly"}`}
                   style={{

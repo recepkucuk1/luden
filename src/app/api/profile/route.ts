@@ -45,7 +45,27 @@ export async function GET() {
       return NextResponse.json({ error: "Kullanıcı bulunamadı" }, { status: 404 });
     }
 
-    return NextResponse.json({ therapist });
+    // Most recent subscription (active or cancelled-but-still-in-period). Used
+    // by /subscription page to show "İptal Et" button or "İptal edildi, X
+    // tarihine kadar PRO" notice. Excludes EXPIRED — those have no claim on
+    // the current plan anymore.
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        therapistId: session.user.id,
+        status: { in: ["ACTIVE", "CANCELLED"] },
+      },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        status: true,
+        billingCycle: true,
+        currentPeriodEnd: true,
+        cancelledAt: true,
+        plan: { select: { type: true } },
+      },
+    });
+
+    return NextResponse.json({ therapist, subscription });
   } catch (error) {
     logError("GET /api/profile", error);
     return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
