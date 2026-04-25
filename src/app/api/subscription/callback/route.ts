@@ -4,9 +4,17 @@ import { retrieveCheckoutForm } from "@/lib/iyzico";
 import { auth } from "@/auth";
 import { grantCredits } from "@/lib/credits";
 
-/** 303 redirect so a POST from iyzico is converted to a GET by the browser. */
+/**
+ * 303 redirect so a POST from iyzico is converted to a GET by the browser.
+ *
+ * IMPORTANT: must use NEXT_PUBLIC_APP_URL as the base, not req.url. In
+ * Next.js standalone behind a reverse proxy (Hostinger LiteSpeed) req.url
+ * resolves to the internal bind address (http://0.0.0.0:3000/...) which
+ * the browser can't reach.
+ */
 function seeOther(path: string, req: NextRequest) {
-  return NextResponse.redirect(new URL(path, req.url), { status: 303 });
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin;
+  return NextResponse.redirect(new URL(path, base), { status: 303 });
 }
 
 export async function POST(req: NextRequest) {
