@@ -9,10 +9,58 @@ const nextConfig: NextConfig = {
   //   ENOENT: ... node_modules/iyzipay/lib/resources
   outputFileTracingIncludes: {
     "/api/**/*": [
-      // Whole iyzipay package — its constructor does fs.readdirSync on
-      // ./resources and the resource files require sibling helpers
-      // (../IyzipayResource, ../utils) that the tracer can't see.
+      // iyzipay SDK + its full transitive dep tree.
+      // The constructor does fs.readdirSync on ./resources and the
+      // resource files require sibling helpers — none of which the
+      // Next.js tracer can follow because of the dynamic require.
+      // postman-request and friends are pruned from the trace too
+      // because iyzipay is externalized.
       "./node_modules/iyzipay/**/*",
+      "./node_modules/postman-request/**/*",
+      "./node_modules/@postman/**/*",
+      "./node_modules/aws-sign2/**/*",
+      "./node_modules/aws4/**/*",
+      "./node_modules/caseless/**/*",
+      "./node_modules/combined-stream/**/*",
+      "./node_modules/extend/**/*",
+      "./node_modules/forever-agent/**/*",
+      "./node_modules/http-signature/**/*",
+      "./node_modules/is-typedarray/**/*",
+      "./node_modules/isstream/**/*",
+      "./node_modules/json-stringify-safe/**/*",
+      "./node_modules/mime-types/**/*",
+      "./node_modules/mime-db/**/*",
+      "./node_modules/oauth-sign/**/*",
+      "./node_modules/qs/**/*",
+      "./node_modules/safe-buffer/**/*",
+      "./node_modules/socks-proxy-agent/**/*",
+      "./node_modules/socks/**/*",
+      "./node_modules/stream-length/**/*",
+      "./node_modules/uuid/**/*",
+      "./node_modules/asynckit/**/*",
+      "./node_modules/delayed-stream/**/*",
+      "./node_modules/agent-base/**/*",
+      "./node_modules/debug/**/*",
+      "./node_modules/ms/**/*",
+      "./node_modules/ip-address/**/*",
+      "./node_modules/smart-buffer/**/*",
+      "./node_modules/sshpk/**/*",
+      "./node_modules/jsprim/**/*",
+      "./node_modules/assert-plus/**/*",
+      "./node_modules/extsprintf/**/*",
+      "./node_modules/json-schema/**/*",
+      "./node_modules/verror/**/*",
+      "./node_modules/asn1/**/*",
+      "./node_modules/bcrypt-pbkdf/**/*",
+      "./node_modules/dashdash/**/*",
+      "./node_modules/ecc-jsbn/**/*",
+      "./node_modules/getpass/**/*",
+      "./node_modules/jsbn/**/*",
+      "./node_modules/tweetnacl/**/*",
+      "./node_modules/psl/**/*",
+      "./node_modules/punycode/**/*",
+      "./node_modules/tldts/**/*",
+      "./node_modules/tldts-core/**/*",
     ],
   },
   headers: async () => [
