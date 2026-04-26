@@ -36,6 +36,8 @@ export const authConfig: NextAuthConfig = {
 
       // Webhook endpoint'leri auth gerektirmez — iyzico sunucudan çağırır
       if (path.startsWith("/api/webhooks")) return true;
+      // Cron endpoint'leri kendi Bearer-token auth'unu yapar — middleware'i bypass et
+      if (path.startsWith("/api/cron")) return true;
       if (isApiAuth) return true;
       if (isPublic) return true;
       if (isAuthPage) {
