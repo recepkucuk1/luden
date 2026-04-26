@@ -1,17 +1,21 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { cancelSubscription } from "@/lib/iyzico";
 
 /**
- * Cancel the current user's active subscription.
+ * Cancel the current user's active subscription — DEFERRED mode.
  *
- * Period-end cancellation: we tell iyzico to stop recurring billing, set
- * `cancelledAt` and `status = CANCELLED` on the Subscription, but keep the
- * Therapist on their paid plan until `currentPeriodEnd`. The webhook only
- * downgrades to FREE on `subscription.expired`. As a backup, the next
- * /api/profile fetch (or any plan-aware request) can downgrade lazily —
- * see TODO at end of file.
+ * We do NOT call iyzico here. Instead we mark the subscription CANCELLED
+ * locally, keeping `iyzicoSubscriptionRef` intact and recurring still ON
+ * at iyzico's side. This gives us a true "Resume" capability — the user
+ * can undo the cancellation any time before period-end and we just clear
+ * the flag, no payment side effects.
+ *
+ * The actual iyzico cancel is performed by /api/cron/subscription-cleanup
+ * (daily cron, ~24h before currentPeriodEnd). That cron also downgrades the
+ * Therapist to FREE. If for some reason cron does not run before iyzico's
+ * renewal date, iyzico WILL charge the renewal — that is the cost of this
+ * design and why the daily cron is required infrastructure.
  */
 export async function POST() {
   try {
@@ -20,14 +24,12 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 1. Find the user's most recent ACTIVE subscription.
     const subscription = await prisma.subscription.findFirst({
       where: {
         therapistId: session.user.id,
         status: "ACTIVE",
       },
       orderBy: { createdAt: "desc" },
-      include: { plan: true },
     });
 
     if (!subscription) {
@@ -37,34 +39,6 @@ export async function POST() {
       );
     }
 
-    if (!subscription.iyzicoSubscriptionRef) {
-      console.error(
-        "[cancel] Subscription has no iyzicoSubscriptionRef:",
-        subscription.id,
-      );
-      return NextResponse.json(
-        { error: "Abonelik referansı eksik. Destek ile iletişime geçin." },
-        { status: 500 },
-      );
-    }
-
-    // 2. Tell iyzico to stop recurring billing.
-    const result = await cancelSubscription(subscription.iyzicoSubscriptionRef);
-
-    if (result.status !== "success") {
-      console.error("[cancel] iyzico cancel failed:", result);
-      return NextResponse.json(
-        {
-          error:
-            result.errorMessage ?? "iyzico iptali başarısız oldu. Daha sonra tekrar deneyin.",
-        },
-        { status: 502 },
-      );
-    }
-
-    // 3. Mark cancelled in DB. DO NOT touch Therapist.planType — user keeps
-    //    access until currentPeriodEnd. Webhook (subscription.expired) or a
-    //    backup cron downgrades them later.
     const updated = await prisma.subscription.update({
       where: { id: subscription.id },
       data: {
@@ -79,7 +53,7 @@ export async function POST() {
       currentPeriodEnd: updated.currentPeriodEnd,
       message: `Aboneliğiniz iptal edildi. ${updated.currentPeriodEnd.toLocaleDateString(
         "tr-TR",
-      )} tarihine kadar PRO özelliklerini kullanmaya devam edebilirsiniz.`,
+      )} tarihine kadar mevcut planınızın özelliklerini kullanmaya devam edebilirsiniz. İptal kararınızdan vazgeçerseniz "Aboneliği Devam Ettir" butonunu kullanabilirsiniz.`,
     });
   } catch (error) {
     console.error("[cancel] error:", error);

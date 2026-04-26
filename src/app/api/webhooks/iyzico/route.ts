@@ -171,15 +171,18 @@ export async function POST(req: NextRequest) {
           },
         });
       } else if (iyziEventType === "subscription.cancelled") {
-        // Period-end cancellation: mark cancelled but keep paid access until
-        // currentPeriodEnd. Therapist downgrade happens on subscription.expired.
-        await tx.subscription.update({
-          where: { id: subscription.id },
-          data: {
-            status: "CANCELLED",
-            cancelledAt: subscription.cancelledAt ?? new Date(),
-          },
-        });
+        // iyzico has confirmed cancellation. With deferred-cancel architecture
+        // this typically arrives just after the daily cron has called iyzico
+        // cancel. Don't regress an already-EXPIRED row back to CANCELLED.
+        if (subscription.status !== "EXPIRED") {
+          await tx.subscription.update({
+            where: { id: subscription.id },
+            data: {
+              status: "CANCELLED",
+              cancelledAt: subscription.cancelledAt ?? new Date(),
+            },
+          });
+        }
       } else if (iyziEventType === "subscription.expired") {
         await tx.subscription.update({
           where: { id: subscription.id },

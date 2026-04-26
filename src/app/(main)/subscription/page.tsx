@@ -30,6 +30,10 @@ export default function SubscriptionPage() {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
+  // Resume in-flight state
+  const [resumeLoading, setResumeLoading] = useState(false);
+  const [resumeError, setResumeError] = useState<string | null>(null);
+
   const refresh = () => {
     setLoading(true);
     fetch("/api/profile")
@@ -65,6 +69,23 @@ export default function SubscriptionPage() {
       );
     } finally {
       setCancelLoading(false);
+    }
+  };
+
+  const handleResume = async () => {
+    setResumeLoading(true);
+    setResumeError(null);
+    try {
+      const res = await fetch("/api/subscription/resume", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "İşlem başarısız oldu.");
+      refresh();
+    } catch (err: unknown) {
+      setResumeError(
+        err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu.",
+      );
+    } finally {
+      setResumeLoading(false);
     }
   };
 
@@ -252,6 +273,37 @@ export default function SubscriptionPage() {
                 </PBtn>
               </div>
             )}
+            {subscription.status === "CANCELLED" && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  gap: 12,
+                  flexWrap: "wrap",
+                }}
+              >
+                {resumeError && (
+                  <span
+                    style={{
+                      fontSize: 12,
+                      color: "var(--poster-danger)",
+                      fontFamily: "var(--font-display)",
+                    }}
+                  >
+                    {resumeError}
+                  </span>
+                )}
+                <PBtn
+                  variant="accent"
+                  size="sm"
+                  onClick={handleResume}
+                  disabled={resumeLoading}
+                >
+                  {resumeLoading ? "Devam ettiriliyor…" : "Aboneliği Devam Ettir"}
+                </PBtn>
+              </div>
+            )}
           </PCard>
         </div>
       )}
@@ -321,10 +373,11 @@ export default function SubscriptionPage() {
             <>
               <strong>{periodEndDate}</strong> tarihine kadar mevcut planınızın tüm özelliklerini
               kullanmaya devam edebilirsiniz. Bu tarihten sonra otomatik olarak ücretsiz plana
-              geçeceksiniz.
+              geçeceksiniz. Fikrinizi değiştirirseniz dönem bitmeden &ldquo;Aboneliği Devam
+              Ettir&rdquo; ile iptal kararınızı geri alabilirsiniz.
             </>
           ) : (
-            "Mevcut faturalandırma döneminizin sonuna kadar planınız aktif kalacak."
+            "Mevcut faturalandırma döneminizin sonuna kadar planınız aktif kalacak. İptal kararınızı dönem bitmeden istediğiniz zaman geri alabilirsiniz."
           )}
         </p>
         {cancelError && (
