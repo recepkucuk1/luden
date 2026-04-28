@@ -1290,105 +1290,9 @@ const PLANS: PricingPlan[] = [
   },
 ];
 
-// ─── Landing Page ─────────────────────────────────────────────────────────────
-// ─── Social Proof Band ────────────────────────────────────────────────────────
-function CountUp({ target, suffix = "" }: { target: number; suffix?: string }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (!isInView) return;
-    const duration = 1800;
-    const steps = 40;
-    const increment = target / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [isInView, target]);
-
-  return <span ref={ref}>{count.toLocaleString("tr-TR")}{suffix}</span>;
-}
-
-function SocialProofBand() {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-
-  const stats: { value: number; suffix: string; label: string; color: string }[] = [
-    { value: 500, suffix: "+", label: "Aktif Uzman", color: "#FFCE52" },
-    { value: 12000, suffix: "+", label: "Üretilen Kart", color: "#FF6B9D" },
-    { value: 98, suffix: "%", label: "Memnuniyet", color: "#4A90E2" },
-    { value: 50, suffix: "+", label: "Klinik", color: "#2CC069" },
-  ];
-
-  return (
-    <section
-      ref={ref}
-      style={{
-        background: "var(--poster-bg)",
-        borderTop: "2px solid var(--poster-ink)",
-        borderBottom: "2px solid var(--poster-ink)",
-      }}
-    >
-      <div className="mx-auto max-w-5xl px-6 py-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, staggerChildren: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
-        >
-          {stats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              style={{
-                background: stat.color,
-                border: "2px solid var(--poster-ink)",
-                boxShadow: "0 4px 0 var(--poster-ink)",
-                borderRadius: 14,
-                padding: "14px 16px",
-                fontFamily: "var(--font-display)",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 28,
-                  fontWeight: 700,
-                  color: "var(--poster-ink)",
-                  lineHeight: 1,
-                }}
-              >
-                <CountUp target={stat.value} suffix={stat.suffix} />
-              </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "var(--poster-ink)",
-                  textTransform: "uppercase",
-                  letterSpacing: ".06em",
-                  marginTop: 6,
-                }}
-              >
-                {stat.label}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-    </section>
-  );
-}
+// ─── (Sosyal kanıt bandı kaldırıldı: gerçek veri olmadan istatistik yayınlamak
+//      yanıltıcı reklam riski oluşturuyordu. Yerine müfredat/aydınlatma alanında
+//      gerçek müşteri yorumu eklenecek.)
 
 // ─── Landing Page ─────────────────────────────────────────────────────────────
 export default function LandingPage() {
@@ -1416,9 +1320,6 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <PosterHero />
-
-      {/* ── Social Proof ── */}
-      <SocialProofBand />
 
       {/* ── How It Works ── */}
       <HowItWorksCarousel />
