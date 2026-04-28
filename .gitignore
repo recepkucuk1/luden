@@ -50,3 +50,7 @@ src/app/api/curriculum/*.pdf
 
 # Eval/benchmark run artifacts (bir kerelik çıktılar)
 /scripts/eval-results/
+
+# Sentry
+.sentryclirc
+.env.sentry-build-plugin

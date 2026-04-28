@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   turbopack: {},
@@ -100,7 +101,7 @@ const nextConfig: NextConfig = {
             "img-src 'self' data: blob: *.iyzipay.com *.iyzico.com",
             "font-src 'self' *.iyzipay.com *.iyzico.com",
             "frame-src 'self' https://newassets.hcaptcha.com *.iyzipay.com *.iyzico.com",
-            "connect-src 'self' https://hcaptcha.com https://sentry.hcaptcha.com https://vitals.vercel-insights.com https://va.vercel-scripts.com *.iyzipay.com *.iyzico.com",
+            "connect-src 'self' https://hcaptcha.com https://sentry.hcaptcha.com https://vitals.vercel-insights.com https://va.vercel-scripts.com *.iyzipay.com *.iyzico.com https://*.ingest.de.sentry.io https://*.ingest.sentry.io",
             "worker-src 'self' blob:",
           ].join("; "),
         },
@@ -114,4 +115,10 @@ const nextConfig: NextConfig = {
   ],
 };
 
-export default nextConfig;
+// Sentry build-time entegrasyonu — minimal. Sadece runtime error capture aktif.
+// Source map upload, tunnelRoute, react annotation gibi gelişmiş özellikler
+// kurulum doğrulandıktan sonra eklenecek.
+export default withSentryConfig(nextConfig, {
+  silent: !process.env.CI,
+  disableLogger: true,
+});
