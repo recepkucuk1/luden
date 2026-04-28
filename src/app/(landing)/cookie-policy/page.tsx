@@ -148,7 +148,7 @@ export default function CookiePolicyPage() {
             </span></p>
             <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435] dark:text-foreground">Kurum:</span>{" "}
               Luden Eğitim Danışmanlık Org. Tic. Ltd. Şti.</span></p>
-            <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435] dark:text-foreground">Adres:</span> İzmir, Türkiye</span></p>
+            <p className="flex items-start">{DOT}<span><span className="font-medium text-[#023435] dark:text-foreground">Adres:</span> Aydınlıkevler Mah. 6782/5 Sk. No:15 Çiğli / İzmir</span></p>
           </div>
         </Section>
 
