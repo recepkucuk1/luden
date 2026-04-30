@@ -226,8 +226,8 @@ export function PosterHero() {
                 fontFamily: "var(--font-display)",
               }}
             >
-              Saniyeler içinde kişiselleştirilmiş öğrenme materyalleri üretin,
-              öğrencilerinizi takip edin.
+              Öğrencileriniz için ihtiyaçlarına göre öğrenme materyalleri üretin
+              ve öğrenmelerini takip edin.
             </p>
 
             <div
