@@ -1016,7 +1016,7 @@ export default function CardsPage() {
                   const opt = TOOL_TYPE_OPTIONS.find((o) => o.value === filterToolType);
                   return (
                     <PEmptyState
-                      title={`Henüz ${opt?.label ?? "kart"} üretmediniz.`}
+                      title={`Henüz ${opt?.label?.toLocaleLowerCase("tr") ?? "kart"} üretilmedi`}
                       action={
                         opt?.href ? (
                           <PBtn as="a" href={opt.href} variant="accent" size="md">
@@ -1029,7 +1029,7 @@ export default function CardsPage() {
                 })()
               ) : (
                 <PEmptyState
-                  title="Bu filtrelere uyan materyal bulunamadı."
+                  title="Bu filtrelere uyan materyal yok"
                   action={
                     <PBtn type="button" variant="white" size="sm" onClick={clearFilters}>
                       Filtreleri Temizle

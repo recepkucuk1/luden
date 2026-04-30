@@ -395,12 +395,12 @@ export default function StudentsPage() {
         ) : students.length === 0 ? (
           <PEmptyState
             icon="👤"
-            title="Henüz öğrenci kaydınız yok"
-            subtitle="Öğrencilerinizi eklemeye başlayarak raporlar üretebilirsiniz."
+            title="Henüz öğrenci eklenmedi"
+            subtitle="İlk öğrencinizi ekleyerek raporlar üretmeye başlayın."
           />
         ) : filtered.length === 0 ? (
           <PEmptyState
-            title="Bu filtreye uygun öğrenci bulunamadı."
+            title="Bu filtreye uygun öğrenci yok"
             action={
               <PBtn type="button" variant="white" size="sm" onClick={() => setFilterArea("all")}>
                 Filtreyi Temizle

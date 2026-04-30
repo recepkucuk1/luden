@@ -553,7 +553,7 @@ export default function DashboardPage() {
             </div>
             {recentStudents.length === 0 ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 0" }}>
-                <p style={{ fontSize: 13, color: "var(--poster-ink-3)", textAlign: "center", margin: "0 0 10px" }}>Henüz eklenmedi</p>
+                <p style={{ fontSize: 13, color: "var(--poster-ink-3)", textAlign: "center", margin: "0 0 10px" }}>Henüz öğrenci eklenmedi</p>
                 <PBtn as="a" href="/students" variant="accent" size="sm" icon={<Plus size={14} />}>
                   Öğrenci Ekle
                 </PBtn>

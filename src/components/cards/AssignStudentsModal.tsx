@@ -138,7 +138,7 @@ export function AssignStudentsModal({ cardId, cardTitle, onClose, onSaved }: Pro
             fontFamily: "var(--font-display)",
           }}
         >
-          Henüz öğrenci eklenmedi.
+          Henüz öğrenci eklenmedi
         </p>
       ) : (
         <ul

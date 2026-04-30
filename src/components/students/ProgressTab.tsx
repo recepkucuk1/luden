@@ -232,7 +232,7 @@ export function ProgressTab({
       <PEmptyState
         variant="dashed"
         icon="📋"
-        title="Bu öğrenci için henüz çalışma modülü seçilmemiştir."
+        title="Bu öğrenciye henüz modül atanmamış"
         subtitle="Öğrenci profilini düzenleyerek modül ekleyebilirsiniz."
         action={
           onEditClick ? (
