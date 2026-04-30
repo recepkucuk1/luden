@@ -5,8 +5,8 @@ import * as React from "react";
 type SectionTone = "neutral" | "warning" | "success" | "error" | "info";
 
 type PSectionProps = {
-  /** Üstteki uppercase başlık. Emoji + kelime şeklinde verilebilir. */
-  title: string;
+  /** Üstteki uppercase başlık. Boş bırakılırsa header alanı render edilmez. */
+  title?: string;
   /**
    * `neutral` — beyaz/krem panel, ink-3 başlık (default).
    * `warning|success|error|info` — alert palette'ini paylaşır
@@ -57,29 +57,33 @@ export function PSection({
         ...style,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 10,
-          marginBottom: 10,
-        }}
-      >
-        <p
+      {(title || rightSlot) && (
+        <div
           style={{
-            fontSize: 11,
-            fontWeight: 800,
-            color: titleColor,
-            textTransform: "uppercase",
-            letterSpacing: ".1em",
-            margin: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 10,
+            marginBottom: 10,
           }}
         >
-          {title}
-        </p>
-        {rightSlot}
-      </div>
+          {title && (
+            <p
+              style={{
+                fontSize: 11,
+                fontWeight: 800,
+                color: titleColor,
+                textTransform: "uppercase",
+                letterSpacing: ".1em",
+                margin: 0,
+              }}
+            >
+              {title}
+            </p>
+          )}
+          {rightSlot}
+        </div>
+      )}
       <div style={{ color: bodyColor }}>{children}</div>
     </div>
   );

@@ -112,18 +112,6 @@ export default function AboutPage() {
             style={{ height: 56, width: "auto", margin: "0 auto" }}
             priority
           />
-          <h1
-            style={{
-              fontSize: "clamp(32px, 6vw, 44px)",
-              fontWeight: 800,
-              color: "var(--poster-ink)",
-              letterSpacing: "-.02em",
-              marginTop: 24,
-              marginBottom: 0,
-            }}
-          >
-            Hakkımızda
-          </h1>
         </header>
 
         {/* Bölüm 1: Hakkımızda */}
@@ -195,7 +183,7 @@ export default function AboutPage() {
           >
             Homo Ludens Felsefesi
           </h3>
-          <PSection tone="warning" title="✦ İSİM HAKKI">
+          <PSection tone="warning">
             <p style={{ fontSize: 14, lineHeight: 1.6, margin: 0 }}>
               LudenLab ismindeki &ldquo;Luden&rdquo;, Johan Huizinga&apos;nın &ldquo;Homo Ludens&rdquo; (Oynayan İnsan)
               kavramından esinlenmektedir. Öğrenmenin oyun ve keşif yoluyla gerçekleştiğine inanan bu felsefeyi dijital
