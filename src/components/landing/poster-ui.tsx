@@ -31,13 +31,18 @@ export type BadgeColor =
   | "soft";
 
 const BADGE_COLORS: Record<BadgeColor, { bg: string; ink: string }> = {
+  // Brand colors — keep their hue in both modes
   accent: { bg: "#FE703A", ink: "#fff" },
   green: { bg: "#2CC069", ink: "#fff" },
   yellow: { bg: "#FFCE52", ink: "#3D2900" },
   pink: { bg: "#FF6B9D", ink: "#fff" },
   blue: { bg: "#4A90E2", ink: "#fff" },
-  ink: { bg: "#0E1E26", ink: "#fff" },
-  soft: { bg: "rgba(14,30,38,.08)", ink: "#0E1E26" },
+  // Neutral variants — token-driven so they flip with the theme
+  ink: { bg: "var(--poster-ink)", ink: "var(--poster-panel)" },
+  soft: {
+    bg: "color-mix(in srgb, var(--poster-ink) 10%, transparent)",
+    ink: "var(--poster-ink)",
+  },
 };
 
 export function PBadge({
