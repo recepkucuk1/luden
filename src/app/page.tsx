@@ -566,7 +566,7 @@ function KartSlide4() {
   return (
     <MockPdfCard
       header="Luden Özel Keşif · Nisan 2026"
-      tags={<><CarouselTag color="blue">Dil · Söz Dönemi</CarouselTag><CarouselTag color="orange">3-6 yaş</CarouselTag><CarouselTag color="green">Başlangıç</CarouselTag><span className="inline-flex items-center rounded-full bg-[rgba(16,121,150,0.08)] border border-[#107996]/20 px-2.5 py-0.5 text-xs md:text-[11px] font-semibold text-[#107996]">Hedef 2.2.3</span></>}
+      tags={<><CarouselTag color="blue">Dil · Söz Dönemi</CarouselTag><CarouselTag color="orange">3-6 yaş</CarouselTag><CarouselTag color="green">Başlangıç</CarouselTag><PBadge color="blue">Hedef 2.2.3</PBadge></>}
       rows={[
         { label: "ETKİNLİK", title: "Mutfak Keşfi — Sözcük Bulma Oyunu", body: "Mutfak ortamında 6-8 nesne ile sözcük dağarcığı genişletme — dokunsal keşif ve işlev adlandırma" },
         { label: "UYGULAMA", body: "Nesneleri sırayla göster → \"Bu ne? Ne işe yarıyor?\" sor → Bilmediğinde tanımla, dokundur, 2 kez tekrarlat → İşlev soruları sor" },
@@ -588,68 +588,60 @@ function ArtSlide1() {
         <MockDropdown label="Zorluk seviyesi" value="Kelime Düzeyi" />
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex-1 rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(2,52,53,0.1)] dark:border-border/70 p-4">
-          <p className="text-xs md:text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Önerilen egzersiz türleri</p>
-          <div className="space-y-2.5">
-            {[
-              { label: "Yalıtılmış ses tekrarı", active: true },
-              { label: "Hece düzeyi (sa, se, sı, so, su)", active: true },
-              { label: "Kelime düzeyi (10 sözcük)", active: true },
-            ].map((g) => (
-              <div key={g.label} className="flex items-center gap-2.5">
-                <span className={cn("shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[11px] md:text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]/40 dark:text-muted-foreground/75")}>✓</span>
-                <span className={cn("text-xs", g.active ? "text-[#023435] dark:text-foreground" : "text-[rgba(2,52,53,0.4)]")}>{g.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <Link href="/register" className="block w-full rounded-[9px] bg-[#FE703A] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors">
-          ✦ Artikülasyon Kartı Üret
-        </Link>
+        <GoalChecklistCard
+          title="Önerilen egzersiz türleri"
+          items={[
+            { code: "•", title: "Yalıtılmış ses tekrarı", active: true },
+            { code: "•", title: "Hece düzeyi (sa, se, sı, so, su)", active: true },
+            { code: "•", title: "Kelime düzeyi (10 sözcük)", active: true },
+          ]}
+        />
+        <SlideCtaButton href="/register">✦ Artikülasyon Kartı Üret</SlideCtaButton>
       </div>
     </div>
   );
 }
 function ArtSlide2() {
   return (
-    <div className="space-y-4 max-w-2xl">
-      <div className="flex flex-wrap gap-2">
+    <div className="max-w-2xl" style={{ display: "flex", flexDirection: "column", gap: 14, fontFamily: "var(--font-display)" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         <CarouselTag color="blue">/s/ — Sürtünmeli ünsüz</CarouselTag>
         <CarouselTag color="orange">Sözcük başı</CarouselTag>
         <CarouselTag color="green">7-12 yaş · Kelime düzeyi</CarouselTag>
       </div>
-      <h3 className="text-lg font-bold text-[#023435] dark:text-foreground">/s/ Sesi Kelime Çalışması — Sözcük Başı</h3>
-      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Hedef /s/ sesini sözcük başında doğru üretebilmek için 10 adet yaşa uygun Türkçe kelimeyle yapılandırılmış çalışma. Her kelime hece ayrımı ve örnek cümleyle birlikte sunulur.</p>
-      <div className="space-y-2">
-        {[
+      <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--poster-ink)", letterSpacing: "-.01em", margin: 0 }}>
+        /s/ Sesi Kelime Çalışması — Sözcük Başı
+      </h3>
+      <p style={{ fontSize: 14, color: "var(--poster-ink-2)", lineHeight: 1.6, margin: 0 }}>
+        Hedef /s/ sesini sözcük başında doğru üretebilmek için 10 adet yaşa uygun Türkçe kelimeyle
+        yapılandırılmış çalışma. Her kelime hece ayrımı ve örnek cümleyle birlikte sunulur.
+      </p>
+      <StepList
+        steps={[
           "Ayna karşısında /s/ sesinin ağız pozisyonunu gösterin: dil ucu alt dişlerin arkasında, hava ortadan çıkar",
           "\"Sandal, sabun, süt, sepet, simit\" kelimelerini teker teker model olun, öğrenci tekrar etsin",
           "Her kelimeyi cümle içinde kullanın: \"Denizde mavi bir sandal var\" — öğrenci cümleyi tekrar etsin",
           "Zorlandığı kelimelerde heceye dönün: \"san-dal\" → tekrar birleştirin",
-        ].map((step, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-xs md:text-[11px] font-bold text-white">{i + 1}</span>
-            <span className="text-sm text-[rgba(2,52,53,0.7)] pt-0.5">{step}</span>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
     </div>
   );
 }
 function ArtSlide3() {
   return (
-    <div className="space-y-4 max-w-2xl">
-      <div className="rounded-xl bg-[#fffaf7] dark:bg-brand-orange/8 px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
-        <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">/s/ sesinde dil ucu kontrolü kritiktir. Lateral kaçış (havanın yandan çıkması) varsa dil ortasından hava geçişini pekiştirin. Ayna kullanımı görsel geri bildirim sağlar. Her doğru üretimde &ldquo;Havanın ortadan çıkışını hissettin mi? Harika kontrol!&rdquo; gibi farkındalık temelli geri bildirimler verin.</p>
-        <p className="text-xs md:text-[11px] text-[rgba(2,52,53,0.4)] mt-2">/s/ · Sözcük başı pozisyon çalışması</p>
-      </div>
-      <div className="border-t border-[rgba(2,52,53,0.08)] dark:border-border/60" />
-      <div className="rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
-        <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME ÖNERİSİ</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veliye 5 hedef kelime listesi verin (sabun, süt, simit, sandal, sepet). Öğrenci bu kelimeleri günlük konuşmada bilinçli kullanmaya çalışsın. Doğru üretimde velinin göz kontağı + gülümseme ile onaylaması yeterlidir.</p>
-      </div>
-      <div className="flex flex-wrap gap-2">
+    <div className="max-w-2xl" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <NoteBlock tone="warning" label="UZMAN NOTU" meta="/s/ · Sözcük başı pozisyon çalışması">
+        /s/ sesinde dil ucu kontrolü kritiktir. Lateral kaçış (havanın yandan çıkması) varsa dil
+        ortasından hava geçişini pekiştirin. Ayna kullanımı görsel geri bildirim sağlar. Her doğru
+        üretimde &ldquo;Havanın ortadan çıkışını hissettin mi? Harika kontrol!&rdquo; gibi farkındalık
+        temelli geri bildirimler verin.
+      </NoteBlock>
+      <NoteBlock tone="info" label="GENELLEŞTİRME ÖNERİSİ">
+        Veliye 5 hedef kelime listesi verin (sabun, süt, simit, sandal, sepet). Öğrenci bu kelimeleri
+        günlük konuşmada bilinçli kullanmaya çalışsın. Doğru üretimde velinin göz kontağı + gülümseme
+        ile onaylaması yeterlidir.
+      </NoteBlock>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         <CarouselTag color="green">Dil ucu kontrolü</CarouselTag>
         <CarouselTag color="blue">Görsel geri bildirim</CarouselTag>
         <CarouselTag color="orange">Hece geçişi</CarouselTag>
@@ -674,6 +666,69 @@ function ArtSlide4() {
 }
 
 // ── EV ÖDEVİ slides ───────────────────────────────────────────────────────────
+function ScheduleList({
+  title,
+  items,
+  bulletColor = "var(--poster-accent)",
+}: {
+  title: string;
+  items: string[];
+  bulletColor?: string;
+}) {
+  return (
+    <div
+      style={{
+        flex: 1,
+        background: "var(--poster-bg-2)",
+        border: "2px solid var(--poster-ink)",
+        borderRadius: 14,
+        boxShadow: "var(--poster-shadow-sm)",
+        padding: 14,
+        fontFamily: "var(--font-display)",
+      }}
+    >
+      <p
+        style={{
+          fontSize: 10,
+          fontWeight: 800,
+          textTransform: "uppercase",
+          letterSpacing: ".08em",
+          color: "var(--poster-ink-3)",
+          margin: "0 0 10px",
+        }}
+      >
+        {title}
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {items.map((d, i) => (
+          <div
+            key={i}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 12,
+              color: "var(--poster-ink-2)",
+              lineHeight: 1.5,
+            }}
+          >
+            <span
+              style={{
+                flexShrink: 0,
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: bulletColor,
+              }}
+            />
+            {d}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function EvSlide1() {
   return (
     <div className="grid md:grid-cols-2 gap-5">
@@ -684,63 +739,60 @@ function EvSlide1() {
         <MockDropdown label="Hedef alan" value="Dil anlama ve üretme" />
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex-1 rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(2,52,53,0.1)] dark:border-border/70 p-4">
-          <p className="text-xs md:text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Haftalık program</p>
-          <div className="space-y-1.5">
-            {["Pazartesi — Kahvaltı sırasında nesne adlandırma","Çarşamba — Park yürüyüşünde renk + nesne tanımlama","Cuma — Uyku öncesi resimli kitap anlatımı"].map((d, i) => (
-              <div key={i} className="flex items-center gap-2 text-xs text-[rgba(2,52,53,0.65)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#FE703A] shrink-0" />
-                {d}
-              </div>
-            ))}
-          </div>
-        </div>
-        <Link href="/register" className="block w-full rounded-[9px] bg-[#FE703A] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors">
-          ✦ Ev Ödevi Oluştur
-        </Link>
+        <ScheduleList
+          title="Haftalık program"
+          items={[
+            "Pazartesi — Kahvaltı sırasında nesne adlandırma",
+            "Çarşamba — Park yürüyüşünde renk + nesne tanımlama",
+            "Cuma — Uyku öncesi resimli kitap anlatımı",
+          ]}
+        />
+        <SlideCtaButton href="/register">✦ Ev Ödevi Oluştur</SlideCtaButton>
       </div>
     </div>
   );
 }
 function EvSlide2() {
   return (
-    <div className="space-y-4 max-w-2xl">
-      <div className="flex flex-wrap gap-2">
+    <div className="max-w-2xl" style={{ display: "flex", flexDirection: "column", gap: 14, fontFamily: "var(--font-display)" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         <CarouselTag color="blue">Günlük Konuşma Aktivitesi</CarouselTag>
         <CarouselTag color="orange">15 dk/gün</CarouselTag>
         <CarouselTag color="green">Temel seviye</CarouselTag>
       </div>
-      <h3 className="text-lg font-bold text-[#023435] dark:text-foreground">Kahvaltı Masasında Dil Oyunu</h3>
-      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Günlük kahvaltı rutinini fırsat olarak kullanarak öğrencinin hem nesne adlandırma hem de cümle kurma becerilerini doğal ortamda güçlendiren bir aktivite. Öğrenci nesneleri adlandırır, tercihlerini ifade eder ve basit isteklerde bulunur.</p>
-      <div className="space-y-2">
-        {[
+      <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--poster-ink)", letterSpacing: "-.01em", margin: 0 }}>
+        Kahvaltı Masasında Dil Oyunu
+      </h3>
+      <p style={{ fontSize: 14, color: "var(--poster-ink-2)", lineHeight: 1.6, margin: 0 }}>
+        Günlük kahvaltı rutinini fırsat olarak kullanarak öğrencinin hem nesne adlandırma hem de cümle
+        kurma becerilerini doğal ortamda güçlendiren bir aktivite. Öğrenci nesneleri adlandırır,
+        tercihlerini ifade eder ve basit isteklerde bulunur.
+      </p>
+      <StepList
+        steps={[
           "Kahvaltı masasındaki 5-6 nesneyi öğrencinin önüne koyun (çay bardağı, peynir, ekmek, bal, kaşık, tabak)",
           "Her nesneyi göstererek \"Bu ne?\" sorusunu sorun, ardından \"Ne yapmak için kullanıyoruz?\" diye genişletin",
           "\"Ne yemek istiyorsun?\" diyerek tercih cümlesi kurmayı teşvik edin: \"Ben peynir istiyorum\" gibi",
           "Sonuçları gözlem formuna not edin: hangi sözcükleri bildi, hangilerinde yardım gerekti",
-        ].map((step, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-xs md:text-[11px] font-bold text-white">{i + 1}</span>
-            <span className="text-sm text-[rgba(2,52,53,0.7)] pt-0.5">{step}</span>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
     </div>
   );
 }
 function EvSlide3() {
   return (
-    <div className="space-y-4 max-w-2xl">
-      <div className="rounded-xl bg-[#fffaf7] dark:bg-brand-orange/8 px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
-        <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">VELİ TALİMATI</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Aktiviteyi her sabah kahvaltıda uygulayın — aynı saatte yapılan çalışma rutin oluşturur ve öğrenmeyi kolaylaştırır. Öğrenci sözcüğü hatırlayamazsa 3 saniye bekleyin, ardından sözcüğün ilk hecesini verin (&ldquo;pey...&rdquo; gibi). Tam cümle kurabildiğinde &ldquo;Bak, ne güzel söyledin, peynir istediğini anlattın!&rdquo; gibi süreç odaklı geri bildirim verin.</p>
-      </div>
-      <div className="border-t border-[rgba(2,52,53,0.08)] dark:border-border/60" />
-      <div className="rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
-        <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">UZMAN NOTU</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veli gözlem formunu bir sonraki seansta getirsin. Öğrencinin spontan kullandığı sözcükler ile modelleme sonrası tekrar ettiği sözcükleri ayrı not etmesi hedef güncellemesinde çok işe yarar.</p>
-      </div>
-      <div className="flex flex-wrap gap-2">
+    <div className="max-w-2xl" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <NoteBlock tone="warning" label="VELİ TALİMATI">
+        Aktiviteyi her sabah kahvaltıda uygulayın — aynı saatte yapılan çalışma rutin oluşturur ve
+        öğrenmeyi kolaylaştırır. Öğrenci sözcüğü hatırlayamazsa 3 saniye bekleyin, ardından sözcüğün
+        ilk hecesini verin (&ldquo;pey...&rdquo; gibi). Tam cümle kurabildiğinde &ldquo;Bak, ne güzel
+        söyledin, peynir istediğini anlattın!&rdquo; gibi süreç odaklı geri bildirim verin.
+      </NoteBlock>
+      <NoteBlock tone="info" label="UZMAN NOTU">
+        Veli gözlem formunu bir sonraki seansta getirsin. Öğrencinin spontan kullandığı sözcükler ile
+        modelleme sonrası tekrar ettiği sözcükleri ayrı not etmesi hedef güncellemesinde çok işe yarar.
+      </NoteBlock>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         <CarouselTag color="green">Doğal ortam</CarouselTag>
         <CarouselTag color="blue">Kahvaltı rutini</CarouselTag>
         <CarouselTag color="orange">Gözlem formu</CarouselTag>
@@ -775,68 +827,61 @@ function SesSlide1() {
         <MockDropdown label="Seviye" value="Kolay" />
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex-1 rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(2,52,53,0.1)] dark:border-border/70 p-4">
-          <p className="text-xs md:text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Seans hedefleri</p>
-          <div className="space-y-2.5">
-            {[
-              { label: "Hedef sesi sahnede tanımlama", active: true },
-              { label: "Doğru/yanlış ses ayrımı yapma", active: true },
-              { label: "Sözcük düzeyinde üretim", active: false },
-            ].map((g) => (
-              <div key={g.label} className="flex items-center gap-2.5">
-                <span className={cn("shrink-0 h-5 w-5 rounded-full flex items-center justify-center text-[11px] md:text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435]/40 dark:text-muted-foreground/75")}>✓</span>
-                <span className={cn("text-xs", g.active ? "text-[#023435] dark:text-foreground" : "text-[rgba(2,52,53,0.4)]")}>{g.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <Link href="/register" className="block w-full rounded-[9px] bg-[#FE703A] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors">
-          ✦ Sesletim Kartı Üret
-        </Link>
+        <GoalChecklistCard
+          title="Seans hedefleri"
+          items={[
+            { code: "•", title: "Hedef sesi sahnede tanımlama", active: true },
+            { code: "•", title: "Doğru/yanlış ses ayrımı yapma", active: true },
+            { code: "•", title: "Sözcük düzeyinde üretim", active: false },
+          ]}
+        />
+        <SlideCtaButton href="/register">✦ Sesletim Kartı Üret</SlideCtaButton>
       </div>
     </div>
   );
 }
 function SesSlide2() {
   return (
-    <div className="space-y-4 max-w-2xl">
-      <div className="flex flex-wrap gap-2">
+    <div className="max-w-2xl" style={{ display: "flex", flexDirection: "column", gap: 14, fontFamily: "var(--font-display)" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         <CarouselTag color="blue">Ses Avı</CarouselTag>
         <CarouselTag color="orange">/ş/ sesi</CarouselTag>
         <CarouselTag color="green">Çiftlik teması</CarouselTag>
         <CarouselTag color="yellow">5-8 yaş · Kolay</CarouselTag>
       </div>
-      <h3 className="text-lg font-bold text-[#023435] dark:text-foreground">Çiftlikte /ş/ Avı — Ses Bulma Oyunu</h3>
-      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Çiftlik sahnesindeki nesneler arasında /ş/ sesi içerenleri bulma oyunu. Öğrenci resmi inceler, /ş/ sesli nesneleri işaretler ve her birini sesli olarak adlandırır.</p>
-      <div className="space-y-2">
-        {[
+      <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--poster-ink)", letterSpacing: "-.01em", margin: 0 }}>
+        Çiftlikte /ş/ Avı — Ses Bulma Oyunu
+      </h3>
+      <p style={{ fontSize: 14, color: "var(--poster-ink-2)", lineHeight: 1.6, margin: 0 }}>
+        Çiftlik sahnesindeki nesneler arasında /ş/ sesi içerenleri bulma oyunu. Öğrenci resmi inceler,
+        /ş/ sesli nesneleri işaretler ve her birini sesli olarak adlandırır.
+      </p>
+      <StepList
+        steps={[
           "Çiftlik sahnesini öğrencinin önüne koyun: \"Bakalım bu çiftlikte /ş/ sesi saklanan nesneler var mı?\"",
           "Öğrenciden sahneyi incelemesini ve /ş/ sesi duyduğu nesneleri parmağıyla göstermesini isteyin",
           "Her bulunan nesneyi birlikte söyleyin: \"Şapka! Evet, /ş/ sesi var. Peki kuş? Kuş'ta da var mı?\"",
           "Bulunan nesneleri sayın: \"6 tanesini buldun! Bakalım kaçını cümle içinde söyleyebilirsin\"",
-        ].map((step, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-xs md:text-[11px] font-bold text-white">{i + 1}</span>
-            <span className="text-sm text-[rgba(2,52,53,0.7)] pt-0.5">{step}</span>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
     </div>
   );
 }
 function SesSlide3() {
   return (
-    <div className="space-y-4 max-w-2xl">
-      <div className="rounded-xl bg-[#fffaf7] dark:bg-brand-orange/8 px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
-        <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Ses avı aktivitesinde öğrencinin kendi keşfetmesi kritiktir — cevabı söylemeyin, ipuçları verin. Yanlış cevaplarda &ldquo;Dinle: masa... /ş/ sesi var mı? Bir daha deneyelim&rdquo; gibi yönlendirin. Oyun bittiğinde bulunan nesnelerle kısa bir hikâye kurdurmak genellemeyi güçlendirir.</p>
-      </div>
-      <div className="border-t border-[rgba(2,52,53,0.08)] dark:border-border/60" />
-      <div className="rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
-        <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veliden evde &ldquo;ses dedektifi&rdquo; oyunu oynamasını isteyin: çocuk evdeki nesnelerde /ş/ sesini arar. Banyoda şampuan, şişe; mutfakta kaşık, şeker gibi. Günlük 5 dakika doğal ortamda ses farkındalığı çalışması seans verimliliğini artırır.</p>
-      </div>
-      <div className="flex flex-wrap gap-2">
+    <div className="max-w-2xl" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <NoteBlock tone="warning" label="UZMAN NOTU">
+        Ses avı aktivitesinde öğrencinin kendi keşfetmesi kritiktir — cevabı söylemeyin, ipuçları
+        verin. Yanlış cevaplarda &ldquo;Dinle: masa... /ş/ sesi var mı? Bir daha deneyelim&rdquo;
+        gibi yönlendirin. Oyun bittiğinde bulunan nesnelerle kısa bir hikâye kurdurmak genellemeyi
+        güçlendirir.
+      </NoteBlock>
+      <NoteBlock tone="info" label="GENELLEŞTİRME">
+        Veliden evde &ldquo;ses dedektifi&rdquo; oyunu oynamasını isteyin: çocuk evdeki nesnelerde
+        /ş/ sesini arar. Banyoda şampuan, şişe; mutfakta kaşık, şeker gibi. Günlük 5 dakika doğal
+        ortamda ses farkındalığı çalışması seans verimliliğini artırır.
+      </NoteBlock>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         <CarouselTag color="green">Keşif odaklı</CarouselTag>
         <CarouselTag color="blue">Ses farkındalığı</CarouselTag>
         <CarouselTag color="orange">Oyun temelli</CarouselTag>
@@ -871,20 +916,16 @@ function HedefSlide1() {
         <MockDropdown label="Ölçüm birimi" value="% doğru yanıt (10 deneme üzerinden)" />
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex-1 rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(2,52,53,0.1)] dark:border-border/70 p-4">
-          <p className="text-xs md:text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Başlangıç kriterleri</p>
-          <div className="space-y-1.5">
-            {["Başlangıç: %30 doğru yanıt","Kısa dönem hedef: %60","Uzun dönem hedef: %80"].map((d, i) => (
-              <div key={i} className="flex items-center gap-2 text-xs text-[rgba(2,52,53,0.65)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#107996] shrink-0" />
-                {d}
-              </div>
-            ))}
-          </div>
-        </div>
-        <Link href="/register" className="block w-full rounded-[9px] bg-[#FE703A] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors">
-          ✦ Hedef Tablosu Oluştur
-        </Link>
+        <ScheduleList
+          title="Başlangıç kriterleri"
+          bulletColor="var(--poster-blue)"
+          items={[
+            "Başlangıç: %30 doğru yanıt",
+            "Kısa dönem hedef: %60",
+            "Uzun dönem hedef: %80",
+          ]}
+        />
+        <SlideCtaButton href="/register">✦ Hedef Tablosu Oluştur</SlideCtaButton>
       </div>
     </div>
   );
@@ -897,47 +938,95 @@ function HedefSlide2() {
     { tarih: "25 Mar", oran: 65, not: "Kısa dönem hedef aşıldı ✓" },
   ];
   return (
-    <div className="space-y-4 max-w-2xl">
-      <div className="flex flex-wrap gap-2">
+    <div className="max-w-2xl" style={{ display: "flex", flexDirection: "column", gap: 14, fontFamily: "var(--font-display)" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         <CarouselTag color="blue">Ahmet Y.</CarouselTag>
         <CarouselTag color="orange">Hedef 2.2.3</CarouselTag>
         <CarouselTag color="green">2. Dönem</CarouselTag>
       </div>
-      <h3 className="text-lg font-bold text-[#023435] dark:text-foreground">İlerleme Tablosu — Sözcük Dağarcığı</h3>
-      <div className="rounded-xl border border-[rgba(2,52,53,0.1)] dark:border-border/70 overflow-hidden">
-        <div className="grid grid-cols-3 bg-[#f0f7f7] dark:bg-card/40 px-4 py-2 text-xs md:text-[11px] font-bold uppercase tracking-wide text-[rgba(2,52,53,0.45)]">
+      <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--poster-ink)", letterSpacing: "-.01em", margin: 0 }}>
+        İlerleme Tablosu — Sözcük Dağarcığı
+      </h3>
+      <div
+        style={{
+          background: "var(--poster-panel)",
+          border: "2px solid var(--poster-ink)",
+          borderRadius: 14,
+          boxShadow: "var(--poster-shadow-sm)",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "70px 1fr 1.2fr",
+            background: "var(--poster-bg-2)",
+            padding: "8px 14px",
+            borderBottom: "2px solid var(--poster-ink)",
+            fontSize: 10,
+            fontWeight: 800,
+            textTransform: "uppercase",
+            letterSpacing: ".08em",
+            color: "var(--poster-ink-3)",
+            gap: 10,
+          }}
+        >
           <span>Tarih</span><span>Doğru %</span><span>Not</span>
         </div>
-        {rows.map((r) => (
-          <div key={r.tarih} className="grid grid-cols-3 px-4 py-2.5 text-xs text-[rgba(2,52,53,0.7)] border-t border-[rgba(2,52,53,0.06)] dark:border-border/50 items-center">
-            <span className="font-medium text-[#023435] dark:text-foreground">{r.tarih}</span>
-            <div className="flex items-center gap-2">
-              <div className="h-1.5 flex-1 rounded-full bg-[rgba(2,52,53,0.08)] dark:bg-card/60">
-                <div className="h-full rounded-full bg-[#FE703A]" style={{ width: `${r.oran}%` }} />
+        {rows.map((r, i) => (
+          <div
+            key={r.tarih}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "70px 1fr 1.2fr",
+              padding: "10px 14px",
+              borderTop: i === 0 ? "none" : "1px dashed var(--poster-ink-faint)",
+              fontSize: 12,
+              color: "var(--poster-ink-2)",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            <span style={{ fontWeight: 800, color: "var(--poster-ink)" }}>{r.tarih}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div
+                style={{
+                  flex: 1,
+                  height: 6,
+                  background: "var(--poster-ink-faint)",
+                  border: "1.5px solid var(--poster-ink)",
+                  borderRadius: 999,
+                  overflow: "hidden",
+                }}
+              >
+                <div style={{ height: "100%", width: `${r.oran}%`, background: "var(--poster-accent)" }} />
               </div>
-              <span className="font-semibold text-[#FE703A] shrink-0">{r.oran}%</span>
+              <span style={{ fontWeight: 800, color: "var(--poster-accent)", flexShrink: 0 }}>{r.oran}%</span>
             </div>
             <span>{r.not}</span>
           </div>
         ))}
       </div>
-      <p className="text-xs text-[rgba(2,52,53,0.5)]">Kısa dönem hedef (%60) 4. haftada aşıldı. Uzun dönem hedef: %80.</p>
+      <p style={{ fontSize: 11, color: "var(--poster-ink-3)", margin: 0 }}>
+        Kısa dönem hedef (%60) 4. haftada aşıldı. Uzun dönem hedef: %80.
+      </p>
     </div>
   );
 }
 function HedefSlide3() {
   return (
-    <div className="space-y-4 max-w-2xl">
-      <div className="rounded-xl bg-[#fffaf7] dark:bg-brand-orange/8 px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
-        <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">DÖNEM ANALİZİ</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Öğrenci 4 hafta içinde %30&rsquo;dan %65&rsquo;e ilerledi — haftalık ortalama %8.75 artış. Kısa dönem hedef olan %60 aşıldı. Mutfak temalı doğal ortam çalışmaları en yüksek ilerlemeyi sağladı (tek seansta %15 artış). Uzun dönem hedef %80 için tahmini 2 seans daha gerekli.</p>
-      </div>
-      <div className="border-t border-[rgba(2,52,53,0.08)] dark:border-border/60" />
-      <div className="rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
-        <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">SONRAKİ ADIM ÖNERİSİ</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Sözcük dağarcığını cümle düzeyine taşımak için hedef 2.2.4&rsquo;e (basit cümleler kurar) geçiş planlanabilir. Ev ödevi frekansını haftada 3&rsquo;ten 5&rsquo;e çıkarmak ve doğal ortam çalışmalarını sürdürmek ilerleme hızını koruyacaktır.</p>
-      </div>
-      <div className="flex flex-wrap gap-2">
+    <div className="max-w-2xl" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <NoteBlock tone="warning" label="DÖNEM ANALİZİ">
+        Öğrenci 4 hafta içinde %30&rsquo;dan %65&rsquo;e ilerledi — haftalık ortalama %8.75 artış.
+        Kısa dönem hedef olan %60 aşıldı. Mutfak temalı doğal ortam çalışmaları en yüksek ilerlemeyi
+        sağladı (tek seansta %15 artış). Uzun dönem hedef %80 için tahmini 2 seans daha gerekli.
+      </NoteBlock>
+      <NoteBlock tone="info" label="SONRAKİ ADIM ÖNERİSİ">
+        Sözcük dağarcığını cümle düzeyine taşımak için hedef 2.2.4&rsquo;e (basit cümleler kurar)
+        geçiş planlanabilir. Ev ödevi frekansını haftada 3&rsquo;ten 5&rsquo;e çıkarmak ve doğal
+        ortam çalışmalarını sürdürmek ilerleme hızını koruyacaktır.
+      </NoteBlock>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         <CarouselTag color="green">%35 ilerleme</CarouselTag>
         <CarouselTag color="blue">4 hafta</CarouselTag>
         <CarouselTag color="orange">Kısa hedef ✓</CarouselTag>
@@ -1121,7 +1210,7 @@ function HowItWorksCarousel() {
                 alignItems: "center",
                 gap: 6,
                 border: "2px solid var(--poster-ink)",
-                background: "#fff",
+                background: "var(--poster-panel)",
                 padding: "6px 12px",
                 borderRadius: 999,
                 fontSize: 12,
@@ -1160,7 +1249,7 @@ function HowItWorksCarousel() {
                   cursor: "pointer",
                   fontFamily: "var(--font-display)",
                   border: "2px solid var(--poster-ink)",
-                  background: isActive ? "var(--poster-accent)" : "#fff",
+                  background: isActive ? "var(--poster-accent)" : "var(--poster-panel)",
                   color: isActive ? "#fff" : "var(--poster-ink)",
                   boxShadow: isActive ? "0 3px 0 var(--poster-ink)" : "none",
                   transition: "transform .1s, box-shadow .1s",
@@ -1192,7 +1281,7 @@ function HowItWorksCarousel() {
                     cursor: "pointer",
                     fontFamily: "var(--font-display)",
                     border: isActive ? "2px solid var(--poster-ink)" : "2px solid transparent",
-                    background: isActive ? "#fff" : "transparent",
+                    background: isActive ? "var(--poster-panel)" : "transparent",
                     boxShadow: isActive ? "0 4px 0 var(--poster-ink)" : "none",
                     transition: "all .15s",
                   }}
@@ -1209,7 +1298,7 @@ function HowItWorksCarousel() {
                       border: "2px solid var(--poster-ink)",
                       fontSize: 12,
                       fontWeight: 700,
-                      background: isActive ? "var(--poster-accent)" : "#FFCE52",
+                      background: isActive ? "var(--poster-accent)" : "var(--poster-yellow)",
                       color: isActive ? "#fff" : "var(--poster-ink)",
                     }}
                   >
@@ -1246,7 +1335,7 @@ function HowItWorksCarousel() {
           <div
             className="relative flex-1 overflow-hidden"
             style={{
-              background: "#fff",
+              background: "var(--poster-panel)",
               borderRadius: 20,
               border: "2px solid var(--poster-ink)",
               boxShadow: "0 6px 0 var(--poster-ink)",
@@ -1255,7 +1344,7 @@ function HowItWorksCarousel() {
             onMouseLeave={() => setPaused(false)}
           >
             {/* Progress bar */}
-            <div className="absolute top-0 left-0 right-0 z-10" style={{ height: 3, background: "rgba(14,30,38,.08)" }}>
+            <div className="absolute top-0 left-0 right-0 z-10" style={{ height: 3, background: "var(--poster-ink-faint)" }}>
               <motion.div
                 style={{ height: "100%", background: "var(--poster-accent)" }}
                 animate={{ width: `${((active + 1) / count) * 100}%` }}
@@ -1296,7 +1385,7 @@ function HowItWorksCarousel() {
                     width: 36,
                     flexShrink: 0,
                     borderRadius: 10,
-                    background: "#fff",
+                    background: "var(--poster-panel)",
                     border: "2px solid var(--poster-ink)",
                     boxShadow: "0 3px 0 var(--poster-ink)",
                     display: "flex",
@@ -1320,7 +1409,7 @@ function HowItWorksCarousel() {
                       width: i === active ? 28 : 10,
                       borderRadius: 999,
                       border: "2px solid var(--poster-ink)",
-                      background: i === active ? "var(--poster-accent)" : "#fff",
+                      background: i === active ? "var(--poster-accent)" : "var(--poster-panel)",
                       transition: "all .25s",
                       cursor: "pointer",
                     }}
@@ -1334,7 +1423,7 @@ function HowItWorksCarousel() {
                     width: 36,
                     flexShrink: 0,
                     borderRadius: 10,
-                    background: "#fff",
+                    background: "var(--poster-panel)",
                     border: "2px solid var(--poster-ink)",
                     boxShadow: "0 3px 0 var(--poster-ink)",
                     display: "flex",
