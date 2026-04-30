@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { GlowyWavesHero } from "@/components/landing/glowy-waves-hero";
 import { PosterHero } from "@/components/landing/poster-hero";
 import { PosterHeader } from "@/components/landing/poster-header";
 import { ForceLightTheme } from "@/components/ForceLightTheme";
@@ -1056,7 +1055,7 @@ const TOOLS_CONFIG = [
     id: "kart",
     label: "Öğrenme Kartı",
     icon: "🃏",
-    headline: "Saniyeler içinde kişiselleştirilmiş kart",
+    headline: "Hedeflere özel öğrenme kartı",
     subtitle: "Alan, yaş grubu ve hedefi seçin — yapay zeka gerisini halleder",
     slides: [
       { title: "Parametreleri seç",   desc: "Alan, yaş grubu, tanı ve müfredat hedefini belirle", Panel: KartSlide1 },
@@ -1096,7 +1095,7 @@ const TOOLS_CONFIG = [
     label: "Sesletim",
     icon: "🎵",
     headline: "Nefes ve rezonans egzersiz kartı",
-    subtitle: "Ses grubunu ve egzersiz türünü seçin — protokol saniyeler içinde hazır",
+    subtitle: "Sesi, konumu ve yaş grubunu seçin — egzersiz protokolü hazır",
     slides: [
       { title: "Ses & egzersiz seç",  desc: "Ses grubunu, egzersiz türünü ve seviyeyi belirle",  Panel: SesSlide1 },
       { title: "Protokolü gör",       desc: "Adım adım sesletim egzersiz protokolü oluşturuldu", Panel: SesSlide2 },
