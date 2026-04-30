@@ -17,7 +17,7 @@ type PModalProps = {
  * Poster modal — wraps ModalPortal, keeps its portal + scroll-lock contract.
  * - Ink 2px border + hard shadow panel
  * - Backdrop dims page, click-to-close unless persistent
- * - ESC closes; focus trap is intentionally lightweight (first focusable autofocus)
+ * - ESC closes; focus restored to opener trigger when modal closes
  */
 export function PModal({
   open,
@@ -29,6 +29,8 @@ export function PModal({
   persistent = false,
 }: PModalProps) {
   const panelRef = React.useRef<HTMLDivElement>(null);
+  const titleId = React.useId();
+  const triggerRef = React.useRef<HTMLElement | null>(null);
 
   // ESC to close
   React.useEffect(() => {
@@ -40,13 +42,23 @@ export function PModal({
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose, persistent]);
 
-  // Body scroll lock
+  // Body scroll lock + focus capture/restore
   React.useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const opener = document.activeElement as HTMLElement | null;
+    if (opener && opener !== document.body) {
+      triggerRef.current = opener;
+    }
     return () => {
       document.body.style.overflow = prev;
+      const t = triggerRef.current;
+      triggerRef.current = null;
+      if (t && typeof t.focus === "function") {
+        // schedule after portal unmount so the trigger isn't covered
+        requestAnimationFrame(() => t.focus({ preventScroll: true }));
+      }
     };
   }, [open]);
 
@@ -57,6 +69,7 @@ export function PModal({
       <div
         role="dialog"
         aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
         style={{
           position: "fixed",
           inset: 0,
@@ -79,7 +92,7 @@ export function PModal({
           onClick={(e) => e.stopPropagation()}
           style={{
             width: "100%",
-            maxWidth: width,
+            maxWidth: typeof width === "number" ? `min(${width}px, 95vw)` : width,
             maxHeight: "calc(100vh - 32px)",
             background: "var(--poster-panel)",
             border: "2px solid var(--poster-ink)",
@@ -104,7 +117,7 @@ export function PModal({
                 background: "var(--poster-bg-2)",
               }}
             >
-              <div style={{ fontSize: 17, fontWeight: 700, letterSpacing: "-.01em" }}>{title}</div>
+              <div id={titleId} style={{ fontSize: 17, fontWeight: 700, letterSpacing: "-.01em" }}>{title}</div>
               <button
                 type="button"
                 onClick={onClose}

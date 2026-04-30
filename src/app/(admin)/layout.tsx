@@ -22,7 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="poster-scope" style={{ minHeight: "100vh", background: "var(--poster-bg)" }}>
       <AppHeader />
-      {children}
+      <main id="main-content">{children}</main>
     </div>
   );
 }

@@ -227,16 +227,18 @@ export function PAlert({
 type PSelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & { invalid?: boolean };
 
 export const PSelect = React.forwardRef<HTMLSelectElement, PSelectProps>(
-  function PSelect({ style, invalid, children, ...rest }, ref) {
+  function PSelect({ style, invalid, children, className, ...rest }, ref) {
+    // Arrow rendered via CSS background-image with theme-aware stroke; see globals.css
     return (
       <select
         ref={ref}
         {...rest}
+        className={`p-select${className ? ` ${className}` : ""}`}
         style={{
           width: "100%",
           height: 46,
           padding: "0 38px 0 14px",
-          background: `var(--poster-panel) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3e%3cpath fill='none' stroke='%230E1E26' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3e%3c/svg%3e") no-repeat right 14px center`,
+          background: "var(--poster-panel)",
           border: `2px solid ${invalid ? "var(--poster-danger)" : "var(--poster-ink)"}`,
           borderRadius: 12,
           boxShadow: "var(--poster-shadow-sm)",

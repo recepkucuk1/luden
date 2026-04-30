@@ -212,6 +212,17 @@ input, select, textarea {
 .poster-toast-warning { border-color: var(--poster-yellow) !important; box-shadow: 0 6px 0 var(--poster-yellow) !important; }
 .poster-toast-info    { border-color: var(--poster-blue) !important;   box-shadow: 0 6px 0 var(--poster-blue) !important; }
 
+/* PSelect dropdown arrow — theme-aware via inline SVG with light/dark stroke */
+.poster-scope select.p-select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3e%3cpath fill='none' stroke='%230E1E26' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+.poster-scope.dark select.p-select,
+.dark .poster-scope select.p-select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3e%3cpath fill='none' stroke='%23F5E8C7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3e%3c/svg%3e");
+}
+
 /* PSkeleton shimmer */
 @keyframes poster-skeleton-pulse {
   0%, 100% { opacity: 1; }

@@ -5,7 +5,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <ForceLightTheme />
-      {children}
+      <main id="main-content">{children}</main>
     </>
   );
 }
