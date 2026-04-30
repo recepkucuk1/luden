@@ -9,25 +9,25 @@ function HeroCardStack() {
       <PCard
         color="#FFCE52"
         rotate={-6}
-        style={{ position: "absolute", top: 40, left: 20, width: 280, padding: 20 }}
+        style={{ position: "absolute", top: 24, left: 16, width: 260, padding: 16 }}
       >
-        <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
           <PBadge color="blue">Artikülasyon</PBadge>
           <PBadge color="soft">7-12 yaş</PBadge>
         </div>
         <div
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: 700,
             lineHeight: 1.1,
-            marginBottom: 10,
+            marginBottom: 8,
             color: "#0E1E26",
           }}
         >
           /s/ Sesi — Sözcük Başı
         </div>
-        <div style={{ fontSize: 13, color: "rgba(14,30,38,.7)", lineHeight: 1.5 }}>
+        <div style={{ fontSize: 12.5, color: "rgba(14,30,38,.7)", lineHeight: 1.45 }}>
           10 Türkçe kelime, hece ayrımı ve örnek cümlelerle.
         </div>
       </PCard>
@@ -36,14 +36,14 @@ function HeroCardStack() {
         color="#fff"
         style={{
           position: "absolute",
-          top: 80,
-          left: 80,
-          width: 300,
-          padding: 20,
+          top: 60,
+          left: 70,
+          width: 280,
+          padding: 16,
           zIndex: 3,
         }}
       >
-        <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
           <PBadge color="accent">Dil</PBadge>
           <PBadge color="soft">3-6 yaş</PBadge>
           <PBadge color="green">Kolay</PBadge>
@@ -51,10 +51,10 @@ function HeroCardStack() {
         <div
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: 22,
+            fontSize: 20,
             fontWeight: 700,
             lineHeight: 1.1,
-            marginBottom: 10,
+            marginBottom: 8,
             color: "#0E1E26",
           }}
         >
@@ -62,22 +62,23 @@ function HeroCardStack() {
         </div>
         <div
           style={{
-            fontSize: 13,
+            fontSize: 12.5,
             color: "rgba(14,30,38,.7)",
-            lineHeight: 1.5,
-            marginBottom: 14,
+            lineHeight: 1.45,
+            marginBottom: 10,
           }}
         >
           Tanıdık mutfak nesneleriyle aktif sözcük dağarcığını genişletir.
         </div>
         <div
           style={{
-            padding: 10,
+            padding: 8,
             borderRadius: 10,
             background: "#FFF8EC",
             border: "1px dashed rgba(14,30,38,.2)",
-            fontSize: 11.5,
+            fontSize: 11,
             color: "rgba(14,30,38,.7)",
+            lineHeight: 1.4,
           }}
         >
           <strong style={{ color: "#0E1E26" }}>💡 Uzman notu:</strong> Çoklu duyusal
@@ -88,16 +89,16 @@ function HeroCardStack() {
       <PCard
         color="#FF6B9D"
         rotate={5}
-        style={{ position: "absolute", top: 220, left: 170, width: 260, padding: 18 }}
+        style={{ position: "absolute", top: 200, left: 150, width: 240, padding: 14 }}
       >
-        <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
           <PBadge color="soft">İşitme</PBadge>
           <PBadge color="yellow">Orta</PBadge>
         </div>
         <div
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: 700,
             color: "#fff",
             lineHeight: 1.1,
@@ -110,9 +111,9 @@ function HeroCardStack() {
       <div
         style={{
           position: "absolute",
-          top: 20,
-          right: 40,
-          fontSize: 32,
+          top: 8,
+          right: 24,
+          fontSize: 28,
           color: "#0E1E26",
           animation: "spin 8s linear infinite",
         }}
@@ -122,9 +123,9 @@ function HeroCardStack() {
       <div
         style={{
           position: "absolute",
-          bottom: 40,
-          right: 20,
-          fontSize: 24,
+          bottom: 16,
+          right: 8,
+          fontSize: 22,
           color: "#0E1E26",
           animation: "spin 12s linear infinite reverse",
         }}
@@ -164,7 +165,7 @@ export function PosterHero() {
         style={{
           position: "relative",
           zIndex: 3,
-          padding: "clamp(40px, 8vw, 64px) clamp(16px, 5vw, 24px) clamp(56px, 10vw, 88px)",
+          padding: "clamp(24px, 5vw, 48px) clamp(16px, 5vw, 24px) clamp(40px, 7vw, 64px)",
           maxWidth: 1200,
           margin: "0 auto",
         }}
@@ -172,7 +173,7 @@ export function PosterHero() {
       >
         <div className="poster-hero-grid">
           <div>
-            <PBadge color="yellow" style={{ marginBottom: 24 }}>
+            <PBadge color="yellow" style={{ marginBottom: 18 }}>
               ✦ AI Destekli · Dil ve Konuşma Terapisi
             </PBadge>
 
@@ -211,8 +212,8 @@ export function PosterHero() {
 
             <p
               style={{
-                margin: "24px 0 32px",
-                fontSize: "clamp(15px, 4vw, 19px)",
+                margin: "18px 0 24px",
+                fontSize: "clamp(15px, 4vw, 18px)",
                 lineHeight: 1.5,
                 maxWidth: 520,
                 color: "rgba(14,30,38,.7)",
@@ -228,7 +229,6 @@ export function PosterHero() {
               style={{
                 display: "flex",
                 gap: 14,
-                marginBottom: 40,
                 flexWrap: "wrap",
               }}
             >
@@ -268,16 +268,17 @@ export function PosterHero() {
         .poster-hero-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 48px;
+          gap: 32px;
           align-items: center;
         }
         .poster-hero-stack {
           position: relative;
-          height: 480px;
+          height: 400px;
           display: none;
         }
         .poster-hero-h1 {
-          font-size: clamp(36px, 10vw, 56px);
+          font-size: clamp(34px, 9vw, 48px);
+          line-height: 1.02;
         }
         @media (min-width: 768px) {
           .poster-hero-grid {
@@ -287,7 +288,7 @@ export function PosterHero() {
             display: block;
           }
           .poster-hero-h1 {
-            font-size: clamp(56px, 7vw, 84px);
+            font-size: clamp(44px, 5.5vw, 68px);
           }
         }
         @keyframes spin {
