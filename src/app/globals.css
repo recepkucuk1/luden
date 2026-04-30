@@ -129,6 +129,12 @@ input, select, textarea {
   --surface-page-gradient: linear-gradient(135deg, #fff8ec 0%, #fde8c7 50%, #fff8ec 100%);
   --surface-page-solid: #fff8ec;
 
+  /* Soft accent tints — for subtle highlights (mock dropdowns, info chips, etc.) */
+  --poster-accent-soft: color-mix(in srgb, var(--poster-accent) 8%, transparent);
+  --poster-blue-soft: color-mix(in srgb, var(--poster-blue) 10%, transparent);
+  --poster-yellow-soft: color-mix(in srgb, var(--poster-yellow) 18%, transparent);
+  --poster-green-soft: color-mix(in srgb, var(--poster-green) 12%, transparent);
+
   /* Alert / Section tone palette — used by PAlert + CardPreview Section */
   --alert-error-bg: #ffe9e9;
   --alert-error-border: var(--poster-danger);

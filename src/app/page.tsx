@@ -12,6 +12,7 @@ import { PosterHeader } from "@/components/landing/poster-header";
 import { ForceLightTheme } from "@/components/ForceLightTheme";
 import { PosterFooter } from "@/components/landing/poster-footer";
 import { Pricing, type PricingPlan } from "@/components/poster/pricing";
+import { PBadge } from "@/components/poster";
 import {
   IconSparkles,
   IconUsers,
@@ -158,31 +159,47 @@ function CarouselTag({ children, color }: {
   children: React.ReactNode;
   color: "blue" | "orange" | "green" | "yellow";
 }) {
-  const cls: Record<string, string> = {
-    blue:   "bg-[rgba(16,121,150,0.1)] text-[#107996]",
-    orange: "bg-[rgba(254,112,58,0.1)] text-[#FE703A]",
-    green:  "bg-[rgba(2,52,53,0.1)] dark:bg-card/70 text-[#023435] dark:text-foreground",
-    yellow: "bg-[rgba(244,174,16,0.15)] text-amber-800",
-  };
-  return (
-    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs md:text-[11px] font-medium", cls[color])}>
-      {children}
-    </span>
-  );
+  // Re-using PBadge so the carousel mock chips visually match the
+  // badges users see inside the actual app once they log in.
+  const map = { blue: "blue", orange: "accent", green: "soft", yellow: "yellow" } as const;
+  return <PBadge color={map[color]}>{children}</PBadge>;
 }
 
 function MockDropdown({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  // Visually mimics the real PSelect (2px ink border, cream panel, accent
+  // shadow when highlighted) so what's promised on the landing matches
+  // what users see in the app.
   return (
     <div>
-      <p className="text-xs md:text-[11px] font-medium text-[rgba(2,52,53,0.45)] mb-1">{label}</p>
-      <div className={cn(
-        "flex items-center justify-between rounded-xl border px-3 py-2 text-sm",
-        highlight
-          ? "border-[#FE703A] bg-[#FE703A]/5 text-[#023435] dark:text-foreground font-medium"
-          : "border-[rgba(2,52,53,0.12)] dark:border-border/80 bg-[#f8fafa] dark:bg-muted/20 text-[#023435] dark:text-foreground"
-      )}>
+      <p
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: "var(--poster-ink-3)",
+          marginBottom: 6,
+          fontFamily: "var(--font-display)",
+        }}
+      >
+        {label}
+      </p>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "10px 14px",
+          background: highlight ? "var(--poster-accent-soft)" : "var(--poster-panel)",
+          border: "2px solid var(--poster-ink)",
+          borderRadius: 12,
+          boxShadow: highlight ? "0 3px 0 var(--poster-accent)" : "var(--poster-shadow-sm)",
+          fontSize: 14,
+          fontWeight: highlight ? 700 : 600,
+          color: "var(--poster-ink)",
+          fontFamily: "var(--font-display)",
+        }}
+      >
         <span>{value}</span>
-        <svg className="h-4 w-4 shrink-0 text-[#023435]/30 dark:text-muted-foreground/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--poster-ink)" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </div>
@@ -197,30 +214,278 @@ function MockPdfCard({ header, tags, rows, cta }: {
   cta: string;
 }) {
   return (
-    <div className="max-w-xl mx-auto rounded-xl border border-[rgba(2,52,53,0.12)] dark:border-border/80 bg-white shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between border-b border-[rgba(2,52,53,0.08)] dark:border-border/60 px-5 py-3">
-        <span className="font-bold text-[#023435] dark:text-foreground">Luden<span className="text-[#FE703A]">Lab</span></span>
-        <span className="text-xs text-[rgba(2,52,53,0.4)]">{header}</span>
+    <div
+      style={{
+        maxWidth: 560,
+        margin: "0 auto",
+        background: "var(--poster-panel)",
+        border: "2px solid var(--poster-ink)",
+        borderRadius: 16,
+        boxShadow: "0 6px 0 var(--poster-ink)",
+        overflow: "hidden",
+        fontFamily: "var(--font-display)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "12px 20px",
+          borderBottom: "2px solid var(--poster-ink)",
+          background: "var(--poster-bg-2)",
+        }}
+      >
+        <span style={{ fontWeight: 800, color: "var(--poster-ink)", fontSize: 15 }}>
+          Luden<span style={{ color: "var(--poster-accent)" }}>Lab</span>
+        </span>
+        <span style={{ fontSize: 11, color: "var(--poster-ink-3)" }}>{header}</span>
       </div>
-      <div className="flex flex-wrap gap-1.5 px-5 py-3 border-b border-[rgba(2,52,53,0.06)] dark:border-border/50">{tags}</div>
-      <div className="px-5 py-4 space-y-3">
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 6,
+          padding: "12px 20px",
+          borderBottom: "1px dashed var(--poster-ink-faint)",
+        }}
+      >
+        {tags}
+      </div>
+      <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
         {rows.map((s) => (
           <div key={s.label}>
-            <p className="text-[11px] md:text-[10px] font-bold uppercase tracking-wider text-[#023435]/40 dark:text-muted-foreground/75 mb-1">{s.label}</p>
-            {s.title && <p className="text-sm font-semibold text-[#023435] dark:text-foreground mb-0.5">{s.title}</p>}
-            <p className="text-xs text-[rgba(2,52,53,0.6)] leading-relaxed">{s.body}</p>
+            <p
+              style={{
+                fontSize: 10,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: ".1em",
+                color: "var(--poster-ink-3)",
+                margin: "0 0 4px",
+              }}
+            >
+              {s.label}
+            </p>
+            {s.title && (
+              <p style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink)", margin: "0 0 2px" }}>
+                {s.title}
+              </p>
+            )}
+            <p style={{ fontSize: 12, color: "var(--poster-ink-2)", lineHeight: 1.55, margin: 0 }}>
+              {s.body}
+            </p>
           </div>
         ))}
       </div>
-      <div className="flex items-center justify-between border-t border-[rgba(2,52,53,0.08)] dark:border-border/60 px-5 py-3">
-        <span className="text-xs md:text-[11px] text-[rgba(2,52,53,0.4)]">{cta}</span>
-        <span className="flex items-center gap-1.5 text-xs font-semibold text-[#107996]">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "12px 20px",
+          borderTop: "2px solid var(--poster-ink)",
+          background: "var(--poster-bg-2)",
+        }}
+      >
+        <span style={{ fontSize: 11, color: "var(--poster-ink-3)" }}>{cta}</span>
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            fontSize: 12,
+            fontWeight: 800,
+            color: "var(--poster-accent)",
+          }}
+        >
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
           PDF İndir
         </span>
       </div>
+    </div>
+  );
+}
+
+// ── Shared slide bits ─────────────────────────────────────────────────────────
+
+function SlideCtaButton({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        display: "block",
+        width: "100%",
+        background: "var(--poster-accent)",
+        color: "#fff",
+        padding: "12px 18px",
+        textAlign: "center",
+        fontSize: 14,
+        fontWeight: 800,
+        border: "2px solid var(--poster-ink)",
+        borderRadius: 12,
+        boxShadow: "0 4px 0 var(--poster-ink)",
+        textDecoration: "none",
+        fontFamily: "var(--font-display)",
+      }}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function GoalChecklistCard({ items, title }: {
+  items: { code: string; title: string; active: boolean }[];
+  title: string;
+}) {
+  return (
+    <div
+      style={{
+        flex: 1,
+        background: "var(--poster-bg-2)",
+        border: "2px solid var(--poster-ink)",
+        borderRadius: 14,
+        boxShadow: "var(--poster-shadow-sm)",
+        padding: 14,
+        fontFamily: "var(--font-display)",
+      }}
+    >
+      <p
+        style={{
+          fontSize: 10,
+          fontWeight: 800,
+          textTransform: "uppercase",
+          letterSpacing: ".08em",
+          color: "var(--poster-ink-3)",
+          margin: "0 0 10px",
+        }}
+      >
+        {title}
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {items.map((g) => (
+          <div key={g.code} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <span
+              style={{
+                flexShrink: 0,
+                width: 18,
+                height: 18,
+                borderRadius: "50%",
+                background: g.active ? "var(--poster-accent-soft)" : "var(--poster-ink-faint)",
+                color: g.active ? "var(--poster-accent)" : "var(--poster-ink-3)",
+                border: "1.5px solid var(--poster-ink)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 10,
+                fontWeight: 800,
+                marginTop: 1,
+              }}
+            >
+              ✓
+            </span>
+            <span style={{ fontSize: 12, color: "var(--poster-ink-2)", lineHeight: 1.4 }}>
+              <span style={{ fontWeight: 800, color: "var(--poster-ink)" }}>{g.code}</span>
+              <span style={{ marginLeft: 6 }}>{g.title}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StepList({ steps }: { steps: string[] }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {steps.map((step, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+          <span
+            style={{
+              flexShrink: 0,
+              width: 24,
+              height: 24,
+              borderRadius: "50%",
+              background: "var(--poster-ink)",
+              color: "var(--poster-panel)",
+              border: "2px solid var(--poster-ink)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 11,
+              fontWeight: 800,
+            }}
+          >
+            {i + 1}
+          </span>
+          <span
+            style={{
+              fontSize: 13,
+              color: "var(--poster-ink-2)",
+              paddingTop: 2,
+              lineHeight: 1.5,
+              fontFamily: "var(--font-display)",
+            }}
+          >
+            {step}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function NoteBlock({
+  tone,
+  label,
+  children,
+  meta,
+}: {
+  tone: "warning" | "info" | "success";
+  label: string;
+  children: React.ReactNode;
+  meta?: string;
+}) {
+  return (
+    <div
+      style={{
+        padding: "12px 14px",
+        background: `var(--alert-${tone}-bg)`,
+        border: `2px solid var(--alert-${tone}-border)`,
+        borderLeftWidth: 4,
+        borderRadius: 12,
+        fontFamily: "var(--font-display)",
+      }}
+    >
+      <p
+        style={{
+          fontSize: 10,
+          fontWeight: 800,
+          textTransform: "uppercase",
+          letterSpacing: ".1em",
+          color: `var(--alert-${tone}-text)`,
+          margin: "0 0 6px",
+        }}
+      >
+        {label}
+      </p>
+      <p
+        style={{
+          fontSize: 13,
+          color: `var(--alert-${tone}-text)`,
+          lineHeight: 1.55,
+          margin: 0,
+        }}
+      >
+        {children}
+      </p>
+      {meta && (
+        <p style={{ fontSize: 10, color: `var(--alert-${tone}-text)`, opacity: 0.65, margin: "6px 0 0" }}>
+          {meta}
+        </p>
+      )}
     </div>
   );
 }
@@ -236,64 +501,59 @@ function KartSlide1() {
         <MockDropdown label="Tanı türü" value="Dil Gelişim Gecikmesi" />
       </div>
       <div className="flex flex-col gap-4">
-        <div className="flex-1 rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(2,52,53,0.1)] dark:border-border/70 p-4">
-          <p className="text-xs md:text-[11px] font-semibold uppercase tracking-wide text-[rgba(2,52,53,0.45)] mb-3">Seçilen müfredat hedefi</p>
-          <div className="space-y-2.5">
-            {[
-              { code: "2.2.1", title: "Dili anlar (tek sözcük → cümle düzeyi)", active: true },
-              { code: "2.2.3", title: "Sözcük dağarcığını genişletir", active: true },
-            ].map((g) => (
-              <div key={g.code} className="flex items-start gap-2.5">
-                <span className={cn("shrink-0 mt-0.5 h-5 w-5 rounded-full flex items-center justify-center text-[11px] md:text-[10px] font-bold", g.active ? "bg-[#FE703A]/15 text-[#FE703A]" : "bg-[#023435]/10 text-[#023435] dark:text-foreground")}>✓</span>
-                <span className="text-xs text-[rgba(2,52,53,0.65)]"><span className="font-semibold text-[#023435] dark:text-foreground">{g.code}</span><span className="ml-1.5">{g.title}</span></span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <Link href="/register" className="block w-full rounded-[9px] bg-[#FE703A] px-4 py-3 text-center text-sm font-semibold text-white hover:bg-[#FE703A]/90 transition-colors">
-          ✦ Öğrenme Kartı Üret
-        </Link>
+        <GoalChecklistCard
+          title="Seçilen müfredat hedefi"
+          items={[
+            { code: "2.2.1", title: "Dili anlar (tek sözcük → cümle düzeyi)", active: true },
+            { code: "2.2.3", title: "Sözcük dağarcığını genişletir", active: true },
+          ]}
+        />
+        <SlideCtaButton href="/register">✦ Öğrenme Kartı Üret</SlideCtaButton>
       </div>
     </div>
   );
 }
 function KartSlide2() {
   return (
-    <div className="space-y-4 max-w-2xl">
-      <div className="flex flex-wrap gap-2">
+    <div className="max-w-2xl" style={{ display: "flex", flexDirection: "column", gap: 14, fontFamily: "var(--font-display)" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         <CarouselTag color="blue">Dil · Söz Dönemi</CarouselTag>
         <CarouselTag color="orange">3-6 yaş</CarouselTag>
         <CarouselTag color="green">Başlangıç</CarouselTag>
         <CarouselTag color="yellow">Dil Gelişim Gecikmesi</CarouselTag>
-        <span className="inline-flex items-center rounded-full bg-[rgba(16,121,150,0.08)] border border-[#107996]/20 px-2.5 py-0.5 text-xs md:text-[11px] font-semibold text-[#107996]">Hedef 2.2.3</span>
+        <PBadge color="blue">Hedef 2.2.3</PBadge>
       </div>
-      <h3 className="text-lg font-bold text-[#023435] dark:text-foreground">Mutfak Keşfi — Sözcük Bulma Oyunu</h3>
-      <p className="text-sm text-[rgba(2,52,53,0.65)] leading-relaxed">Uzman, mutfak ortamındaki gerçek nesneleri kullanarak öğrencinin aktif sözcük dağarcığını genişletir. Öğrenci nesneleri keşfeder, adlandırır ve işlevlerini kendi cümleleriyle anlatır.</p>
-      <div className="space-y-2">
-        {["Mutfaktan 6-8 tanıdık nesne seçin (bardak, kaşık, tabak, tencere, sünger, peçete)","Her nesneyi sırayla göstererek \"Bu ne? Ne işe yarıyor?\" diye sorun","Öğrenci bilmediğinde nesneyi tanımlayın, dokunmasını sağlayın ve adını 2 kez tekrarlayın","Tüm nesneleri masaya dizin, \"Yemeği karıştıran nesneyi göster\" gibi işlev soruları sorun"].map((step, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <span className="shrink-0 h-6 w-6 rounded-full bg-[#023435] flex items-center justify-center text-xs md:text-[11px] font-bold text-white">{i + 1}</span>
-            <span className="text-sm text-[rgba(2,52,53,0.7)] pt-0.5">{step}</span>
-          </div>
-        ))}
-      </div>
+      <h3 style={{ fontSize: 18, fontWeight: 800, color: "var(--poster-ink)", letterSpacing: "-.01em", margin: 0 }}>
+        Mutfak Keşfi — Sözcük Bulma Oyunu
+      </h3>
+      <p style={{ fontSize: 14, color: "var(--poster-ink-2)", lineHeight: 1.6, margin: 0 }}>
+        Uzman, mutfak ortamındaki gerçek nesneleri kullanarak öğrencinin aktif sözcük dağarcığını genişletir.
+        Öğrenci nesneleri keşfeder, adlandırır ve işlevlerini kendi cümleleriyle anlatır.
+      </p>
+      <StepList
+        steps={[
+          "Mutfaktan 6-8 tanıdık nesne seçin (bardak, kaşık, tabak, tencere, sünger, peçete)",
+          "Her nesneyi sırayla göstererek \"Bu ne? Ne işe yarıyor?\" diye sorun",
+          "Öğrenci bilmediğinde nesneyi tanımlayın, dokunmasını sağlayın ve adını 2 kez tekrarlayın",
+          "Tüm nesneleri masaya dizin, \"Yemeği karıştıran nesneyi göster\" gibi işlev soruları sorun",
+        ]}
+      />
     </div>
   );
 }
 function KartSlide3() {
   return (
-    <div className="space-y-4 max-w-2xl">
-      <div className="rounded-xl bg-[#fffaf7] dark:bg-brand-orange/8 px-4 py-3.5 border border-l-4 border-[rgba(254,112,58,0.2)] border-l-[#FE703A]">
-        <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#FE703A] mb-2">UZMAN NOTU</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Tanıdık nesnelerle başlayın — ev ortamı en güçlü doğal bağlamdır. Öğrenci nesneye dokunabilmeli, koklayabilmeli; çoklu duyusal deneyim sözcük yerleşimini hızlandırır. &ldquo;Aferin&rdquo; yerine &ldquo;Bak, tencerenin ne işe yaradığını hatırladın!&rdquo; gibi süreci ön plana çıkaran geri bildirimler kullanın.</p>
-        <p className="text-xs md:text-[11px] text-[rgba(2,52,53,0.4)] mt-2">Hedef 2.2.3 — Sözcük dağarcığını genişletir</p>
-      </div>
-      <div className="border-t border-[rgba(2,52,53,0.08)] dark:border-border/60" />
-      <div className="rounded-xl bg-[#f0f7f7] dark:bg-card/40 border border-[rgba(16,121,150,0.15)] px-4 py-3.5">
-        <p className="text-xs md:text-[11px] font-bold uppercase tracking-wide text-[#107996] mb-2">GENELLEŞTİRME ÖNERİSİ</p>
-        <p className="text-sm text-[rgba(2,52,53,0.7)] leading-relaxed">Veliden akşam yemeği hazırlığı sırasında 3-4 nesneyi öğrenciye isimlendirmesini istemesini isteyin. Günlük rutine gömülü tekrar, haftalık 2 seans kadar etkili olabilir.</p>
-      </div>
-      <div className="flex flex-wrap gap-2">
+    <div className="max-w-2xl" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <NoteBlock tone="warning" label="UZMAN NOTU" meta="Hedef 2.2.3 — Sözcük dağarcığını genişletir">
+        Tanıdık nesnelerle başlayın — ev ortamı en güçlü doğal bağlamdır. Öğrenci nesneye dokunabilmeli,
+        koklayabilmeli; çoklu duyusal deneyim sözcük yerleşimini hızlandırır. &ldquo;Aferin&rdquo; yerine
+        &ldquo;Bak, tencerenin ne işe yaradığını hatırladın!&rdquo; gibi süreci ön plana çıkaran geri bildirimler kullanın.
+      </NoteBlock>
+      <NoteBlock tone="info" label="GENELLEŞTİRME ÖNERİSİ">
+        Veliden akşam yemeği hazırlığı sırasında 3-4 nesneyi öğrenciye isimlendirmesini istemesini isteyin.
+        Günlük rutine gömülü tekrar, haftalık 2 seans kadar etkili olabilir.
+      </NoteBlock>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         <CarouselTag color="green">Çoklu duyusal</CarouselTag>
         <CarouselTag color="blue">Doğal bağlam</CarouselTag>
         <CarouselTag color="yellow">Günlük rutin</CarouselTag>
