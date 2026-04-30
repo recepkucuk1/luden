@@ -262,10 +262,14 @@ export function PosterLabel({
   htmlFor,
   children,
   rightSlot,
+  required,
+  optional,
 }: {
   htmlFor?: string;
   children: React.ReactNode;
   rightSlot?: React.ReactNode;
+  required?: boolean;
+  optional?: boolean;
 }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
@@ -279,6 +283,16 @@ export function PosterLabel({
         }}
       >
         {children}
+        {required && (
+          <span aria-hidden style={{ color: "var(--poster-accent)", fontWeight: 800, marginLeft: 3 }}>
+            *
+          </span>
+        )}
+        {optional && (
+          <span style={{ fontWeight: 500, color: "var(--poster-ink-3)", marginLeft: 6 }}>
+            (opsiyonel)
+          </span>
+        )}
       </label>
       {rightSlot}
     </div>

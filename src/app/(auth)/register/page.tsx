@@ -14,6 +14,7 @@ import {
   PosterAlert,
 } from "@/components/auth/PosterAuthShell";
 import { PasswordStrengthBar } from "@/components/auth/PasswordStrengthBar";
+import { PFieldHint } from "@/components/poster";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -27,11 +28,31 @@ export default function RegisterPage() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
+  const [nameTouched, setNameTouched] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+
+  const nameFieldError = !name.trim() ? "Ad Soyad gerekli" : null;
+  const emailFieldError = !email
+    ? "Email gerekli"
+    : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ? "Geçerli bir email adresi girin"
+    : null;
+  const passwordFieldError = !password
+    ? "Şifre gerekli"
+    : password.length < 8
+    ? "En az 8 karakter olmalı"
+    : null;
+
+  const showNameError = nameTouched && nameFieldError;
+  const showEmailError = emailTouched && emailFieldError;
+  const showPasswordError = passwordTouched && passwordFieldError;
 
   const passwordsMismatch =
     passwordConfirm.length > 0 && password !== passwordConfirm;
@@ -40,6 +61,14 @@ export default function RegisterPage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setNameTouched(true);
+    setEmailTouched(true);
+    setPasswordTouched(true);
+
+    if (nameFieldError || emailFieldError || passwordFieldError) {
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
@@ -118,9 +147,9 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div>
-          <PosterLabel htmlFor="name">Ad Soyad</PosterLabel>
+          <PosterLabel htmlFor="name" required>Ad Soyad</PosterLabel>
           <PosterInput
             id="name"
             name="name"
@@ -128,13 +157,21 @@ export default function RegisterPage() {
             placeholder="Dr. Ayşe Yılmaz"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required
+            onBlur={() => setNameTouched(true)}
             autoComplete="name"
+            invalid={!!showNameError}
+            aria-invalid={!!showNameError}
+            aria-describedby={showNameError ? "name-error" : undefined}
           />
+          {showNameError && (
+            <PFieldHint tone="error" style={{ marginTop: 6 }}>
+              <span id="name-error">{nameFieldError}</span>
+            </PFieldHint>
+          )}
         </div>
 
         <div>
-          <PosterLabel htmlFor="email">Email</PosterLabel>
+          <PosterLabel htmlFor="email" required>Email</PosterLabel>
           <PosterInput
             id="email"
             name="email"
@@ -142,13 +179,21 @@ export default function RegisterPage() {
             placeholder="ad@klinik.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
+            onBlur={() => setEmailTouched(true)}
             autoComplete="email"
+            invalid={!!showEmailError}
+            aria-invalid={!!showEmailError}
+            aria-describedby={showEmailError ? "email-error" : undefined}
           />
+          {showEmailError && (
+            <PFieldHint tone="error" style={{ marginTop: 6 }}>
+              <span id="email-error">{emailFieldError}</span>
+            </PFieldHint>
+          )}
         </div>
 
         <div>
-          <PosterLabel htmlFor="password">Şifre</PosterLabel>
+          <PosterLabel htmlFor="password" required>Şifre</PosterLabel>
           <div style={{ position: "relative" }}>
             <PosterInput
               id="password"
@@ -157,9 +202,12 @@ export default function RegisterPage() {
               placeholder="En az 8 karakter"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              onBlur={() => setPasswordTouched(true)}
               minLength={8}
               autoComplete="new-password"
+              invalid={!!showPasswordError}
+              aria-invalid={!!showPasswordError}
+              aria-describedby={showPasswordError ? "password-error" : undefined}
               style={{ paddingRight: 44 }}
             />
             <button
@@ -182,13 +230,19 @@ export default function RegisterPage() {
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-          <div style={{ marginTop: 8 }}>
-            <PasswordStrengthBar password={password} />
-          </div>
+          {showPasswordError ? (
+            <PFieldHint tone="error" style={{ marginTop: 6 }}>
+              <span id="password-error">{passwordFieldError}</span>
+            </PFieldHint>
+          ) : (
+            <div style={{ marginTop: 8 }}>
+              <PasswordStrengthBar password={password} />
+            </div>
+          )}
         </div>
 
         <div>
-          <PosterLabel htmlFor="passwordConfirm">Şifre Tekrar</PosterLabel>
+          <PosterLabel htmlFor="passwordConfirm" required>Şifre Tekrar</PosterLabel>
           <div style={{ position: "relative" }}>
             <PosterInput
               id="passwordConfirm"

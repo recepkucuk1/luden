@@ -13,6 +13,7 @@ import {
   PosterLabel,
   PosterAlert,
 } from "@/components/auth/PosterAuthShell";
+import { PFieldHint } from "@/components/poster";
 
 type LoginErrorCode =
   | "INVALID_CREDENTIALS"
@@ -30,12 +31,26 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
 
   const [errorCode, setErrorCode] = useState<LoginErrorCode | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const emailFieldError = !email
+    ? "Email gerekli"
+    : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ? "Geçerli bir email adresi girin"
+    : null;
+  const passwordFieldError = !password ? "Şifre gerekli" : null;
+  const showEmailError = emailTouched && emailFieldError;
+  const showPasswordError = passwordTouched && passwordFieldError;
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setEmailTouched(true);
+    setPasswordTouched(true);
+    if (emailFieldError || passwordFieldError) return;
     setErrorCode(null);
     setLoading(true);
 
@@ -109,9 +124,9 @@ function LoginForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <div>
-          <PosterLabel htmlFor="email">Email</PosterLabel>
+          <PosterLabel htmlFor="email" required>Email</PosterLabel>
           <PosterInput
             id="email"
             type="email"
@@ -119,13 +134,22 @@ function LoginForm() {
             value={email}
             autoComplete="email"
             onChange={(e) => setEmail(e.target.value)}
-            required
+            onBlur={() => setEmailTouched(true)}
+            invalid={!!showEmailError}
+            aria-invalid={!!showEmailError}
+            aria-describedby={showEmailError ? "email-error" : undefined}
           />
+          {showEmailError && (
+            <PFieldHint tone="error" style={{ marginTop: 6 }}>
+              <span id="email-error">{emailFieldError}</span>
+            </PFieldHint>
+          )}
         </div>
 
         <div>
           <PosterLabel
             htmlFor="password"
+            required
             rightSlot={
               <Link
                 href="/forgot-password"
@@ -149,8 +173,11 @@ function LoginForm() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              onBlur={() => setPasswordTouched(true)}
               autoComplete="current-password"
+              invalid={!!showPasswordError}
+              aria-invalid={!!showPasswordError}
+              aria-describedby={showPasswordError ? "password-error" : undefined}
               style={{ paddingRight: 44 }}
             />
             <button
@@ -173,6 +200,11 @@ function LoginForm() {
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+          {showPasswordError && (
+            <PFieldHint tone="error" style={{ marginTop: 6 }}>
+              <span id="password-error">{passwordFieldError}</span>
+            </PFieldHint>
+          )}
         </div>
 
         {verifiedSuccess && (

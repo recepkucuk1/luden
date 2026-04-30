@@ -108,11 +108,17 @@ export function PLabel({
   htmlFor,
   children,
   rightSlot,
+  required,
+  optional,
   style,
 }: {
   htmlFor?: string;
   children: React.ReactNode;
   rightSlot?: React.ReactNode;
+  /** Zorunlu alan göstergesi — turuncu yıldız ekler. */
+  required?: boolean;
+  /** İsteğe bağlı alan göstergesi — sağ tarafta gri "(opsiyonel)". */
+  optional?: boolean;
   style?: React.CSSProperties;
 }) {
   return (
@@ -127,9 +133,51 @@ export function PLabel({
         }}
       >
         {children}
+        {required && (
+          <span aria-hidden style={{ color: "var(--poster-accent)", fontWeight: 800, marginLeft: 3 }}>
+            *
+          </span>
+        )}
+        {optional && (
+          <span style={{ fontWeight: 500, color: "var(--poster-ink-3)", marginLeft: 6 }}>
+            (opsiyonel)
+          </span>
+        )}
       </label>
       {rightSlot}
     </div>
+  );
+}
+
+/* ==================== PFieldHint ==================== */
+/**
+ * Form alanlarının altında gösterilen kısa hint/error metni.
+ * tone="error" → kırmızı; tone="hint" → gri.
+ */
+export function PFieldHint({
+  tone = "hint",
+  children,
+  style,
+}: {
+  tone?: "hint" | "error";
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <p
+      role={tone === "error" ? "alert" : undefined}
+      style={{
+        margin: "6px 0 0",
+        fontSize: 12,
+        lineHeight: 1.4,
+        color: tone === "error" ? "var(--poster-danger)" : "var(--poster-ink-3)",
+        fontWeight: tone === "error" ? 700 : 500,
+        fontFamily: "var(--font-display)",
+        ...style,
+      }}
+    >
+      {children}
+    </p>
   );
 }
 

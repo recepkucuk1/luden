@@ -511,7 +511,7 @@ export default function ProfilePage() {
           <form onSubmit={handleProfileSave} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 }}>
               <div>
-                <PLabel htmlFor="name">Ad Soyad</PLabel>
+                <PLabel htmlFor="name" required>Ad Soyad</PLabel>
                 <PInput id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Adınız Soyadınız" />
               </div>
               <div>
@@ -542,9 +542,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <PLabel htmlFor="phone">
-                  Telefon <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(opsiyonel)</span>
-                </PLabel>
+                <PLabel htmlFor="phone" optional>Telefon</PLabel>
                 <PInput id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+90 5XX XXX XX XX" />
               </div>
               <div>
@@ -564,10 +562,7 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <PLabel htmlFor="certs">
-                Lisans / Sertifikalar{" "}
-                <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(opsiyonel)</span>
-              </PLabel>
+              <PLabel htmlFor="certs" optional>Lisans / Sertifikalar</PLabel>
               <PTextarea
                 id="certs"
                 rows={2}

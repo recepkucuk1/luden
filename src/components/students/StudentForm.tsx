@@ -9,6 +9,7 @@ import {
   PTextarea,
   PLabel,
   PAlert,
+  PFieldHint,
 } from "@/components/poster";
 
 const WORK_AREAS = [
@@ -51,30 +52,44 @@ export function StudentForm({
   const [diagnosis, setDiagnosis] = useState(initialValues?.diagnosis || "");
   const [notes, setNotes] = useState(initialValues?.notes || "");
   const [curriculumIds, setCurriculumIds] = useState<string[]>(initialValues?.curriculumIds || []);
+  const [nameTouched, setNameTouched] = useState(false);
+
+  const nameError = !name.trim() ? "Ad Soyad zorunludur" : null;
+  const showNameError = nameTouched && nameError;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setNameTouched(true);
+    if (nameError) return;
     onSubmit({ name, birthDate, workArea, diagnosis, notes, curriculumIds });
   };
 
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div>
-        <PLabel htmlFor="name">
-          Ad Soyad <span style={{ color: "var(--poster-accent)", fontWeight: 800 }}>*</span>
+        <PLabel htmlFor="name" required>
+          Ad Soyad
         </PLabel>
         <PInput
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          onBlur={() => setNameTouched(true)}
           placeholder="Öğrenci adı"
           autoFocus
-          required
+          invalid={!!showNameError}
+          aria-invalid={!!showNameError}
+          aria-describedby={showNameError ? "name-error" : undefined}
         />
+        {showNameError && (
+          <PFieldHint tone="error" style={{ marginTop: 6 }}>
+            <span id="name-error">{nameError}</span>
+          </PFieldHint>
+        )}
       </div>
 
       <div>
-        <PLabel htmlFor="birthDate">Doğum Tarihi</PLabel>
+        <PLabel htmlFor="birthDate" optional>Doğum Tarihi</PLabel>
         <PInput
           id="birthDate"
           type="date"
@@ -84,9 +99,7 @@ export function StudentForm({
       </div>
 
       <div>
-        <PLabel>
-          Çalışma Alanı <span style={{ color: "var(--poster-accent)", fontWeight: 800 }}>*</span>
-        </PLabel>
+        <PLabel required>Çalışma Alanı</PLabel>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
           {WORK_AREAS.map((w) => {
             const active = workArea === w.value;
@@ -131,9 +144,7 @@ export function StudentForm({
       />
 
       <div>
-        <PLabel htmlFor="diagnosis">
-          Tanı <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(opsiyonel)</span>
-        </PLabel>
+        <PLabel htmlFor="diagnosis" optional>Tanı</PLabel>
         <PInput
           id="diagnosis"
           value={diagnosis}
@@ -143,9 +154,7 @@ export function StudentForm({
       </div>
 
       <div>
-        <PLabel htmlFor="notes">
-          Notlar <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(opsiyonel)</span>
-        </PLabel>
+        <PLabel htmlFor="notes" optional>Notlar</PLabel>
         <PTextarea
           id="notes"
           value={notes}

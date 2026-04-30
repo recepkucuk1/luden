@@ -287,7 +287,7 @@ function LessonModal({
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div>
-          <PLabel htmlFor="student">Öğrenci</PLabel>
+          <PLabel htmlFor="student" required>Öğrenci</PLabel>
           <PSelect id="student" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
             <option value="">Öğrenci seçin</option>
             {students.map((s) => (
@@ -299,12 +299,12 @@ function LessonModal({
         </div>
 
         <div>
-          <PLabel htmlFor="title">Başlık</PLabel>
+          <PLabel htmlFor="title" required>Başlık</PLabel>
           <PInput id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ders başlığı" />
         </div>
 
         <div>
-          <PLabel>Tarih</PLabel>
+          <PLabel required>Tarih</PLabel>
           <div style={{ position: "relative" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <PInput
@@ -372,11 +372,11 @@ function LessonModal({
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div>
-            <PLabel>Başlangıç</PLabel>
+            <PLabel required>Başlangıç</PLabel>
             <TimeSelect value={startTime} onChange={setStartTime} />
           </div>
           <div>
-            <PLabel>Bitiş</PLabel>
+            <PLabel required>Bitiş</PLabel>
             <TimeSelect value={endTime} onChange={setEndTime} />
           </div>
         </div>
@@ -450,9 +450,7 @@ function LessonModal({
         </div>
 
         <div>
-          <PLabel htmlFor="note">
-            Not <span style={{ color: "var(--poster-ink-3)", fontWeight: 500 }}>(isteğe bağlı)</span>
-          </PLabel>
+          <PLabel htmlFor="note" optional>Not</PLabel>
           <PTextarea
             id="note"
             value={note}
