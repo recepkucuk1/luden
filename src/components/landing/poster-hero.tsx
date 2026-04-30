@@ -212,7 +212,7 @@ export function PosterHero() {
               </span>{" "}
               için
               <br />
-              AI Destekli Öğrenme Kartları
+              AI Destekli Öğrenme Araçları
             </h1>
 
             <p
