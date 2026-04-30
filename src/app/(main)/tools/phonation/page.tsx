@@ -8,7 +8,7 @@ import { WORK_AREA_LABEL, calcAge, getCategoryBadge } from "@/lib/constants";
 import { PhonationView } from "@/components/cards/PhonationView";
 import type { PhonationActivityContent } from "@/components/cards/PhonationView";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
-import { PBtn, PCard, PBadge, PLabel, PSelect } from "@/components/poster";
+import { PBtn, PCard, PBadge, PLabel, PSelect, PFieldHint } from "@/components/poster";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -468,6 +468,10 @@ export default function PhonationPage() {
   const [savedCardId, setSavedCardId] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [formKey,     setFormKey]     = useState(0);
+  const [soundsTouched, setSoundsTouched] = useState(false);
+
+  const soundsError = targetSounds.length === 0 ? "En az bir hedef ses seçin" : null;
+  const showSoundsError = soundsTouched && soundsError;
 
   const selectedStudent    = students.find((s) => s.id === studentId) ?? null;
   const selectedTypeOption = ACTIVITY_TYPE_OPTIONS.find((o) => o.value === activityType)!;
@@ -479,6 +483,7 @@ export default function PhonationPage() {
   }
 
   function toggleSound(sound: string) {
+    setSoundsTouched(true);
     setTargetSounds((prev) =>
       prev.includes(sound) ? prev.filter((s) => s !== sound) : [...prev, sound]
     );
@@ -493,10 +498,8 @@ export default function PhonationPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (targetSounds.length === 0) {
-      toast.error("En az bir hedef ses seçin");
-      return;
-    }
+    setSoundsTouched(true);
+    if (soundsError) return;
 
     setLoading(true);
     setActivity(null);
@@ -581,7 +584,7 @@ export default function PhonationPage() {
 
       {/* Hedef Sesler */}
       <div>
-        <PLabel>
+        <PLabel required>
           Hedef Ses(ler)
           {targetSounds.length > 0 && (
             <span style={{ marginLeft: 6, fontWeight: 700, color: "var(--poster-accent)", textTransform: "none" }}>
@@ -610,6 +613,7 @@ export default function PhonationPage() {
             </div>
           ))}
         </div>
+        {showSoundsError && <PFieldHint tone="error">{soundsError}</PFieldHint>}
       </div>
 
       {/* Aktivite Türü */}

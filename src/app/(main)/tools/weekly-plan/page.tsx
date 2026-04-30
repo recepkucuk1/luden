@@ -7,7 +7,7 @@ import { formatDate } from "@/lib/utils";
 import { WeeklyPlanView } from "@/components/cards/WeeklyPlanView";
 import type { WeeklyPlanContent } from "@/components/cards/WeeklyPlanView";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
-import { PBtn, PCard, PBadge, PLabel, PSelect, PInput, PTextarea, PCheckbox } from "@/components/poster";
+import { PBtn, PCard, PBadge, PLabel, PSelect, PInput, PTextarea, PCheckbox, PFieldHint } from "@/components/poster";
 
 interface Student {
   id: string;
@@ -331,6 +331,10 @@ export default function WeeklyPlanPage() {
   const [plan,         setPlan]         = useState<WeeklyPlanContent | null>(null);
   const [downloading,  setDownloading]  = useState(false);
 
+  const [studentTouched, setStudentTouched] = useState(false);
+  const [daysTouched,    setDaysTouched]    = useState(false);
+  const [focusTouched,   setFocusTouched]   = useState(false);
+
   useEffect(() => {
     Promise.all([
       fetch("/api/students?limit=200").then((r) => r.json()),
@@ -355,6 +359,14 @@ export default function WeeklyPlanPage() {
 
   const totalAssigned = Object.values(daySchedule).reduce((a, b) => a + b, 0);
 
+  const studentError = !studentId ? "Lütfen öğrenci seçin" : null;
+  const daysError = totalAssigned === 0 ? "En az 1 ders günü belirleyin" : null;
+  const effectiveFocusCount = focusAreas.length + (customFocus.trim() ? 1 : 0);
+  const focusError = effectiveFocusCount === 0 ? "En az bir odak alanı seçin" : null;
+  const showStudentError = studentTouched && studentError;
+  const showDaysError    = daysTouched && daysError;
+  const showFocusError   = focusTouched && focusError;
+
   function updateDay(day: string, delta: number) {
     setDaySchedule((prev) => {
       const val = (prev[day] ?? 0) + delta;
@@ -375,10 +387,11 @@ export default function WeeklyPlanPage() {
 
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
-    if (!studentId) { toast.error("Lütfen öğrenci seçin"); return; }
-    if (totalAssigned === 0) { toast.error("En az 1 ders günü belirleyin"); return; }
+    setStudentTouched(true);
+    setDaysTouched(true);
+    setFocusTouched(true);
+    if (studentError || daysError || focusError) return;
     const effectiveFocus = [...focusAreas, ...(customFocus.trim() ? [customFocus.trim()] : [])];
-    if (effectiveFocus.length === 0) { toast.error("En az bir odak alanı seçin"); return; }
     setGenerating(true);
     setSavedCardId(null);
     setPendingCardId(null);
@@ -440,12 +453,19 @@ export default function WeeklyPlanPage() {
       {/* Öğrenci */}
       <div>
         <PLabel required>Öğrenci</PLabel>
-        <PSelect value={studentId} onChange={(e) => setStudentId(e.target.value)}>
+        <PSelect
+          value={studentId}
+          onChange={(e) => setStudentId(e.target.value)}
+          onBlur={() => setStudentTouched(true)}
+          invalid={!!showStudentError}
+          aria-invalid={!!showStudentError}
+        >
           <option value="">— Öğrenci seçin —</option>
           {students.map((s) => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </PSelect>
+        {showStudentError && <PFieldHint tone="error">{studentError}</PFieldHint>}
         {selectedStudent && (
           <div
             style={{
@@ -496,7 +516,7 @@ export default function WeeklyPlanPage() {
 
       {/* Day schedule */}
       <div>
-        <PLabel>
+        <PLabel required>
           Günlük Dağılım
           <span style={{ marginLeft: 6, fontWeight: 700, color: "var(--poster-accent)", textTransform: "none" }}>
             · Toplam {totalAssigned}
@@ -525,7 +545,7 @@ export default function WeeklyPlanPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <button
                   type="button"
-                  onClick={() => updateDay(day, -1)}
+                  onClick={() => { updateDay(day, -1); setDaysTouched(true); }}
                   disabled={!daySchedule[day]}
                   style={{ ...counterBtnStyle, opacity: daySchedule[day] ? 1 : 0.3, cursor: daySchedule[day] ? "pointer" : "not-allowed" }}
                 >
@@ -534,13 +554,14 @@ export default function WeeklyPlanPage() {
                 <span style={{ width: 20, textAlign: "center", fontSize: 13, fontWeight: 800, color: "var(--poster-ink)" }}>
                   {daySchedule[day] ?? 0}
                 </span>
-                <button type="button" onClick={() => updateDay(day, 1)} style={counterBtnStyle}>
+                <button type="button" onClick={() => { updateDay(day, 1); setDaysTouched(true); }} style={counterBtnStyle}>
                   +
                 </button>
               </div>
             </div>
           ))}
         </div>
+        {showDaysError && <PFieldHint tone="error">{daysError}</PFieldHint>}
       </div>
 
       {/* Ders süresi */}
@@ -555,7 +576,7 @@ export default function WeeklyPlanPage() {
 
       {/* Odak alanları */}
       <div>
-        <PLabel>
+        <PLabel required>
           Odak Alanları
           {studentCurricula.length > 0 && (
             <span style={{ marginLeft: 6, fontWeight: 700, color: "var(--poster-accent)", textTransform: "none" }}>
@@ -568,7 +589,7 @@ export default function WeeklyPlanPage() {
             <PCheckbox
               key={area}
               checked={focusAreas.includes(area)}
-              onChange={() => toggleFocus(area)}
+              onChange={() => { toggleFocus(area); setFocusTouched(true); }}
               label={area}
             />
           ))}
@@ -576,10 +597,11 @@ export default function WeeklyPlanPage() {
         <div style={{ marginTop: 8 }}>
           <PInput
             value={customFocus}
-            onChange={(e) => setCustomFocus(e.target.value)}
+            onChange={(e) => { setCustomFocus(e.target.value); setFocusTouched(true); }}
             placeholder="Diğer (serbest metin — isteğe bağlı)"
           />
         </div>
+        {showFocusError && <PFieldHint tone="error">{focusError}</PFieldHint>}
       </div>
 
       {/* Yaklaşım */}

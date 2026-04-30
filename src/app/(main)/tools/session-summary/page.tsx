@@ -6,7 +6,7 @@ import { RefreshCw, Library, Plus, X, Lock, Download } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { WORK_AREA_LABEL, calcAge, getCategoryBadge } from "@/lib/constants";
 import { SessionSummaryView, type SessionSummaryContent } from "@/components/cards/SessionSummaryView";
-import { PBtn, PCard, PBadge, PSelect, PLabel, PInput, PTextarea, PCheckbox } from "@/components/poster";
+import { PBtn, PCard, PBadge, PSelect, PLabel, PInput, PTextarea, PCheckbox, PFieldHint } from "@/components/poster";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -332,6 +332,19 @@ export default function SessionSummaryPage() {
   const [downloading,   setDownloading]   = useState(false);
   const [formKey,       setFormKey]       = useState(0);
 
+  const [studentTouched, setStudentTouched] = useState(false);
+  const [goalsTouched,   setGoalsTouched]   = useState(false);
+
+  const studentError = !studentId ? "Lütfen bir öğrenci seçin" : null;
+  const emptyGoalTitle = selectedGoals.find((g) => !g.title.trim());
+  const goalsError = selectedGoals.length === 0
+    ? "En az bir hedef ekleyin"
+    : emptyGoalTitle
+    ? "Tüm hedef başlıklarını doldurun"
+    : null;
+  const showStudentError = studentTouched && studentError;
+  const showGoalsError   = goalsTouched && goalsError;
+
   const selectedStudent = students.find((s) => s.id === studentId) ?? null;
 
   const availableGoals = curricula
@@ -362,6 +375,7 @@ export default function SessionSummaryPage() {
   }
 
   function toggleGoal(goalId: string, goalTitle: string) {
+    setGoalsTouched(true);
     setSelectedGoals((prev) => {
       const exists = prev.find((g) => g.tempId === goalId);
       if (exists) return prev.filter((g) => g.tempId !== goalId);
@@ -376,26 +390,28 @@ export default function SessionSummaryPage() {
   }
 
   function addCustomGoal() {
+    setGoalsTouched(true);
     const tempId = `custom-${Date.now()}`;
     setSelectedGoals((prev) => [...prev, { tempId, goalId: "", title: "", accuracy: 80, cueLevel: "Bağımsız" }]);
   }
 
   function updateCustomTitle(tempId: string, title: string) {
+    setGoalsTouched(true);
     setSelectedGoals((prev) =>
       prev.map((g) => g.tempId === tempId ? { ...g, title } : g)
     );
   }
 
   function removeGoal(tempId: string) {
+    setGoalsTouched(true);
     setSelectedGoals((prev) => prev.filter((g) => g.tempId !== tempId));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!studentId) { toast.error("Lütfen bir öğrenci seçin"); return; }
-    if (selectedGoals.length === 0) { toast.error("En az bir hedef ekleyin"); return; }
-    const emptyTitle = selectedGoals.find((g) => !g.title.trim());
-    if (emptyTitle) { toast.error("Tüm hedef başlıklarını doldurun"); return; }
+    setStudentTouched(true);
+    setGoalsTouched(true);
+    if (studentError || goalsError) return;
 
     setLoading(true);
     setSummary(null);
@@ -552,12 +568,19 @@ export default function SessionSummaryPage() {
       {/* Öğrenci */}
       <div>
         <PLabel required>Öğrenci</PLabel>
-        <PSelect value={studentId} onChange={(e) => handleStudentChange(e.target.value)} required>
+        <PSelect
+          value={studentId}
+          onChange={(e) => handleStudentChange(e.target.value)}
+          onBlur={() => setStudentTouched(true)}
+          invalid={!!showStudentError}
+          aria-invalid={!!showStudentError}
+        >
           <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
           {students.map((s) => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </PSelect>
+        {showStudentError && <PFieldHint tone="error">{studentError}</PFieldHint>}
         {selectedStudent && (
           <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
             {selectedStudent.birthDate && <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>}
@@ -763,6 +786,7 @@ export default function SessionSummaryPage() {
             </button>
           </div>
         )}
+        {showGoalsError && <PFieldHint tone="error">{goalsError}</PFieldHint>}
       </div>
 
       {/* Genel Performans */}

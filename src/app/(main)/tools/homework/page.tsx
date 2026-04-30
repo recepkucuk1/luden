@@ -6,7 +6,7 @@ import { RefreshCw, Library, Eye, Star, Clock, Package, ChevronRight, Lightbulb,
 import { formatDate } from "@/lib/utils";
 import { WORK_AREA_LABEL, calcAge, getCategoryBadge } from "@/lib/constants";
 import type { HomeworkContent } from "@/components/cards/HomeworkView";
-import { PBtn, PCard, PBadge, PSelect, PLabel, PInput, PTextarea } from "@/components/poster";
+import { PBtn, PCard, PBadge, PSelect, PLabel, PInput, PTextarea, PFieldHint } from "@/components/poster";
 import type { BadgeColor } from "@/components/poster";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
@@ -451,6 +451,15 @@ export default function HomeworkPage() {
   const [downloading, setDownloading] = useState(false);
   const [formKey,     setFormKey]     = useState(0);
 
+  const [studentTouched, setStudentTouched] = useState(false);
+  const [areaTouched,    setAreaTouched]    = useState(false);
+
+  const finalArea = targetArea === "Diğer" ? customArea.trim() : targetArea;
+  const studentError = !studentId ? "Lütfen bir öğrenci seçin" : null;
+  const areaError    = !finalArea ? "Lütfen çalışma alanını belirtin" : null;
+  const showStudentError = studentTouched && studentError;
+  const showAreaError    = areaTouched && areaError;
+
   const selectedStudent = students.find((s) => s.id === studentId) ?? null;
 
   const studentAreas = curricula
@@ -477,9 +486,9 @@ export default function HomeworkPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!studentId) { toast.error("Lütfen bir öğrenci seçin"); return; }
-    const finalArea = targetArea === "Diğer" ? customArea.trim() : targetArea;
-    if (!finalArea) { toast.error("Lütfen çalışma alanını belirtin"); return; }
+    setStudentTouched(true);
+    setAreaTouched(true);
+    if (studentError || areaError) return;
 
     setLoading(true);
     setHomework(null);
@@ -581,12 +590,19 @@ export default function HomeworkPage() {
       {/* Öğrenci */}
       <div>
         <PLabel required>Öğrenci</PLabel>
-        <PSelect value={studentId} onChange={(e) => handleStudentChange(e.target.value)} required>
+        <PSelect
+          value={studentId}
+          onChange={(e) => handleStudentChange(e.target.value)}
+          onBlur={() => setStudentTouched(true)}
+          invalid={!!showStudentError}
+          aria-invalid={!!showStudentError}
+        >
           <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
           {students.map((s) => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </PSelect>
+        {showStudentError && <PFieldHint tone="error">{studentError}</PFieldHint>}
         {selectedStudent && (
           <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
             {selectedStudent.birthDate && <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>}
@@ -600,13 +616,19 @@ export default function HomeworkPage() {
 
       {/* Çalışma Alanı */}
       <div>
-        <PLabel>
+        <PLabel required>
           Çalışma Alanı{" "}
           {studentAreas.length > 0 && (
             <span style={{ fontSize: 10, fontWeight: 500, color: "var(--poster-ink-3)" }}>(öğrencinin modüllerinden)</span>
           )}
         </PLabel>
-        <PSelect value={targetArea} onChange={(e) => setTargetArea(e.target.value)} required>
+        <PSelect
+          value={targetArea}
+          onChange={(e) => setTargetArea(e.target.value)}
+          onBlur={() => setAreaTouched(true)}
+          invalid={!!showAreaError}
+          aria-invalid={!!showAreaError}
+        >
           <option value="">Alan seçin</option>
           {areaOptions.map((a) => (
             <option key={a} value={a}>{a}</option>
@@ -618,11 +640,16 @@ export default function HomeworkPage() {
               type="text"
               placeholder="Çalışma alanını açıklayın..."
               value={customArea}
-              onChange={(e) => setCustomArea(e.target.value)}
+              onChange={(e) => {
+                setCustomArea(e.target.value);
+                setAreaTouched(true);
+              }}
               required
+              invalid={!!showAreaError}
             />
           </div>
         )}
+        {showAreaError && <PFieldHint tone="error">{areaError}</PFieldHint>}
       </div>
 
       {/* Süre */}

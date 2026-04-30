@@ -7,7 +7,7 @@ import { CommBoardView } from "@/components/cards/CommBoardView";
 import type { CommBoardContent } from "@/components/cards/CommBoardView";
 import { formatDate } from "@/lib/utils";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
-import { PBtn, PCard, PLabel, PSelect, PInput, PSwitch } from "@/components/poster";
+import { PBtn, PCard, PLabel, PSelect, PInput, PSwitch, PFieldHint } from "@/components/poster";
 
 interface Student {
   id: string;
@@ -392,6 +392,12 @@ export default function CommBoardPage() {
   const [savedCardId, setSavedCardId]     = useState<string | null>(null);
   const [board, setBoard]                 = useState<CommBoardContent | null>(null);
   const [pendingCardId, setPendingCardId] = useState<string | null>(null);
+
+  const [customCategoryTouched, setCustomCategoryTouched] = useState(false);
+  const customCategoryError = boardType === "custom" && !customCategory.trim()
+    ? "Lütfen özel kategori adını girin"
+    : null;
+  const showCustomCategoryError = customCategoryTouched && customCategoryError;
   const [downloadingBoard, setDownloadingBoard]   = useState(false);
   const [downloadingReport, setDownloadingReport] = useState(false);
 
@@ -405,10 +411,8 @@ export default function CommBoardPage() {
 
   async function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
-    if (boardType === "custom" && !customCategory.trim()) {
-      toast.error("Lütfen özel kategori adını girin");
-      return;
-    }
+    setCustomCategoryTouched(true);
+    if (customCategoryError) return;
     setGenerating(true);
     setSavedCardId(null);
     setPendingCardId(null);
@@ -538,8 +542,16 @@ export default function CommBoardPage() {
             <PInput
               placeholder="Kategori adı (örn: Spor aktiviteleri)"
               value={customCategory}
-              onChange={(e) => setCustomCategory(e.target.value)}
+              onChange={(e) => {
+                setCustomCategory(e.target.value);
+                setCustomCategoryTouched(true);
+              }}
+              invalid={!!showCustomCategoryError}
+              aria-invalid={!!showCustomCategoryError}
             />
+            {showCustomCategoryError && (
+              <PFieldHint tone="error">{customCategoryError}</PFieldHint>
+            )}
           </div>
         )}
       </div>

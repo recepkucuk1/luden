@@ -5,7 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Lightbulb, Home, RefreshCw, Library } from "lucide-react";
 import { WORK_AREA_LABEL, calcAge, getCategoryBadge } from "@/lib/constants";
-import { PBtn, PCard, PBadge, PSwitch, PSelect, PInput, PLabel } from "@/components/poster";
+import { PBtn, PCard, PBadge, PSwitch, PSelect, PInput, PLabel, PFieldHint } from "@/components/poster";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
 interface Student {
@@ -122,6 +122,15 @@ export default function SocialStoryPage() {
   const [savedCardId, setSavedCardId] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
 
+  const [studentTouched, setStudentTouched] = useState(false);
+  const [situationTouched, setSituationTouched] = useState(false);
+
+  const finalSituation = situation === "Diğer" ? customSit.trim() : situation;
+  const studentError = !studentId ? "Lütfen bir öğrenci seçin" : null;
+  const situationError = !finalSituation ? "Lütfen sosyal durumu belirtin" : null;
+  const showStudentError = studentTouched && studentError;
+  const showSituationError = situationTouched && situationError;
+
   const selectedStudent = students.find((s) => s.id === studentId) ?? null;
 
   useEffect(() => {
@@ -133,15 +142,9 @@ export default function SocialStoryPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!studentId) {
-      toast.error("Lütfen bir öğrenci seçin");
-      return;
-    }
-    const finalSituation = situation === "Diğer" ? customSit.trim() : situation;
-    if (!finalSituation) {
-      toast.error("Lütfen sosyal durumu belirtin");
-      return;
-    }
+    setStudentTouched(true);
+    setSituationTouched(true);
+    if (studentError || situationError) return;
 
     setLoading(true);
     setStory(null);
@@ -191,7 +194,13 @@ export default function SocialStoryPage() {
     >
       <div>
         <PLabel required>Öğrenci</PLabel>
-        <PSelect value={studentId} onChange={(e) => setStudentId(e.target.value)} required>
+        <PSelect
+          value={studentId}
+          onChange={(e) => setStudentId(e.target.value)}
+          onBlur={() => setStudentTouched(true)}
+          invalid={!!showStudentError}
+          aria-invalid={!!showStudentError}
+        >
           <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
           {students.map((s) => (
             <option key={s.id} value={s.id}>
@@ -199,6 +208,7 @@ export default function SocialStoryPage() {
             </option>
           ))}
         </PSelect>
+        {showStudentError && <PFieldHint tone="error">{studentError}</PFieldHint>}
         {selectedStudent && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
             {selectedStudent.birthDate && <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>}
@@ -212,7 +222,13 @@ export default function SocialStoryPage() {
 
       <div>
         <PLabel required>Sosyal Durum</PLabel>
-        <PSelect value={situation} onChange={(e) => setSituation(e.target.value)} required>
+        <PSelect
+          value={situation}
+          onChange={(e) => setSituation(e.target.value)}
+          onBlur={() => setSituationTouched(true)}
+          invalid={!!showSituationError}
+          aria-invalid={!!showSituationError}
+        >
           <option value="">Durum seçin</option>
           {SITUATIONS.map((s) => (
             <option key={s} value={s}>
@@ -225,11 +241,16 @@ export default function SocialStoryPage() {
             type="text"
             placeholder="Sosyal durumu açıklayın..."
             value={customSit}
-            onChange={(e) => setCustomSit(e.target.value)}
+            onChange={(e) => {
+              setCustomSit(e.target.value);
+              setSituationTouched(true);
+            }}
             required
             style={{ marginTop: 8 }}
+            invalid={!!showSituationError}
           />
         )}
+        {showSituationError && <PFieldHint tone="error">{situationError}</PFieldHint>}
       </div>
 
       <div>

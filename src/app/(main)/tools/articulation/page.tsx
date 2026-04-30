@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Lightbulb, Home, RefreshCw, Library } from "lucide-react";
 import { WORK_AREA_LABEL, calcAge, getCategoryBadge } from "@/lib/constants";
-import { PBtn, PCard, PBadge, PSelect, PLabel } from "@/components/poster";
+import { PBtn, PCard, PBadge, PSelect, PLabel, PFieldHint } from "@/components/poster";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -398,7 +398,18 @@ export default function ArticulationPage() {
   const [drill,       setDrill]       = useState<DrillResult | null>(null);
   const [savedCardId, setSavedCardId] = useState<string | null>(null);
 
+  const [studentTouched,   setStudentTouched]   = useState(false);
+  const [soundsTouched,    setSoundsTouched]    = useState(false);
+  const [positionsTouched, setPositionsTouched] = useState(false);
+
   const selectedStudent = students.find((s) => s.id === studentId) ?? null;
+
+  const studentError   = !studentId ? "Lütfen bir öğrenci seçin" : null;
+  const soundsError    = !selectedSounds.length ? "En az bir hedef ses seçin" : null;
+  const positionsError = !positions.length ? "En az bir ses pozisyonu seçin" : null;
+  const showStudentError   = studentTouched && studentError;
+  const showSoundsError    = soundsTouched && soundsError;
+  const showPositionsError = positionsTouched && positionsError;
 
   useEffect(() => {
     fetch("/api/students")
@@ -425,9 +436,10 @@ export default function ArticulationPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!studentId)          { toast.error("Lütfen bir öğrenci seçin"); return; }
-    if (!selectedSounds.length) { toast.error("En az bir hedef ses seçin"); return; }
-    if (!positions.length)   { toast.error("En az bir ses pozisyonu seçin"); return; }
+    setStudentTouched(true);
+    setSoundsTouched(true);
+    setPositionsTouched(true);
+    if (studentError || soundsError || positionsError) return;
 
     setLoading(true);
     setDrill(null);
@@ -467,6 +479,9 @@ export default function ArticulationPage() {
     setPositions(["initial"]);
     setLevel("word");
     setItemCount(15);
+    setStudentTouched(false);
+    setSoundsTouched(false);
+    setPositionsTouched(false);
     setTheme("none");
   }
 
@@ -547,12 +562,19 @@ export default function ArticulationPage() {
       {/* Öğrenci */}
       <div>
         <PLabel required>Öğrenci</PLabel>
-        <PSelect value={studentId} onChange={(e) => setStudentId(e.target.value)} required>
+        <PSelect
+          value={studentId}
+          onChange={(e) => setStudentId(e.target.value)}
+          onBlur={() => setStudentTouched(true)}
+          invalid={!!showStudentError}
+          aria-invalid={!!showStudentError}
+        >
           <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
           {students.map((s) => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
         </PSelect>
+        {showStudentError && <PFieldHint tone="error">{studentError}</PFieldHint>}
         {selectedStudent && (
           <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
             {selectedStudent.birthDate && (
@@ -570,7 +592,7 @@ export default function ArticulationPage() {
 
       {/* Hedef sesler */}
       <div>
-        <PLabel>
+        <PLabel required>
           Hedef Ses(ler){" "}
           {selectedSounds.length > 0 && (
             <span style={{ color: "var(--poster-blue)", fontWeight: 600 }}>
@@ -589,7 +611,10 @@ export default function ArticulationPage() {
                   <button
                     key={sound}
                     type="button"
-                    onClick={() => toggleSound(sound)}
+                    onClick={() => {
+                      toggleSound(sound);
+                      setSoundsTouched(true);
+                    }}
                     style={pillStyle(selectedSounds.includes(sound))}
                   >
                     {sound}
@@ -599,17 +624,21 @@ export default function ArticulationPage() {
             </div>
           ))}
         </div>
+        {showSoundsError && <PFieldHint tone="error">{soundsError}</PFieldHint>}
       </div>
 
       {/* Ses pozisyonu */}
       <div>
-        <PLabel>Ses Pozisyonu</PLabel>
+        <PLabel required>Ses Pozisyonu</PLabel>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
           {POSITION_OPTIONS.map((p) => (
             <button
               key={p.value}
               type="button"
-              onClick={() => togglePosition(p.value)}
+              onClick={() => {
+                togglePosition(p.value);
+                setPositionsTouched(true);
+              }}
               style={chipStyle(positions.includes(p.value))}
             >
               {p.label}
@@ -617,12 +646,16 @@ export default function ArticulationPage() {
           ))}
           <button
             type="button"
-            onClick={() => togglePosition("all")}
+            onClick={() => {
+              togglePosition("all");
+              setPositionsTouched(true);
+            }}
             style={chipStyle(positions.length === 3)}
           >
             Tümü
           </button>
         </div>
+        {showPositionsError && <PFieldHint tone="error">{positionsError}</PFieldHint>}
       </div>
 
       {/* Alıştırma seviyesi */}
