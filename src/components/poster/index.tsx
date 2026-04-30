@@ -22,6 +22,7 @@ export { PSpinner } from "./PSpinner";
 export { PEmptyState } from "./PEmptyState";
 export { PStatCard } from "./PStatCard";
 export { PHoverPanel } from "./PHoverPanel";
+export { PSection } from "./PSection";
 
 /* ==================== PInput ==================== */
 

@@ -11,7 +11,7 @@ import {
   getCategoryBadge,
   getDifficultyBadge,
 } from "@/lib/constants";
-import { PBtn, PBadge, PCard } from "@/components/poster";
+import { PBtn, PBadge, PSection } from "@/components/poster";
 import { InlineMd } from "@/components/Md";
 import { Download } from "lucide-react";
 
@@ -34,64 +34,6 @@ async function downloadPDF(card: GeneratedCard) {
   a.download = `${card.title.replace(/\s+/g, "_")}.pdf`;
   a.click();
   URL.revokeObjectURL(url);
-}
-
-function Section({
-  title,
-  tone = "neutral",
-  children,
-}: {
-  title: string;
-  tone?: "neutral" | "warning" | "success";
-  children: React.ReactNode;
-}) {
-  const palette = {
-    neutral: {
-      bg: "var(--poster-panel)",
-      borderTitle: "var(--poster-ink-3)",
-      titleColor: "var(--poster-ink-3)",
-      bodyColor: "var(--poster-ink)",
-    },
-    warning: {
-      bg: "var(--alert-warning-bg)",
-      borderTitle: "var(--alert-warning-border)",
-      titleColor: "var(--alert-warning-text)",
-      bodyColor: "var(--alert-warning-text)",
-    },
-    success: {
-      bg: "var(--alert-success-bg)",
-      borderTitle: "var(--alert-success-border)",
-      titleColor: "var(--alert-success-text)",
-      bodyColor: "var(--alert-success-text)",
-    },
-  }[tone];
-
-  return (
-    <PCard
-      rounded={14}
-      style={{
-        padding: 14,
-        background: palette.bg,
-        border: tone === "neutral" ? undefined : `2px solid ${palette.borderTitle}`,
-        boxShadow: tone === "neutral" ? undefined : `0 4px 0 ${palette.borderTitle}`,
-      }}
-    >
-      <p
-        style={{
-          fontSize: 11,
-          fontWeight: 800,
-          color: palette.titleColor,
-          textTransform: "uppercase",
-          letterSpacing: ".1em",
-          margin: "0 0 10px",
-          fontFamily: "var(--font-display)",
-        }}
-      >
-        {title}
-      </p>
-      <div style={{ color: palette.bodyColor, fontFamily: "var(--font-display)" }}>{children}</div>
-    </PCard>
-  );
 }
 
 export function CardPreview({ card }: CardPreviewProps) {
@@ -153,7 +95,7 @@ export function CardPreview({ card }: CardPreviewProps) {
       </div>
 
       {card.materials?.length > 0 && (
-        <Section title="📦 Materyaller">
+        <PSection title="📦 Materyaller">
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {card.materials.map((m, i) => (
               <PBadge key={i} color="soft">
@@ -161,11 +103,11 @@ export function CardPreview({ card }: CardPreviewProps) {
               </PBadge>
             ))}
           </div>
-        </Section>
+        </PSection>
       )}
 
       {card.instructions?.length > 0 && (
-        <Section title="📋 Uygulama Adımları">
+        <PSection title="📋 Uygulama Adımları">
           <ol style={{ display: "flex", flexDirection: "column", gap: 8, margin: 0, padding: 0, listStyle: "none" }}>
             {card.instructions.map((step, i) => (
               <li key={i} style={{ display: "flex", gap: 12, fontSize: 14, lineHeight: 1.5 }}>
@@ -193,11 +135,11 @@ export function CardPreview({ card }: CardPreviewProps) {
               </li>
             ))}
           </ol>
-        </Section>
+        </PSection>
       )}
 
       {card.exercises?.length > 0 && (
-        <Section title="🏃 Egzersizler">
+        <PSection title="🏃 Egzersizler">
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {card.exercises.map((ex, i) => (
               <div
@@ -220,19 +162,19 @@ export function CardPreview({ card }: CardPreviewProps) {
               </div>
             ))}
           </div>
-        </Section>
+        </PSection>
       )}
 
       {card.therapistNotes && (
-        <Section title="📝 Uzman Notları" tone="warning">
+        <PSection title="📝 Uzman Notları" tone="warning">
           <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0 }}>
             <InlineMd text={card.therapistNotes} />
           </p>
-        </Section>
+        </PSection>
       )}
 
       {card.progressIndicators?.length > 0 && (
-        <Section title="📈 İlerleme Göstergeleri">
+        <PSection title="📈 İlerleme Göstergeleri">
           <ul style={{ display: "flex", flexDirection: "column", gap: 4, margin: 0, padding: 0, listStyle: "none" }}>
             {card.progressIndicators.map((pi, i) => (
               <li
@@ -244,15 +186,15 @@ export function CardPreview({ card }: CardPreviewProps) {
               </li>
             ))}
           </ul>
-        </Section>
+        </PSection>
       )}
 
       {card.homeExercise && (
-        <Section title="🏠 Ev Egzersizi" tone="success">
+        <PSection title="🏠 Ev Egzersizi" tone="success">
           <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0 }}>
             <InlineMd text={card.homeExercise} />
           </p>
-        </Section>
+        </PSection>
       )}
     </div>
   );
