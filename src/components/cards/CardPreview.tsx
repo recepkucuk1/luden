@@ -53,16 +53,16 @@ function Section({
       bodyColor: "var(--poster-ink)",
     },
     warning: {
-      bg: "#fff3d1",
-      borderTitle: "#b7791f",
-      titleColor: "#7a4f06",
-      bodyColor: "#5a3d05",
+      bg: "var(--alert-warning-bg)",
+      borderTitle: "var(--alert-warning-border)",
+      titleColor: "var(--alert-warning-text)",
+      bodyColor: "var(--alert-warning-text)",
     },
     success: {
-      bg: "#e4f8ec",
-      borderTitle: "var(--poster-green)",
-      titleColor: "#0f4f28",
-      bodyColor: "#0f4f28",
+      bg: "var(--alert-success-bg)",
+      borderTitle: "var(--alert-success-border)",
+      titleColor: "var(--alert-success-text)",
+      bodyColor: "var(--alert-success-text)",
     },
   }[tone];
 

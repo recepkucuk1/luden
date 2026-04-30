@@ -39,7 +39,7 @@ input, select, textarea {
   --poster-panel: #ffffff;
   --poster-ink: #0e1e26;
   --poster-ink-2: rgba(14, 30, 38, 0.7);
-  --poster-ink-3: rgba(14, 30, 38, 0.45);
+  --poster-ink-3: rgba(14, 30, 38, 0.6);
   --poster-ink-faint: rgba(14, 30, 38, 0.12);
   --poster-accent: #fe703a;
   --poster-green: #2cc069;
@@ -128,6 +128,20 @@ input, select, textarea {
 
   --surface-page-gradient: linear-gradient(135deg, #fff8ec 0%, #fde8c7 50%, #fff8ec 100%);
   --surface-page-solid: #fff8ec;
+
+  /* Alert / Section tone palette — used by PAlert + CardPreview Section */
+  --alert-error-bg: #ffe9e9;
+  --alert-error-border: var(--poster-danger);
+  --alert-error-text: #7a1414;
+  --alert-success-bg: #e4f8ec;
+  --alert-success-border: var(--poster-green);
+  --alert-success-text: #0f4f28;
+  --alert-warning-bg: #fff3d1;
+  --alert-warning-border: #b7791f;
+  --alert-warning-text: #5a3d05;
+  --alert-info-bg: #e0ecfb;
+  --alert-info-border: var(--poster-blue);
+  --alert-info-text: #0e3a6b;
 }
 
 /* Dark poster palette — deep kraft + cream ink, same accent */
@@ -137,8 +151,8 @@ input, select, textarea {
   --poster-bg-2: #1e1811;
   --poster-panel: #1e1811;
   --poster-ink: #f5e8c7;
-  --poster-ink-2: rgba(245, 232, 199, 0.62);
-  --poster-ink-3: rgba(245, 232, 199, 0.4);
+  --poster-ink-2: rgba(245, 232, 199, 0.7);
+  --poster-ink-3: rgba(245, 232, 199, 0.55);
   --poster-ink-faint: rgba(245, 232, 199, 0.12);
   --poster-accent: #fe703a;
   --poster-green: #2cc069;
@@ -187,6 +201,21 @@ input, select, textarea {
 
   --surface-page-gradient: linear-gradient(135deg, #15100a 0%, #1e1811 50%, #15100a 100%);
   --surface-page-solid: #15100a;
+
+  /* Alert / Section tone palette — dark variant: deep tinted backgrounds
+     with light tinted text so cream ink stays readable. */
+  --alert-error-bg: #3a1515;
+  --alert-error-border: var(--poster-danger);
+  --alert-error-text: #ffb3b3;
+  --alert-success-bg: #0f3d2a;
+  --alert-success-border: var(--poster-green);
+  --alert-success-text: #87dba8;
+  --alert-warning-bg: #2a2015;
+  --alert-warning-border: #d4a040;
+  --alert-warning-text: #ffd680;
+  --alert-info-bg: #0f2a3a;
+  --alert-info-border: var(--poster-blue);
+  --alert-info-text: #8fc1eb;
 }
 
 /* Focus ring — WCAG AA: 2px ink outline + 2px offset on poster interactive els */

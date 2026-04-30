@@ -1255,6 +1255,21 @@ export default function CalendarPage() {
     }
   }, []);
 
+  // Mobile (<768px) için haftalık görünüm kullanışsız (7×100px overflow);
+  // bu genişlikte aylık görünüme zorla ve haftalık seçeneğini gizle.
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsNarrow(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  useEffect(() => {
+    if (isNarrow && view === "week") setView("month");
+  }, [isNarrow, view]);
+
   useEffect(() => {
     if (!("Notification" in window) || Notification.permission !== "granted") return;
 
@@ -1471,6 +1486,7 @@ export default function CalendarPage() {
             >
               {(["month", "week"] as const).map((v) => {
                 const active = view === v;
+                if (v === "week" && isNarrow) return null;
                 return (
                   <button
                     key={v}

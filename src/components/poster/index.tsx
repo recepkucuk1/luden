@@ -194,25 +194,18 @@ export function PAlert({
   children: React.ReactNode;
   style?: React.CSSProperties;
 }) {
-  const palette: Record<AlertTone, { bg: string; border: string; text: string }> = {
-    error: { bg: "#ffe9e9", border: "var(--poster-danger)", text: "#7a1414" },
-    success: { bg: "#e4f8ec", border: "var(--poster-green)", text: "#0f4f28" },
-    warning: { bg: "#fff3d1", border: "#b7791f", text: "#5a3d05" },
-    info: { bg: "#e0ecfb", border: "var(--poster-blue)", text: "#0e3a6b" },
-  };
-  const p = palette[tone];
   return (
     <div
       role="alert"
       style={{
         padding: "10px 14px",
         borderRadius: 12,
-        background: p.bg,
-        border: `2px solid ${p.border}`,
-        boxShadow: `0 3px 0 ${p.border}`,
+        background: `var(--alert-${tone}-bg)`,
+        border: `2px solid var(--alert-${tone}-border)`,
+        boxShadow: `0 3px 0 var(--alert-${tone}-border)`,
         fontSize: 13,
         lineHeight: 1.5,
-        color: p.text,
+        color: `var(--alert-${tone}-text)`,
         fontFamily: "var(--font-display)",
         ...style,
       }}
