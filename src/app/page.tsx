@@ -366,7 +366,7 @@ function GoalChecklistCard({ items, title }: {
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {items.map((g) => (
-          <div key={g.code} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+          <div key={g.title} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <span
               style={{
                 flexShrink: 0,
