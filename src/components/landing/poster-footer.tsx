@@ -137,7 +137,7 @@ export function PosterFooter() {
             </a>
             <div style={{ display: "flex", gap: 10 }}>
               <a
-                href="https://instagram.com/ludenlab"
+                href="https://www.instagram.com/ludenlabcom"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
