@@ -6,6 +6,7 @@ import Link from "next/link";
 import { PBtn } from "./poster-ui";
 
 const NAV_LINKS = [
+  { href: "/about", label: "Hakkımızda" },
   { href: "/#features", label: "Özellikler" },
   { href: "/#pricing", label: "Fiyatlandırma" },
   { href: "/#faq", label: "SSS" },
