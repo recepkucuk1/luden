@@ -299,7 +299,7 @@ const counterBtnStyle: React.CSSProperties = {
   height: 28,
   borderRadius: 8,
   border: "2px solid var(--poster-ink)",
-  background: "#fff",
+  background: "var(--poster-panel)",
   color: "var(--poster-ink)",
   fontSize: 14,
   fontWeight: 800,
@@ -506,7 +506,7 @@ export default function WeeklyPlanPage() {
           style={{
             border: "2px solid var(--poster-ink)",
             borderRadius: 12,
-            background: "#fff",
+            background: "var(--poster-panel)",
             overflow: "hidden",
           }}
         >

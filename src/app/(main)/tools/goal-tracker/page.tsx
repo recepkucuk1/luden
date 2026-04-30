@@ -661,7 +661,7 @@ export default function GoalTrackerPage() {
                   width: "100%",
                   border: "2px solid var(--poster-ink)",
                   borderRadius: 7,
-                  background: "#fff",
+                  background: "var(--poster-panel)",
                   display: "flex",
                   overflow: "hidden",
                 }}
@@ -744,7 +744,7 @@ export default function GoalTrackerPage() {
                             height: 8,
                             border: "1.5px solid var(--poster-ink)",
                             borderRadius: 6,
-                            background: "#fff",
+                            background: "var(--poster-panel)",
                             overflow: "hidden",
                           }}
                         >
@@ -921,7 +921,7 @@ export default function GoalTrackerPage() {
                           width: 12,
                           height: 12,
                           borderRadius: "50%",
-                          background: "#fff",
+                          background: "var(--poster-panel)",
                           border: "2px solid var(--poster-ink)",
                         }}
                       />

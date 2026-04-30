@@ -614,7 +614,7 @@ export default function CommBoardPage() {
           padding: "10px 12px",
           border: "2px solid var(--poster-ink)",
           borderRadius: 12,
-          background: "#fff",
+          background: "var(--poster-panel)",
         }}
       >
         <div style={{ minWidth: 0 }}>

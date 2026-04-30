@@ -874,7 +874,7 @@ function DayLessonList({
                           height: 8,
                           width: 8,
                           borderRadius: 999,
-                          background: "#fff",
+                          background: "var(--poster-panel)",
                           border: "2px solid var(--poster-accent)",
                         }}
                       />

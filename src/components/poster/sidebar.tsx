@@ -74,7 +74,8 @@ export const Sidebar = () => {
     { icon: Settings, title: "Admin Panel", href: "/admin/users" },
   ];
 
-  const width = open ? 256 : 72;
+  // open: 80vw cap on narrow phones (≤320px), 256px elsewhere; collapsed: 72
+  const width = open ? "clamp(220px, 80vw, 256px)" : 72;
 
   return (
     <>
@@ -318,7 +319,7 @@ const TitleSection = ({ open, userName, userImage, planLabel }: { open: boolean;
               borderRadius: 10,
               objectFit: "cover",
               border: "2px solid var(--poster-ink)",
-              background: "#fff",
+              background: "var(--poster-panel)",
               flexShrink: 0,
             }}
           />
@@ -392,7 +393,7 @@ const ToggleClose = ({ open, setOpen }: { open: boolean; setOpen: (v: boolean) =
         height: 40,
         borderRadius: 10,
         border: "2px solid var(--poster-ink)",
-        background: "#fff",
+        background: "var(--poster-panel)",
         color: "var(--poster-ink)",
         cursor: "pointer",
         fontFamily: "inherit",
