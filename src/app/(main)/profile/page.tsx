@@ -947,7 +947,7 @@ export default function ProfilePage() {
         <Panel title="Şifre Değiştir">
           <form onSubmit={handlePasswordChange} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div>
-              <PLabel htmlFor="currentPwd">Mevcut Şifre</PLabel>
+              <PLabel htmlFor="currentPwd" required>Mevcut Şifre</PLabel>
               <PInput
                 id="currentPwd"
                 type="password"
@@ -959,7 +959,7 @@ export default function ProfilePage() {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
               <div>
-                <PLabel htmlFor="newPwd">Yeni Şifre</PLabel>
+                <PLabel htmlFor="newPwd" required>Yeni Şifre</PLabel>
                 <PInput
                   id="newPwd"
                   type="password"
@@ -970,7 +970,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <PLabel htmlFor="confirmPwd">Yeni Şifre Tekrar</PLabel>
+                <PLabel htmlFor="confirmPwd" required>Yeni Şifre Tekrar</PLabel>
                 <PInput
                   id="confirmPwd"
                   type="password"

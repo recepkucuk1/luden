@@ -439,7 +439,7 @@ export default function WeeklyPlanPage() {
     <form onSubmit={handleGenerate} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {/* Öğrenci */}
       <div>
-        <PLabel>Öğrenci</PLabel>
+        <PLabel required>Öğrenci</PLabel>
         <PSelect value={studentId} onChange={(e) => setStudentId(e.target.value)}>
           <option value="">— Öğrenci seçin —</option>
           {students.map((s) => (

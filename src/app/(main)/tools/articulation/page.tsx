@@ -546,7 +546,7 @@ export default function ArticulationPage() {
     <form key={formKey} onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       {/* Öğrenci */}
       <div>
-        <PLabel>Öğrenci</PLabel>
+        <PLabel required>Öğrenci</PLabel>
         <PSelect value={studentId} onChange={(e) => setStudentId(e.target.value)} required>
           <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
           {students.map((s) => (
@@ -662,7 +662,7 @@ export default function ArticulationPage() {
 
       {/* Tema */}
       <div>
-        <PLabel>Tema <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(opsiyonel)</span></PLabel>
+        <PLabel optional>Tema</PLabel>
         <PSelect value={theme} onChange={(e) => setTheme(e.target.value)}>
           {THEMES.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>

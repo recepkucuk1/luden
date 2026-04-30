@@ -190,7 +190,7 @@ export default function SocialStoryPage() {
       style={{ display: "flex", flexDirection: "column", gap: 16 }}
     >
       <div>
-        <PLabel>Öğrenci</PLabel>
+        <PLabel required>Öğrenci</PLabel>
         <PSelect value={studentId} onChange={(e) => setStudentId(e.target.value)} required>
           <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
           {students.map((s) => (
@@ -211,7 +211,7 @@ export default function SocialStoryPage() {
       </div>
 
       <div>
-        <PLabel>Sosyal Durum</PLabel>
+        <PLabel required>Sosyal Durum</PLabel>
         <PSelect value={situation} onChange={(e) => setSituation(e.target.value)} required>
           <option value="">Durum seçin</option>
           {SITUATIONS.map((s) => (

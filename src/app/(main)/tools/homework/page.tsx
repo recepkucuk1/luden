@@ -580,7 +580,7 @@ export default function HomeworkPage() {
     <form key={formKey} onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       {/* Öğrenci */}
       <div>
-        <PLabel>Öğrenci</PLabel>
+        <PLabel required>Öğrenci</PLabel>
         <PSelect value={studentId} onChange={(e) => handleStudentChange(e.target.value)} required>
           <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
           {students.map((s) => (

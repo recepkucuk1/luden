@@ -551,7 +551,7 @@ export default function SessionSummaryPage() {
     <form key={formKey} onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       {/* Öğrenci */}
       <div>
-        <PLabel>Öğrenci</PLabel>
+        <PLabel required>Öğrenci</PLabel>
         <PSelect value={studentId} onChange={(e) => handleStudentChange(e.target.value)} required>
           <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin"}</option>
           {students.map((s) => (
@@ -571,7 +571,7 @@ export default function SessionSummaryPage() {
 
       {/* Oturum Tarihi */}
       <div>
-        <PLabel>Oturum Tarihi</PLabel>
+        <PLabel required>Oturum Tarihi</PLabel>
         <PInput
           type="date"
           value={sessionDate}

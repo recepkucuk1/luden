@@ -563,9 +563,7 @@ export default function MatchingGamePage() {
     <form key={formKey} onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       {/* Öğrenci */}
       <div>
-        <PLabel>
-          Öğrenci <span style={{ fontSize: 10, fontWeight: 500, color: "var(--poster-ink-3)" }}>opsiyonel</span>
-        </PLabel>
+        <PLabel optional>Öğrenci</PLabel>
         <PSelect value={studentId} onChange={(e) => handleStudentChange(e.target.value)}>
           <option value="">{studentsLoading ? "Yükleniyor..." : "Öğrenci seçin (opsiyonel)"}</option>
           {students.map((s) => (

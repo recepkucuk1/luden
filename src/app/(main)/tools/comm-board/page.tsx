@@ -479,9 +479,7 @@ export default function CommBoardPage() {
     <form onSubmit={handleGenerate} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {/* Öğrenci */}
       <div>
-        <PLabel>
-          Öğrenci <span style={{ fontWeight: 500, color: "var(--poster-ink-3)", textTransform: "none" }}>(opsiyonel)</span>
-        </PLabel>
+        <PLabel optional>Öğrenci</PLabel>
         <PSelect value={studentId} onChange={(e) => setStudentId(e.target.value)}>
           <option value="">— Öğrenci seçin —</option>
           {students.map((s) => (
