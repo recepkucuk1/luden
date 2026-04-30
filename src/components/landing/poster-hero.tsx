@@ -187,7 +187,6 @@ export function PosterHero() {
               style={{
                 margin: 0,
                 fontFamily: "var(--font-display)",
-                lineHeight: 0.95,
                 letterSpacing: "-.035em",
                 fontWeight: 700,
                 color: "#0E1E26",
@@ -284,7 +283,9 @@ export function PosterHero() {
         }
         .poster-hero-h1 {
           font-size: clamp(34px, 9vw, 48px);
-          line-height: 1.02;
+          /* Turkish diacritics (ç, ş, ö, ü, ğ) need ≥1.1 to avoid
+             dot/cedilla collisions between rows. */
+          line-height: 1.12;
         }
         @media (min-width: 768px) {
           .poster-hero-grid {
