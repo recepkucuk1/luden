@@ -45,6 +45,12 @@ type PStatCardProps = {
   countUp?: boolean;
   /** Kompakt variant — padding ve font boyutları küçülür. */
   size?: "default" | "small";
+  /** Value rengi override; default var(--poster-ink). */
+  valueColor?: string;
+  /** Animasyon tamamen kapat (entrance dahil). */
+  noAnimation?: boolean;
+  /** Value sonrasında ek slot — trend indicator, mini progress bar vb. */
+  children?: React.ReactNode;
   style?: React.CSSProperties;
 };
 
@@ -58,6 +64,9 @@ export function PStatCard({
   delay = 0,
   countUp = true,
   size = "default",
+  valueColor,
+  noAnimation,
+  children,
   style,
 }: PStatCardProps) {
   const isSmall = size === "small";
@@ -68,11 +77,18 @@ export function PStatCard({
   const valueNode =
     typeof value === "number" && countUp ? <CountUp target={value} /> : value;
 
+  const Wrapper = noAnimation ? "div" : motion.div;
+  const motionProps = noAnimation
+    ? {}
+    : {
+        initial: { opacity: 0, y: 16 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.35, delay },
+      };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay }}
+    <Wrapper
+      {...motionProps}
       style={{
         padding,
         background: "var(--poster-panel)",
@@ -127,7 +143,7 @@ export function PStatCard({
           style={{
             fontSize: valueFontSize,
             fontWeight: 800,
-            color: "var(--poster-ink)",
+            color: valueColor ?? "var(--poster-ink)",
             letterSpacing: "-.02em",
             margin: 0,
             lineHeight: 1.1,
@@ -146,6 +162,7 @@ export function PStatCard({
           {sub}
         </p>
       )}
-    </motion.div>
+      {children}
+    </Wrapper>
   );
 }

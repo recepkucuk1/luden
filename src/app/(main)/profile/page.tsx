@@ -17,6 +17,7 @@ import {
   PSwitch,
   PProgress,
   PSpinner,
+  PStatCard,
 } from "@/components/poster";
 
 interface TherapistProfile {
@@ -398,7 +399,7 @@ export default function ProfilePage() {
       style={{
         minHeight: "100%",
         background: "var(--poster-bg)",
-        padding: "24px 24px 48px",
+        padding: "clamp(16px, 4vw, 24px) clamp(16px, 4vw, 24px) clamp(32px, 6vw, 48px)",
         fontFamily: "var(--font-display)",
       }}
     >
@@ -637,7 +638,13 @@ export default function ProfilePage() {
                 marginBottom: 20,
               }}
             >
-              <StatBox label="Bu Ay" value={thisMonthCount} color="var(--poster-ink)">
+              <PStatCard
+                label="Bu Ay"
+                value={thisMonthCount}
+                size="small"
+                noAnimation
+                style={{ background: "var(--poster-bg-2)" }}
+              >
                 <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
                   {monthDiff > 0 ? (
                     <>
@@ -660,14 +667,35 @@ export default function ProfilePage() {
                     </>
                   )}
                 </div>
-              </StatBox>
-              <StatBox label="Kalan Kredi" value={profile?.credits ?? 0} color="var(--poster-accent)">
+              </PStatCard>
+              <PStatCard
+                label="Kalan Kredi"
+                value={profile?.credits ?? 0}
+                valueColor="var(--poster-accent)"
+                size="small"
+                noAnimation
+                style={{ background: "var(--poster-bg-2)" }}
+              >
                 <div style={{ marginTop: 8 }}>
                   <PProgress value={Math.min(((profile?.credits ?? 0) / 200) * 100, 100)} color="var(--poster-accent)" />
                 </div>
-              </StatBox>
-              <StatBox label="Aktif Öğrenci" value={stats.students} color="var(--poster-blue)" />
-              <StatBox label="En Çok Araç" value={topToolName} color="var(--poster-ink)" small />
+              </PStatCard>
+              <PStatCard
+                label="Aktif Öğrenci"
+                value={stats.students}
+                valueColor="var(--poster-blue)"
+                size="small"
+                noAnimation
+                style={{ background: "var(--poster-bg-2)" }}
+              />
+              <PStatCard
+                label="En Çok Araç"
+                value={topToolName}
+                size="small"
+                noAnimation
+                countUp={false}
+                style={{ background: "var(--poster-bg-2)" }}
+              />
             </div>
 
             {allTimeTotal > 0 && (
@@ -993,54 +1021,3 @@ export default function ProfilePage() {
   );
 }
 
-function StatBox({
-  label,
-  value,
-  color,
-  small,
-  children,
-}: {
-  label: string;
-  value: React.ReactNode;
-  color: string;
-  small?: boolean;
-  children?: React.ReactNode;
-}) {
-  return (
-    <div
-      style={{
-        padding: 14,
-        background: "var(--poster-bg-2)",
-        border: "2px solid var(--poster-ink)",
-        borderRadius: 14,
-        boxShadow: "var(--poster-shadow-sm)",
-      }}
-    >
-      <p
-        style={{
-          fontSize: 10,
-          color: "var(--poster-ink-3)",
-          textTransform: "uppercase",
-          letterSpacing: ".1em",
-          fontWeight: 800,
-          margin: 0,
-        }}
-      >
-        {label}
-      </p>
-      <p
-        style={{
-          fontSize: small ? 14 : 26,
-          fontWeight: 800,
-          color,
-          margin: small ? "6px 0 0" : "4px 0 0",
-          lineHeight: 1.15,
-          letterSpacing: small ? 0 : "-.02em",
-        }}
-      >
-        {value}
-      </p>
-      {children}
-    </div>
-  );
-}

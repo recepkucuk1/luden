@@ -655,7 +655,7 @@ export default function CardsPage() {
       style={{
         minHeight: "100%",
         background: "var(--poster-bg)",
-        padding: "24px 24px 48px",
+        padding: "clamp(16px, 4vw, 24px) clamp(16px, 4vw, 24px) clamp(32px, 6vw, 48px)",
         fontFamily: "var(--font-display)",
       }}
     >
