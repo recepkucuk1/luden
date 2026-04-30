@@ -144,6 +144,12 @@ export function PosterHero() {
         overflow: "hidden",
         background: "#FFF8EC",
         color: "#0E1E26",
+        // Header is sticky 72px (56px scrolled). Reserve the rest of the
+        // viewport so the hero always claims a single screen — no peek of
+        // the next section, no forced scroll.
+        minHeight: "calc(100svh - 72px)",
+        display: "flex",
+        alignItems: "center",
       }}
     >
       <div aria-hidden style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
