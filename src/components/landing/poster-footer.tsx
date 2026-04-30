@@ -5,7 +5,7 @@ import Image from "next/image";
 const FOOTER_LINKS = [
   { href: "/register", label: "Kayıt Ol" },
   { href: "/login", label: "Giriş Yap" },
-  { href: "/#features", label: "Özellikler" },
+  { href: "/#features", label: "Nasıl Çalışır" },
   { href: "/#pricing", label: "Fiyatlandırma" },
   { href: "/#faq", label: "SSS" },
   { href: "/delivery-return", label: "Teslimat ve İade" },
