@@ -7,7 +7,7 @@ import { PBtn } from "./poster-ui";
 
 const NAV_LINKS = [
   { href: "/about", label: "Hakkımızda" },
-  { href: "/#features", label: "Özellikler" },
+  { href: "/#features", label: "Nasıl Çalışır" },
   { href: "/#pricing", label: "Fiyatlandırma" },
   { href: "/#faq", label: "SSS" },
 ];
