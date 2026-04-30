@@ -79,14 +79,20 @@ const BTN_VARIANTS: Record<
   BtnVariant,
   { bg: string; ink: string; shadow: string; border?: string }
 > = {
+  // Brand colors — same in light + dark
   accent: { bg: "#FE703A", ink: "#fff", shadow: "#D14F1E" },
   green: { bg: "#2CC069", ink: "#fff", shadow: "#1F8E4A" },
-  dark: { bg: "#0E1E26", ink: "#fff", shadow: "#000" },
+  // Neutral variants — token-driven so they flip in dark mode
+  dark: {
+    bg: "var(--poster-ink)",
+    ink: "var(--poster-panel)",
+    shadow: "var(--poster-ink)",
+  },
   white: {
-    bg: "#fff",
-    ink: "#0E1E26",
-    shadow: "rgba(14,30,38,.2)",
-    border: "2px solid #0E1E26",
+    bg: "var(--poster-panel)",
+    ink: "var(--poster-ink)",
+    shadow: "var(--poster-ink)",
+    border: "2px solid var(--poster-ink)",
   },
 };
 
@@ -192,13 +198,16 @@ export function PBtn({
 
 export function PCard({
   children,
-  color = "#fff",
+  color,
   rotate = 0,
   rounded = 20,
   style,
   keepRotateOnMobile = false,
 }: {
   children: React.ReactNode;
+  /** Override panel background. Defaults to var(--poster-panel) so dark
+   *  mode flips automatically. Pass a hex (or a category tint) for
+   *  always-on accent cards. */
   color?: string;
   rotate?: number;
   rounded?: number;
@@ -211,10 +220,10 @@ export function PCard({
   return (
     <div
       style={{
-        background: color,
+        background: color ?? "var(--poster-panel)",
         borderRadius: rounded,
-        border: "2px solid #0E1E26",
-        boxShadow: `0 ${shadowY}px 0 #0E1E26`,
+        border: "2px solid var(--poster-ink)",
+        boxShadow: `0 ${shadowY}px 0 var(--poster-ink)`,
         transform: effectiveRotate ? `rotate(${effectiveRotate}deg)` : undefined,
         ...style,
       }}
