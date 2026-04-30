@@ -241,6 +241,32 @@ input, select, textarea {
 .poster-toast-warning { border-color: var(--poster-yellow) !important; box-shadow: 0 6px 0 var(--poster-yellow) !important; }
 .poster-toast-info    { border-color: var(--poster-blue) !important;   box-shadow: 0 6px 0 var(--poster-blue) !important; }
 
+/* Skip-to-main-content link — visually hidden until keyboard focus */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 1000;
+  padding: 10px 16px;
+  background: var(--poster-accent, #fe703a);
+  color: #fff;
+  border: 2px solid var(--poster-ink, #0e1e26);
+  border-radius: 10px;
+  box-shadow: 0 3px 0 var(--poster-ink, #0e1e26);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform 0.15s ease;
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--poster-ink, #0e1e26);
+  outline-offset: 2px;
+}
+
 /* PSelect dropdown arrow — theme-aware via inline SVG with light/dark stroke */
 .poster-scope select.p-select {
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3e%3cpath fill='none' stroke='%230E1E26' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M1 1l5 5 5-5'/%3e%3c/svg%3e");

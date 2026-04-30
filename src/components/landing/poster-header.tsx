@@ -113,7 +113,8 @@ export function PosterHeader() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="poster-mobile-toggle"
-            aria-label="Menü"
+            aria-label={mobileMenuOpen ? "Menüyü kapat" : "Menüyü aç"}
+            aria-expanded={mobileMenuOpen}
             style={{
               display: "inline-flex",
               alignItems: "center",

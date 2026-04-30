@@ -99,12 +99,15 @@ export const Sidebar = () => {
         <button
           type="button"
           onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Menüyü kapat" : "Menüyü aç"}
+          aria-expanded={mobileOpen}
+          aria-controls="sidebar-nav"
           style={{
             width: 36,
             height: 36,
             borderRadius: 10,
             border: "2px solid var(--poster-ink)",
-            background: "#fff",
+            background: "var(--poster-panel)",
             color: "var(--poster-ink)",
             display: "grid",
             placeItems: "center",
@@ -132,6 +135,8 @@ export const Sidebar = () => {
 
       {/* Sidebar */}
       <nav
+        id="sidebar-nav"
+        aria-label="Ana navigasyon"
         className={`poster-scope fixed md:sticky top-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
         style={{
           height: "100dvh",
