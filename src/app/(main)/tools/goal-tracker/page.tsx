@@ -18,7 +18,7 @@ import {
   Printer,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { PBtn, PCard, PBadge, PLabel, PSelect, PTextarea } from "@/components/poster";
+import { PBtn, PCard, PBadge, PLabel, PSelect, PTextarea, PSpinner } from "@/components/poster";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -616,8 +616,7 @@ export default function GoalTrackerPage() {
         {/* Loading */}
         {selectedId && loading && (
           <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
-            <Loader2 style={{ width: 32, height: 32, color: "var(--poster-accent)", animation: "spin 1s linear infinite" }} />
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            <PSpinner size={32} />
           </div>
         )}
 

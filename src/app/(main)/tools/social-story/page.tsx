@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Lightbulb, Home, RefreshCw, Library } from "lucide-react";
-import { WORK_AREA_LABEL, calcAge } from "@/lib/constants";
+import { WORK_AREA_LABEL, calcAge, getCategoryBadge } from "@/lib/constants";
 import { PBtn, PCard, PBadge, PSwitch, PSelect, PInput, PLabel } from "@/components/poster";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
@@ -57,11 +57,6 @@ const SENTENCE_TYPE_COLOR: Record<string, BadgeColor> = {
   perspective: "ink",
   directive: "accent",
   affirmative: "yellow",
-};
-const AREA_BADGE: Record<string, BadgeColor> = {
-  speech: "yellow",
-  language: "accent",
-  hearing: "blue",
 };
 
 const LOADING_MSGS = [
@@ -207,7 +202,7 @@ export default function SocialStoryPage() {
         {selectedStudent && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
             {selectedStudent.birthDate && <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>}
-            <PBadge color={AREA_BADGE[selectedStudent.workArea] ?? "soft"}>
+            <PBadge color={getCategoryBadge(selectedStudent.workArea)}>
               {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
             </PBadge>
             {selectedStudent.diagnosis && <PBadge color="soft">{selectedStudent.diagnosis}</PBadge>}

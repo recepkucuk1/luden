@@ -5,9 +5,9 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { toInputDate, formatDate } from "@/lib/utils";
-import { WORK_AREA_LABEL, calcAge } from "@/lib/constants";
+import { WORK_AREA_LABEL, calcAge, getCategoryBadge } from "@/lib/constants";
 import { StudentForm, StudentFormData } from "@/components/students/StudentForm";
-import { PBtn, PBadge, PModal, PSelect, PProgress } from "@/components/poster";
+import { PBtn, PBadge, PModal, PSelect, PProgress, PSpinner, PEmptyState, PHoverPanel } from "@/components/poster";
 
 type FilterArea = "all" | "speech" | "language" | "hearing";
 type SortBy = "name" | "birthDate-asc" | "birthDate-desc" | "lastCard" | "mostCards";
@@ -39,12 +39,6 @@ const SORT_OPTIONS: { value: SortBy; label: string }[] = [
   { value: "lastCard", label: "En son kart üretilene göre" },
   { value: "mostCards", label: "En çok kart üretilene göre" },
 ];
-
-const AREA_BADGE_COLOR: Record<string, "yellow" | "accent" | "blue" | "soft"> = {
-  speech: "yellow",
-  language: "accent",
-  hearing: "blue",
-};
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -396,26 +390,16 @@ export default function StudentsPage() {
         {/* List */}
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", padding: "80px 0" }}>
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: "50%",
-                border: "4px solid rgba(254,112,58,.2)",
-                borderTopColor: "var(--poster-accent)",
-                animation: "spin 1s linear infinite",
-              }}
-            />
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            <PSpinner size={32} />
           </div>
         ) : students.length === 0 ? (
-          <EmptyState
-            emoji="👤"
+          <PEmptyState
+            icon="👤"
             title="Henüz öğrenci kaydınız yok"
             subtitle="Öğrencilerinizi eklemeye başlayarak raporlar üretebilirsiniz."
           />
         ) : filtered.length === 0 ? (
-          <EmptyState
+          <PEmptyState
             title="Bu filtreye uygun öğrenci bulunamadı."
             action={
               <PBtn type="button" variant="white" size="sm" onClick={() => setFilterArea("all")}>
@@ -502,38 +486,6 @@ export default function StudentsPage() {
   );
 }
 
-function EmptyState({
-  emoji,
-  title,
-  subtitle,
-  action,
-}: {
-  emoji?: string;
-  title: string;
-  subtitle?: string;
-  action?: React.ReactNode;
-}) {
-  return (
-    <div
-      style={{
-        padding: "64px 24px",
-        textAlign: "center",
-        background: "var(--poster-panel)",
-        border: "2px solid var(--poster-ink)",
-        borderRadius: 20,
-        boxShadow: "var(--poster-shadow-md)",
-      }}
-    >
-      {emoji && <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.85 }}>{emoji}</div>}
-      <p style={{ fontSize: 16, fontWeight: 700, color: "var(--poster-ink)", margin: 0 }}>{title}</p>
-      {subtitle && (
-        <p style={{ fontSize: 13, color: "var(--poster-ink-2)", marginTop: 4, marginBottom: 0 }}>{subtitle}</p>
-      )}
-      {action && <div style={{ marginTop: 16 }}>{action}</div>}
-    </div>
-  );
-}
-
 function StudentCard({
   student,
   confirmDelete,
@@ -556,24 +508,12 @@ function StudentCard({
     student.progressSummary.total > 0
       ? Math.round((student.progressSummary.completed / student.progressSummary.total) * 100)
       : 0;
-  const areaColor = AREA_BADGE_COLOR[student.workArea] ?? "soft";
+  const areaColor = getCategoryBadge(student.workArea);
 
   return (
-    <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        background: "var(--poster-panel)",
-        border: "2px solid var(--poster-ink)",
-        borderRadius: 18,
-        boxShadow: hover ? "0 9px 0 var(--poster-ink)" : "0 6px 0 var(--poster-ink)",
-        transform: hover ? "translateY(-3px)" : "none",
-        transition: "transform .15s cubic-bezier(.16,1,.3,1), box-shadow .15s cubic-bezier(.16,1,.3,1)",
-        overflow: "hidden",
-      }}
+    <PHoverPanel
+      style={{ display: "flex", flexDirection: "column" }}
+      onHoverChange={setHover}
     >
       <Link
         href={`/students/${student.id}`}
@@ -783,7 +723,7 @@ function StudentCard({
           </div>
         </div>
       )}
-    </div>
+    </PHoverPanel>
   );
 }
 

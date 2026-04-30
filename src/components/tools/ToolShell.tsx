@@ -2,7 +2,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { PCard } from "@/components/poster";
+import { PCard, PSpinner } from "@/components/poster";
 
 type ToolShellProps = {
   title: string;
@@ -125,19 +125,8 @@ export function ToolLoadingCard({ children }: { children?: React.ReactNode }) {
       }}
     >
       <div style={{ textAlign: "center", padding: "0 32px" }}>
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            margin: "0 auto 16px",
-            borderRadius: "50%",
-            border: "4px solid rgba(254,112,58,.2)",
-            borderTopColor: "var(--poster-accent)",
-            animation: "spin 1s linear infinite",
-          }}
-        />
+        <PSpinner size={40} style={{ marginBottom: 16 }} />
         {children}
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     </PCard>
   );

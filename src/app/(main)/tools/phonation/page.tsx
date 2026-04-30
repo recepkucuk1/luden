@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { RefreshCw, Library } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { WORK_AREA_LABEL, calcAge } from "@/lib/constants";
+import { WORK_AREA_LABEL, calcAge, getCategoryBadge } from "@/lib/constants";
 import { PhonationView } from "@/components/cards/PhonationView";
 import type { PhonationActivityContent } from "@/components/cards/PhonationView";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
@@ -109,11 +109,6 @@ const LOADING_MSGS = [
   "Uzman notları ekleniyor...",
 ];
 
-const WORK_AREA_BADGE: Record<string, "accent" | "blue" | "yellow" | "ink"> = {
-  speech: "yellow",
-  language: "accent",
-  hearing: "blue",
-};
 
 // ─── Loading Messages ─────────────────────────────────────────────────────────
 
@@ -576,7 +571,7 @@ export default function PhonationPage() {
             {selectedStudent.birthDate && (
               <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>
             )}
-            <PBadge color={WORK_AREA_BADGE[selectedStudent.workArea] ?? "ink"}>
+            <PBadge color={getCategoryBadge(selectedStudent.workArea)}>
               {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
             </PBadge>
             {selectedStudent.diagnosis && (

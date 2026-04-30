@@ -5,11 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { AREA_LABELS, WORK_AREA_FILTER } from "@/lib/constants";
+import { AREA_LABELS, WORK_AREA_FILTER, CATEGORY_META, DIFFICULTY_BADGE_COLOR } from "@/lib/constants";
+import { PBtn, PLabel, PSelect, PTextarea, PAlert, PBadge } from "@/components/poster";
 import type { GeneratedCard } from "@/lib/prompts";
 
 const schema = z.object({
@@ -32,7 +29,6 @@ function calcAgeGroup(birthDate: string): AgeGroup {
   return "adult";
 }
 
-// ─── Curriculum types ─────────────────────────────────────────────────────────
 interface CurriculumGoal {
   id: string;
   code: string;
@@ -48,7 +44,6 @@ interface Curriculum {
   goals: CurriculumGoal[];
 }
 
-// ─── Form props ───────────────────────────────────────────────────────────────
 interface CardGeneratorFormProps {
   onCardGenerated: (card: GeneratedCard) => void;
   onLoading: (loading: boolean) => void;
@@ -72,13 +67,16 @@ const AGE_GROUPS = [
 ] as const;
 
 const DIFFICULTIES = [
-  { value: "easy", label: "Kolay", color: "text-emerald-600 border-emerald-200 bg-emerald-50 data-[selected=true]:bg-emerald-100 data-[selected=true]:border-emerald-500" },
-  { value: "medium", label: "Orta", color: "text-amber-600 border-amber-200 bg-amber-50 data-[selected=true]:bg-amber-100 data-[selected=true]:border-amber-500" },
-  { value: "hard", label: "Zor", color: "text-red-600 border-red-200 bg-red-50 data-[selected=true]:bg-red-100 data-[selected=true]:border-red-500" },
+  { value: "easy", label: "Kolay" },
+  { value: "medium", label: "Orta" },
+  { value: "hard", label: "Zor" },
 ] as const;
 
-const SELECT_CLS =
-  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#023435]/30 disabled:opacity-50 disabled:cursor-not-allowed";
+const DIFFICULTY_TINT: Record<string, string> = {
+  easy: "var(--poster-green)",
+  medium: "var(--poster-yellow)",
+  hard: "var(--poster-pink)",
+};
 
 export function CardGeneratorForm({
   onCardGenerated,
@@ -90,11 +88,10 @@ export function CardGeneratorForm({
 }: CardGeneratorFormProps) {
   const [error, setError] = useState<string | null>(null);
 
-  // ─── Curriculum state ──────────────────────────────────────────────────────
   const [curricula, setCurricula] = useState<Curriculum[]>([]);
   const [selectedCurriculumId, setSelectedCurriculumId] = useState("");
   const [selectedMainGoalId, setSelectedMainGoalId] = useState("");
-  const [selectedSubGoalIds, setSelectedSubGoalIds] = useState<string[]>([]); // çoklu seçim
+  const [selectedSubGoalIds, setSelectedSubGoalIds] = useState<string[]>([]);
   const [studentCurriculumIds, setStudentCurriculumIds] = useState<string[]>([]);
 
   const curriculaByArea = curricula.reduce<Record<string, Curriculum[]>>((acc, c) => {
@@ -122,7 +119,6 @@ export function CardGeneratorForm({
   const mainGoals = selectedCurriculum?.goals.filter((g) => g.isMainGoal) ?? [];
   const selectedMainGoal = mainGoals.find((g) => g.id === selectedMainGoalId);
 
-  // Alt hedefler: seçili ana hedefin altındakiler
   const filteredSubGoals = selectedMainGoal
     ? (selectedCurriculum?.goals.filter(
         (g) => !g.isMainGoal && g.code.startsWith(selectedMainGoal.code.replace(".0", "."))
@@ -141,7 +137,6 @@ export function CardGeneratorForm({
     setSelectedSubGoalIds([]);
   }
 
-  // ─── React Hook Form ───────────────────────────────────────────────────────
   const autoAgeGroup = studentBirthDate ? calcAgeGroup(studentBirthDate) : undefined;
 
   const {
@@ -180,7 +175,6 @@ export function CardGeneratorForm({
       .filter(([, list]) => list.length > 0)
   );
 
-  // Kategori değişince müfredat seçimini sıfırla
   useEffect(() => {
     resetCurriculum();
   }, [watchedCategory]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -196,7 +190,6 @@ export function CardGeneratorForm({
         body: JSON.stringify({
           ...values,
           studentId,
-          // Alt hedef seçildiyse array, yoksa ana hedef tek eleman, yoksa boş
           curriculumGoalIds: selectedSubGoalIds.length > 0
             ? selectedSubGoalIds
             : selectedMainGoalId
@@ -219,123 +212,188 @@ export function CardGeneratorForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
-      {/* Seçili Öğrenci */}
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      style={{ display: "flex", flexDirection: "column", gap: 22, fontFamily: "var(--font-display)" }}
+    >
       {studentId && studentName && (
-        <div className="flex items-center gap-2 rounded-xl border border-[#023435]/20 bg-[#023435]/5 px-3 py-2">
-          <span className="text-[#023435] dark:text-foreground text-sm">👤</span>
-          <span className="text-sm text-[#023435] dark:text-foreground font-medium">{studentName}</span>
-          <span className="text-xs text-[#023435]/60 dark:text-muted-foreground ml-auto">için kart üretiliyor</span>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "8px 12px",
+            background: "var(--poster-bg-2)",
+            border: "2px solid var(--poster-ink)",
+            borderRadius: 12,
+            boxShadow: "var(--poster-shadow-sm)",
+          }}
+        >
+          <span style={{ fontSize: 14 }}>👤</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink)" }}>{studentName}</span>
+          <span style={{ fontSize: 11, color: "var(--poster-ink-3)", marginLeft: "auto" }}>
+            için kart üretiliyor
+          </span>
         </div>
       )}
 
-      {/* Kategori */}
-      <div className="space-y-2">
-        <Label className="text-sm font-semibold text-zinc-700">Eğitim Kategorisi</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.value}
-              type="button"
-              onClick={() => setValue("category", cat.value)}
-              className={cn(
-                "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all",
-                watchedCategory === cat.value
-                  ? "border-[#023435] bg-[#023435]/5"
-                  : "border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50"
-              )}
-            >
-              <span className="text-2xl">{cat.icon}</span>
-              <span className="text-xs font-semibold text-zinc-800">{cat.label}</span>
-              <span className="text-[10px] text-zinc-400 leading-tight">{cat.desc}</span>
-            </button>
-          ))}
+      <div>
+        <PLabel>Eğitim Kategorisi</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+          {CATEGORIES.map((cat) => {
+            const active = watchedCategory === cat.value;
+            const tint = CATEGORY_META[cat.value]?.cssVar ?? "var(--poster-accent)";
+            return (
+              <button
+                key={cat.value}
+                type="button"
+                onClick={() => setValue("category", cat.value)}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 4,
+                  padding: "12px 6px",
+                  background: active ? tint : "var(--poster-panel)",
+                  border: "2px solid var(--poster-ink)",
+                  borderRadius: 12,
+                  boxShadow: active ? "0 3px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-display)",
+                  textAlign: "center",
+                  transition: "background .12s, box-shadow .12s",
+                }}
+              >
+                <span style={{ fontSize: 22, lineHeight: 1 }}>{cat.icon}</span>
+                <span style={{ fontSize: 12, fontWeight: 800, color: "var(--poster-ink)" }}>{cat.label}</span>
+                <span style={{ fontSize: 10, color: active ? "var(--poster-ink)" : "var(--poster-ink-3)", lineHeight: 1.3 }}>
+                  {cat.desc}
+                </span>
+              </button>
+            );
+          })}
         </div>
-        {errors.category && <p className="text-xs text-red-500">{errors.category.message}</p>}
+        {errors.category && <p style={{ fontSize: 12, color: "var(--poster-danger)", margin: "6px 0 0" }}>{errors.category.message}</p>}
       </div>
 
-      {/* Yaş Grubu */}
-      <div className="space-y-2">
-        <Label className="text-sm font-semibold text-zinc-700">Yaş Grubu</Label>
+      <div>
+        <PLabel>Yaş Grubu</PLabel>
         {autoAgeGroup ? (
-          <div className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-            <span className="text-sm text-zinc-700 font-medium">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 14px",
+              background: "var(--poster-bg-2)",
+              border: "2px dashed var(--poster-ink-3)",
+              borderRadius: 12,
+            }}
+          >
+            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink)" }}>
               {AGE_GROUPS.find((a) => a.value === autoAgeGroup)?.label}
             </span>
-            <span className="text-xs text-zinc-400 ml-auto">öğrenciden otomatik</span>
+            <span style={{ fontSize: 11, color: "var(--poster-ink-3)", marginLeft: "auto" }}>
+              öğrenciden otomatik
+            </span>
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-2">
-            {AGE_GROUPS.map((age) => (
-              <button
-                key={age.value}
-                type="button"
-                onClick={() => setValue("ageGroup", age.value)}
-                className={cn(
-                  "rounded-lg border-2 py-2 text-sm font-medium transition-all",
-                  watchedAgeGroup === age.value
-                    ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                    : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
-                )}
-              >
-                {age.label}
-              </button>
-            ))}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+            {AGE_GROUPS.map((age) => {
+              const active = watchedAgeGroup === age.value;
+              return (
+                <button
+                  key={age.value}
+                  type="button"
+                  onClick={() => setValue("ageGroup", age.value)}
+                  style={{
+                    padding: "10px 6px",
+                    background: active ? "var(--poster-accent)" : "var(--poster-panel)",
+                    border: "2px solid var(--poster-ink)",
+                    borderRadius: 12,
+                    boxShadow: active ? "0 3px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: active ? "#fff" : "var(--poster-ink-2)",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-display)",
+                    transition: "background .12s, box-shadow .12s",
+                  }}
+                >
+                  {age.label}
+                </button>
+              );
+            })}
           </div>
         )}
-        {errors.ageGroup && <p className="text-xs text-red-500">{errors.ageGroup.message}</p>}
+        {errors.ageGroup && <p style={{ fontSize: 12, color: "var(--poster-danger)", margin: "6px 0 0" }}>{errors.ageGroup.message}</p>}
       </div>
 
-      {/* Zorluk */}
-      <div className="space-y-2">
-        <Label className="text-sm font-semibold text-zinc-700">Zorluk Seviyesi</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {DIFFICULTIES.map((d) => (
-            <button
-              key={d.value}
-              type="button"
-              data-selected={watchedDifficulty === d.value}
-              onClick={() => setValue("difficulty", d.value)}
-              className={cn(
-                "rounded-lg border-2 py-2 text-sm font-semibold transition-all",
-                d.color
-              )}
-            >
-              {d.label}
-            </button>
-          ))}
+      <div>
+        <PLabel>Zorluk Seviyesi</PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+          {DIFFICULTIES.map((d) => {
+            const active = watchedDifficulty === d.value;
+            const tint = DIFFICULTY_TINT[d.value];
+            return (
+              <button
+                key={d.value}
+                type="button"
+                onClick={() => setValue("difficulty", d.value)}
+                style={{
+                  padding: "10px 6px",
+                  background: active ? tint : "var(--poster-panel)",
+                  border: "2px solid var(--poster-ink)",
+                  borderRadius: 12,
+                  boxShadow: active ? "0 3px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: "var(--poster-ink)",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-display)",
+                  transition: "background .12s, box-shadow .12s",
+                }}
+              >
+                {d.label}
+              </button>
+            );
+          })}
         </div>
-        {errors.difficulty && <p className="text-xs text-red-500">{errors.difficulty.message}</p>}
+        {errors.difficulty && <p style={{ fontSize: 12, color: "var(--poster-danger)", margin: "6px 0 0" }}>{errors.difficulty.message}</p>}
       </div>
 
-      {/* Müfredat Hedefi */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold text-zinc-700">
-            Müfredat Hedefi{" "}
-            <span className="text-zinc-400 font-normal">(isteğe bağlı)</span>
-          </Label>
-          {selectedCurriculumId && (
-            <button
-              type="button"
-              onClick={resetCurriculum}
-              className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
-            >
-              Temizle
-            </button>
-          )}
-        </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <PLabel
+          rightSlot={
+            selectedCurriculumId ? (
+              <button
+                type="button"
+                onClick={resetCurriculum}
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: "var(--poster-ink-3)",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                Temizle
+              </button>
+            ) : undefined
+          }
+        >
+          Müfredat Hedefi <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(isteğe bağlı)</span>
+        </PLabel>
 
-        {/* Alan seçimi */}
-        <select
+        <PSelect
           value={selectedCurriculumId}
           onChange={(e) => {
             setSelectedCurriculumId(e.target.value);
             setSelectedMainGoalId("");
             setSelectedSubGoalIds([]);
           }}
-          className={SELECT_CLS}
         >
           <option value="">— Modül seç —</option>
           {Object.entries(filteredCurriculaByArea).map(([area, list]) => (
@@ -347,17 +405,15 @@ export function CardGeneratorForm({
               ))}
             </optgroup>
           ))}
-        </select>
+        </PSelect>
 
-        {/* Ana hedef */}
         {selectedCurriculumId && (
-          <select
+          <PSelect
             value={selectedMainGoalId}
             onChange={(e) => {
               setSelectedMainGoalId(e.target.value);
               setSelectedSubGoalIds([]);
             }}
-            className={SELECT_CLS}
           >
             <option value="">— Ana hedef seç —</option>
             {mainGoals.map((g) => (
@@ -365,43 +421,82 @@ export function CardGeneratorForm({
                 {g.code} {g.title}
               </option>
             ))}
-          </select>
+          </PSelect>
         )}
 
-        {/* Alt hedef — checkbox listesi */}
         {selectedMainGoalId && filteredSubGoals.length > 0 && (
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50 divide-y divide-zinc-100">
-            {filteredSubGoals.map((g) => {
+          <div
+            style={{
+              background: "var(--poster-panel)",
+              border: "2px solid var(--poster-ink)",
+              borderRadius: 12,
+              boxShadow: "var(--poster-shadow-sm)",
+              overflow: "hidden",
+            }}
+          >
+            {filteredSubGoals.map((g, i) => {
               const checked = selectedSubGoalIds.includes(g.id);
               return (
                 <label
                   key={g.id}
-                  className={cn(
-                    "flex items-start gap-3 px-3 py-2.5 cursor-pointer transition-colors",
-                    checked ? "bg-[#023435]/5" : "hover:bg-white"
-                  )}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 10,
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                    background: checked ? "var(--poster-bg-2)" : "var(--poster-panel)",
+                    borderTop: i === 0 ? "none" : "1px dashed var(--poster-ink-faint)",
+                    transition: "background .12s",
+                  }}
                 >
                   <input
                     type="checkbox"
                     checked={checked}
                     onChange={() => toggleSubGoal(g.id)}
-                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 accent-[#023435]"
+                    style={{
+                      marginTop: 2,
+                      width: 16,
+                      height: 16,
+                      flexShrink: 0,
+                      accentColor: "var(--poster-accent)",
+                      cursor: "pointer",
+                    }}
                   />
-                  <span className="text-xs text-zinc-400 shrink-0 w-10 tabular-nums pt-px">
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: "var(--poster-ink-3)",
+                      flexShrink: 0,
+                      width: 40,
+                      paddingTop: 1,
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
                     {g.code}
                   </span>
-                  <span className="text-xs text-zinc-700 leading-relaxed">{g.title}</span>
+                  <span style={{ fontSize: 12, color: "var(--poster-ink)", lineHeight: 1.5 }}>{g.title}</span>
                 </label>
               );
             })}
           </div>
         )}
 
-        {/* Seçim özeti */}
         {(selectedSubGoalIds.length > 0 || selectedMainGoalId) && (
-          <div className="flex items-start gap-2 rounded-xl border border-[#023435]/20 bg-[#023435]/5 px-3 py-2">
-            <span className="text-[#023435] dark:text-foreground text-xs mt-0.5">🎯</span>
-            <p className="text-xs text-[#023435] dark:text-foreground leading-relaxed">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 8,
+              padding: "8px 12px",
+              background: "var(--poster-bg-2)",
+              border: "2px solid var(--poster-ink)",
+              borderRadius: 12,
+              boxShadow: "var(--poster-shadow-sm)",
+            }}
+          >
+            <span style={{ fontSize: 13, lineHeight: 1.4 }}>🎯</span>
+            <p style={{ fontSize: 12, color: "var(--poster-ink)", lineHeight: 1.5, margin: 0 }}>
               {selectedSubGoalIds.length > 0
                 ? `${selectedSubGoalIds.length} alt hedef seçildi`
                 : mainGoals.find((g) => g.id === selectedMainGoalId)?.title}
@@ -410,43 +505,29 @@ export function CardGeneratorForm({
         )}
       </div>
 
-      {/* Hedef Beceri */}
-      <div className="space-y-2">
-        <Label htmlFor="focusArea" className="text-sm font-semibold text-zinc-700">
-          Hedef Beceri <span className="text-zinc-400 font-normal">(isteğe bağlı)</span>
-        </Label>
-        <Textarea
+      <div>
+        <PLabel htmlFor="focusArea">
+          Hedef Beceri <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(isteğe bağlı)</span>
+        </PLabel>
+        <PTextarea
           id="focusArea"
           {...register("focusArea")}
           placeholder="Örn: /s/ sesi üretimi, akıcı konuşma, kelime çağrışımı..."
-          className="resize-none text-sm"
           rows={3}
         />
       </div>
 
-      {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-600">
-          {error}
-        </div>
-      )}
+      {error && <PAlert tone="error">{error}</PAlert>}
 
-      <Button
+      <PBtn
         type="submit"
+        variant="accent"
+        size="md"
         disabled={isSubmitting}
-        className="w-full h-11 text-sm font-semibold"
+        style={{ width: "100%", justifyContent: "center" }}
       >
-        {isSubmitting ? (
-          <span className="flex items-center gap-2">
-            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-            </svg>
-            Kart üretiliyor…
-          </span>
-        ) : (
-          "✨ Kart Üret"
-        )}
-      </Button>
+        {isSubmitting ? "Kart üretiliyor…" : "✨ Kart Üret"}
+      </PBtn>
     </form>
   );
 }

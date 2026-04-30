@@ -3,20 +3,18 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import type { GeneratedCard } from "@/lib/prompts";
 import {
   WORK_AREA_LABEL,
-  WORK_AREA_COLOR,
   DIFFICULTY_LABEL,
-  DIFFICULTY_COLOR,
   AGE_LABEL,
+  getCategoryBadge,
+  getDifficultyBadge,
 } from "@/lib/constants";
+import { PBtn, PBadge, PCard } from "@/components/poster";
 import { InlineMd } from "@/components/Md";
+import { Download } from "lucide-react";
 
-// @react-pdf/renderer SSR uyumlu değil — client-side only
 const CardPDFDocument = dynamic(
   () => import("./CardPDFDocument").then((m) => m.CardPDFDocument),
   { ssr: false }
@@ -38,6 +36,64 @@ async function downloadPDF(card: GeneratedCard) {
   URL.revokeObjectURL(url);
 }
 
+function Section({
+  title,
+  tone = "neutral",
+  children,
+}: {
+  title: string;
+  tone?: "neutral" | "warning" | "success";
+  children: React.ReactNode;
+}) {
+  const palette = {
+    neutral: {
+      bg: "var(--poster-panel)",
+      borderTitle: "var(--poster-ink-3)",
+      titleColor: "var(--poster-ink-3)",
+      bodyColor: "var(--poster-ink)",
+    },
+    warning: {
+      bg: "#fff3d1",
+      borderTitle: "#b7791f",
+      titleColor: "#7a4f06",
+      bodyColor: "#5a3d05",
+    },
+    success: {
+      bg: "#e4f8ec",
+      borderTitle: "var(--poster-green)",
+      titleColor: "#0f4f28",
+      bodyColor: "#0f4f28",
+    },
+  }[tone];
+
+  return (
+    <PCard
+      rounded={14}
+      style={{
+        padding: 14,
+        background: palette.bg,
+        border: tone === "neutral" ? undefined : `2px solid ${palette.borderTitle}`,
+        boxShadow: tone === "neutral" ? undefined : `0 4px 0 ${palette.borderTitle}`,
+      }}
+    >
+      <p
+        style={{
+          fontSize: 11,
+          fontWeight: 800,
+          color: palette.titleColor,
+          textTransform: "uppercase",
+          letterSpacing: ".1em",
+          margin: "0 0 10px",
+          fontFamily: "var(--font-display)",
+        }}
+      >
+        {title}
+      </p>
+      <div style={{ color: palette.bodyColor, fontFamily: "var(--font-display)" }}>{children}</div>
+    </PCard>
+  );
+}
+
 export function CardPreview({ card }: CardPreviewProps) {
   const [downloading, setDownloading] = useState(false);
 
@@ -56,160 +112,147 @@ export function CardPreview({ card }: CardPreviewProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Başlık ve Rozetler */}
-      <div className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
-            <Badge className={WORK_AREA_COLOR[card.category]}>{WORK_AREA_LABEL[card.category]}</Badge>
-            <Badge className={DIFFICULTY_COLOR[card.difficulty]}>{DIFFICULTY_LABEL[card.difficulty]}</Badge>
-            <Badge className="bg-zinc-100 text-zinc-600">{AGE_LABEL[card.ageGroup]}</Badge>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16, fontFamily: "var(--font-display)" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            <PBadge color={getCategoryBadge(card.category)}>
+              {WORK_AREA_LABEL[card.category] ?? card.category}
+            </PBadge>
+            <PBadge color={getDifficultyBadge(card.difficulty)}>
+              {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
+            </PBadge>
+            <PBadge color="soft">{AGE_LABEL[card.ageGroup] ?? card.ageGroup}</PBadge>
           </div>
-          <Button
-            variant="outline"
+          <PBtn
+            type="button"
+            variant="white"
             size="sm"
             onClick={handleDownload}
             disabled={downloading}
-            className="shrink-0 gap-1.5 text-xs"
+            icon={<Download size={14} />}
           >
-            {downloading ? (
-              <>
-                <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                Hazırlanıyor…
-              </>
-            ) : (
-              <>
-                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                PDF İndir
-              </>
-            )}
-          </Button>
+            {downloading ? "Hazırlanıyor…" : "PDF İndir"}
+          </PBtn>
         </div>
-        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{card.title}</h2>
-        <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed"><InlineMd text={card.objective} /></p>
+        <h2
+          style={{
+            fontSize: 24,
+            fontWeight: 800,
+            color: "var(--poster-ink)",
+            letterSpacing: "-.02em",
+            margin: 0,
+            lineHeight: 1.2,
+          }}
+        >
+          {card.title}
+        </h2>
+        <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--poster-ink-2)", margin: 0 }}>
+          <InlineMd text={card.objective} />
+        </p>
       </div>
 
-      {/* Materyaller */}
       {card.materials?.length > 0 && (
-        <Card className="border-zinc-100 dark:border-zinc-800 dark:bg-zinc-900/50">
-          <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
-              📦 Materyaller
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="flex flex-wrap gap-2">
-              {card.materials.map((m, i) => (
-                <span key={i} className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1 text-sm text-zinc-700 dark:text-zinc-300">
-                  {m}
-                </span>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <Section title="📦 Materyaller">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {card.materials.map((m, i) => (
+              <PBadge key={i} color="soft">
+                {m}
+              </PBadge>
+            ))}
+          </div>
+        </Section>
       )}
 
-      {/* Uygulama Adımları */}
       {card.instructions?.length > 0 && (
-        <Card className="border-zinc-100 dark:border-zinc-800 dark:bg-zinc-900/50">
-          <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
-              📋 Uygulama Adımları
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <ol className="space-y-2">
-              {card.instructions.map((step, i) => (
-                <li key={i} className="flex gap-3 text-sm text-zinc-700 dark:text-zinc-300">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FE703A]/10 text-xs font-bold text-[#FE703A]">
-                    {i + 1}
-                  </span>
-                  <span className="leading-relaxed"><InlineMd text={step.replace(/^Adım \d+:\s*/, "")} /></span>
-                </li>
-              ))}
-            </ol>
-          </CardContent>
-        </Card>
+        <Section title="📋 Uygulama Adımları">
+          <ol style={{ display: "flex", flexDirection: "column", gap: 8, margin: 0, padding: 0, listStyle: "none" }}>
+            {card.instructions.map((step, i) => (
+              <li key={i} style={{ display: "flex", gap: 12, fontSize: 14, lineHeight: 1.5 }}>
+                <span
+                  style={{
+                    flexShrink: 0,
+                    width: 22,
+                    height: 22,
+                    borderRadius: 999,
+                    background: "var(--poster-accent)",
+                    color: "#fff",
+                    border: "2px solid var(--poster-ink)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 11,
+                    fontWeight: 800,
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <span style={{ paddingTop: 2 }}>
+                  <InlineMd text={step.replace(/^Adım \d+:\s*/, "")} />
+                </span>
+              </li>
+            ))}
+          </ol>
+        </Section>
       )}
 
-      {/* Egzersizler */}
       {card.exercises?.length > 0 && (
-        <Card className="border-zinc-100 dark:border-zinc-800 dark:bg-zinc-900/50">
-          <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
-              🏃 Egzersizler
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 space-y-3">
+        <Section title="🏃 Egzersizler">
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {card.exercises.map((ex, i) => (
-              <div key={i} className="rounded-lg bg-zinc-50 dark:bg-zinc-800/50 p-3 space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{ex.name}</span>
-                  <span className="text-xs text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-full px-2 py-0.5">
-                    {ex.repetitions}
-                  </span>
+              <div
+                key={i}
+                style={{
+                  padding: 12,
+                  background: "var(--poster-bg-2)",
+                  border: "2px solid var(--poster-ink)",
+                  borderRadius: 12,
+                  boxShadow: "var(--poster-shadow-sm)",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: "var(--poster-ink)" }}>{ex.name}</span>
+                  <PBadge color="soft">{ex.repetitions}</PBadge>
                 </div>
-                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed"><InlineMd text={ex.description} /></p>
+                <p style={{ fontSize: 12, color: "var(--poster-ink-2)", lineHeight: 1.5, margin: 0 }}>
+                  <InlineMd text={ex.description} />
+                </p>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </Section>
       )}
 
-      {/* Uzman Notları */}
       {card.therapistNotes && (
-        <Card className="border-amber-100 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/10">
-          <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-amber-700 dark:text-amber-500 uppercase tracking-wide">
-              📝 Uzman Notları
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <p className="text-sm text-amber-800 dark:text-amber-400/90 leading-relaxed"><InlineMd text={card.therapistNotes} /></p>
-          </CardContent>
-        </Card>
+        <Section title="📝 Uzman Notları" tone="warning">
+          <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+            <InlineMd text={card.therapistNotes} />
+          </p>
+        </Section>
       )}
 
-      {/* İlerleme Göstergeleri */}
       {card.progressIndicators?.length > 0 && (
-        <Card className="border-zinc-100 dark:border-zinc-800 dark:bg-zinc-900/50">
-          <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">
-              📈 İlerleme Göstergeleri
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <ul className="space-y-1">
-              {card.progressIndicators.map((pi, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-                  <span className="text-emerald-500 mt-0.5">✓</span>
-                  <InlineMd text={pi} />
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        <Section title="📈 İlerleme Göstergeleri">
+          <ul style={{ display: "flex", flexDirection: "column", gap: 4, margin: 0, padding: 0, listStyle: "none" }}>
+            {card.progressIndicators.map((pi, i) => (
+              <li
+                key={i}
+                style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13, color: "var(--poster-ink)" }}
+              >
+                <span style={{ color: "var(--poster-green)", marginTop: 2, fontWeight: 800 }}>✓</span>
+                <InlineMd text={pi} />
+              </li>
+            ))}
+          </ul>
+        </Section>
       )}
 
-      {/* Ev Egzersizi */}
       {card.homeExercise && (
-        <Card className="border-[#023435]/15 dark:border-emerald-900/30 bg-[#023435]/5 dark:bg-emerald-900/10">
-          <CardHeader className="pb-2 pt-4 px-4">
-            <CardTitle className="text-sm font-semibold text-[#023435] dark:text-emerald-500 uppercase tracking-wide">
-              🏠 Ev Egzersizi
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <p className="text-sm text-[#023435] dark:text-emerald-400 leading-relaxed"><InlineMd text={card.homeExercise} /></p>
-          </CardContent>
-        </Card>
+        <Section title="🏠 Ev Egzersizi" tone="success">
+          <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+            <InlineMd text={card.homeExercise} />
+          </p>
+        </Section>
       )}
     </div>
   );

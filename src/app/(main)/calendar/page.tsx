@@ -3,9 +3,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
-import { GlassCalendar } from "@/components/ui/glass-calendar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { PBtn, PCard, PBadge, PSelect, PInput, PTextarea, PLabel, PModal, PCheckbox } from "@/components/poster";
+import { GlassCalendar } from "@/components/poster/glass-calendar";
+import { PBtn, PCard, PBadge, PSelect, PInput, PTextarea, PLabel, PModal, PCheckbox, PSkeleton } from "@/components/poster";
 import useSWR from "swr";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Check, X as XIcon, RotateCcw, Trash2, Repeat } from "lucide-react";
 
@@ -854,7 +853,7 @@ function DayLessonList({
                     }}
                   />
                   <p style={{ margin: 0, fontSize: 10, fontWeight: 800, color: "var(--poster-ink-3)", textTransform: "uppercase", letterSpacing: ".08em" }}>
-                    Yaklaşandaki Oturumlar
+                    Yaklaşan Oturumlar
                   </p>
                 </div>
                 <div
@@ -1503,13 +1502,11 @@ export default function CalendarPage() {
 
         {loading ? (
           <div style={{ display: "flex", gap: 20, padding: "16px 0" }}>
-            <div style={{ width: 380, height: 384 }}>
-              <Skeleton className="w-full h-full rounded-2xl" />
-            </div>
+            <PSkeleton width={380} height={384} radius={18} />
             <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
-              <Skeleton className="w-full h-20 rounded-xl" />
-              <Skeleton className="w-full h-20 rounded-xl" />
-              <Skeleton className="w-full h-20 rounded-xl" />
+              <PSkeleton height={80} radius={14} />
+              <PSkeleton height={80} radius={14} />
+              <PSkeleton height={80} radius={14} />
             </div>
           </div>
         ) : view === "month" ? (

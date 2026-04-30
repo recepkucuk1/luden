@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, FileText } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { AREA_LABELS } from "@/lib/constants";
+import { PBtn, PSelect, PTextarea, PSpinner, PEmptyState } from "@/components/poster";
 
 interface CurriculumGoal {
   id: string;
@@ -30,22 +29,22 @@ const STATUS_OPTIONS = [
     value: "not_started",
     label: "Başlanmadı",
     icon: "⚪",
-    activeCls: "bg-zinc-100 border-zinc-400 text-zinc-700",
-    inactiveCls: "border-zinc-200 text-zinc-300 hover:border-zinc-400 hover:text-zinc-500",
+    activeBg: "var(--poster-bg-2)",
+    activeColor: "var(--poster-ink)",
   },
   {
     value: "in_progress",
     label: "Devam Ediyor",
     icon: "🔵",
-    activeCls: "bg-[#FE703A]/10 border-[#FE703A] text-[#FE703A]",
-    inactiveCls: "border-[#FE703A]/20 text-[#FE703A]/30 hover:border-[#FE703A]/40 hover:text-[#FE703A]/50",
+    activeBg: "var(--poster-accent)",
+    activeColor: "#fff",
   },
   {
     value: "completed",
     label: "Tamamlandı",
     icon: "✅",
-    activeCls: "bg-emerald-100 border-emerald-500 text-emerald-800",
-    inactiveCls: "border-emerald-100 text-emerald-200 hover:border-emerald-300 hover:text-emerald-400",
+    activeBg: "var(--poster-green)",
+    activeColor: "#fff",
   },
 ] as const;
 
@@ -59,21 +58,34 @@ function GoalStatusButtons({
   onSet: (goalId: string, status: string) => void;
 }) {
   return (
-    <div className="flex items-center gap-1 shrink-0">
-      {STATUS_OPTIONS.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => onSet(goalId, opt.value)}
-          title={opt.label}
-          className={cn(
-            "rounded-lg border px-2 py-1 text-xs font-medium transition-all",
-            status === opt.value ? opt.activeCls : opt.inactiveCls
-          )}
-        >
-          {opt.icon}
-        </button>
-      ))}
+    <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+      {STATUS_OPTIONS.map((opt) => {
+        const active = status === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onSet(goalId, opt.value)}
+            title={opt.label}
+            aria-pressed={active}
+            style={{
+              padding: "4px 8px",
+              borderRadius: 8,
+              border: "2px solid var(--poster-ink)",
+              background: active ? opt.activeBg : "var(--poster-panel)",
+              color: active ? opt.activeColor : "var(--poster-ink-3)",
+              boxShadow: active ? "0 2px 0 var(--poster-ink)" : "none",
+              fontSize: 13,
+              cursor: "pointer",
+              fontFamily: "var(--font-display)",
+              transition: "background .12s, color .12s, box-shadow .12s",
+              opacity: active ? 1 : 0.55,
+            }}
+          >
+            {opt.icon}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -98,13 +110,11 @@ export function ProgressTab({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Sadece öğrenciye atanmış modüller
   const curricula = useMemo(
     () => allCurricula.filter((c) => curriculumIds.includes(c.id)),
     [allCurricula, curriculumIds]
   );
 
-  // curriculumIds değişince (düzenleme sonrası) seçimi güncelle
   useEffect(() => {
     if (curricula.length > 0 && !curricula.find((c) => c.id === selectedCurriculumId)) {
       setSelectedCurriculumId(curricula[0].id);
@@ -120,7 +130,6 @@ export function ProgressTab({
     ])
       .then(([cData, pData]) => {
         setAllCurricula(cData.curricula ?? []);
-
         const progressList: { goalId: string; status: string; notes: string | null }[] =
           pData.progress ?? [];
         const map: ProgressMap = {};
@@ -212,36 +221,30 @@ export function ProgressTab({
 
   if (loading) {
     return (
-      <div className="flex justify-center py-16">
-        <div className="h-6 w-6 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin" />
+      <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}>
+        <PSpinner size={28} />
       </div>
     );
   }
 
-  // Boş state — modül atanmamış
   if (curriculumIds.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-16 px-8 text-center">
-        <div className="text-4xl mb-3">📋</div>
-        <p className="text-sm font-medium text-zinc-600 mb-1">
-          Bu öğrenci için henüz çalışma modülü seçilmemiştir.
-        </p>
-        <p className="text-xs text-zinc-400 mb-5">
-          Öğrenci profilini düzenleyerek modül ekleyebilirsiniz.
-        </p>
-        {onEditClick && (
-          <button
-            onClick={onEditClick}
-            className="rounded-lg bg-[#FE703A] px-4 py-2 text-sm font-medium text-white hover:bg-[#FE703A]/90 transition-colors"
-          >
-            Öğrenciyi Düzenle → Modül Ekle
-          </button>
-        )}
-      </div>
+      <PEmptyState
+        variant="dashed"
+        icon="📋"
+        title="Bu öğrenci için henüz çalışma modülü seçilmemiştir."
+        subtitle="Öğrenci profilini düzenleyerek modül ekleyebilirsiniz."
+        action={
+          onEditClick ? (
+            <PBtn type="button" variant="accent" size="sm" onClick={onEditClick}>
+              Öğrenciyi Düzenle → Modül Ekle
+            </PBtn>
+          ) : undefined
+        }
+      />
     );
   }
 
-  // Curricula gruplama (area bazlı, dropdown için)
   const curriculaByArea = curricula.reduce<Record<string, Curriculum[]>>((acc, c) => {
     if (!acc[c.area]) acc[c.area] = [];
     acc[c.area].push(c);
@@ -254,13 +257,11 @@ export function ProgressTab({
   const totalCount = allGoals.length;
 
   return (
-    <div className="space-y-4">
-      {/* Modül Dropdown */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 16, fontFamily: "var(--font-display)" }}>
       {curricula.length > 1 && (
-        <select
+        <PSelect
           value={selectedCurriculumId}
           onChange={(e) => setSelectedCurriculumId(e.target.value)}
-          className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {Object.entries(curriculaByArea).map(([area, list]) => (
             <optgroup key={area} label={AREA_LABELS[area] ?? area}>
@@ -271,17 +272,26 @@ export function ProgressTab({
               ))}
             </optgroup>
           ))}
-        </select>
+        </PSelect>
       )}
 
-      {/* Tek modül varsa başlık olarak göster */}
       {curricula.length === 1 && selectedCurriculum && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-zinc-700">{selectedCurriculum.title}</p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <p style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink)", margin: 0 }}>
+            {selectedCurriculum.title}
+          </p>
           {onEditClick && (
             <button
               onClick={onEditClick}
-              className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: "var(--poster-accent)",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-display)",
+              }}
             >
               Modülü Değiştir
             </button>
@@ -289,114 +299,180 @@ export function ProgressTab({
         </div>
       )}
 
-      {/* İlerleme Özeti */}
       {totalCount > 0 && (
-        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs text-zinc-500">
-              <span className="font-semibold text-emerald-600">{completedCount}</span>
+        <div
+          style={{
+            padding: "12px 14px",
+            background: "var(--poster-panel)",
+            border: "2px solid var(--poster-ink)",
+            borderRadius: 14,
+            boxShadow: "var(--poster-shadow-sm)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <span style={{ fontSize: 11, color: "var(--poster-ink-2)" }}>
+              <span style={{ fontWeight: 800, color: "var(--poster-green)" }}>{completedCount}</span>
               {" "}tamamlandı ·{" "}
-              <span className="font-semibold text-[#FE703A]">{inProgressCount}</span>
+              <span style={{ fontWeight: 800, color: "var(--poster-accent)" }}>{inProgressCount}</span>
               {" "}devam ediyor ·{" "}
-              <span className="text-zinc-400">
+              <span style={{ color: "var(--poster-ink-3)" }}>
                 {totalCount - completedCount - inProgressCount} başlanmadı
               </span>
             </span>
-            <span className="text-xs font-semibold text-zinc-700">
+            <span style={{ fontSize: 12, fontWeight: 800, color: "var(--poster-ink)" }}>
               {Math.round((completedCount / totalCount) * 100)}%
             </span>
           </div>
-          <div className="h-1.5 w-full rounded-full bg-zinc-100 overflow-hidden">
-            <div className="h-full flex">
+          <div
+            style={{
+              height: 8,
+              width: "100%",
+              borderRadius: 999,
+              border: "2px solid var(--poster-ink)",
+              background: "var(--poster-ink-faint)",
+              overflow: "hidden",
+            }}
+          >
+            <div style={{ height: "100%", display: "flex" }}>
               <div
-                className="bg-emerald-500 transition-all duration-500"
-                style={{ width: `${(completedCount / totalCount) * 100}%` }}
+                style={{
+                  background: "var(--poster-green)",
+                  width: `${(completedCount / totalCount) * 100}%`,
+                  transition: "width .3s cubic-bezier(.16,1,.3,1)",
+                }}
               />
               <div
-                className="bg-[#FE703A] transition-all duration-500"
-                style={{ width: `${(inProgressCount / totalCount) * 100}%` }}
+                style={{
+                  background: "var(--poster-accent)",
+                  width: `${(inProgressCount / totalCount) * 100}%`,
+                  transition: "width .3s cubic-bezier(.16,1,.3,1)",
+                }}
               />
             </div>
           </div>
         </div>
       )}
 
-      {/* Ana Hedef Listesi */}
       {selectedCurriculum && (
-        <div className="space-y-2">
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {mainGoals.map((main) => {
             const subGoals = getSubGoals(main);
             const isOpen = openMainGoals.has(main.id);
-            const subCompleted = subGoals.filter(
-              (s) => localProgress[s.id]?.status === "completed"
-            ).length;
-            const subInProgress = subGoals.filter(
-              (s) => localProgress[s.id]?.status === "in_progress"
-            ).length;
+            const subCompleted = subGoals.filter((s) => localProgress[s.id]?.status === "completed").length;
+            const subInProgress = subGoals.filter((s) => localProgress[s.id]?.status === "in_progress").length;
 
             return (
               <div
                 key={main.id}
-                className="rounded-2xl border border-zinc-200 bg-white overflow-hidden"
+                style={{
+                  background: "var(--poster-panel)",
+                  border: "2px solid var(--poster-ink)",
+                  borderRadius: 14,
+                  boxShadow: "var(--poster-shadow-sm)",
+                  overflow: "hidden",
+                }}
               >
                 <button
                   type="button"
                   onClick={() => toggleMainGoal(main.id)}
-                  className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-50 hover:bg-zinc-100 transition-colors text-left"
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "10px 14px",
+                    background: isOpen ? "var(--poster-bg-2)" : "var(--poster-panel)",
+                    border: "none",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    fontFamily: "var(--font-display)",
+                    transition: "background .12s",
+                  }}
                 >
-                  <span className="text-zinc-400 shrink-0">
-                    {isOpen ? (
-                      <ChevronDown className="w-4 h-4" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4" />
-                    )}
+                  <span style={{ color: "var(--poster-ink-3)", flexShrink: 0, display: "inline-flex" }}>
+                    {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                   </span>
-                  <span className="text-xs font-bold text-zinc-400 shrink-0 w-8">
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: "var(--poster-ink-3)",
+                      flexShrink: 0,
+                      width: 32,
+                    }}
+                  >
                     {main.code}
                   </span>
-                  <span className="flex-1 text-sm font-semibold text-zinc-900 leading-snug">
+                  <span
+                    style={{
+                      flex: 1,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: "var(--poster-ink)",
+                      lineHeight: 1.4,
+                    }}
+                  >
                     {main.title}
                   </span>
                   {subGoals.length > 0 && (
-                    <span className="text-[11px] text-zinc-400 shrink-0 tabular-nums">
+                    <span style={{ fontSize: 11, color: "var(--poster-ink-3)", flexShrink: 0, fontVariantNumeric: "tabular-nums" }}>
                       {subCompleted}/{subGoals.length}
                       {subInProgress > 0 && (
-                        <span className="ml-1 text-blue-400">· {subInProgress} sürmekte</span>
+                        <span style={{ marginLeft: 4, color: "var(--poster-accent)" }}>· {subInProgress} sürmekte</span>
                       )}
                     </span>
                   )}
                 </button>
 
                 {isOpen && subGoals.length > 0 && (
-                  <div className="divide-y divide-zinc-50">
-                    {subGoals.map((sub) => {
+                  <div>
+                    {subGoals.map((sub, i) => {
                       const currentStatus = localProgress[sub.id]?.status ?? "not_started";
                       const currentNotes = localProgress[sub.id]?.notes ?? "";
                       const noteOpen = openNotes.has(sub.id);
                       const hasNote = currentNotes.length > 0;
 
                       return (
-                        <div key={sub.id} className="px-4 py-2.5">
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs text-zinc-300 shrink-0 w-8 tabular-nums">
+                        <div
+                          key={sub.id}
+                          style={{
+                            padding: "10px 14px",
+                            borderTop: i === 0 ? "2px solid var(--poster-ink-faint)" : "1px dashed var(--poster-ink-faint)",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <span
+                              style={{
+                                fontSize: 11,
+                                color: "var(--poster-ink-3)",
+                                flexShrink: 0,
+                                width: 32,
+                                fontVariantNumeric: "tabular-nums",
+                              }}
+                            >
                               {sub.code}
                             </span>
-                            <span className="flex-1 text-sm text-zinc-700 leading-snug">
+                            <span style={{ flex: 1, fontSize: 13, color: "var(--poster-ink)", lineHeight: 1.4 }}>
                               {sub.title}
                             </span>
-                            <div className="flex items-center gap-1.5 shrink-0">
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
                               <button
                                 type="button"
                                 onClick={() => toggleNote(sub.id)}
                                 title="Not ekle"
-                                className={cn(
-                                  "rounded p-1 transition-colors",
-                                  noteOpen || hasNote
-                                    ? "text-[#023435] dark:text-foreground"
-                                    : "text-zinc-200 hover:text-zinc-400"
-                                )}
+                                aria-pressed={noteOpen || hasNote}
+                                style={{
+                                  padding: 4,
+                                  borderRadius: 6,
+                                  border: "none",
+                                  background: "transparent",
+                                  color: noteOpen || hasNote ? "var(--poster-accent)" : "var(--poster-ink-3)",
+                                  cursor: "pointer",
+                                  opacity: noteOpen || hasNote ? 1 : 0.55,
+                                  transition: "color .12s, opacity .12s",
+                                }}
                               >
-                                <FileText className="w-3.5 h-3.5" />
+                                <FileText style={{ width: 14, height: 14 }} />
                               </button>
                               <GoalStatusButtons
                                 goalId={sub.id}
@@ -407,13 +483,15 @@ export function ProgressTab({
                           </div>
 
                           {(noteOpen || hasNote) && (
-                            <textarea
-                              value={currentNotes}
-                              onChange={(e) => setGoalNotes(sub.id, e.target.value)}
-                              placeholder="Not ekle…"
-                              rows={2}
-                              className="mt-2 w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-xs text-zinc-700 placeholder-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#023435]/50 resize-none"
-                            />
+                            <div style={{ marginTop: 8 }}>
+                              <PTextarea
+                                value={currentNotes}
+                                onChange={(e) => setGoalNotes(sub.id, e.target.value)}
+                                placeholder="Not ekle…"
+                                rows={2}
+                                style={{ fontSize: 13 }}
+                              />
+                            </div>
                           )}
                         </div>
                       );
@@ -422,7 +500,17 @@ export function ProgressTab({
                 )}
 
                 {isOpen && subGoals.length === 0 && (
-                  <p className="px-4 py-3 text-xs text-zinc-400">Alt hedef bulunmuyor.</p>
+                  <p
+                    style={{
+                      padding: "12px 14px",
+                      fontSize: 12,
+                      color: "var(--poster-ink-3)",
+                      borderTop: "2px solid var(--poster-ink-faint)",
+                      margin: 0,
+                    }}
+                  >
+                    Alt hedef bulunmuyor.
+                  </p>
                 )}
               </div>
             );
@@ -430,20 +518,29 @@ export function ProgressTab({
         </div>
       )}
 
-      {/* Kaydet */}
-      <div className="flex items-center justify-between pt-2 pb-4">
-        <span className="text-xs text-zinc-400">
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingTop: 4,
+          paddingBottom: 12,
+        }}
+      >
+        <span style={{ fontSize: 12, color: "var(--poster-ink-3)" }}>
           {dirtyEntries.length > 0
             ? `${dirtyEntries.length} değişiklik kaydedilmedi`
             : "Tüm değişiklikler kaydedildi"}
         </span>
-        <Button
+        <PBtn
+          type="button"
+          variant="accent"
+          size="sm"
           onClick={handleSave}
           disabled={dirtyEntries.length === 0 || saving}
-          size="sm"
         >
           {saving ? "Kaydediliyor…" : "Kaydet"}
-        </Button>
+        </PBtn>
       </div>
     </div>
   );

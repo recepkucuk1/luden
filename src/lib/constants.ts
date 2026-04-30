@@ -2,11 +2,41 @@
 // UI'da Tailwind class, PDF'de hex renk farklı olduğu için
 // DIFFICULTY_COLOR_PDF CardPDFDocument içinde yerel kalır.
 
-// Kısa etiket (badge, filtre butonları)
+import type { BadgeColor } from "@/components/poster";
+
+// ─── Tek kanonik kategori → renk/label tablosu ────────────────────────────────
+// `workArea` (öğrenci) 3 değer kullanır (speech/language/hearing); `category`
+// (üretilen kart) bunlara ek fluency + voice alabilir. Tek tabloyla ikisini
+// de besliyoruz; 5 alanın hepsinde rengi tanımlı tutmak fluency/voice
+// öğrencilerinde gri "soft" badge'i önler.
+export const CATEGORY_META: Record<
+  string,
+  { label: string; cssVar: string; badge: BadgeColor }
+> = {
+  speech:   { label: "Konuşma",  cssVar: "var(--poster-yellow)", badge: "yellow" },
+  language: { label: "Dil",       cssVar: "var(--poster-accent)", badge: "accent" },
+  hearing:  { label: "İşitme",    cssVar: "var(--poster-blue)",   badge: "blue" },
+  fluency:  { label: "Akıcılık",  cssVar: "var(--poster-pink)",   badge: "pink" },
+  voice:    { label: "Ses",       cssVar: "var(--poster-green)",  badge: "green" },
+};
+
+export function getCategoryBadge(key: string | null | undefined): BadgeColor {
+  if (!key) return "soft";
+  return CATEGORY_META[key]?.badge ?? "soft";
+}
+
+export function getCategoryLabel(key: string | null | undefined, fallback?: string): string {
+  if (!key) return fallback ?? "";
+  return CATEGORY_META[key]?.label ?? fallback ?? key;
+}
+
+// Kısa etiket (badge, filtre butonları) — workArea (3 değer)
+// CATEGORY_META'dan türetilir, ekstra anahtar eklenirse buradaki tip
+// genişletilmeden çalışmaz; bu kasıtlı (workArea sadece 3 değer alır).
 export const WORK_AREA_LABEL: Record<string, string> = {
-  speech: "Konuşma",
-  language: "Dil",
-  hearing: "İşitme",
+  speech: CATEGORY_META.speech.label,
+  language: CATEGORY_META.language.label,
+  hearing: CATEGORY_META.hearing.label,
 };
 
 // Müfredat alt-alan etiketleri
@@ -52,6 +82,18 @@ export const DIFFICULTY_COLOR: Record<string, string> = {
   medium: "bg-amber-100 text-amber-700",
   hard: "bg-red-100 text-red-700",
 };
+
+// Poster badge eşlemesi — UI'da DIFFICULTY_BADGE_COLOR yerine kullan
+export const DIFFICULTY_BADGE_COLOR: Record<string, BadgeColor> = {
+  easy: "green",
+  medium: "yellow",
+  hard: "pink",
+};
+
+export function getDifficultyBadge(key: string | null | undefined): BadgeColor {
+  if (!key) return "soft";
+  return DIFFICULTY_BADGE_COLOR[key] ?? "soft";
+}
 
 export const AGE_LABEL: Record<string, string> = {
   "3-6": "3–6 yaş",

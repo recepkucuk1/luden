@@ -16,6 +16,7 @@ import {
   PSelect,
   PSwitch,
   PProgress,
+  PSpinner,
 } from "@/components/poster";
 
 interface TherapistProfile {
@@ -385,17 +386,8 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div
-        className="poster-scope"
-        style={{
-          minHeight: "70vh",
-          background: "var(--poster-bg)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Loader2 style={{ width: 32, height: 32, color: "var(--poster-ink-3)" }} className="animate-spin" />
+      <div className="poster-scope">
+        <PSpinner fullPanel style={{ minHeight: "70vh" }} />
       </div>
     );
   }

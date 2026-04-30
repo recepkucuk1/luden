@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { CurriculumPicker } from "@/components/students/CurriculumPicker";
-import { cn } from "@/lib/utils";
+import { CATEGORY_META } from "@/lib/constants";
+import {
+  PBtn,
+  PInput,
+  PTextarea,
+  PLabel,
+  PAlert,
+} from "@/components/poster";
 
 const WORK_AREAS = [
   { value: "speech", label: "Konuşma", icon: "🗣️" },
@@ -40,7 +43,7 @@ export function StudentForm({
   onCancel,
   submitting,
   error,
-  submitText = "Kaydet"
+  submitText = "Kaydet",
 }: StudentFormProps) {
   const [name, setName] = useState(initialValues?.name || "");
   const [birthDate, setBirthDate] = useState(initialValues?.birthDate || "");
@@ -55,21 +58,24 @@ export function StudentForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-1.5">
-        <Label htmlFor="name" className="text-sm font-medium">Ad Soyad *</Label>
-        <Input
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div>
+        <PLabel htmlFor="name">
+          Ad Soyad <span style={{ color: "var(--poster-accent)", fontWeight: 800 }}>*</span>
+        </PLabel>
+        <PInput
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Öğrenci adı"
           autoFocus
+          required
         />
       </div>
-      
-      <div className="space-y-1.5">
-        <Label htmlFor="birthDate" className="text-sm font-medium">Doğum Tarihi</Label>
-        <Input
+
+      <div>
+        <PLabel htmlFor="birthDate">Doğum Tarihi</PLabel>
+        <PInput
           id="birthDate"
           type="date"
           value={birthDate}
@@ -77,25 +83,42 @@ export function StudentForm({
         />
       </div>
 
-      <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Çalışma Alanı *</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {WORK_AREAS.map((w) => (
-            <button
-              key={w.value}
-              type="button"
-              onClick={() => setWorkArea(w.value)}
-              className={cn(
-                "flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-center transition-all text-xs font-medium",
-                workArea === w.value
-                  ? "border-[#023435] bg-[#023435]/5 text-[#023435] dark:text-foreground"
-                  : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
-              )}
-            >
-              <span className="text-lg">{w.icon}</span>
-              {w.label}
-            </button>
-          ))}
+      <div>
+        <PLabel>
+          Çalışma Alanı <span style={{ color: "var(--poster-accent)", fontWeight: 800 }}>*</span>
+        </PLabel>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+          {WORK_AREAS.map((w) => {
+            const active = workArea === w.value;
+            const tint = CATEGORY_META[w.value]?.cssVar ?? "var(--poster-accent)";
+            return (
+              <button
+                key={w.value}
+                type="button"
+                onClick={() => setWorkArea(w.value)}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 4,
+                  padding: "12px 8px",
+                  background: active ? tint : "var(--poster-panel)",
+                  border: "2px solid var(--poster-ink)",
+                  borderRadius: 12,
+                  boxShadow: active ? "0 3px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
+                  fontFamily: "var(--font-display)",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: active ? "var(--poster-ink)" : "var(--poster-ink-2)",
+                  cursor: "pointer",
+                  transition: "background .12s, box-shadow .12s",
+                }}
+              >
+                <span style={{ fontSize: 18, lineHeight: 1 }}>{w.icon}</span>
+                {w.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -107,9 +130,11 @@ export function StudentForm({
         defaultOpenKey={workArea}
       />
 
-      <div className="space-y-1.5">
-        <Label htmlFor="diagnosis" className="text-sm font-medium">Tanı</Label>
-        <Input
+      <div>
+        <PLabel htmlFor="diagnosis">
+          Tanı <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(opsiyonel)</span>
+        </PLabel>
+        <PInput
           id="diagnosis"
           value={diagnosis}
           onChange={(e) => setDiagnosis(e.target.value)}
@@ -117,27 +142,40 @@ export function StudentForm({
         />
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="notes" className="text-sm font-medium">Notlar</Label>
-        <Textarea
+      <div>
+        <PLabel htmlFor="notes">
+          Notlar <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(opsiyonel)</span>
+        </PLabel>
+        <PTextarea
           id="notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Öğrenci hakkında ek notlar..."
           rows={2}
-          className="resize-none text-sm"
         />
       </div>
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <PAlert tone="error">{error}</PAlert>}
 
-      <div className="flex gap-2 pt-1">
-        <Button type="submit" disabled={submitting} className="flex-1">
+      <div style={{ display: "flex", gap: 8, paddingTop: 4 }}>
+        <PBtn
+          type="submit"
+          variant="accent"
+          size="md"
+          disabled={submitting}
+          style={{ flex: 1, justifyContent: "center" }}
+        >
           {submitting ? "Kaydediliyor…" : submitText}
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+        </PBtn>
+        <PBtn
+          type="button"
+          variant="white"
+          size="md"
+          onClick={onCancel}
+          style={{ flex: 1, justifyContent: "center" }}
+        >
           İptal
-        </Button>
+        </PBtn>
       </div>
     </form>
   );

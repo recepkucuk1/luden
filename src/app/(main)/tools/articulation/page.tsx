@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Lightbulb, Home, RefreshCw, Library } from "lucide-react";
-import { WORK_AREA_LABEL, calcAge } from "@/lib/constants";
+import { WORK_AREA_LABEL, calcAge, getCategoryBadge } from "@/lib/constants";
 import { PBtn, PCard, PBadge, PSelect, PLabel } from "@/components/poster";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
@@ -37,14 +37,6 @@ interface DrillResult {
   cueTypes?: string[];
   homeGuidance?: string;
 }
-
-type BadgeColor = "accent" | "green" | "yellow" | "pink" | "blue" | "ink" | "soft";
-
-const WORK_AREA_BADGE: Record<string, BadgeColor> = {
-  speech: "yellow",
-  language: "accent",
-  hearing: "blue",
-};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -566,7 +558,7 @@ export default function ArticulationPage() {
             {selectedStudent.birthDate && (
               <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>
             )}
-            <PBadge color={WORK_AREA_BADGE[selectedStudent.workArea] ?? "soft"}>
+            <PBadge color={getCategoryBadge(selectedStudent.workArea)}>
               {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
             </PBadge>
             {selectedStudent.diagnosis && (

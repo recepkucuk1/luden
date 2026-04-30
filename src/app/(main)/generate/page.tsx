@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { CardGeneratorForm } from "@/components/cards/CardGeneratorForm";
 import { CardPreview } from "@/components/cards/CardPreview";
 import { AssignStudentsModal } from "@/components/cards/AssignStudentsModal";
-import { PBtn, PCard } from "@/components/poster";
+import { PBtn, PCard, PSpinner } from "@/components/poster";
 import type { GeneratedCard } from "@/lib/prompts";
 
 const LOADING_MSGS = [
@@ -203,19 +203,8 @@ function HomeContent() {
                   }}
                 >
                   <div style={{ textAlign: "center", padding: "0 32px" }}>
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        margin: "0 auto 16px",
-                        borderRadius: "50%",
-                        border: "4px solid rgba(254,112,58,.2)",
-                        borderTopColor: "var(--poster-accent)",
-                        animation: "spin 1s linear infinite",
-                      }}
-                    />
+                    <PSpinner size={40} style={{ marginBottom: 16 }} />
                     <LoadingMessages />
-                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                   </div>
                 </PCard>
               ) : card ? (

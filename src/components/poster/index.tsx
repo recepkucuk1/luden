@@ -9,6 +9,7 @@ import * as React from "react";
 
 // Re-exports from the historical location (landing + auth)
 export { PBtn, PCard, PBadge, Blob, Squiggle, POSTER_TOKENS } from "@/components/landing/poster-ui";
+export type { BadgeColor } from "@/components/landing/poster-ui";
 
 // Form primitives — promoted from auth/PosterAuthShell but token-driven so dark works
 export { PosterAuthShell } from "@/components/auth/PosterAuthShell";
@@ -17,6 +18,10 @@ export { PosterAuthShell } from "@/components/auth/PosterAuthShell";
 export { PModal } from "./PModal";
 export { PTabs } from "./PTabs";
 export { PToaster } from "./PToaster";
+export { PSpinner } from "./PSpinner";
+export { PEmptyState } from "./PEmptyState";
+export { PStatCard } from "./PStatCard";
+export { PHoverPanel } from "./PHoverPanel";
 
 /* ==================== PInput ==================== */
 

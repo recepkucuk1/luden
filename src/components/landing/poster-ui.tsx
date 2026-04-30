@@ -21,7 +21,7 @@ export const POSTER_TOKENS = {
   blue: "#4A90E2",
 };
 
-type BadgeColor =
+export type BadgeColor =
   | "accent"
   | "green"
   | "yellow"

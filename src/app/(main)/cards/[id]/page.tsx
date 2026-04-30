@@ -16,7 +16,7 @@ import { CommBoardView, type CommBoardContent } from "@/components/cards/CommBoa
 import { WeeklyPlanView, type WeeklyPlanContent } from "@/components/cards/WeeklyPlanView";
 import type { GeneratedCard } from "@/lib/prompts";
 import { formatDate } from "@/lib/utils";
-import { PBtn, PCard, PBadge } from "@/components/poster";
+import { PBtn, PCard, PBadge, PSpinner } from "@/components/poster";
 
 interface CurriculumGoal {
   id: string;
@@ -1476,28 +1476,8 @@ export default function CardDetailPage({
 
   if (loading) {
     return (
-      <div
-        className="poster-scope"
-        style={{
-          minHeight: "100%",
-          background: "var(--poster-bg)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "80px 20px",
-        }}
-      >
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            border: "4px solid rgba(254,112,58,.2)",
-            borderTopColor: "var(--poster-accent)",
-            animation: "spin 1s linear infinite",
-          }}
-        />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="poster-scope">
+        <PSpinner fullPanel size={40} style={{ minHeight: "100%", padding: "80px 20px" }} />
       </div>
     );
   }

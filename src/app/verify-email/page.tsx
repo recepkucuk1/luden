@@ -6,7 +6,7 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Check, X, Mail } from "lucide-react";
 import { ForceLightTheme } from "@/components/ForceLightTheme";
-import { PosterAuthShell, PBtn, PInput, PLabel, PAlert } from "@/components/poster";
+import { PosterAuthShell, PBtn, PInput, PLabel, PAlert, PSpinner } from "@/components/poster";
 
 type Status = "pending" | "loading" | "success" | "error" | "signing-in";
 
@@ -191,49 +191,17 @@ function VerifyEmailContent() {
       {/* LOADING */}
       {status === "loading" && (
         <div style={{ textAlign: "center", padding: "48px 0" }}>
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              margin: "0 auto 16px",
-              borderRadius: "50%",
-              border: "4px solid rgba(254,112,58,.2)",
-              borderTopColor: "var(--poster-accent)",
-              animation: "spin 1s linear infinite",
-            }}
-          />
-          <p style={{ fontSize: 14, fontWeight: 600, color: "var(--poster-ink-2)", fontFamily: "var(--font-display)" }}>
-            Email doğrulanıyor…
-          </p>
-          <style>{`
-            @keyframes spin { to { transform: rotate(360deg); } }
-          `}</style>
+          <PSpinner size={40} label="Email doğrulanıyor…" style={{ display: "flex" }} />
         </div>
       )}
 
       {/* SIGNING-IN */}
       {status === "signing-in" && (
         <div style={{ textAlign: "center", padding: "48px 0" }}>
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              margin: "0 auto 16px",
-              borderRadius: "50%",
-              border: "4px solid rgba(14,30,38,.2)",
-              borderTopColor: "var(--poster-ink)",
-              animation: "spin 1s linear infinite",
-            }}
-          />
-          <p style={{ fontSize: 14, fontWeight: 600, color: "var(--poster-ink-2)", fontFamily: "var(--font-display)" }}>
-            Giriş yapılıyor…
-          </p>
+          <PSpinner size={40} label="Giriş yapılıyor…" style={{ display: "flex" }} />
           <p style={{ marginTop: 4, fontSize: 12, color: "var(--poster-ink-3)", fontFamily: "var(--font-display)" }}>
             Seni yönlendiriyoruz.
           </p>
-          <style>{`
-            @keyframes spin { to { transform: rotate(360deg); } }
-          `}</style>
         </div>
       )}
 
@@ -347,18 +315,8 @@ export default function VerifyEmailPage() {
       <ForceLightTheme />
       <Suspense
         fallback={
-          <div className="poster-scope" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--poster-bg)" }}>
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: "50%",
-                border: "4px solid rgba(254,112,58,.2)",
-                borderTopColor: "var(--poster-accent)",
-                animation: "spin 1s linear infinite",
-              }}
-            />
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          <div className="poster-scope">
+            <PSpinner fullPanel style={{ minHeight: "100vh" }} />
           </div>
         }
       >

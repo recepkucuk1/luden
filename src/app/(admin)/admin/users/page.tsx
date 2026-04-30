@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, Filter, MoreVertical, X } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { PBtn, PCard, PBadge, PInput, PSelect, PModal } from "@/components/poster";
+import { PBtn, PCard, PBadge, PInput, PSelect, PModal, PSpinner } from "@/components/poster";
 
 type PlanType = "FREE" | "PRO" | "ADVANCED" | "ENTERPRISE";
 type BillingCycle = "MONTHLY" | "YEARLY";
@@ -608,17 +608,7 @@ export default function AdminUsersPage() {
   if (loading || status === "loading") {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 999,
-            border: "3px solid var(--poster-ink-faint)",
-            borderTopColor: "var(--poster-accent)",
-            animation: "spin 1s linear infinite",
-          }}
-        />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <PSpinner size={40} />
       </div>
     );
   }

@@ -11,6 +11,8 @@ import {
   DIFFICULTY_LABEL,
   CARD_STATUS_LABEL,
   calcAge,
+  getCategoryBadge,
+  getDifficultyBadge,
 } from "@/lib/constants";
 import { ProgressTab } from "@/components/students/ProgressTab";
 import { CurriculumPicker } from "@/components/students/CurriculumPicker";
@@ -25,6 +27,7 @@ import {
   PTextarea,
   PLabel,
   PAlert,
+  PSpinner,
 } from "@/components/poster";
 
 function parseProfileSections(text: string): { title: string; content: string }[] {
@@ -48,17 +51,7 @@ const WORK_AREAS = [
   { value: "hearing", label: "İşitme", icon: "👂" },
 ];
 
-type BadgeColor = "accent" | "green" | "blue" | "yellow" | "pink" | "soft" | "ink";
-const AREA_BADGE: Record<string, BadgeColor> = {
-  speech: "yellow",
-  language: "accent",
-  hearing: "blue",
-};
-const DIFFICULTY_BADGE: Record<string, BadgeColor> = {
-  easy: "yellow",
-  medium: "accent",
-  hard: "soft",
-};
+import type { BadgeColor } from "@/components/poster";
 
 interface StudentCard {
   id: string;
@@ -269,28 +262,8 @@ export default function StudentDetailPage({
 
   if (loading) {
     return (
-      <div
-        className="poster-scope"
-        style={{
-          minHeight: "100%",
-          background: "var(--poster-bg)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "80px 20px",
-        }}
-      >
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            border: "4px solid rgba(254,112,58,.2)",
-            borderTopColor: "var(--poster-accent)",
-            animation: "spin 1s linear infinite",
-          }}
-        />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="poster-scope">
+        <PSpinner fullPanel size={40} style={{ minHeight: "100%", padding: "80px 20px" }} />
       </div>
     );
   }
@@ -437,7 +410,7 @@ export default function StudentDetailPage({
                 {student.name}
               </h1>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-                <PBadge color={AREA_BADGE[student.workArea] ?? "soft"}>
+                <PBadge color={getCategoryBadge(student.workArea)}>
                   {WORK_AREA_LABEL[student.workArea] ?? student.workArea}
                 </PBadge>
                 {student.birthDate && <PBadge color="soft">{calcAge(student.birthDate)}</PBadge>}
@@ -682,24 +655,10 @@ export default function StudentDetailPage({
 
             {generatingProfile && (
               <div style={{ textAlign: "center", padding: "40px 20px" }}>
-                <div
-                  style={{
-                    width: 28,
-                    height: 28,
-                    margin: "0 auto 12px",
-                    borderRadius: "50%",
-                    border: "3px solid rgba(254,112,58,.2)",
-                    borderTopColor: "var(--poster-accent)",
-                    animation: "spin 1s linear infinite",
-                  }}
-                />
-                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--poster-ink-2)", margin: 0 }}>
-                  Profil oluşturuluyor…
-                </p>
+                <PSpinner size={28} label="Profil oluşturuluyor…" style={{ display: "flex" }} />
                 <p style={{ fontSize: 11, color: "var(--poster-ink-3)", margin: "4px 0 0" }}>
                   Bu birkaç saniye sürebilir.
                 </p>
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
               </div>
             )}
 
@@ -824,10 +783,10 @@ export default function StudentDetailPage({
                           }}
                         >
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10, paddingRight: 24 }}>
-                            <PBadge color={AREA_BADGE[card.category] ?? "soft"}>
+                            <PBadge color={getCategoryBadge(card.category)}>
                               {WORK_AREA_LABEL[card.category] ?? card.category}
                             </PBadge>
-                            <PBadge color={DIFFICULTY_BADGE[card.difficulty] ?? "soft"}>
+                            <PBadge color={getDifficultyBadge(card.difficulty)}>
                               {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
                             </PBadge>
                             <PBadge color="soft">{card.ageGroup}</PBadge>
@@ -1032,10 +991,10 @@ export default function StudentDetailPage({
                         }}
                       >
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
-                          <PBadge color={AREA_BADGE[assignment.card.category] ?? "soft"}>
+                          <PBadge color={getCategoryBadge(assignment.card.category)}>
                             {WORK_AREA_LABEL[assignment.card.category] ?? assignment.card.category}
                           </PBadge>
-                          <PBadge color={DIFFICULTY_BADGE[assignment.card.difficulty] ?? "soft"}>
+                          <PBadge color={getDifficultyBadge(assignment.card.difficulty)}>
                             {DIFFICULTY_LABEL[assignment.card.difficulty] ?? assignment.card.difficulty}
                           </PBadge>
                           <PBadge color="soft">{assignment.card.ageGroup}</PBadge>

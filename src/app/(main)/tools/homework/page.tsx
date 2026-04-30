@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { RefreshCw, Library, Eye, Star, Clock, Package, ChevronRight, Lightbulb, Download } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { WORK_AREA_LABEL, calcAge } from "@/lib/constants";
+import { WORK_AREA_LABEL, calcAge, getCategoryBadge } from "@/lib/constants";
 import type { HomeworkContent } from "@/components/cards/HomeworkView";
 import { PBtn, PCard, PBadge, PSelect, PLabel, PInput, PTextarea } from "@/components/poster";
+import type { BadgeColor } from "@/components/poster";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -27,13 +28,6 @@ interface CurriculumItem {
   goals?: { id: string; title: string }[];
 }
 
-type BadgeColor = "accent" | "green" | "yellow" | "pink" | "blue" | "ink" | "soft";
-
-const WORK_AREA_BADGE: Record<string, BadgeColor> = {
-  speech: "yellow",
-  language: "accent",
-  hearing: "blue",
-};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -596,7 +590,7 @@ export default function HomeworkPage() {
         {selectedStudent && (
           <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
             {selectedStudent.birthDate && <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>}
-            <PBadge color={WORK_AREA_BADGE[selectedStudent.workArea] ?? "soft"}>
+            <PBadge color={getCategoryBadge(selectedStudent.workArea)}>
               {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
             </PBadge>
             {selectedStudent.diagnosis && <PBadge color="soft">{selectedStudent.diagnosis}</PBadge>}

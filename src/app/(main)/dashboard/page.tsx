@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
@@ -16,12 +16,22 @@ import {
   Clock,
 } from "lucide-react";
 import {
-  WORK_AREA_LABEL,
   DIFFICULTY_LABEL,
+  CATEGORY_META,
+  getCategoryLabel,
+  getDifficultyBadge,
 } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
-import { motion, useInView } from "framer-motion";
-import { PBtn, PCard, PBadge, PProgress } from "@/components/poster";
+import { motion } from "framer-motion";
+import {
+  PBtn,
+  PCard,
+  PBadge,
+  PProgress,
+  PSpinner,
+  PStatCard,
+} from "@/components/poster";
+import type { BadgeColor } from "@/components/poster";
 
 function relativeTime(dateStr: string): string {
   const now = new Date();
@@ -36,32 +46,6 @@ function relativeTime(dateStr: string): string {
   if (diffD === 1) return "Dün";
   if (diffD < 7) return `${diffD} gün önce`;
   return formatDate(d, "short");
-}
-
-function CountUp({ target }: { target: number }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (!isInView || target === 0) { setCount(target); return; }
-    const duration = 1200;
-    const steps = 30;
-    const increment = target / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [isInView, target]);
-
-  return <span ref={ref}>{count}</span>;
 }
 
 interface DashboardStats {
@@ -94,102 +78,12 @@ interface RecentStudent {
   cardCount: number;
 }
 
-type PosterColor = "accent" | "green" | "yellow" | "pink" | "blue" | "ink" | "soft";
-
-const CATEGORY_META: Record<string, { label: string; color: string; badge: PosterColor }> = {
-  speech:   { label: "Konuşma",  color: "var(--poster-yellow)", badge: "yellow" },
-  language: { label: "Dil",       color: "var(--poster-accent)", badge: "accent" },
-  hearing:  { label: "İşitme",    color: "var(--poster-blue)",   badge: "blue" },
-  fluency:  { label: "Akıcılık",  color: "var(--poster-pink)",   badge: "pink" },
-  voice:    { label: "Ses",       color: "var(--poster-green)",  badge: "green" },
-};
-
-const DIFFICULTY_COLOR: Record<string, PosterColor> = {
-  easy: "green",
-  medium: "yellow",
-  hard: "pink",
-};
-
-function StatCard({
-  Icon,
-  label,
-  value,
-  suffix,
-  sub,
-  tint,
-  delay,
-}: {
-  Icon: React.ElementType;
-  label: string;
-  value: number;
-  suffix?: string;
-  sub: string;
-  tint: string;
-  delay: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay }}
-      style={{
-        padding: 20,
-        background: "var(--poster-panel)",
-        border: "2px solid var(--poster-ink)",
-        borderRadius: 18,
-        boxShadow: "var(--poster-shadow-lg)",
-        fontFamily: "var(--font-display)",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            background: tint,
-            border: "2px solid var(--poster-ink)",
-            boxShadow: "0 2px 0 var(--poster-ink)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "var(--poster-ink)",
-          }}
-        >
-          <Icon style={{ width: 20, height: 20 }} strokeWidth={2.25} />
-        </div>
-      </div>
-      <p style={{ fontSize: 12, fontWeight: 700, color: "var(--poster-ink-2)", textTransform: "uppercase", letterSpacing: ".08em", margin: 0 }}>
-        {label}
-      </p>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 4 }}>
-        <p style={{ fontSize: "clamp(22px, 5vw, 30px)", fontWeight: 800, color: "var(--poster-ink)", letterSpacing: "-.02em", margin: 0 }}>
-          <CountUp target={value} />
-        </p>
-        {suffix && (
-          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--poster-ink-2)", margin: 0 }}>{suffix}</p>
-        )}
-      </div>
-      <p style={{ fontSize: 12, color: "var(--poster-accent)", fontWeight: 700, marginTop: 6 }}>{sub}</p>
-    </motion.div>
-  );
-}
 
 function Panel({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <div
-      style={{
-        padding: 20,
-        background: "var(--poster-panel)",
-        border: "2px solid var(--poster-ink)",
-        borderRadius: 18,
-        boxShadow: "var(--poster-shadow-lg)",
-        fontFamily: "var(--font-display)",
-        ...style,
-      }}
-    >
+    <PCard rounded={18} style={{ padding: 20, boxShadow: "var(--poster-shadow-lg)", ...style }}>
       {children}
-    </div>
+    </PCard>
   );
 }
 
@@ -225,31 +119,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div
-        className="poster-scope"
-        style={{
-          flex: 1,
-          minHeight: "70vh",
-          background: "var(--poster-bg)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "var(--font-display)",
-        }}
-      >
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            border: "4px solid rgba(254,112,58,.25)",
-            borderTopColor: "var(--poster-accent)",
-            animation: "dash-spin 1s linear infinite",
-          }}
-        />
-        <p style={{ marginTop: 16, fontSize: 13, color: "var(--poster-ink-2)" }}>Yükleniyor…</p>
-        <style>{`@keyframes dash-spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="poster-scope" style={{ flex: 1 }}>
+        <PSpinner fullPanel label="Yükleniyor…" style={{ minHeight: "70vh" }} />
       </div>
     );
   }
@@ -332,7 +203,16 @@ export default function DashboardPage() {
         }}
       >
         {statCards.map((c, i) => (
-          <StatCard key={c.label} Icon={c.Icon} label={c.label} value={c.value} suffix={c.suffix} sub={c.sub} tint={c.tint} delay={i * 0.06} />
+          <PStatCard
+            key={c.label}
+            icon={<c.Icon style={{ width: 20, height: 20 }} strokeWidth={2.25} />}
+            label={c.label}
+            value={c.value}
+            suffix={c.suffix}
+            sub={c.sub}
+            tint={c.tint}
+            delay={i * 0.06}
+          />
         ))}
       </div>
 
@@ -388,7 +268,7 @@ export default function DashboardPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8, overflowY: "auto", paddingRight: 4, flex: 1 }}>
                 {recentCards.map((card) => {
                   const catMeta = CATEGORY_META[card.category];
-                  const diffColor: PosterColor = DIFFICULTY_COLOR[card.difficulty] ?? "soft";
+                  const diffColor: BadgeColor = getDifficultyBadge(card.difficulty);
                   return (
                     <Link
                       key={card.id}
@@ -418,7 +298,7 @@ export default function DashboardPage() {
                           height: 40,
                           flexShrink: 0,
                           borderRadius: 10,
-                          background: catMeta?.color ?? "var(--poster-ink-faint)",
+                          background: catMeta?.cssVar ?? "var(--poster-ink-faint)",
                           border: "2px solid var(--poster-ink)",
                           boxShadow: "0 2px 0 var(--poster-ink)",
                           display: "flex",
@@ -435,7 +315,7 @@ export default function DashboardPage() {
                         </p>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 5, alignItems: "center", marginTop: 4 }}>
                           <PBadge color={catMeta?.badge ?? "soft"}>
-                            {WORK_AREA_LABEL[card.category] ?? card.category}
+                            {getCategoryLabel(card.category, card.category)}
                           </PBadge>
                           <PBadge color={diffColor}>
                             {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
@@ -551,18 +431,18 @@ export default function DashboardPage() {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {categoryEntries.map(([key, value]) => {
-                  const meta = CATEGORY_META[key] || { label: key, color: "var(--poster-ink-faint)", badge: "soft" as PosterColor };
+                  const meta = CATEGORY_META[key] ?? { label: key, cssVar: "var(--poster-ink-faint)", badge: "soft" as BadgeColor };
                   const pct = totalCategoryItems > 0 ? (value / totalCategoryItems) * 100 : 0;
                   return (
                     <div key={key}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 700, color: "var(--poster-ink)" }}>
-                          <span style={{ width: 10, height: 10, borderRadius: 999, background: meta.color, border: "1.5px solid var(--poster-ink)" }} />
+                          <span style={{ width: 10, height: 10, borderRadius: 999, background: meta.cssVar, border: "1.5px solid var(--poster-ink)" }} />
                           {meta.label}
                         </span>
                         <span style={{ fontSize: 13, fontWeight: 800, color: "var(--poster-ink)" }}>{value}</span>
                       </div>
-                      <PProgress value={pct} color={meta.color} />
+                      <PProgress value={pct} color={meta.cssVar} />
                     </div>
                   );
                 })}

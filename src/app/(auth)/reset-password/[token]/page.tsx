@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Eye, EyeOff, Check, X } from "lucide-react";
 import { PBtn } from "@/components/landing/poster-ui";
+import { PSpinner } from "@/components/poster";
 import {
   PosterAuthShell,
   PosterInput,
@@ -103,33 +104,7 @@ export default function ResetPasswordPage({
 
       {tokenStatus === "checking" && (
         <div style={{ textAlign: "center", padding: "48px 0" }}>
-          <div
-            style={{
-              height: 36,
-              width: 36,
-              borderRadius: "50%",
-              border: "4px solid rgba(14,30,38,.15)",
-              borderTopColor: "var(--poster-accent)",
-              animation: "poster-spin 0.8s linear infinite",
-              margin: "0 auto 14px",
-            }}
-          />
-          <p
-            style={{
-              fontSize: 14,
-              color: "var(--poster-ink-2)",
-              fontFamily: "var(--font-display)",
-            }}
-          >
-            Link doğrulanıyor…
-          </p>
-          <style>{`
-            @keyframes poster-spin {
-              to {
-                transform: rotate(360deg);
-              }
-            }
-          `}</style>
+          <PSpinner size={36} label="Link doğrulanıyor…" style={{ display: "flex" }} />
         </div>
       )}
 

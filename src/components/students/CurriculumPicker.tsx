@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 import { AREA_LABELS } from "@/lib/constants";
+import { PLabel, PBadge } from "@/components/poster";
 
 interface Curriculum {
   id: string;
@@ -62,14 +61,23 @@ export function CurriculumPicker({ curricula, selectedIds, onChange, defaultOpen
   if (curricula.length === 0) return null;
 
   return (
-    <div className="space-y-2">
-      <Label className="text-sm font-semibold text-zinc-700">
+    <div>
+      <PLabel>
         Çalışma Modülleri{" "}
-        <span className="text-zinc-400 font-normal">(isteğe bağlı)</span>
-      </Label>
+        <span style={{ fontWeight: 500, color: "var(--poster-ink-3)" }}>(isteğe bağlı)</span>
+      </PLabel>
 
-      <div className="rounded-xl border border-zinc-200 overflow-hidden divide-y divide-zinc-100">
-        {TOP_GROUPS.map((group) => {
+      <div
+        style={{
+          background: "var(--poster-panel)",
+          border: "2px solid var(--poster-ink)",
+          borderRadius: 12,
+          boxShadow: "var(--poster-shadow-sm)",
+          overflow: "hidden",
+          fontFamily: "var(--font-display)",
+        }}
+      >
+        {TOP_GROUPS.map((group, idx) => {
           const subGroups = group.areas
             .map((area) => ({ area, list: curricula.filter((c) => c.area === area) }))
             .filter((g) => g.list.length > 0);
@@ -81,55 +89,111 @@ export function CurriculumPicker({ curricula, selectedIds, onChange, defaultOpen
           const isOpen = openKeys.includes(group.key);
 
           return (
-            <div key={group.key}>
-              {/* Accordion Header */}
+            <div
+              key={group.key}
+              style={{ borderTop: idx === 0 ? "none" : "2px dashed var(--poster-ink-faint)" }}
+            >
               <button
                 type="button"
                 onClick={() => toggleGroup(group.key)}
-                className={cn(
-                  "w-full flex items-center justify-between px-3 py-2.5 text-left transition-colors",
-                  isOpen ? "bg-zinc-50" : "bg-white hover:bg-zinc-50"
-                )}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "10px 14px",
+                  background: isOpen ? "var(--poster-bg-2)" : "var(--poster-panel)",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-display)",
+                  textAlign: "left",
+                  transition: "background .12s",
+                }}
               >
-                <span className="flex items-center gap-2 text-sm font-medium text-zinc-700">
-                  <span>{group.icon}</span>
-                  <span>{group.label}</span>
-                  {selectedCount > 0 && (
-                    <span className="rounded-full bg-[#FE703A]/10 px-1.5 py-0.5 text-[11px] font-semibold text-[#FE703A] leading-none">
-                      {selectedCount} seçili
-                    </span>
-                  )}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 16, lineHeight: 1 }}>{group.icon}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--poster-ink)" }}>{group.label}</span>
+                  {selectedCount > 0 && <PBadge color="accent">{selectedCount} seçili</PBadge>}
                 </span>
                 <svg
-                  className={cn("h-4 w-4 text-zinc-400 transition-transform", isOpen && "rotate-180")}
+                  width={14}
+                  height={14}
                   viewBox="0 0 20 20"
                   fill="currentColor"
+                  style={{
+                    color: "var(--poster-ink-3)",
+                    transform: isOpen ? "rotate(180deg)" : "none",
+                    transition: "transform .15s",
+                  }}
                 >
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                  <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </button>
 
-              {/* Accordion Content */}
               {isOpen && (
-                <div className="bg-zinc-50 border-t border-zinc-100 px-3 pb-2 max-h-48 overflow-y-auto">
+                <div
+                  style={{
+                    background: "var(--poster-bg-2)",
+                    borderTop: "2px dashed var(--poster-ink-faint)",
+                    padding: "8px 14px 10px",
+                    maxHeight: 192,
+                    overflowY: "auto",
+                  }}
+                >
                   {subGroups.map(({ area, list }) => (
-                    <div key={area} className="pt-2">
-                      <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wide mb-1">
+                    <div key={area} style={{ paddingTop: 8 }}>
+                      <p
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 800,
+                          color: "var(--poster-ink-3)",
+                          textTransform: "uppercase",
+                          letterSpacing: ".08em",
+                          margin: "0 0 4px",
+                        }}
+                      >
                         {AREA_LABELS[area]}
                       </p>
-                      {list.map((c) => (
-                        <label key={c.id} className="flex items-center gap-2.5 py-1 cursor-pointer group">
-                          <input
-                            type="checkbox"
-                            checked={selectedIds.includes(c.id)}
-                            onChange={() => toggleId(c.id)}
-                            className="h-4 w-4 rounded border-zinc-300 accent-[#023435]"
-                          />
-                          <span className="text-sm text-zinc-700 group-hover:text-zinc-900">
-                            {c.title}
-                          </span>
-                        </label>
-                      ))}
+                      {list.map((c) => {
+                        const checked = selectedIds.includes(c.id);
+                        return (
+                          <label
+                            key={c.id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              padding: "4px 0",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleId(c.id)}
+                              style={{
+                                width: 16,
+                                height: 16,
+                                accentColor: "var(--poster-accent)",
+                                cursor: "pointer",
+                              }}
+                            />
+                            <span
+                              style={{
+                                fontSize: 13,
+                                color: "var(--poster-ink)",
+                                fontWeight: checked ? 700 : 500,
+                              }}
+                            >
+                              {c.title}
+                            </span>
+                          </label>
+                        );
+                      })}
                     </div>
                   ))}
                 </div>

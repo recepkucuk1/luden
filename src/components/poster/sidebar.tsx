@@ -226,8 +226,8 @@ export const Sidebar = () => {
               transition: "all 0.1s",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = "var(--poster-danger, #ef4444)";
-              e.currentTarget.style.color = "#fff";
+              e.currentTarget.style.background = "var(--poster-bg-2)";
+              e.currentTarget.style.color = "var(--poster-ink)";
               e.currentTarget.style.borderColor = "var(--poster-ink)";
             }}
             onMouseLeave={(e) => {

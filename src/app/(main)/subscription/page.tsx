@@ -1,10 +1,10 @@
 "use client";
 
-import { Pricing } from "@/components/ui/pricing";
+import { Pricing } from "@/components/poster/pricing";
 import { PLAN_CONFIG } from "@/lib/plans";
 import { useEffect, useState } from "react";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import { PBtn, PCard, PModal } from "@/components/poster";
+import { CheckCircle2, AlertCircle } from "lucide-react";
+import { PBtn, PCard, PModal, PSpinner } from "@/components/poster";
 import { SubscriptionCheckoutModal } from "@/components/subscription/CheckoutModal";
 
 type SubscriptionInfo = {
@@ -91,19 +91,8 @@ export default function SubscriptionPage() {
 
   if (loading) {
     return (
-      <main
-        className="poster-scope"
-        style={{
-          minHeight: "60vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Loader2
-          style={{ width: 32, height: 32, color: "var(--poster-ink-3)" }}
-          className="animate-spin"
-        />
+      <main className="poster-scope">
+        <PSpinner fullPanel style={{ minHeight: "60vh" }} />
       </main>
     );
   }

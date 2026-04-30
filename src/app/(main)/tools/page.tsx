@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Wand2, ClipboardList, Gamepad2, Sparkles } from "lucide-react";
-import { PBadge, PTabs } from "@/components/poster";
+import { PBadge, PTabs, PHoverPanel } from "@/components/poster";
 
 interface ToolItem {
   title: string;
@@ -67,35 +67,16 @@ function ToolCard({ item, section }: { item: ToolItem; section: ToolSection }) {
   const color = SECTION_COLOR_HEX[section.color];
   const { Icon } = section;
 
-  const handleEnter = (e: React.MouseEvent<HTMLElement>) => {
-    if (!item.active) return;
-    e.currentTarget.style.transform = "translateY(-3px)";
-    e.currentTarget.style.boxShadow = "0 9px 0 var(--poster-ink)";
-  };
-  const handleLeave = (e: React.MouseEvent<HTMLElement>) => {
-    if (!item.active) return;
-    e.currentTarget.style.transform = "";
-    e.currentTarget.style.boxShadow = "0 6px 0 var(--poster-ink)";
-  };
-
   const content = (
-    <div
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
+    <PHoverPanel
+      disabled={!item.active}
       style={{
-        position: "relative",
         display: "flex",
         flexDirection: "column",
         gap: 10,
         padding: 18,
-        background: "var(--poster-panel)",
-        border: "2px solid var(--poster-ink)",
-        borderRadius: 18,
-        boxShadow: "0 6px 0 var(--poster-ink)",
-        transition: "transform .15s cubic-bezier(.16,1,.3,1), box-shadow .15s cubic-bezier(.16,1,.3,1)",
         opacity: item.active ? 1 : 0.55,
         cursor: item.active ? "pointer" : "not-allowed",
-        fontFamily: "var(--font-display)",
         height: "100%",
       }}
     >
@@ -127,7 +108,7 @@ function ToolCard({ item, section }: { item: ToolItem; section: ToolSection }) {
           <p style={{ fontSize: 13, lineHeight: 1.5, color: "var(--poster-ink-2)", margin: 0 }}>{item.desc}</p>
         </div>
       </div>
-    </div>
+    </PHoverPanel>
   );
 
   if (!item.active) return content;

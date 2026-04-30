@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { RefreshCw, Library, Plus, X, Lock, Download } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { WORK_AREA_LABEL, calcAge } from "@/lib/constants";
+import { WORK_AREA_LABEL, calcAge, getCategoryBadge } from "@/lib/constants";
 import { SessionSummaryView, type SessionSummaryContent } from "@/components/cards/SessionSummaryView";
 import { PBtn, PCard, PBadge, PSelect, PLabel, PInput, PTextarea, PCheckbox } from "@/components/poster";
 import { ToolShell, ToolEmptyState, ToolLoadingCard } from "@/components/tools/ToolShell";
@@ -42,13 +42,6 @@ interface GoalEntry {
   cueLevel: string;
 }
 
-type BadgeColor = "accent" | "green" | "yellow" | "pink" | "blue" | "ink" | "soft";
-
-const WORK_AREA_BADGE: Record<string, BadgeColor> = {
-  speech: "yellow",
-  language: "accent",
-  hearing: "blue",
-};
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -568,7 +561,7 @@ export default function SessionSummaryPage() {
         {selectedStudent && (
           <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
             {selectedStudent.birthDate && <PBadge color="soft">{calcAge(selectedStudent.birthDate)}</PBadge>}
-            <PBadge color={WORK_AREA_BADGE[selectedStudent.workArea] ?? "soft"}>
+            <PBadge color={getCategoryBadge(selectedStudent.workArea)}>
               {WORK_AREA_LABEL[selectedStudent.workArea] ?? selectedStudent.workArea}
             </PBadge>
             {selectedStudent.diagnosis && <PBadge color="soft">{selectedStudent.diagnosis}</PBadge>}

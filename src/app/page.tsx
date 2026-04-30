@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { GlowyWavesHero } from "@/components/ui/glowy-waves-hero-shadcnui";
+import { GlowyWavesHero } from "@/components/landing/glowy-waves-hero";
 import { PosterHero } from "@/components/landing/poster-hero";
 import { PosterHeader } from "@/components/landing/poster-header";
 import { ForceLightTheme } from "@/components/ForceLightTheme";
 import { PosterFooter } from "@/components/landing/poster-footer";
-import { Pricing, type PricingPlan } from "@/components/ui/pricing";
+import { Pricing, type PricingPlan } from "@/components/poster/pricing";
 import {
   IconSparkles,
   IconUsers,

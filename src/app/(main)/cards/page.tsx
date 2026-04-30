@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { Filter, Plus } from "lucide-react";
 import { AssignStudentsModal } from "@/components/cards/AssignStudentsModal";
 import { SwipeableCard } from "@/components/SwipeableCard";
-import { WORK_AREA_LABEL, DIFFICULTY_LABEL, AGE_LABEL } from "@/lib/constants";
-import { PBtn, PBadge, PModal, PSelect } from "@/components/poster";
+import { DIFFICULTY_LABEL, AGE_LABEL, getCategoryBadge, getCategoryLabel, getDifficultyBadge } from "@/lib/constants";
+import { PBtn, PBadge, PModal, PSelect, PSpinner, PEmptyState, PHoverPanel } from "@/components/poster";
 
 interface CardItem {
   id: string;
@@ -72,17 +72,6 @@ const TOOL_TYPE_BADGE_LABEL: Record<string, string> = {
   WEEKLY_PLAN: "Haftalık Plan",
 };
 
-const AREA_BADGE_COLOR: Record<string, "yellow" | "accent" | "blue" | "soft"> = {
-  speech: "yellow",
-  language: "accent",
-  hearing: "blue",
-};
-
-const DIFFICULTY_BADGE_COLOR: Record<string, "accent" | "yellow" | "soft"> = {
-  easy: "yellow",
-  medium: "accent",
-  hard: "soft",
-};
 
 function resolveToolType(toolType: string | null): string {
   return toolType ?? "LEARNING_CARD";
@@ -654,27 +643,8 @@ export default function CardsPage() {
 
   if (loading) {
     return (
-      <div
-        className="poster-scope"
-        style={{
-          minHeight: "70vh",
-          background: "var(--poster-bg)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            border: "4px solid rgba(254,112,58,.2)",
-            borderTopColor: "var(--poster-accent)",
-            animation: "spin 1s linear infinite",
-          }}
-        />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="poster-scope">
+        <PSpinner fullPanel style={{ minHeight: "70vh" }} />
       </div>
     );
   }
@@ -723,27 +693,16 @@ export default function CardsPage() {
         </div>
 
         {cards.length === 0 ? (
-          <div
-            style={{
-              padding: "64px 24px",
-              textAlign: "center",
-              background: "var(--poster-panel)",
-              border: "2px solid var(--poster-ink)",
-              borderRadius: 20,
-              boxShadow: "var(--poster-shadow-md)",
-            }}
-          >
-            <div style={{ fontSize: 40, marginBottom: 12 }}>🗂️</div>
-            <p style={{ fontSize: 18, fontWeight: 700, color: "var(--poster-ink)", margin: 0 }}>
-              Henüz materyal üretilmedi
-            </p>
-            <p style={{ fontSize: 13, color: "var(--poster-ink-2)", margin: "4px 0 16px" }}>
-              Öğrencileriniz için harika materyaller üretmeye başlayın.
-            </p>
-            <PBtn as="a" href="/generate" variant="accent" size="md">
-              Materyal Üret
-            </PBtn>
-          </div>
+          <PEmptyState
+            icon="🗂️"
+            title="Henüz materyal üretilmedi"
+            subtitle="Öğrencileriniz için harika materyaller üretmeye başlayın."
+            action={
+              <PBtn as="a" href="/generate" variant="accent" size="md">
+                Materyal Üret
+              </PBtn>
+            }
+          />
         ) : (
           <>
             {/* Tool type tabs */}
@@ -1052,43 +1011,32 @@ export default function CardsPage() {
             </p>
 
             {filtered.length === 0 ? (
-              <div
-                style={{
-                  padding: "64px 24px",
-                  textAlign: "center",
-                  background: "var(--poster-panel)",
-                  border: "2px solid var(--poster-ink)",
-                  borderRadius: 20,
-                  boxShadow: "var(--poster-shadow-md)",
-                }}
-              >
-                {filterToolType !== "all"
-                  ? (() => {
-                      const opt = TOOL_TYPE_OPTIONS.find((o) => o.value === filterToolType);
-                      return (
-                        <>
-                          <p style={{ fontSize: 14, color: "var(--poster-ink-2)", marginBottom: 12 }}>
-                            Henüz {opt?.label} üretmediniz.
-                          </p>
-                          {opt?.href && (
-                            <PBtn as="a" href={opt.href} variant="accent" size="md">
-                              Üretmeye Başla
-                            </PBtn>
-                          )}
-                        </>
-                      );
-                    })()
-                  : (
-                    <>
-                      <p style={{ fontSize: 14, fontWeight: 700, color: "var(--poster-ink-2)", marginBottom: 12 }}>
-                        Bu filtrelere uyan materyal bulunamadı.
-                      </p>
-                      <PBtn type="button" variant="white" size="sm" onClick={clearFilters}>
-                        Filtreleri Temizle
-                      </PBtn>
-                    </>
-                  )}
-              </div>
+              filterToolType !== "all" ? (
+                (() => {
+                  const opt = TOOL_TYPE_OPTIONS.find((o) => o.value === filterToolType);
+                  return (
+                    <PEmptyState
+                      title={`Henüz ${opt?.label ?? "kart"} üretmediniz.`}
+                      action={
+                        opt?.href ? (
+                          <PBtn as="a" href={opt.href} variant="accent" size="md">
+                            Üretmeye Başla
+                          </PBtn>
+                        ) : undefined
+                      }
+                    />
+                  );
+                })()
+              ) : (
+                <PEmptyState
+                  title="Bu filtrelere uyan materyal bulunamadı."
+                  action={
+                    <PBtn type="button" variant="white" size="sm" onClick={clearFilters}>
+                      Filtreleri Temizle
+                    </PBtn>
+                  }
+                />
+              )
             ) : (
               <div
                 style={{
@@ -1201,25 +1149,16 @@ function LibraryCardTile({
   const tt = resolveToolType(card.toolType);
   const toolLabel = TOOL_TYPE_BADGE_LABEL[tt];
   const toolColor = TOOL_TYPE_BADGE_COLOR[tt] ?? "soft";
-  const categoryColor = AREA_BADGE_COLOR[card.category] ?? "soft";
-  const difficultyColor = DIFFICULTY_BADGE_COLOR[card.difficulty] ?? "soft";
+  const categoryColor = getCategoryBadge(card.category);
+  const difficultyColor = getDifficultyBadge(card.difficulty);
 
   return (
-    <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+    <PHoverPanel
+      onHoverChange={setHover}
       style={{
-        position: "relative",
         display: "flex",
         flexDirection: "column",
         minHeight: 200,
-        background: "var(--poster-panel)",
-        border: "2px solid var(--poster-ink)",
-        borderRadius: 18,
-        boxShadow: hover ? "0 9px 0 var(--poster-ink)" : "0 6px 0 var(--poster-ink)",
-        transform: hover ? "translateY(-3px)" : "none",
-        transition: "transform .15s cubic-bezier(.16,1,.3,1), box-shadow .15s cubic-bezier(.16,1,.3,1)",
-        overflow: "hidden",
       }}
     >
       <button
@@ -1257,7 +1196,7 @@ function LibraryCardTile({
       >
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10, paddingRight: 40 }}>
           {toolLabel && <PBadge color={toolColor}>{toolLabel}</PBadge>}
-          {WORK_AREA_LABEL[card.category] && <PBadge color={categoryColor}>{WORK_AREA_LABEL[card.category]}</PBadge>}
+          {getCategoryLabel(card.category) && <PBadge color={categoryColor}>{getCategoryLabel(card.category, card.category)}</PBadge>}
           <PBadge color={difficultyColor}>{DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}</PBadge>
           <PBadge color="soft">{AGE_LABEL[card.ageGroup] ?? card.ageGroup}</PBadge>
         </div>
@@ -1321,6 +1260,6 @@ function LibraryCardTile({
           Öğrenci Ata
         </button>
       </div>
-    </div>
+    </PHoverPanel>
   );
 }

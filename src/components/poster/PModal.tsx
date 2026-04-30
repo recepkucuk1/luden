@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { ModalPortal } from "@/components/ui/modal-portal";
+import { ModalPortal } from "./modal-portal";
 
 type PModalProps = {
   open: boolean;

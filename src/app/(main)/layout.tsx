@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/ui/dashboard-with-collapsible-sidebar";
+import { Sidebar } from "@/components/poster/sidebar";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
