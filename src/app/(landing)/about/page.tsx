@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Hakkımızda — LudenLab",
@@ -27,10 +28,14 @@ export default function AboutPage() {
 
         {/* Başlık */}
         <div className="text-center mb-14">
-          <div className="text-2xl font-bold mb-1">
-            <span className="text-[#023435] dark:text-foreground">Luden</span>
-            <span className="text-[#FE703A]">Lab</span>
-          </div>
+          <Image
+            src="/logo.svg"
+            alt="LudenLab"
+            width={200}
+            height={72}
+            style={{ height: 56, width: "auto", margin: "0 auto" }}
+            priority
+          />
           <h1 className="text-2xl font-bold text-[#023435] dark:text-foreground mt-4">Hakkımızda</h1>
         </div>
 
