@@ -180,7 +180,7 @@ export function PosterHero() {
         <div className="poster-hero-grid">
           <div>
             <PBadge color="yellow" style={{ marginBottom: 18 }}>
-              ✦ AI Destekli · Dil ve Konuşma Terapisi
+              ✦ AI Destekli · Öğrenme Yönetimi
             </PBadge>
 
             <h1
