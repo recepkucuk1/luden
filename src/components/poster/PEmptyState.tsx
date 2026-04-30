@@ -38,6 +38,8 @@ export function PEmptyState({
 
   return (
     <div
+      role="status"
+      aria-live="polite"
       style={{
         padding,
         textAlign: "center",

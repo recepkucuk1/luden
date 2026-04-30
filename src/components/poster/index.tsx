@@ -329,7 +329,7 @@ export function PSwitch({ checked, onChange, label, disabled, id }: PSwitchProps
         fontFamily: "var(--font-display)",
         fontSize: 14,
         color: "var(--poster-ink)",
-        opacity: disabled ? 0.5 : 1,
+        opacity: disabled ? 0.6 : 1,
       }}
     >
       <button

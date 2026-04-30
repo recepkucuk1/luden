@@ -241,6 +241,16 @@ input, select, textarea {
 .poster-toast-warning { border-color: var(--poster-yellow) !important; box-shadow: 0 6px 0 var(--poster-yellow) !important; }
 .poster-toast-info    { border-color: var(--poster-blue) !important;   box-shadow: 0 6px 0 var(--poster-blue) !important; }
 
+/* Disabled state — uniform 0.6 opacity (was inline-styled at 0.5/0.7
+   in different places, dropping below WCAG AA on cream surface). */
+.poster-scope button:disabled,
+.poster-scope select:disabled,
+.poster-scope input:disabled,
+.poster-scope textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Skip-to-main-content link — visually hidden until keyboard focus */
 .skip-link {
   position: fixed;

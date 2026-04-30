@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { MotionConfig } from "framer-motion";
 
 /**
  * 3-state theme provider backed by next-themes.
@@ -12,6 +13,10 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
  *
  * FOUC is prevented by the inline script in `app/layout.tsx` (sets
  * .dark on <html> before React hydrates).
+ *
+ * MotionConfig reducedMotion="user" makes every framer-motion element
+ * respect prefers-reduced-motion: reduce automatically (entrance,
+ * stagger, slide, hover lift). No per-component opt-in needed.
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -22,7 +27,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       storageKey="luden-theme"
       disableTransitionOnChange
     >
-      {children}
+      <MotionConfig reducedMotion="user">{children}</MotionConfig>
     </NextThemesProvider>
   );
 }

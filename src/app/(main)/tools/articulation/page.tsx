@@ -182,7 +182,7 @@ function IsolatedView({ items }: { items: DrillItem[] }) {
 
 function SyllableView({ items }: { items: DrillItem[] }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(64px, 1fr))", gap: 8 }}>
       {items.map((item, i) => (
         <div
           key={i}
