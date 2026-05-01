@@ -2,13 +2,21 @@ import { Lightbulb, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface DrillItem {
-  word: string;
+  word?: string;
+  syllable?: string;
+  exampleWord?: string;
   syllableCount?: number;
   syllableBreak?: string;
+  syllableType?: string;
   position?: string;
   targetSound?: string;
   sentence?: string;
   visualPrompt?: string;
+  repetitionPattern?: string;
+}
+
+function primaryText(item: DrillItem): string {
+  return item.word ?? item.syllable ?? item.repetitionPattern ?? item.sentence ?? "";
 }
 
 export interface ArticulationContent {
@@ -64,7 +72,7 @@ function IsolatedView({ items }: { items: DrillItem[] }) {
       {items.map((item, i) => (
         <li key={i} className="flex items-center gap-3 rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-2.5">
           <span className="text-xs font-semibold text-zinc-400 w-5">{i + 1}.</span>
-          <span className="text-sm text-zinc-800">{item.word}</span>
+          <span className="text-sm text-zinc-800">{primaryText(item)}</span>
         </li>
       ))}
     </ul>
@@ -76,7 +84,10 @@ function SyllableView({ items }: { items: DrillItem[] }) {
     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
       {items.map((item, i) => (
         <div key={i} className="rounded-lg border border-[#107996]/20 bg-[#107996]/5 px-3 py-2.5 text-center">
-          <span className="text-sm font-semibold text-[#107996]">{item.word}</span>
+          <span className="block text-sm font-semibold text-[#107996]">{primaryText(item)}</span>
+          {item.exampleWord && (
+            <span className="block text-[10px] text-[#107996]/70 mt-0.5">{item.exampleWord}</span>
+          )}
         </div>
       ))}
     </div>
@@ -99,7 +110,7 @@ function WordView({ items, sounds }: { items: DrillItem[]; sounds: string[] }) {
           {items.map((item, i) => (
             <tr key={i} className={cn("border-b border-zinc-100", i % 2 === 0 ? "bg-white" : "bg-zinc-50")}>
               <td className="py-2 text-xs text-zinc-400">{i + 1}</td>
-              <td className="py-2 font-medium text-zinc-800">{highlightSound(item.word, sounds)}</td>
+              <td className="py-2 font-medium text-zinc-800">{highlightSound(primaryText(item), sounds)}</td>
               <td className="py-2 text-zinc-500">{item.syllableBreak ?? "—"}</td>
               <td className="py-2">
                 <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500">
@@ -120,7 +131,7 @@ function SentenceView({ items, sounds }: { items: DrillItem[]; sounds: string[] 
       {items.map((item, i) => (
         <div key={i} className="rounded-lg border border-zinc-100 bg-zinc-50 p-3">
           <p className="text-sm font-semibold text-zinc-800 mb-1">
-            {highlightSound(item.word, sounds)}
+            {highlightSound(primaryText(item), sounds)}
           </p>
           {item.sentence && (
             <p className="text-xs text-zinc-600 leading-relaxed">
@@ -139,7 +150,7 @@ function ContextualView({ items, sounds }: { items: DrillItem[]; sounds: string[
       {items.map((item, i) => (
         <div key={i} className="rounded-lg border border-zinc-200 bg-white p-4">
           <p className="text-sm text-zinc-700 leading-loose">
-            {highlightSound(item.sentence ?? item.word, sounds)}
+            {highlightSound(item.sentence ?? primaryText(item), sounds)}
           </p>
         </div>
       ))}

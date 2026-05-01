@@ -34,6 +34,15 @@ Kurallar:
 İçsel motivasyon ilkesi: Ödül/puan/çıkartma sistemi önerme.
 'hasta' yerine 'öğrenci', 'terapist' yerine 'uzman' de.
 
+ÖNEMLİ — items[] içindeki "word" alanı:
+- Her seviyede MUTLAKA "word" alanı doldurulmalı (asla "syllable", "sound", "phrase" gibi başka isimler kullanma).
+- "word" alanı, öğrencinin sesli olarak üreteceği birim olur:
+  - isolated  → tek ses veya tekrar deseni: "şşş", "ş - ş - ş"
+  - syllable  → hece: "şa", "şap", "şa-şa"
+  - word      → kelime: "şapka"
+  - sentence  → "word" alanı yine kelime olur (cümle ayrı "sentence" alanına yazılır)
+  - contextual→ "word" alanı baş kelime, paragraf "sentence" alanına yazılır
+
 Yanıtını SADECE JSON formatında ver, başka hiçbir şey yazma:
 {
   "title": "Alıştırma başlığı",
@@ -54,7 +63,19 @@ Yanıtını SADECE JSON formatında ver, başka hiçbir şey yazma:
   "expertNotes": "Çalışma önerileri ve dikkat edilecek noktalar",
   "cueTypes": ["Görsel (ayna karşısında)", "Dokunsal (çene altı desteği)", "İşitsel (uzman modeli)"],
   "homeGuidance": "Evde tekrar için veli rehberi"
-}`;
+}
+
+Hece düzeyi (syllable) için items[] örneği:
+[
+  { "word": "şa",  "syllableType": "açık",   "exampleWord": "şapka", "targetSound": "/ş/", "position": "initial" },
+  { "word": "şap", "syllableType": "kapalı", "exampleWord": "şapka", "targetSound": "/ş/", "position": "initial" }
+]
+
+İzole ses (isolated) için items[] örneği:
+[
+  { "word": "şşş",       "targetSound": "/ş/" },
+  { "word": "ş - ş - ş", "targetSound": "/ş/" }
+]`;
 
 export const POST = createToolHandler({
   rateLimitKey: "articulation",
