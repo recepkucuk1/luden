@@ -317,9 +317,11 @@ export function CardPDFDocument({ card }: CardPDFDocumentProps) {
         {/* Başlık */}
         <View style={styles.titleSection}>
           <View style={styles.badgeRow}>
-            <Text style={[styles.badge, styles.badgeCategory]}>
-              {WORK_AREA_LABEL[card.category] ?? card.category}
-            </Text>
+            {WORK_AREA_LABEL[card.category] && (
+              <Text style={[styles.badge, styles.badgeCategory]}>
+                {WORK_AREA_LABEL[card.category]}
+              </Text>
+            )}
             <Text style={[styles.badge, {
               backgroundColor: "#fef9c3",
               color: diffColor,

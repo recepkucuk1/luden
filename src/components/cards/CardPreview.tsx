@@ -58,9 +58,11 @@ export function CardPreview({ card }: CardPreviewProps) {
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            <PBadge color={getCategoryBadge(card.category)}>
-              {WORK_AREA_LABEL[card.category] ?? card.category}
-            </PBadge>
+            {WORK_AREA_LABEL[card.category] && (
+              <PBadge color={getCategoryBadge(card.category)}>
+                {WORK_AREA_LABEL[card.category]}
+              </PBadge>
+            )}
             <PBadge color={getDifficultyBadge(card.difficulty)}>
               {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
             </PBadge>

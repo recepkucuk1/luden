@@ -264,7 +264,7 @@ Bu parametrelere uygun haftalık çalışma planı oluştur. Tam olarak ${sessio
           title:       (planContent.title as string) ?? `Haftalık Plan — ${student.name}`,
           content:     planContent as Parameters<typeof prisma.card.create>[0]["data"]["content"],
           toolType:    "WEEKLY_PLAN",
-          category:    "organizer",
+          category:    student.workArea,
           difficulty:  "medium",
           ageGroup,
           therapistId: session.user.id,

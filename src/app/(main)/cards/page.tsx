@@ -6,13 +6,13 @@ import { toast } from "sonner";
 import { Filter, Plus } from "lucide-react";
 import { AssignStudentsModal } from "@/components/cards/AssignStudentsModal";
 import { SwipeableCard } from "@/components/SwipeableCard";
-import { DIFFICULTY_LABEL, AGE_LABEL, getCategoryBadge, getCategoryLabel, getDifficultyBadge } from "@/lib/constants";
+import { DIFFICULTY_LABEL, AGE_LABEL, CATEGORY_META, getCategoryBadge, getDifficultyBadge } from "@/lib/constants";
 import { PBtn, PBadge, PModal, PSelect, PSpinner, PEmptyState, PHoverPanel } from "@/components/poster";
 
 interface CardItem {
   id: string;
   title: string;
-  category: string;
+  category: string | null;
   toolType: string | null;
   difficulty: string;
   ageGroup: string;
@@ -1196,7 +1196,9 @@ function LibraryCardTile({
       >
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10, paddingRight: 40 }}>
           {toolLabel && <PBadge color={toolColor}>{toolLabel}</PBadge>}
-          {getCategoryLabel(card.category) && <PBadge color={categoryColor}>{getCategoryLabel(card.category, card.category)}</PBadge>}
+          {card.category && CATEGORY_META[card.category] && (
+            <PBadge color={categoryColor}>{CATEGORY_META[card.category].label}</PBadge>
+          )}
           <PBadge color={difficultyColor}>{DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}</PBadge>
           <PBadge color="soft">{AGE_LABEL[card.ageGroup] ?? card.ageGroup}</PBadge>
         </div>

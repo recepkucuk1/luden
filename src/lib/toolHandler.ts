@@ -27,8 +27,10 @@ export interface ToolConfig<T extends z.ZodTypeAny> {
   systemPrompt: string;
   /** Tool type stored in Card.toolType */
   toolType: ToolType;
-  /** Default card category */
+  /** Card category — fallback when student has no workArea or studentId is absent */
   category: string;
+  /** When true, Card.category is set from student.workArea (overrides `category` field if student is present) */
+  categoryFromWorkArea?: boolean;
   /** Default difficulty */
   difficulty?: string;
   /** Default age group */
@@ -191,12 +193,16 @@ export function createToolHandler<T extends z.ZodTypeAny>(config: ToolConfig<T>)
         });
         if (!fresh || fresh.credits < config.cost) throw new Error("INSUFFICIENT_CREDITS");
 
+        const resolvedCategory = config.categoryFromWorkArea && student
+          ? student.workArea
+          : config.category;
+
         const created = await tx.card.create({
           data: {
             title: (aiContent.title as string) ?? fallback,
             content: aiContent as Parameters<typeof prisma.card.create>[0]["data"]["content"],
             toolType: config.toolType,
-            category: config.category,
+            category: resolvedCategory,
             difficulty: config.difficulty ?? "medium",
             ageGroup,
             therapistId: session.user.id,

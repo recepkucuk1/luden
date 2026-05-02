@@ -43,7 +43,7 @@ export async function GET() {
     const byCategory: Record<string, number> = {};
     let totalCards = 0;
     for (const group of categoryGroups) {
-      byCategory[group.category] = group._count;
+      if (group.category) byCategory[group.category] = group._count;
       totalCards += group._count;
     }
 

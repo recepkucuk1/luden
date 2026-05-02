@@ -29,7 +29,7 @@ interface CurriculumGoal {
 interface CardRecord {
   id: string;
   title: string;
-  category: string;
+  category: string | null;
   toolType: string | null;
   difficulty: string;
   ageGroup: string;

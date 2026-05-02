@@ -56,7 +56,7 @@ import type { BadgeColor } from "@/components/poster";
 interface StudentCard {
   id: string;
   title: string;
-  category: string;
+  category: string | null;
   difficulty: string;
   ageGroup: string;
   content: GeneratedCard;
@@ -70,7 +70,7 @@ interface AssignedCard {
   card: {
     id: string;
     title: string;
-    category: string;
+    category: string | null;
     difficulty: string;
     ageGroup: string;
     createdAt: string;
@@ -783,9 +783,11 @@ export default function StudentDetailPage({
                           }}
                         >
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10, paddingRight: 24 }}>
-                            <PBadge color={getCategoryBadge(card.category)}>
-                              {WORK_AREA_LABEL[card.category] ?? card.category}
-                            </PBadge>
+                            {card.category && WORK_AREA_LABEL[card.category] && (
+                              <PBadge color={getCategoryBadge(card.category)}>
+                                {WORK_AREA_LABEL[card.category]}
+                              </PBadge>
+                            )}
                             <PBadge color={getDifficultyBadge(card.difficulty)}>
                               {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
                             </PBadge>
@@ -991,9 +993,11 @@ export default function StudentDetailPage({
                         }}
                       >
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
-                          <PBadge color={getCategoryBadge(assignment.card.category)}>
-                            {WORK_AREA_LABEL[assignment.card.category] ?? assignment.card.category}
-                          </PBadge>
+                          {assignment.card.category && WORK_AREA_LABEL[assignment.card.category] && (
+                            <PBadge color={getCategoryBadge(assignment.card.category)}>
+                              {WORK_AREA_LABEL[assignment.card.category]}
+                            </PBadge>
+                          )}
                           <PBadge color={getDifficultyBadge(assignment.card.difficulty)}>
                             {DIFFICULTY_LABEL[assignment.card.difficulty] ?? assignment.card.difficulty}
                           </PBadge>

@@ -191,7 +191,7 @@ model Card {
   title      String
   content    Json
   toolType   ToolType @default(LEARNING_CARD)
-  category   String   @default("generator") // "speech" | "language" | "hearing" | "generator"
+  category   String?  // "speech" | "language" | "hearing" | "fluency" | "voice"
   difficulty String // "easy" | "medium" | "hard"
   ageGroup   String // "3-6" | "7-12" | "13-18" | "adult"
   prompt     String?

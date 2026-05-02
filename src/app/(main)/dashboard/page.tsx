@@ -18,7 +18,6 @@ import {
 import {
   DIFFICULTY_LABEL,
   CATEGORY_META,
-  getCategoryLabel,
   getDifficultyBadge,
 } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
@@ -64,7 +63,7 @@ interface WeeklyStats {
 interface RecentCard {
   id: string;
   title: string;
-  category: string;
+  category: string | null;
   difficulty: string;
   createdAt: string;
   student: { id: string; name: string } | null;
@@ -267,7 +266,7 @@ export default function DashboardPage() {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8, overflowY: "auto", paddingRight: 4, flex: 1 }}>
                 {recentCards.map((card) => {
-                  const catMeta = CATEGORY_META[card.category];
+                  const catMeta = card.category ? CATEGORY_META[card.category] : null;
                   const diffColor: BadgeColor = getDifficultyBadge(card.difficulty);
                   return (
                     <Link
@@ -314,9 +313,9 @@ export default function DashboardPage() {
                           {card.title}
                         </p>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 5, alignItems: "center", marginTop: 4 }}>
-                          <PBadge color={catMeta?.badge ?? "soft"}>
-                            {getCategoryLabel(card.category, card.category)}
-                          </PBadge>
+                          {catMeta && (
+                            <PBadge color={catMeta.badge}>{catMeta.label}</PBadge>
+                          )}
                           <PBadge color={diffColor}>
                             {DIFFICULTY_LABEL[card.difficulty] ?? card.difficulty}
                           </PBadge>
