@@ -114,3 +114,52 @@ export async function grantCredits(
   if (tx) return run(tx);
   return prisma.$transaction(run);
 }
+
+/**
+ * Atomically revokes credits from a therapist account — admin refund flow.
+ *
+ * Yetersiz bakiyede `{ ok: false }` döner — caller UI'da uyarır. Sessiz clamp
+ * yapmıyoruz çünkü audit'te "ne kadar düşürüldü" net olmalı; admin amount'u
+ * kararlı verir. `grantCredits`'in simetrik karşılığı: bakiyeyi düşürür ve
+ * `CreditTransaction(SPEND)` yazar.
+ */
+export async function revokeCredits(
+  therapistId: string,
+  amount: number,
+  description: string,
+  tx?: Prisma.TransactionClient,
+): Promise<{ ok: true; newBalance: number } | { ok: false; credits: number }> {
+  if (!Number.isInteger(amount) || amount <= 0) {
+    throw new Error("revokeCredits: amount must be a positive integer");
+  }
+
+  const run = async (
+    client: Prisma.TransactionClient,
+  ): Promise<{ ok: true; newBalance: number } | { ok: false; credits: number }> => {
+    const therapist = await client.therapist.findUnique({
+      where: { id: therapistId },
+      select: { credits: true },
+    });
+    if (!therapist) throw new Error("Therapist not found");
+    if (therapist.credits < amount) {
+      return { ok: false as const, credits: therapist.credits };
+    }
+    const updated = await client.therapist.update({
+      where: { id: therapistId },
+      data: { credits: { decrement: amount } },
+      select: { credits: true },
+    });
+    await client.creditTransaction.create({
+      data: {
+        therapistId,
+        amount,
+        type: "SPEND",
+        description,
+      },
+    });
+    return { ok: true as const, newBalance: updated.credits };
+  };
+
+  if (tx) return run(tx);
+  return prisma.$transaction(run);
+}

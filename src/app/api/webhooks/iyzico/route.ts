@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { grantCredits } from "@/lib/credits";
 
@@ -55,77 +56,91 @@ function verifyIyzicoSignature(
  * - subscription.order.failure
  * - subscription.cancelled
  * - subscription.expired
+ *
+ * WebhookDelivery yazma sözleşmesi (admin observability için kritik):
+ *   1. Payload parse + imza geçtikten sonra `received` upsert (attempts++).
+ *   2. Aynı externalId daha önce "processed" ise erken döneriz — yine attempts++
+ *      sayaca yansır.
+ *   3. Ana iş başarısı durumunda "processed" + processedAt; subscription bizim
+ *      sistemimizde yoksa yine "processed" olarak kapatılır (admin filtreyle ayırır).
+ *   4. Ana işte hata fırlarsa "failed" + error stringi kaydedilir.
+ * İmza fail / payload eksikse DB'ye yazılmaz (kötü-niyetli istek gürültüsü).
  */
 export async function POST(req: NextRequest) {
+  const rawBody = await req.text();
+
+  let event: Record<string, unknown>;
   try {
-    const rawBody = await req.text();
-    const event = JSON.parse(rawBody);
+    event = JSON.parse(rawBody) as Record<string, unknown>;
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
 
-    const {
+  const iyziEventType = typeof event.iyziEventType === "string" ? event.iyziEventType : "";
+  const iyziReferenceCode = typeof event.iyziReferenceCode === "string" ? event.iyziReferenceCode : "";
+  const subscriptionReferenceCode = typeof event.subscriptionReferenceCode === "string" ? event.subscriptionReferenceCode : "";
+
+  if (!iyziEventType || !iyziReferenceCode || !subscriptionReferenceCode) {
+    return NextResponse.json({ error: "Invalid webhook payload" }, { status: 400 });
+  }
+
+  const sig = req.headers.get("x-iyz-signature-v3");
+  if (
+    !verifyIyzicoSignature(sig, {
       iyziEventType,
-      iyziReferenceCode, // Bu webhook event delivery'nin benzersiz ID'si
       subscriptionReferenceCode,
-    } = event;
+      orderReferenceCode: typeof event.orderReferenceCode === "string" ? event.orderReferenceCode : "",
+      customerReferenceCode: typeof event.customerReferenceCode === "string" ? event.customerReferenceCode : "",
+    })
+  ) {
+    console.warn("[iyzico webhook] Geçersiz imza");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
 
-    if (!iyziEventType || !iyziReferenceCode || !subscriptionReferenceCode) {
-      return NextResponse.json({ error: "Invalid webhook payload" }, { status: 400 });
-    }
+  // Phase 1 — receipt kaydı. Daha önce processed ise upsert sadece sayacı artırır.
+  const delivery = await prisma.webhookDelivery.upsert({
+    where: { provider_externalId: { provider: "iyzico", externalId: iyziReferenceCode } },
+    create: {
+      provider: "iyzico",
+      externalId: iyziReferenceCode,
+      payload: event as unknown as Prisma.InputJsonValue,
+      status: "received",
+    },
+    update: {
+      attempts: { increment: 1 },
+      payload: event as unknown as Prisma.InputJsonValue,
+      error: null,
+    },
+  });
 
-    // 1. İmza doğrulama — payload alanlarından türetilir, ayrı secret gerekmez
-    const sig = req.headers.get("x-iyz-signature-v3");
-    if (
-      !verifyIyzicoSignature(sig, {
-        iyziEventType,
-        subscriptionReferenceCode,
-        orderReferenceCode: event.orderReferenceCode ?? "",
-        customerReferenceCode: event.customerReferenceCode ?? "",
-      })
-    ) {
-      console.warn("[iyzico webhook] Geçersiz imza");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
+  if (delivery.status === "processed") {
+    console.log(`[iyzico webhook] Event ${iyziReferenceCode} already processed (attempt ${delivery.attempts}).`);
+    return NextResponse.json({ ok: true, message: "Already processed" });
+  }
 
-    // 2. Idempotency — aynı event iki kez işlenmesin
-    const existingDelivery = await prisma.webhookDelivery.findUnique({
-      where: {
-        provider_externalId: {
-          provider: "iyzico",
-          externalId: iyziReferenceCode,
-        },
-      },
-    });
-
-    if (existingDelivery) {
-      console.log(`[iyzico webhook] Event ${iyziReferenceCode} already processed.`);
-      return NextResponse.json({ ok: true, message: "Already processed" });
-    }
-
-    // 3. DB'deki subscription kaydını bul
-    const subscription = await prisma.subscription.findUnique({
-      where: { iyzicoSubscriptionRef: subscriptionReferenceCode },
-      include: {
-        plan: true,
-        therapist: true,
-      },
-    });
-
-    if (!subscription) {
-      console.warn(`[iyzico webhook] Sub Ref ${subscriptionReferenceCode} not found in DB`);
-      return NextResponse.json({ ok: true, message: "Subscription not tracked in this system" });
-    }
-
-    // 4. Olayı işle — WebhookDelivery idempotency çifte işlemeyi engeller
+  // Phase 2 — ana iş. Hata olursa Phase 3'te delivery 'failed' yapılır.
+  try {
     await prisma.$transaction(async (tx) => {
-      // Delivery kaydı — çifte işlemeyi engeller
-      await tx.webhookDelivery.create({
-        data: {
-          provider: "iyzico",
-          externalId: iyziReferenceCode,
-          payload: event as any,
-          status: "processed",
-          processedAt: new Date(),
-        },
+      // CAS: yalnızca received/failed iken processed'a alabilen kazanır.
+      const claim = await tx.webhookDelivery.updateMany({
+        where: { id: delivery.id, status: { in: ["received", "failed"] } },
+        data: { status: "processed", processedAt: new Date(), error: null },
       });
+      if (claim.count === 0) {
+        // Başka bir paralel istek bizden önce kapattı; idempotent erken çıkış.
+        return;
+      }
+
+      const subscription = await tx.subscription.findUnique({
+        where: { iyzicoSubscriptionRef: subscriptionReferenceCode },
+        include: { plan: true, therapist: true },
+      });
+
+      if (!subscription) {
+        console.warn(`[iyzico webhook] Sub Ref ${subscriptionReferenceCode} not found in DB`);
+        // Delivery yine processed olarak kapanır; admin payload üzerinden ayırt eder.
+        return;
+      }
 
       if (iyziEventType === "subscription.order.success") {
         const newPeriodEnd = new Date(
@@ -134,14 +149,11 @@ export async function POST(req: NextRequest) {
 
         await tx.subscription.update({
           where: { id: subscription.id },
-          data: {
-            status: "ACTIVE",
-            currentPeriodEnd: newPeriodEnd,
-          },
+          data: { status: "ACTIVE", currentPeriodEnd: newPeriodEnd },
         });
 
         // Kredi grant'ı yalnızca webhook'ta yapılır (ilk ödeme + yenilemeler).
-        // Bu WebhookDelivery idempotency'si sayesinde iki kez çalışmaz.
+        // CAS sayesinde aynı externalId için iki kez çalışmaz.
         if (subscription.plan.creditAmount > 0) {
           await grantCredits(
             subscription.therapist.id,
@@ -156,24 +168,18 @@ export async function POST(req: NextRequest) {
       ) {
         await tx.subscription.update({
           where: { id: subscription.id },
-          data: {
-            // Enum'da UNPAID yok; PENDING "yeniden deneme bekleniyor" anlamında kullanılır
-            status: "PENDING",
-          },
+          // Enum'da UNPAID yok; PENDING "yeniden deneme bekleniyor" anlamında kullanılır.
+          data: { status: "PENDING" },
         });
 
         await tx.therapist.update({
           where: { id: subscription.therapist.id },
-          data: {
-            planType: "FREE",
-            studentLimit: 2,
-            pdfEnabled: false,
-          },
+          data: { planType: "FREE", studentLimit: 2, pdfEnabled: false },
         });
       } else if (iyziEventType === "subscription.cancelled") {
-        // iyzico has confirmed cancellation. With deferred-cancel architecture
-        // this typically arrives just after the daily cron has called iyzico
-        // cancel. Don't regress an already-EXPIRED row back to CANCELLED.
+        // iyzico iptali onayladı. Deferred-cancel mimarisinde günlük cron iyzico
+        // cancel çağırdıktan hemen sonra gelir. Zaten EXPIRED olan satırı CANCELLED'a
+        // geri çekme.
         if (subscription.status !== "EXPIRED") {
           await tx.subscription.update({
             where: { id: subscription.id },
@@ -194,11 +200,7 @@ export async function POST(req: NextRequest) {
 
         await tx.therapist.update({
           where: { id: subscription.therapist.id },
-          data: {
-            planType: "FREE",
-            studentLimit: 2,
-            pdfEnabled: false,
-          },
+          data: { planType: "FREE", studentLimit: 2, pdfEnabled: false },
         });
       }
     });
@@ -206,6 +208,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[iyzico Webhook Error]", error);
+    const errMsg = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    // Phase 3 — failure trail. Update'in kendisi de fail ederse logla, 500'le geç.
+    try {
+      await prisma.webhookDelivery.update({
+        where: { id: delivery.id },
+        data: { status: "failed", error: errMsg.slice(0, 4000) },
+      });
+    } catch (markErr) {
+      console.error("[iyzico Webhook] failed-state mark error", markErr);
+    }
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

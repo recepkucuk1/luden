@@ -99,6 +99,57 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string): P
   }
 }
 
+/**
+ * Yeni destek erişim consent'i verildiğinde tüm admin'lere bildirim.
+ *
+ * Tek bir send'de `to: [adminEmails]` kullanmıyoruz — Resend bu durumda her
+ * alıcıyı diğerlerinin "To" satırında gösterir (privacy/distraction). Sıralı
+ * göndermek hem her admin'in mailbox'ında bağımsız ürün-içi bir thread olmasını
+ * sağlar hem de bir alıcının fail olması diğerlerini etkilemez.
+ */
+export async function sendSupportConsentNotification(
+  adminEmails: string[],
+  user: { name: string; email: string },
+  consent: { expiresAt: Date; reason: string | null },
+  userDetailUrl: string,
+): Promise<void> {
+  if (adminEmails.length === 0) return;
+
+  const expires = consent.expiresAt.toLocaleString("tr-TR");
+  const reasonHtml = consent.reason
+    ? `<p style="margin:0 0 12px;font-size:14px;color:#0f172a;"><strong>Sebep:</strong> ${consent.reason.replace(/[<>]/g, "")}</p>`
+    : "";
+
+  const body = `
+    <p style="margin:0 0 12px;font-size:14px;color:#0f172a;"><strong>${user.name}</strong> (${user.email}) hesabına geçici destek erişimi izni verdi.</p>
+    <p style="margin:0 0 12px;font-size:14px;color:#0f172a;"><strong>Geçerli:</strong> ${expires}'a kadar</p>
+    ${reasonHtml}
+  `;
+
+  const html = emailTemplate({
+    title: "Yeni Destek Erişim Talebi",
+    heading: "Yeni Destek Erişim İzni",
+    headingColor: "#023435",
+    body,
+    buttonText: "Kullanıcı Detayını Aç",
+    url: userDetailUrl,
+    footer: "Bu izin sayesinde admin paneli üzerinden bu kullanıcının hesabına 'Bu Kullanıcı Olarak Giriş' yapabilirsiniz. Tüm erişimler audit log'a yazılır.",
+  });
+
+  for (const to of adminEmails) {
+    const { error } = await getResend().emails.send({
+      from: FROM,
+      to,
+      subject: `Destek izni: ${user.name} — LudenLab`,
+      html,
+    });
+    if (error) {
+      // Diğer adminlere göndermeye devam — bir alıcının fail'i süreci durdurmaz.
+      logError("[email] sendSupportConsentNotification", error);
+    }
+  }
+}
+
 export async function sendVerificationEmail(email: string, token: string): Promise<void> {
   const verifyUrl = `${getBaseUrl()}/verify-email?token=${token}`;
 

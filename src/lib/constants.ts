@@ -114,6 +114,19 @@ export const CARD_STATUS_COLOR: Record<string, string> = {
   completed: "bg-emerald-100 text-emerald-700",
 };
 
+/**
+ * Revenue dashboard veri toplama başlangıcı.
+ *
+ * Bu tarihten önce oluşturulmuş Subscription kayıtları admin gelir/churn/renewal
+ * istatistiklerine **dahil edilmez** — kuruluş öncesi test/dev verisi metrikleri
+ * çarpıtmasın diye. Tarih ileri taşınırsa eski sub'lar yine sayılmaz; geri
+ * çekilirse o tarihten sonraki kayıtlar eklenir.
+ *
+ * Yalnızca `/admin/revenue` filtreler — users listesi, audit, webhooks tüm
+ * veriyi gösterir.
+ */
+export const REVENUE_STATS_SINCE = new Date("2026-05-02T00:00:00.000Z");
+
 export function calcAge(birthDate: string | null): string {
   if (!birthDate) return "";
   const birth = new Date(birthDate);

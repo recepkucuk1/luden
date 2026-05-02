@@ -26,6 +26,7 @@ export async function GET() {
         studentLimit: true,
         suspended: true,
         lastLogin: true,
+        supportAccessExpiresAt: true,
         createdAt: true,
         _count: { select: { students: true, cards: true, lessons: true } },
         subscriptions: {

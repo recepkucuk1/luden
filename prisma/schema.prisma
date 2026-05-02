@@ -76,6 +76,11 @@ model Therapist {
   experienceYears    String?
   certifications     String?   @db.Text
   preferences        Json?
+  // KVKK uyumluluğu — admin "bu kullanıcı olarak giriş" yapabilmesi için
+  // kullanıcının açık rızası gerekir. expiresAt > now ise consent aktiftir.
+  // reason: kullanıcının "neden destek istiyorum" notu (opsiyonel).
+  supportAccessExpiresAt DateTime?
+  supportAccessReason    String?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 

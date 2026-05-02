@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { cancelSubscription } from "@/lib/iyzico";
+import { recordAudit } from "@/lib/audit";
 
 /**
  * Daily cron — finalises pending subscription cancellations.
@@ -124,6 +125,28 @@ export async function POST(req: NextRequest) {
       phase2Results.push({ id: sub.id, ok: false, error: message });
     }
   }
+
+  // Heartbeat — admin System Health "son cron çalışması"nı bu kayıttan okur.
+  // Faz başına sayım yeter; başarısızlık detayını sunucu loglarında bırakıyoruz.
+  await recordAudit({
+    actorId: null,
+    action: "cron.subscription-cleanup",
+    targetType: "system",
+    targetId: "cron",
+    diff: {
+      timestamp: now.toISOString(),
+      phase1: {
+        considered: phase1Targets.length,
+        ok: phase1Results.filter((r) => r.ok).length,
+        failed: phase1Results.filter((r) => !r.ok).length,
+      },
+      phase2: {
+        considered: phase2Targets.length,
+        ok: phase2Results.filter((r) => r.ok).length,
+        failed: phase2Results.filter((r) => !r.ok).length,
+      },
+    },
+  });
 
   return NextResponse.json({
     timestamp: now.toISOString(),

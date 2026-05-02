@@ -20,6 +20,164 @@ import {
   PStatCard,
 } from "@/components/poster";
 
+function SupportAccessSection() {
+  const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState(false);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [reason, setReason] = useState<string | null>(null);
+  const [days, setDays] = useState(1);
+  const [reasonInput, setReasonInput] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/profile/support-access")
+      .then((r) => r.json())
+      .then((d) => {
+        setActive(!!d.active);
+        setExpiresAt(d.expiresAt ?? null);
+        setReason(d.reason ?? null);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleGrant() {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/profile/support-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ days, reason: reasonInput.trim() || undefined }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error);
+      setActive(true);
+      setExpiresAt(d.expiresAt);
+      setReason(d.reason);
+      setReasonInput("");
+      toast.success("Destek erişimi izni verildi");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Hata oluştu");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleRevoke() {
+    if (!window.confirm("Destek erişimi iznini iptal etmek istediğinize emin misiniz?")) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/profile/support-access", { method: "DELETE" });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error ?? "İptal edilemedi");
+      }
+      setActive(false);
+      setExpiresAt(null);
+      setReason(null);
+      toast.success("Destek erişimi izni iptal edildi");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Hata oluştu");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const fieldLabel: React.CSSProperties = {
+    fontSize: 11,
+    fontWeight: 800,
+    letterSpacing: ".1em",
+    textTransform: "uppercase",
+    color: "var(--poster-ink-3)",
+    fontFamily: "var(--font-display)",
+    marginBottom: 6,
+  };
+
+  if (loading) {
+    return (
+      <div style={{ padding: "20px 0", textAlign: "center" }}>
+        <PSpinner size={24} />
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div
+        style={{
+          padding: "12px 14px",
+          borderRadius: 12,
+          border: "1.5px dashed var(--poster-ink-faint)",
+          background: "var(--poster-bg-2)",
+          fontFamily: "var(--font-display)",
+          fontSize: 13,
+          color: "var(--poster-ink-2)",
+          lineHeight: 1.6,
+        }}
+      >
+        Destek talebiniz olduğunda ekibimizin hesabınıza geçici olarak erişebilmesi için bu izni verebilirsiniz. <strong style={{ color: "var(--poster-ink)" }}>İzin olmadan kimse hesabınız üzerinden işlem yapamaz.</strong> İzni dilediğiniz zaman iptal edebilirsiniz; süre sonunda otomatik düşer. Tüm erişimler kayıt altına alınır (Audit log).
+      </div>
+
+      {active && expiresAt ? (
+        <div
+          style={{
+            padding: 14,
+            borderRadius: 12,
+            border: "2px solid var(--poster-green)",
+            background: "color-mix(in srgb, var(--poster-green) 8%, transparent)",
+            fontFamily: "var(--font-display)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 10 }}>
+            <div>
+              <p style={{ margin: 0, fontSize: 11, fontWeight: 800, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--poster-green)" }}>
+                Destek Erişimi Aktif
+              </p>
+              <p style={{ margin: "4px 0 0", fontSize: 14, fontWeight: 700, color: "var(--poster-ink)" }}>
+                Bitiş: {new Date(expiresAt).toLocaleString("tr-TR")}
+              </p>
+              {reason && (
+                <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--poster-ink-2)" }}>
+                  Sebep: {reason}
+                </p>
+              )}
+            </div>
+            <PBtn onClick={handleRevoke} disabled={saving} variant="white" size="sm">
+              İptal Et
+            </PBtn>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div>
+            <p style={fieldLabel}>Süre</p>
+            <PSelect value={days} onChange={(e) => setDays(Number(e.target.value))} style={{ width: "100%" }}>
+              <option value={1}>1 gün</option>
+              <option value={3}>3 gün</option>
+              <option value={7}>7 gün (max)</option>
+            </PSelect>
+          </div>
+          <div>
+            <p style={fieldLabel}>Sebep (opsiyonel)</p>
+            <PInput
+              type="text"
+              value={reasonInput}
+              onChange={(e) => setReasonInput(e.target.value)}
+              placeholder="Örn: PDF üretiminde sorun yaşıyorum"
+              maxLength={500}
+              style={{ width: "100%" }}
+            />
+          </div>
+          <div>
+            <PBtn onClick={handleGrant} disabled={saving} variant="dark" size="md">
+              {saving ? "Veriliyor..." : "İzin Ver"}
+            </PBtn>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface TherapistProfile {
   id: string;
   name: string;
@@ -1015,6 +1173,11 @@ export default function ProfilePage() {
               </PBtn>
             </div>
           </form>
+        </Panel>
+
+        {/* Destek Erişimi (KVKK consent) */}
+        <Panel title="Destek Erişimi">
+          <SupportAccessSection />
         </Panel>
       </div>
     </div>

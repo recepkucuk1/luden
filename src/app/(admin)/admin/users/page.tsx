@@ -1,12 +1,17 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
-import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, Filter, MoreVertical, X } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Search, Filter, MoreVertical } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { PBtn, PCard, PBadge, PInput, PSelect, PModal, PSpinner } from "@/components/poster";
+import { PBtn, PCard, PBadge, PInput, PSelect, PSpinner } from "@/components/poster";
+import { ManageUserModal } from "@/components/admin/ManageUserModal";
+import { AdminNav } from "@/components/admin/AdminNav";
+import { buildCsv, downloadCsv } from "@/lib/csv";
 
 type PlanType = "FREE" | "PRO" | "ADVANCED" | "ENTERPRISE";
 type BillingCycle = "MONTHLY" | "YEARLY";
@@ -28,6 +33,7 @@ interface UserRow {
   pdfEnabled: boolean;
   suspended: boolean;
   lastLogin: string | null;
+  supportAccessExpiresAt: string | null;
   createdAt: string;
   subscriptions: Subscription[];
   _count: { students: number; cards: number; lessons: number };
@@ -55,16 +61,6 @@ const PLAN_LABEL: Record<PlanType, string> = {
   ENTERPRISE: "Enterprise",
 };
 
-const PLAN_INFO: Record<PlanType, { students: string; credits: string }> = {
-  FREE: { students: "2 öğrenci", credits: "40 kredi" },
-  PRO: { students: "200 öğrenci", credits: "2.000 kredi" },
-  ADVANCED: { students: "Sınırsız", credits: "10.000 kredi" },
-  ENTERPRISE: { students: "Sınırsız", credits: "Özel" },
-};
-
-const PLANS: PlanType[] = ["FREE", "PRO", "ADVANCED", "ENTERPRISE"];
-const CREDIT_PRESETS = [50, 100, 500, 1000, 2000];
-
 const TOOL_LABELS: Record<string, string> = {
   LEARNING_CARD: "Öğrenme Kartı",
   SOCIAL_STORY: "Sosyal Hikaye",
@@ -86,229 +82,6 @@ function activeSub(u: UserRow): Subscription | null {
   return u.subscriptions?.[0] ?? null;
 }
 
-function ManageModal({
-  user,
-  onClose,
-  onUpdate,
-}: {
-  user: UserRow;
-  onClose: () => void;
-  onUpdate: (patch: Partial<UserRow>) => void;
-}) {
-  const sub = activeSub(user);
-  const [planType, setPlanType] = useState<PlanType>(user.planType);
-  const [billing, setBilling] = useState<BillingCycle>(sub?.billingCycle ?? "YEARLY");
-  const [creditAmount, setCreditAmount] = useState("");
-  const [savingPlan, setSavingPlan] = useState(false);
-  const [savingCredit, setSavingCredit] = useState(false);
-
-  async function handleSavePlan() {
-    if (planType === user.planType && billing === (sub?.billingCycle ?? "YEARLY")) {
-      toast("Değişiklik yok");
-      return;
-    }
-    setSavingPlan(true);
-    try {
-      const res = await fetch(`/api/admin/users/${user.id}/plan`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planType, billingCycle: billing }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
-      const periodEnd = new Date();
-      if (billing === "YEARLY") periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-      else periodEnd.setMonth(periodEnd.getMonth() + 1);
-
-      onUpdate({
-        planType,
-        studentLimit: data.user.studentLimit,
-        pdfEnabled: data.user.pdfEnabled,
-        subscriptions: [{ currentPeriodEnd: periodEnd.toISOString(), billingCycle: billing }],
-      });
-      toast.success("Plan güncellendi");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Hata oluştu");
-    } finally {
-      setSavingPlan(false);
-    }
-  }
-
-  async function handleAddCredit() {
-    const n = parseInt(creditAmount);
-    if (!n || n < 1) {
-      toast.error("Geçerli bir miktar girin");
-      return;
-    }
-    setSavingCredit(true);
-    try {
-      const res = await fetch(`/api/admin/users/${user.id}/credits`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: n }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      onUpdate({ credits: data.user.credits });
-      setCreditAmount("");
-      toast.success(`${n} kredi eklendi`);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Hata oluştu");
-    } finally {
-      setSavingCredit(false);
-    }
-  }
-
-  const sectionLabel: React.CSSProperties = {
-    fontSize: 11,
-    fontWeight: 800,
-    letterSpacing: ".1em",
-    textTransform: "uppercase",
-    color: "var(--poster-ink-3)",
-    marginBottom: 8,
-    fontFamily: "var(--font-display)",
-  };
-
-  return (
-    <PModal open onClose={onClose} title="Üyelik Yönet" width={480}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        <p style={{ margin: 0, fontSize: 12, color: "var(--poster-ink-3)", fontFamily: "var(--font-display)" }}>
-          {user.name} · {user.email}
-        </p>
-        <div>
-          <p style={sectionLabel}>Plan</p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-            {PLANS.map((p) => {
-              const selected = planType === p;
-              return (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setPlanType(p)}
-                  style={{
-                    textAlign: "left",
-                    padding: 12,
-                    borderRadius: 12,
-                    border: "2px solid var(--poster-ink)",
-                    background: selected ? "var(--poster-accent)" : "var(--poster-panel)",
-                    color: selected ? "#fff" : "var(--poster-ink)",
-                    boxShadow: selected ? "3px 3px 0 var(--poster-ink)" : "var(--poster-shadow-sm)",
-                    cursor: "pointer",
-                    fontFamily: "var(--font-display)",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                    <PBadge color={selected ? "ink" : PLAN_COLOR[p]}>{PLAN_LABEL[p]}</PBadge>
-                  </div>
-                  <p style={{ margin: 0, fontSize: 11, opacity: 0.85 }}>{PLAN_INFO[p].students}</p>
-                  <p style={{ margin: 0, fontSize: 11, opacity: 0.85 }}>{PLAN_INFO[p].credits}</p>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div>
-          <p style={sectionLabel}>Fatura Döngüsü</p>
-          <div
-            style={{
-              display: "inline-flex",
-              padding: 3,
-              borderRadius: 12,
-              border: "2px solid var(--poster-ink)",
-              background: "var(--poster-panel)",
-              boxShadow: "var(--poster-shadow-sm)",
-            }}
-          >
-            {(["MONTHLY", "YEARLY"] as BillingCycle[]).map((b) => {
-              const selected = billing === b;
-              return (
-                <button
-                  key={b}
-                  type="button"
-                  onClick={() => setBilling(b)}
-                  style={{
-                    padding: "7px 16px",
-                    borderRadius: 9,
-                    border: "none",
-                    background: selected ? "var(--poster-ink)" : "transparent",
-                    color: selected ? "#fff" : "var(--poster-ink-2)",
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 700,
-                    fontSize: 13,
-                    cursor: "pointer",
-                  }}
-                >
-                  {b === "MONTHLY" ? "Aylık" : "Yıllık"}
-                </button>
-              );
-            })}
-          </div>
-          {sub && (
-            <p style={{ marginTop: 8, fontSize: 11, color: "var(--poster-ink-3)", fontFamily: "var(--font-display)" }}>
-              Mevcut bitiş: {fmtDate(sub.currentPeriodEnd)}
-            </p>
-          )}
-        </div>
-
-        <PBtn onClick={handleSavePlan} disabled={savingPlan} variant="accent" size="md" style={{ width: "100%" }}>
-          {savingPlan ? "Kaydediliyor..." : "Planı Kaydet"}
-        </PBtn>
-
-        <div style={{ height: 2, background: "var(--poster-ink-faint)" }} />
-
-        <div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-            <p style={{ ...sectionLabel, marginBottom: 0 }}>Kredi Ekle</p>
-            <span style={{ fontSize: 12, color: "var(--poster-ink-2)", fontFamily: "var(--font-display)" }}>
-              Mevcut: <strong style={{ color: "var(--poster-ink)" }}>{user.credits.toLocaleString("tr-TR")}</strong>
-            </span>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-            {CREDIT_PRESETS.map((n) => {
-              const selected = creditAmount === String(n);
-              return (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => setCreditAmount(String(n))}
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: 10,
-                    border: "2px solid var(--poster-ink)",
-                    background: selected ? "var(--poster-accent)" : "var(--poster-panel)",
-                    color: selected ? "#fff" : "var(--poster-ink)",
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 700,
-                    fontSize: 12,
-                    cursor: "pointer",
-                  }}
-                >
-                  +{n}
-                </button>
-              );
-            })}
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <PInput
-              type="number"
-              value={creditAmount}
-              onChange={(e) => setCreditAmount(e.target.value)}
-              placeholder="Özel miktar..."
-              min={1}
-              style={{ flex: 1 }}
-            />
-            <PBtn onClick={handleAddCredit} disabled={savingCredit || !creditAmount} variant="accent" size="md">
-              {savingCredit ? "..." : "Ekle"}
-            </PBtn>
-          </div>
-        </div>
-      </div>
-    </PModal>
-  );
-}
-
 function ActionDropdown({
   user,
   currentUserId,
@@ -325,16 +98,41 @@ function ActionDropdown({
   onDelete: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const isSelf = user.id === currentUserId;
 
+  // Menü body'ye portal'lanıyor (parent overflow:hidden tarafından kesilmesin
+  // diye). Konumu butonun viewport rect'inden hesaplıyoruz; scroll/resize'da
+  // kapatıyoruz — pozisyonu canlı yeniden hesaplamak yerine kapatmak basit
+  // ve dropdown deneyimine uygun.
   useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    if (!open) return;
+    function place() {
+      const b = btnRef.current?.getBoundingClientRect();
+      if (!b) return;
+      setPos({ top: b.bottom + 6, right: window.innerWidth - b.right });
     }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+    place();
+    function onClickOutside(e: MouseEvent) {
+      if (wrapRef.current?.contains(e.target as Node)) return;
+      if (menuRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    }
+    function onScrollOrResize() {
+      setOpen(false);
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [open]);
 
   const item: React.CSSProperties = {
     display: "flex",
@@ -351,11 +149,12 @@ function ActionDropdown({
   };
 
   return (
-    <div ref={ref} style={{ position: "relative", display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
+    <div ref={wrapRef} style={{ position: "relative", display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end" }}>
       <PBtn onClick={onManage} variant="white" size="sm">
         Yönet
       </PBtn>
       <button
+        ref={btnRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         style={{
@@ -374,19 +173,20 @@ function ActionDropdown({
         <MoreVertical style={{ width: 14, height: 14 }} />
       </button>
 
-      {open && (
+      {open && pos && createPortal(
         <div
+          ref={menuRef}
           style={{
-            position: "absolute",
-            right: 0,
-            top: "calc(100% + 6px)",
+            position: "fixed",
+            top: pos.top,
+            right: pos.right,
             minWidth: 210,
             background: "var(--poster-panel)",
             border: "2px solid var(--poster-ink)",
             borderRadius: 12,
             boxShadow: "var(--poster-shadow-lg)",
             overflow: "hidden",
-            zIndex: 20,
+            zIndex: 1000,
           }}
         >
           {!isSelf && (
@@ -413,7 +213,8 @@ function ActionDropdown({
           {isSelf && (
             <p style={{ ...item, cursor: "default", color: "var(--poster-ink-3)", fontStyle: "italic" }}>Kendi hesabınız</p>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
@@ -432,7 +233,7 @@ export default function AdminUsersPage() {
 
   const [search, setSearch] = useState("");
   const [filterPlan, setFilterPlan] = useState<PlanType | "ALL">("ALL");
-  const [filterStatus, setFilterStatus] = useState<"ALL" | "ADMIN" | "SUSPENDED">("ALL");
+  const [filterStatus, setFilterStatus] = useState<"ALL" | "ADMIN" | "SUSPENDED" | "SUPPORT">("ALL");
 
   const [sortKey, setSortKey] = useState<SortKey>("createdAt");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
@@ -443,6 +244,12 @@ export default function AdminUsersPage() {
   const [manageUser, setManageUser] = useState<UserRow | null>(null);
   const [confirmDel, setConfirmDel] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<"suspend" | "unsuspend" | "grant-credits" | "revoke-credits">("suspend");
+  const [bulkAmount, setBulkAmount] = useState("");
+  const [bulkReason, setBulkReason] = useState("");
+  const [bulkRunning, setBulkRunning] = useState(false);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -463,6 +270,61 @@ export default function AdminUsersPage() {
         setLoading(false);
       });
   }, [session, status, router]);
+
+  async function refreshUsers() {
+    const r = await fetch("/api/admin/users");
+    const d = await r.json();
+    setUsers(d.users ?? []);
+    setPlanCounts(d.planCounts ?? []);
+  }
+
+  async function runBulk() {
+    if (selected.size === 0) {
+      toast.error("Önce kullanıcı seçin");
+      return;
+    }
+    const ids = Array.from(selected);
+    const isCredit = bulkAction === "grant-credits" || bulkAction === "revoke-credits";
+    const amount = isCredit ? parseInt(bulkAmount) : 0;
+    if (isCredit && (!amount || amount < 1)) {
+      toast.error("Geçerli bir miktar girin");
+      return;
+    }
+
+    const labels = {
+      "suspend": `${ids.length} kullanıcı askıya alınsın mı?`,
+      "unsuspend": `${ids.length} kullanıcının askısı kaldırılsın mı?`,
+      "grant-credits": `${ids.length} kullanıcıya ${amount} kredi eklensin mi?`,
+      "revoke-credits": `${ids.length} kullanıcıdan ${amount} kredi düşülsün mü?`,
+    };
+    if (!window.confirm(labels[bulkAction])) return;
+
+    setBulkRunning(true);
+    try {
+      const body: Record<string, unknown> = { action: bulkAction, ids };
+      if (isCredit) body.amount = amount;
+      if (bulkAction === "revoke-credits" && bulkReason.trim()) body.reason = bulkReason.trim();
+      const res = await fetch("/api/admin/users/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      const skipped = data.skipped?.length ?? 0;
+      const failed = data.failures?.length ?? 0;
+      toast.success(`${data.affected} kullanıcı işlendi${skipped ? `, ${skipped} atlandı` : ""}${failed ? `, ${failed} hata` : ""}`);
+      setSelected(new Set());
+      setBulkAmount("");
+      setBulkReason("");
+      await refreshUsers();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Hata oluştu");
+    } finally {
+      setBulkRunning(false);
+    }
+  }
 
   function planCount(pt: PlanType) {
     return planCounts.find((p) => p.planType === pt)?._count._all ?? 0;
@@ -517,6 +379,10 @@ export default function AdminUsersPage() {
     if (filterPlan !== "ALL") result = result.filter((u) => u.planType === filterPlan);
     if (filterStatus === "ADMIN") result = result.filter((u) => u.role === "admin");
     else if (filterStatus === "SUSPENDED") result = result.filter((u) => u.suspended);
+    else if (filterStatus === "SUPPORT") {
+      const now = Date.now();
+      result = result.filter((u) => u.supportAccessExpiresAt && new Date(u.supportAccessExpiresAt).getTime() > now);
+    }
     return result;
   }, [users, search, filterPlan, filterStatus]);
 
@@ -643,9 +509,9 @@ export default function AdminUsersPage() {
             Sistemdeki tüm terapistleri ve kullanım metriklerini yönetin.
           </p>
         </div>
-        <PBtn as="a" href="/admin" variant="white" size="md">
-          ← Admin Panele Dön
-        </PBtn>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <AdminNav current="/admin/users" />
+        </div>
       </div>
 
       <div
@@ -696,6 +562,7 @@ export default function AdminUsersPage() {
             <option value="ALL">Tüm Durumlar</option>
             <option value="ADMIN">Sadece Adminler</option>
             <option value="SUSPENDED">Askıya Alınanlar</option>
+            <option value="SUPPORT">Aktif Destek İzni</option>
           </PSelect>
 
           <PSelect value={perPage} onChange={(e) => setPerPage(Number(e.target.value))} style={{ width: "auto", minWidth: 130 }}>
@@ -704,14 +571,132 @@ export default function AdminUsersPage() {
             <option value={50}>50 Göster</option>
             <option value={100}>100 Göster</option>
           </PSelect>
+
+          <PBtn
+            onClick={() => {
+              const headers = [
+                "Ad", "Email", "Rol", "Plan", "Fatura", "Kredi", "Öğrenci Limiti",
+                "PDF", "Askıda", "Öğrenci Sayısı", "Materyal Sayısı", "Randevu Sayısı",
+                "Aylık AI ($)", "Aylık API Çağrı", "Son Giriş", "Üyelik Bitiş", "Kayıt",
+              ];
+              const keys = [
+                "name", "email", "role", "planType", "billingCycle", "credits", "studentLimit",
+                "pdfEnabled", "suspended", "studentsCount", "cardsCount", "lessonsCount",
+                "monthlyUsageUsd", "monthlyApiCalls", "lastLogin", "subEndsAt", "createdAt",
+              ];
+              const rows = sortedUsers.map((u) => {
+                const sub = activeSub(u);
+                return {
+                  name: u.name,
+                  email: u.email,
+                  role: u.role,
+                  planType: u.planType,
+                  billingCycle: sub?.billingCycle ?? "",
+                  credits: u.credits,
+                  studentLimit: u.studentLimit === -1 ? "sınırsız" : u.studentLimit,
+                  pdfEnabled: u.pdfEnabled ? "evet" : "hayır",
+                  suspended: u.suspended ? "evet" : "hayır",
+                  studentsCount: u._count.students,
+                  cardsCount: u._count.cards,
+                  lessonsCount: u._count.lessons ?? 0,
+                  monthlyUsageUsd: (u.monthlyUsageUsd ?? 0).toFixed(4),
+                  monthlyApiCalls: u.monthlyApiCalls ?? 0,
+                  lastLogin: u.lastLogin ?? "",
+                  subEndsAt: sub?.currentPeriodEnd ?? "",
+                  createdAt: u.createdAt,
+                };
+              });
+              const csv = buildCsv(headers, rows, keys);
+              const ts = new Date().toISOString().slice(0, 10);
+              downloadCsv(`ludenlab-users-${ts}.csv`, csv);
+            }}
+            variant="white"
+            size="md"
+          >
+            CSV İndir
+          </PBtn>
         </div>
       </PCard>
+
+      {selected.size > 0 && (
+        <PCard
+          rounded={16}
+          style={{
+            padding: 14,
+            marginBottom: 14,
+            background: "color-mix(in srgb, var(--poster-accent) 8%, var(--poster-panel))",
+            borderLeft: "6px solid var(--poster-accent)",
+          }}
+        >
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, color: "var(--poster-ink)" }}>
+              {selected.size} seçili
+            </span>
+            <PBtn onClick={() => setSelected(new Set())} variant="white" size="sm">
+              Temizle
+            </PBtn>
+            <span style={{ color: "var(--poster-ink-3)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 12 }}>·</span>
+            <PSelect
+              value={bulkAction}
+              onChange={(e) => setBulkAction(e.target.value as typeof bulkAction)}
+              style={{ width: "auto", minWidth: 180 }}
+            >
+              <option value="suspend">Askıya Al</option>
+              <option value="unsuspend">Askıyı Kaldır</option>
+              <option value="grant-credits">Kredi Ekle</option>
+              <option value="revoke-credits">Kredi Geri Al</option>
+            </PSelect>
+            {(bulkAction === "grant-credits" || bulkAction === "revoke-credits") && (
+              <PInput
+                type="number"
+                value={bulkAmount}
+                onChange={(e) => setBulkAmount(e.target.value)}
+                placeholder="Miktar"
+                min={1}
+                style={{ width: 100 }}
+              />
+            )}
+            {bulkAction === "revoke-credits" && (
+              <PInput
+                type="text"
+                value={bulkReason}
+                onChange={(e) => setBulkReason(e.target.value)}
+                placeholder="Sebep (opsiyonel)"
+                maxLength={200}
+                style={{ flex: "1 1 200px", minWidth: 180 }}
+              />
+            )}
+            <PBtn onClick={runBulk} disabled={bulkRunning} variant="accent" size="md">
+              {bulkRunning ? "Çalışıyor..." : "Uygula"}
+            </PBtn>
+          </div>
+        </PCard>
+      )}
 
       <PCard rounded={18} style={{ padding: 0, overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--font-display)" }}>
             <thead>
               <tr>
+                <th style={{ ...th, width: 36, cursor: "default" }}>
+                  <input
+                    type="checkbox"
+                    aria-label="Sayfadaki tümünü seç"
+                    checked={paginatedUsers.length > 0 && paginatedUsers.every((u) => u.id === session?.user?.id || selected.has(u.id))}
+                    onChange={(e) => {
+                      const next = new Set(selected);
+                      if (e.target.checked) {
+                        for (const u of paginatedUsers) {
+                          if (u.id !== session?.user?.id) next.add(u.id);
+                        }
+                      } else {
+                        for (const u of paginatedUsers) next.delete(u.id);
+                      }
+                      setSelected(next);
+                    }}
+                    style={{ width: 16, height: 16, cursor: "pointer", accentColor: "var(--poster-ink)" }}
+                  />
+                </th>
                 <th style={th} onClick={() => toggleSort("name")}>
                   <div style={{ display: "flex", alignItems: "center" }}>Ad / Email <SortIcon columnKey="name" /></div>
                 </th>
@@ -753,11 +738,44 @@ export default function AdminUsersPage() {
                       borderTop: "1.5px dashed var(--poster-ink-faint)",
                     }}
                   >
+                    <td style={{ ...td, width: 36, textAlign: "center" }}>
+                      <input
+                        type="checkbox"
+                        aria-label={`${u.name} seç`}
+                        disabled={u.id === session?.user?.id}
+                        checked={selected.has(u.id)}
+                        onChange={(e) => {
+                          const next = new Set(selected);
+                          if (e.target.checked) next.add(u.id);
+                          else next.delete(u.id);
+                          setSelected(next);
+                        }}
+                        style={{
+                          width: 16,
+                          height: 16,
+                          cursor: u.id === session?.user?.id ? "not-allowed" : "pointer",
+                          accentColor: "var(--poster-ink)",
+                        }}
+                      />
+                    </td>
                     <td style={td}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                        <span style={{ fontWeight: 700, color: "var(--poster-ink)" }}>{u.name}</span>
+                        <Link
+                          href={`/admin/users/${u.id}`}
+                          style={{
+                            fontWeight: 700,
+                            color: "var(--poster-ink)",
+                            textDecoration: "none",
+                            borderBottom: "1.5px dashed var(--poster-ink-faint)",
+                          }}
+                        >
+                          {u.name}
+                        </Link>
                         {u.role === "admin" && <PBadge color="ink">ADMIN</PBadge>}
                         {u.suspended && <PBadge color="pink">ASKIDA</PBadge>}
+                        {u.supportAccessExpiresAt && new Date(u.supportAccessExpiresAt).getTime() > Date.now() && (
+                          <PBadge color="accent">DESTEK</PBadge>
+                        )}
                       </div>
                       <p style={{ margin: "4px 0 0", fontSize: 11, color: "var(--poster-ink-3)", fontWeight: 600 }}>{u.email}</p>
                     </td>
@@ -884,7 +902,7 @@ export default function AdminUsersPage() {
 
               {paginatedUsers.length === 0 && (
                 <tr>
-                  <td colSpan={10} style={{ ...td, padding: 48, textAlign: "center", color: "var(--poster-ink-3)" }}>
+                  <td colSpan={11} style={{ ...td, padding: 48, textAlign: "center", color: "var(--poster-ink-3)" }}>
                     {search || filterPlan !== "ALL" || filterStatus !== "ALL"
                       ? "Girilen filtrelere uygun kullanıcı bulunamadı."
                       : "Henüz kayıtlı kullanıcı yok."}
@@ -987,7 +1005,7 @@ export default function AdminUsersPage() {
       </PCard>
 
       {manageUser && (
-        <ManageModal
+        <ManageUserModal
           user={manageUser}
           onClose={() => setManageUser(null)}
           onUpdate={(patch) => updateUser(manageUser.id, patch)}
