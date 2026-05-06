@@ -16,7 +16,8 @@ import {
 import { PasswordStrengthBar } from "@/components/auth/PasswordStrengthBar";
 import { PFieldHint } from "@/components/poster";
 
-const isDev = process.env.NODE_ENV === "development";
+// CAPTCHA geçici olarak kapalı; tekrar açmak için .env'de NEXT_PUBLIC_CAPTCHA_ENABLED=true.
+const captchaEnabled = process.env.NEXT_PUBLIC_CAPTCHA_ENABLED === "true";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -78,7 +79,7 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!isDev && !captchaToken) {
+    if (captchaEnabled && !captchaToken) {
       setError("Lütfen CAPTCHA doğrulamasını tamamlayın.");
       setLoading(false);
       return;
@@ -309,7 +310,7 @@ export default function RegisterPage() {
           )}
         </div>
 
-        {!isDev && (
+        {captchaEnabled && (
           <HCaptcha
             sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? ""}
             onVerify={setCaptchaToken}
@@ -329,11 +330,11 @@ export default function RegisterPage() {
           type="submit"
           variant="dark"
           size="md"
-          disabled={loading || (!isDev && !captchaToken)}
+          disabled={loading || (captchaEnabled && !captchaToken)}
           style={{
             width: "100%",
             marginTop: 4,
-            opacity: loading || (!isDev && !captchaToken) ? 0.7 : 1,
+            opacity: loading || (captchaEnabled && !captchaToken) ? 0.7 : 1,
           }}
         >
           {loading ? "Hesap oluşturuluyor…" : "Kayıt Ol"}

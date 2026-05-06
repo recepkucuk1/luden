@@ -17,8 +17,9 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // hCaptcha doğrulaması (development ortamında atlanır)
-    if (process.env.NODE_ENV !== "development") {
+    // hCaptcha doğrulaması — yalnızca NEXT_PUBLIC_CAPTCHA_ENABLED=true iken devrede.
+    // Geçici olarak devre dışı; tekrar açmak için .env'de NEXT_PUBLIC_CAPTCHA_ENABLED=true.
+    if (process.env.NEXT_PUBLIC_CAPTCHA_ENABLED === "true") {
       const captchaToken = body.captchaToken as string | undefined;
       if (!captchaToken) {
         return NextResponse.json({ error: "CAPTCHA doğrulaması gerekli." }, { status: 400 });
