@@ -97,6 +97,40 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
+  // ─── Multi-tenant router ──────────────────────────────────────────────────
+  // iyzico merchant hesabı brytakip ile paylaşımlı. Webhook URL'i ludenlab'a
+  // ayarlı; bu subscription ludenlab DB'sinde yoksa brytakip'in olabilir,
+  // imza geçti — orijinal payload + imza header'ıyla forward et.
+  try {
+    const localSub = await prisma.subscription.findUnique({
+      where: { iyzicoSubscriptionRef: subscriptionReferenceCode },
+      select: { id: true },
+    });
+    if (!localSub) {
+      const fwdUrl = process.env.BRYTAKIP_WEBHOOK_URL ?? "https://brytakip.com/api/webhooks/iyzico";
+      try {
+        const fwd = await fetch(fwdUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-iyz-signature-v3": sig ?? "",
+          },
+          body: rawBody,
+        });
+        console.log(
+          `[iyzico webhook] Sub ${subscriptionReferenceCode} not in ludenlab DB → forwarded to brytakip (${fwd.status})`,
+        );
+      } catch (err) {
+        console.error("[iyzico webhook] Forward to brytakip failed", err);
+      }
+      // Forward sonucundan bağımsız 200 dön — iyzico retry kuyruğuna takılmasın.
+      return NextResponse.json({ ok: true, forwarded: "brytakip" });
+    }
+  } catch (err) {
+    console.error("[iyzico webhook] Router lookup error", err);
+    // Hata durumunda ludenlab kendi handler'ına devam etsin (best-effort).
+  }
+
   // Phase 1 — receipt kaydı. Daha önce processed ise upsert sadece sayacı artırır.
   const delivery = await prisma.webhookDelivery.upsert({
     where: { provider_externalId: { provider: "iyzico", externalId: iyziReferenceCode } },
